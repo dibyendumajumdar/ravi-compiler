@@ -4,7 +4,10 @@
 
 int main(int argc, const char* argv[]) {
 
-	const char* code = "return { say='hello world' }";
+	//const char* code = "return { say='hello world' }";
+	//const char* code = "if true then return 1 elseif false then return 2 else return 0 end";
+	//const char* code = "if 1 == 1 then return 1 else return 2 end";
+	const char* code = "if 1 == 1 then return 1 elseif 1 > 2 then return 2 else return 2 end";
 	if (argc >= 2) {
 		code = argv[1];
 	}
