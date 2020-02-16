@@ -17,6 +17,12 @@ static void handle_error(struct ast_container *container, const char *msg) {
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr);
+static struct basic_block* create_block(struct proc* proc);
+static void start_block(struct proc* proc, struct basic_block* bb);
+static void linearize_statement(struct proc* proc, struct ast_node* node);
+static void linearize_statement_list(struct proc* proc, struct ast_node_list* list);
+static void start_scope(struct linearizer* linearizer, struct proc* proc, struct block_scope* scope);
+static void end_scope(struct linearizer* linearizer, struct proc* proc);
 
 static inline unsigned alloc_reg(struct pseudo_generator *generator)
 {
@@ -190,6 +196,14 @@ struct pseudo *allocate_boolean_pseudo(struct proc *proc, bool is_true)
 	return pseudo;
 }
 
+struct pseudo* allocate_block_pseudo(struct proc* proc, struct basic_block *block)
+{
+	struct pseudo* pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
+	pseudo->type = PSEUDO_BLOCK;
+	pseudo->block = block;
+	return pseudo;
+}
+
 struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 {
 	struct pseudo_generator *gen;
@@ -281,7 +295,6 @@ static void linearize_function_args(struct linearizer *linearizer)
 	END_FOR_EACH_PTR(sym);
 }
 
-static void linearize_statement(struct proc *proc, struct ast_node *node);
 static void linearize_statement_list(struct proc *proc, struct ast_node_list *list)
 {
 	struct ast_node *node;
@@ -748,15 +761,97 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	// FIXME free all temps
 }
 
+static bool is_block_terminated(struct basic_block* block) {
+	struct instruction* last_insn = (struct instruction*) ptrlist_last((struct ptr_list*)block->insns);
+	if (last_insn == NULL) return false;
+	if (last_insn->opcode == op_ret ||
+		last_insn->opcode == op_cbr ||
+		last_insn->opcode == op_br) return true;
+	return false;
+}
+
+static void instruct_br(struct proc* proc, struct basic_block* target_block) {
+	struct pseudo* pseudo = allocate_block_pseudo(proc, target_block);
+	struct instruction* insn = alloc_instruction(proc, op_br);
+	ptrlist_add((struct ptr_list**) & insn->targets, target_block, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+
+static void instruct_cbr(struct proc* proc, struct pseudo* conditin_pseudo, struct basic_block* true_block, struct basic_block* false_block) {
+	struct pseudo* true_pseudo = allocate_block_pseudo(proc, true_block);
+	struct pseudo* false_pseudo = allocate_block_pseudo(proc, false_block);
+	struct instruction* insn = alloc_instruction(proc, op_cbr);
+	ptrlist_add((struct ptr_list**) & insn->operands, conditin_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list**) & insn->targets, true_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list**) & insn->targets, false_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+static void linearize_test_then(struct proc* proc, struct ast_node* node, struct basic_block* true_block, struct basic_block* false_block) {
+	struct pseudo* condition_pseudo = linearize_expression(proc, node->test_then_block.condition);
+	instruct_cbr(proc, condition_pseudo, true_block, false_block);
+
+	start_block(proc, true_block);
+	start_scope(proc->linearizer, proc, node->test_then_block.test_then_scope);
+	linearize_statement_list(proc, node->test_then_block.test_then_statement_list);
+	end_scope(proc->linearizer, proc);
+}
+
+static void linearize_if_statement(struct proc* proc, struct ast_node* ifnode) {
+	struct basic_block* end_block = NULL;
+	struct basic_block* else_block = NULL;
+	struct basic_block_list* if_blocks = NULL;
+	struct ast_node_list* if_else_stmts = ifnode->if_stmt.if_condition_list;
+	struct ast_node_list* else_stmts = ifnode->if_stmt.else_statement_list;
+	struct block_scope* else_scope = ifnode->if_stmt.else_block;
+
+	struct ast_node* this_node;
+	FOR_EACH_PTR(if_else_stmts, this_node) {
+		struct basic_block* block = create_block(proc);
+		ptrlist_add((struct ptr_list**) &if_blocks, block, &proc->linearizer->ptrlist_allocator);
+	} END_FOR_EACH_PTR(this_node);
+
+	if (ifnode->if_stmt.else_statement_list) {
+		else_block = create_block(proc);
+	}
+
+	end_block = create_block(proc);
+
+	struct basic_block* true_block = NULL;
+	struct basic_block* false_block = NULL;
+	struct basic_block* block = NULL;
+
+	PREPARE_PTR_LIST(if_blocks, block);
+	FOR_EACH_PTR(if_else_stmts, this_node) {
+		true_block = block;
+		struct basic_block* next_block = NEXT_PTR_LIST(block);
+		if (!next_block) {
+			// last one 
+			if (else_block) false_block = else_block;
+			else false_block = end_block;
+		}
+		else {
+			false_block = next_block;
+		}
+		linearize_test_then(proc, this_node, true_block, false_block);
+	} END_FOR_EACH_PTR(node);
+	FINISH_PTR_LIST(block);
+
+	if (else_block) {
+		start_block(proc, else_block);
+		start_scope(proc->linearizer, proc, else_scope);
+		linearize_statement_list(proc, else_stmts);
+		end_scope(proc->linearizer, proc);
+		instruct_br(proc, end_block);
+	}
+
+	start_block(proc, end_block);
+}
+
 static void linearize_statement(struct proc *proc, struct ast_node *node)
 {
 	switch (node->type) {
-	case AST_FUNCTION_EXPR: {
-		/* args need type assertions but those have no ast - i.e. code gen should do it */
-		// typecheck_ast_list(container, function, node->function_expr.function_statement_list);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
-		break;
-	}
 	case AST_NONE: {
 		break;
 	}
@@ -793,8 +888,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_IF_STMT: {
-		// typecheck_if_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		linearize_if_statement(proc, node);
 		break;
 	}
 	case AST_WHILE_STMT:

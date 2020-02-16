@@ -485,7 +485,9 @@ enum opcode {
 	op_iaput, /* target is integer[]*/
 	op_iaput_ival,
 	op_faput, /* target is number[] */
-	op_faput_fval
+	op_faput_fval,
+	op_cbr,
+	op_br,
 };
 
 enum pseudo_type {
@@ -497,7 +499,8 @@ enum pseudo_type {
 	PSEUDO_PROC,
 	PSEUDO_NIL,
 	PSEUDO_TRUE,
-	PSEUDO_FALSE
+	PSEUDO_FALSE,
+	PSEUDO_BLOCK, 
 };
 
 /* pseudo represents a pseudo (virtual) register */
@@ -508,6 +511,7 @@ struct pseudo {
 		const struct constant *constant; /* PSEUDO_CONSTANT */
 		ravitype_t temp_type;		 /* PSEUDO_TEMP* */
 		struct proc *proc;		 /* PSEUDO_PROC */
+		struct basic_block* block; /* PSEUDO_BLOCK */
 	};
 };
 
@@ -537,6 +541,8 @@ struct basic_block {
 	NODE_FIELDS;
 	struct instruction_list *insns;
 };
+DECLARE_PTR_LIST(basic_block_list, struct basic_block);
+
 
 #define CFG_FIELDS                                                                                                     \
 	unsigned node_count;                                                                                           \
