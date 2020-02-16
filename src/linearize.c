@@ -10,6 +10,12 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include <stdlib.h>
 #include <string.h>
 
+static void handle_error(struct ast_container *container, const char *msg) {
+	// TODO source and line number
+	membuff_add_string(&container->error_message, msg);
+	longjmp(container->env, 1);
+}
+
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr);
 
 static inline unsigned alloc_reg(struct pseudo_generator *generator)
@@ -269,6 +275,7 @@ static void linearize_function_args(struct linearizer *linearizer)
 	struct lua_symbol *sym;
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
+		handle_error(linearizer->ast_container, "feature not yet implemented");
 		// printf("Assigning register %d to argument %s\n", (int)reg, getstr(sym->var.var_name));
 	}
 	END_FOR_EACH_PTR(sym);
@@ -307,7 +314,8 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 		pseudo = allocate_boolean_pseudo(proc, expr->literal_expr.u.i);
 		break;
 	default:
-		abort();
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		break;
 	}
 	return pseudo;
 }
@@ -364,7 +372,7 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 		targetop = op_bnot;
 		break;
 	default:
-		abort();
+		handle_error(proc->linearizer->ast_container, "unexpected unary op");
 		break;
 	}
 	if (targetop == op_nop) {
@@ -448,7 +456,7 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 		targetop = op_pow;
 		break;
 	default:
-		abort();
+		handle_error(proc->linearizer->ast_container, "unexpected binary op");
 	}
 
 	ravitype_t t1 = e1->common_expr.type.type_code;
@@ -566,7 +574,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->var.pseudo;
 	} else {
-		abort();
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		return NULL;
 	}
 }
@@ -593,6 +601,7 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 		if (this_node->type == AST_Y_INDEX_EXPR) {
 		} else if (this_node->type == AST_FIELD_SELECTOR_EXPR) {
 		} else if (this_node->type == AST_FUNCTION_CALL_EXPR) {
+			handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		}
 		prev_node = this_node;
 	}
@@ -709,7 +718,7 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 		return linearize_index_expression(proc, expr);
 	} break;
 	default:
-		abort();
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	assert(false);
@@ -745,6 +754,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	case AST_FUNCTION_EXPR: {
 		/* args need type assertions but those have no ast - i.e. code gen should do it */
 		// typecheck_ast_list(container, function, node->function_expr.function_statement_list);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_NONE: {
@@ -757,93 +767,55 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	}
 	case AST_LOCAL_STMT: {
 		// typecheck_local_statement(container, function, node);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_FUNCTION_STMT: {
 		// typecheck_ast_node(container, function, node->function_stmt.function_expr);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_LABEL_STMT: {
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_GOTO_STMT: {
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_DO_STMT: {
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_EXPR_STMT: {
 		// typecheck_expr_statement(container, function, node);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_IF_STMT: {
 		// typecheck_if_statement(container, function, node);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_WHILE_STMT:
 	case AST_REPEAT_STMT: {
 		// typecheck_while_or_repeat_statement(container, function, node);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_FORIN_STMT: {
 		// typecheck_for_in_statment(container, function, node);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	case AST_FORNUM_STMT: {
 		// typecheck_for_num_statment(container, function, node);
-		break;
-	}
-	case AST_SUFFIXED_EXPR: {
-		// typecheck_suffixedexpr(container, function, node);
-		break;
-	}
-	case AST_FUNCTION_CALL_EXPR: {
-		// if (node->function_call_expr.method_name) {
-		//}
-		// else {
-		//}
-		// typecheck_ast_list(container, function, node->function_call_expr.arg_list);
-		break;
-	}
-	case AST_SYMBOL_EXPR: {
-		/* symbol type should have been set when symbol was created */
-		// copy_type(node->symbol_expr.type, node->symbol_expr.var->value_type);
-		break;
-	}
-	case AST_BINARY_EXPR: {
-		// typecheck_binaryop(container, function, node);
-		break;
-	}
-	case AST_UNARY_EXPR: {
-		// typecheck_unaryop(container, function, node);
-		break;
-	}
-	case AST_LITERAL_EXPR: {
-		/* type set during parsing */
-		break;
-	}
-	case AST_FIELD_SELECTOR_EXPR: {
-		// typecheck_ast_node(container, function, node->index_expr.expr);
-		break;
-	}
-	case AST_Y_INDEX_EXPR: {
-		// typecheck_ast_node(container, function, node->index_expr.expr);
-		break;
-	}
-	case AST_INDEXED_ASSIGN_EXPR: {
-		// if (node->indexed_assign_expr.index_expr) {
-		//  typecheck_ast_node(container, function, node->indexed_assign_expr.index_expr);
-		//}
-		// typecheck_ast_node(container, function, node->indexed_assign_expr.value_expr);
-		// copy_type(node->indexed_assign_expr.type, node->indexed_assign_expr.value_expr->common_expr.type);
-		break;
-	}
-	case AST_TABLE_EXPR: {
-		// typecheck_ast_list(container, function, node->table_expr.expr_list);
+		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
 	default:
-		assert(0);
+		handle_error(proc->linearizer->ast_container, "unknown statement type");
+		break;
 	}
 }
 
@@ -989,7 +961,8 @@ void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			break;
 		}
 		default:
-			assert(0);
+			//handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+			abort();
 		}
 	} break;
 	}
@@ -1055,12 +1028,23 @@ void output_proc(struct proc *proc, membuff_t *mb)
 	}
 }
 
-void raviX_ast_linearize(struct linearizer *linearizer)
+int raviX_ast_linearize(struct linearizer *linearizer)
 {
 	struct proc *proc = allocate_proc(linearizer, linearizer->ast_container->main_function);
 	set_main_proc(linearizer, proc);
 	set_current_proc(linearizer, proc);
-	linearize_function(linearizer);
+	int rc = setjmp(linearizer->ast_container->env);
+	if (rc == 0) {
+		linearize_function(linearizer);
+	}
+	return rc;
 }
 
 void raviX_show_linearizer(struct linearizer *linearizer, membuff_t *mb) { output_proc(linearizer->main_proc, mb); }
+
+void raviX_output_linearizer(struct linearizer *linearizer, FILE *fp) {
+	membuff_t mb;
+	membuff_init(&mb, 4096);
+	raviX_show_linearizer(linearizer, &mb);
+	fprintf(fp, "%s", mb.buf);
+}

@@ -613,7 +613,8 @@ void raviX_output_ast(struct ast_container *container, FILE *fp);
 int raviX_ast_typecheck(struct ast_container *container); /* Perform type checks and assign types to AST */
 void raviX_init_linearizer(struct linearizer *linearizer, struct ast_container *container);
 void raviX_destroy_linearizer(struct linearizer *linearizer);
-void raviX_ast_linearize(struct linearizer *linearizer);
+int raviX_ast_linearize(struct linearizer *linearizer);
 void raviX_show_linearizer(struct linearizer *linearizer, membuff_t *mb);
+void raviX_output_linearizer(struct linearizer* linearizer, FILE* fp);
 
 #endif
