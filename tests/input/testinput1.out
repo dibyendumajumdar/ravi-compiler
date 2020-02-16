@@ -1,0 +1,2569 @@
+
+C:\work\github\ravi-compiler\tests\input>tparse "return" 
+function()
+  return
+end
+function()
+  return
+end
+L0 (entry)
+	RET {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1" 
+function()
+  return
+    1
+end
+function()
+  return
+    1
+end
+L0 (entry)
+	RET {1 Kint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 42, 4.2, true, "hello"" 
+function()
+  return
+    42
+   ,
+    4.2000000000000002
+   ,
+    true
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       hello --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+  return
+    42
+   ,
+    4.2000000000000002
+   ,
+    true
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       hello --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {hello} {T(0)}
+	RET {42 Kint(0), 4.200000000000 Kflt(1), true, T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return a" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {a} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1+2" 
+function()
+  return
+    --[binary expr start] any
+     1
+    +
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     1
+    +
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	ADDii {1 Kint(0), 2 Kint(1)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2^3-5*4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      2
+     ^
+      3
+     --[binary expr end]
+    -
+     --[binary expr start] any
+      5
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] number
+     --[binary expr start] number
+      2
+     ^
+      3
+     --[binary expr end]
+    -
+     --[binary expr start] integer
+      5
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	POW {2 Kint(0), 3 Kint(1)} {Tflt(0)}
+	MULii {5 Kint(2), 4 Kint(3)} {Tint(0)}
+	SUBfi {Tflt(0), Tint(0)} {Tflt(1)}
+	RET {Tflt(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1+1" 
+function()
+  return
+    --[binary expr start] any
+     1
+    +
+     1
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     1
+    +
+     1
+    --[binary expr end]
+end
+L0 (entry)
+	ADDii {1 Kint(0), 1 Kint(0)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1+1+1" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      1
+     +
+      1
+     --[binary expr end]
+    +
+     1
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     --[binary expr start] integer
+      1
+     +
+      1
+     --[binary expr end]
+    +
+     1
+    --[binary expr end]
+end
+L0 (entry)
+	ADDii {1 Kint(0), 1 Kint(0)} {Tint(0)}
+	ADDii {Tint(0), 1 Kint(0)} {Tint(1)}
+	RET {Tint(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2-3/5*4" 
+function()
+  return
+    --[binary expr start] any
+     2
+    -
+     --[binary expr start] any
+      --[binary expr start] any
+       3
+      /
+       5
+      --[binary expr end]
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] number
+     2
+    -
+     --[binary expr start] number
+      --[binary expr start] number
+       3
+      /
+       5
+      --[binary expr end]
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	DIVii {3 Kint(1), 5 Kint(2)} {Tflt(0)}
+	MULfi {Tflt(0), 4 Kint(3)} {Tflt(1)}
+	SUBif {2 Kint(0), Tflt(1)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 4.2//5"	 
+function()
+  return
+    --[binary expr start] any
+     4.2000000000000002
+    //
+     5
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     4.2000000000000002
+    //
+     5
+    --[binary expr end]
+end
+L0 (entry)
+	IDIV {4.200000000000 Kflt(0), 5 Kint(1)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0.0" 
+function()
+  return
+    0.0000000000000000
+end
+function()
+  return
+    0.0000000000000000
+end
+L0 (entry)
+	RET {0.000000000000 Kflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0" 
+function()
+  return
+    0
+end
+function()
+  return
+    0
+end
+L0 (entry)
+	RET {0 Kint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -0//1" 
+function()
+  return
+    --[binary expr start] any
+     --[unary expr start] any
+     -
+      0
+     --[unary expr end]
+    //
+     1
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     --[unary expr start] integer
+     -
+      0
+     --[unary expr end]
+    //
+     1
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {0 Kint(0)} {Tint(0)}
+	IDIV {Tint(0), 1 Kint(1)} {Tint(1)}
+	RET {Tint(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 3^-1" 
+function()
+  return
+    --[binary expr start] any
+     3
+    ^
+     --[unary expr start] any
+     -
+      1
+     --[unary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] number
+     3
+    ^
+     --[unary expr start] integer
+     -
+      1
+     --[unary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {1 Kint(1)} {Tint(0)}
+	POW {3 Kint(0), Tint(0)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (1 + 1)^(50 + 50)" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        1
+       +
+        1
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ^
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        50
+       +
+        50
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] number
+     --[suffixed expr start] integer
+      --[primary start] integer
+       --[binary expr start] integer
+        1
+       +
+        1
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ^
+     --[suffixed expr start] integer
+      --[primary start] integer
+       --[binary expr start] integer
+        50
+       +
+        50
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	ADDii {1 Kint(0), 1 Kint(0)} {Tint(0)}
+	ADDii {50 Kint(1), 50 Kint(1)} {Tint(1)}
+	POW {Tint(0), Tint(1)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (-2)^(31 - 2)" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[unary expr start] any
+       -
+        2
+       --[unary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ^
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        31
+       -
+        2
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] number
+     --[suffixed expr start] integer
+      --[primary start] integer
+       --[unary expr start] integer
+       -
+        2
+       --[unary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ^
+     --[suffixed expr start] integer
+      --[primary start] integer
+       --[binary expr start] integer
+        31
+       -
+        2
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {2 Kint(0)} {Tint(0)}
+	SUBii {31 Kint(1), 2 Kint(0)} {Tint(1)}
+	POW {Tint(0), Tint(1)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (-3^0 + 5) // 3.0" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[unary expr start] any
+        -
+         --[binary expr start] any
+          3
+         ^
+          0
+         --[binary expr end]
+        --[unary expr end]
+       +
+        5
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    //
+     3.0000000000000000
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] number
+      --[primary start] number
+       --[binary expr start] number
+        --[unary expr start] number
+        -
+         --[binary expr start] number
+          3
+         ^
+          0
+         --[binary expr end]
+        --[unary expr end]
+       +
+        5
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    //
+     3.0000000000000000
+    --[binary expr end]
+end
+L0 (entry)
+	POW {3 Kint(0), 0 Kint(1)} {Tflt(0)}
+	UNMf {Tflt(0)} {Tflt(1)}
+	ADDfi {Tflt(1), 5 Kint(2)} {Tflt(2)}
+	IDIV {Tflt(2), 3 Kint(0)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -3  5" 
+function()
+  return
+    --[unary expr start] any
+    -
+     3
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] integer
+    -
+     3
+    --[unary expr end]
+end
+L0 (entry)
+	UNMi {3 Kint(0)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -((2.0^8 + -(-1))  8)/2 * 4 - 3" 
+function()
+  return
+    --[unary expr start] any
+    -
+     --[suffixed expr start] any
+      --[primary start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[binary expr start] any
+           2.0000000000000000
+          ^
+           8
+          --[binary expr end]
+         +
+          --[unary expr start] any
+          -
+           --[suffixed expr start] any
+            --[primary start] any
+             --[unary expr start] any
+             -
+              1
+             --[unary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] number
+    -
+     --[suffixed expr start] number
+      --[primary start] number
+       --[suffixed expr start] number
+        --[primary start] number
+         --[binary expr start] number
+          --[binary expr start] number
+           2.0000000000000000
+          ^
+           8
+          --[binary expr end]
+         +
+          --[unary expr start] integer
+          -
+           --[suffixed expr start] integer
+            --[primary start] integer
+             --[unary expr start] integer
+             -
+              1
+             --[unary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	POW {2.000000000000 Kflt(0), 8 Kint(1)} {Tflt(0)}
+	UNMi {1 Kint(2)} {Tint(0)}
+	UNMi {Tint(0)} {Tint(1)}
+	ADDfi {Tflt(0), Tint(1)} {Tflt(1)}
+	UNMf {Tflt(1)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -((2^8 + -(-1))  8)//2 * 4 - 3" 
+function()
+  return
+    --[unary expr start] any
+    -
+     --[suffixed expr start] any
+      --[primary start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[binary expr start] any
+           2
+          ^
+           8
+          --[binary expr end]
+         +
+          --[unary expr start] any
+          -
+           --[suffixed expr start] any
+            --[primary start] any
+             --[unary expr start] any
+             -
+              1
+             --[unary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] number
+    -
+     --[suffixed expr start] number
+      --[primary start] number
+       --[suffixed expr start] number
+        --[primary start] number
+         --[binary expr start] number
+          --[binary expr start] number
+           2
+          ^
+           8
+          --[binary expr end]
+         +
+          --[unary expr start] integer
+          -
+           --[suffixed expr start] integer
+            --[primary start] integer
+             --[unary expr start] integer
+             -
+              1
+             --[unary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	POW {2 Kint(0), 8 Kint(1)} {Tflt(0)}
+	UNMi {1 Kint(2)} {Tint(0)}
+	UNMi {Tint(0)} {Tint(1)}
+	ADDfi {Tflt(0), Tint(1)} {Tflt(1)}
+	UNMf {Tflt(1)} {Tflt(0)}
+	RET {Tflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD" 
+function()
+  return
+    --[binary expr start] any
+     240.0000000000000000
+    |
+     --[binary expr start] any
+      204.0000000000000000
+     ~
+      --[binary expr start] any
+       170
+      &
+       253
+      --[binary expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     240.0000000000000000
+    |
+     --[binary expr start] integer
+      204.0000000000000000
+     ~
+      --[binary expr start] integer
+       170
+      &
+       253
+      --[binary expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	BANDii {170 Kint(2), 253 Kint(3)} {Tint(0)}
+	BXOR {204.000000000000 Kflt(1), Tint(0)} {Tint(1)}
+	BOR {240.000000000000 Kflt(0), Tint(1)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return ~(~0xFF0 | 0xFF0)" 
+function()
+  return
+    --[unary expr start] any
+    ~
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[unary expr start] any
+        ~
+         4080
+        --[unary expr end]
+       |
+        4080
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] any
+    ~
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[unary expr start] any
+        ~
+         4080
+        --[unary expr end]
+       |
+        4080
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	BNOT {4080 Kint(0)} {T(0)}
+	BOR {T(0), 4080 Kint(0)} {T(1)}
+	BNOT {T(1)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return ~~-100024.0" 
+function()
+  return
+    --[unary expr start] any
+    ~
+     --[unary expr start] any
+     ~
+      --[unary expr start] any
+      -
+       100024.0000000000000000
+      --[unary expr end]
+     --[unary expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] any
+    ~
+     --[unary expr start] any
+     ~
+      --[unary expr start] number
+      -
+       100024.0000000000000000
+      --[unary expr end]
+     --[unary expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	UNMf {100024.000000000000 Kflt(0)} {Tflt(0)}
+	BNOT {Tflt(0)} {T(0)}
+	BNOT {T(0)} {T(1)}
+	RET {T(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return ((100 << 6) << -4) >> 2" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           100
+          <<
+           6
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       <<
+        --[unary expr start] any
+        -
+         4
+        --[unary expr end]
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    >>
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] integer
+     --[suffixed expr start] integer
+      --[primary start] integer
+       --[binary expr start] integer
+        --[suffixed expr start] integer
+         --[primary start] integer
+          --[binary expr start] integer
+           100
+          <<
+           6
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       <<
+        --[unary expr start] integer
+        -
+         4
+        --[unary expr end]
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    >>
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	SHLii {100 Kint(0), 6 Kint(1)} {Tint(0)}
+	UNMi {4 Kint(2)} {Tint(1)}
+	SHLii {Tint(0), Tint(1)} {Tint(2)}
+	SHRii {Tint(2), 2 Kint(3)} {Tint(1)}
+	RET {Tint(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2^3^2 == 2^(3^2)" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      2
+     ^
+      --[binary expr start] any
+       3
+      ^
+       2
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      2
+     ^
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         3
+        ^
+         2
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] number
+      2
+     ^
+      --[binary expr start] number
+       3
+      ^
+       2
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] number
+      2
+     ^
+      --[suffixed expr start] number
+       --[primary start] number
+        --[binary expr start] number
+         3
+        ^
+         2
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	POW {3 Kint(1), 2 Kint(0)} {Tflt(0)}
+	POW {2 Kint(0), Tflt(0)} {Tflt(1)}
+	POW {3 Kint(1), 2 Kint(0)} {Tflt(0)}
+	POW {2 Kint(0), Tflt(0)} {Tflt(2)}
+	EQff {Tflt(1), Tflt(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2^3*4 == (2^3)*4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       2
+      ^
+       3
+      --[binary expr end]
+     *
+      4
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         2
+        ^
+         3
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] number
+      --[binary expr start] number
+       2
+      ^
+       3
+      --[binary expr end]
+     *
+      4
+     --[binary expr end]
+    ==
+     --[binary expr start] number
+      --[suffixed expr start] number
+       --[primary start] number
+        --[binary expr start] number
+         2
+        ^
+         3
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     *
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	POW {2 Kint(0), 3 Kint(1)} {Tflt(0)}
+	MULfi {Tflt(0), 4 Kint(2)} {Tflt(1)}
+	POW {2 Kint(0), 3 Kint(1)} {Tflt(0)}
+	MULfi {Tflt(0), 4 Kint(2)} {Tflt(2)}
+	EQff {Tflt(1), Tflt(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2.0^-2 == 1/4, -2^- -2 == - - -4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      2.0000000000000000
+     ^
+      --[unary expr start] any
+      -
+       2
+      --[unary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      1
+     /
+      4
+     --[binary expr end]
+    --[binary expr end]
+   ,
+    --[binary expr start] any
+     --[unary expr start] any
+     -
+      --[binary expr start] any
+       2
+      ^
+       --[unary expr start] any
+       -
+        --[unary expr start] any
+        -
+         2
+        --[unary expr end]
+       --[unary expr end]
+      --[binary expr end]
+     --[unary expr end]
+    ==
+     --[unary expr start] any
+     -
+      --[unary expr start] any
+      -
+       --[unary expr start] any
+       -
+        4
+       --[unary expr end]
+      --[unary expr end]
+     --[unary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] number
+      2.0000000000000000
+     ^
+      --[unary expr start] integer
+      -
+       2
+      --[unary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] number
+      1
+     /
+      4
+     --[binary expr end]
+    --[binary expr end]
+   ,
+    --[binary expr start] boolean
+     --[unary expr start] number
+     -
+      --[binary expr start] number
+       2
+      ^
+       --[unary expr start] integer
+       -
+        --[unary expr start] integer
+        -
+         2
+        --[unary expr end]
+       --[unary expr end]
+      --[binary expr end]
+     --[unary expr end]
+    ==
+     --[unary expr start] integer
+     -
+      --[unary expr start] integer
+      -
+       --[unary expr start] integer
+       -
+        4
+       --[unary expr end]
+      --[unary expr end]
+     --[unary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
+	POW {2.000000000000 Kflt(0), Tint(0)} {Tflt(0)}
+	DIVii {1 Kint(1), 4 Kint(2)} {Tflt(1)}
+	EQff {Tflt(0), Tflt(1)} {T(0)}
+	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
+	UNMi {Tint(0)} {Tint(1)}
+	POW {2.000000000000 Kflt(0), Tint(1)} {Tflt(1)}
+	UNMf {Tflt(1)} {Tflt(0)}
+	UNMi {4 Kint(2)} {Tint(1)}
+	UNMi {Tint(1)} {Tint(2)}
+	UNMi {Tint(2)} {Tint(3)}
+	EQ {Tflt(0), Tint(3)} {T(1)}
+	RET {T(0), T(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -3-1-5 == 0+0-9" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      -
+       1
+      --[binary expr end]
+     -
+      5
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      --[binary expr start] any
+       0
+      +
+       0
+      --[binary expr end]
+     -
+      9
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      --[binary expr start] integer
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      -
+       1
+      --[binary expr end]
+     -
+      5
+     --[binary expr end]
+    ==
+     --[binary expr start] integer
+      --[binary expr start] integer
+       0
+      +
+       0
+      --[binary expr end]
+     -
+      9
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {3 Kint(0)} {Tint(0)}
+	SUBii {Tint(0), 1 Kint(1)} {Tint(1)}
+	SUBii {Tint(1), 5 Kint(2)} {Tint(0)}
+	ADDii {0 Kint(3), 0 Kint(3)} {Tint(1)}
+	SUBii {Tint(1), 9 Kint(4)} {Tint(2)}
+	EQii {Tint(0), Tint(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -2^2 == -4, (-2)^2 == 4, 2*2-3-1 == 0" 
+function()
+  return
+    --[binary expr start] any
+     --[unary expr start] any
+     -
+      --[binary expr start] any
+       2
+      ^
+       2
+      --[binary expr end]
+     --[unary expr end]
+    ==
+     --[unary expr start] any
+     -
+      4
+     --[unary expr end]
+    --[binary expr end]
+   ,
+    --[binary expr start] any
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[unary expr start] any
+        -
+         2
+        --[unary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ^
+      2
+     --[binary expr end]
+    ==
+     4
+    --[binary expr end]
+   ,
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] any
+        2
+       *
+        2
+       --[binary expr end]
+      -
+       3
+      --[binary expr end]
+     -
+      1
+     --[binary expr end]
+    ==
+     0
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[unary expr start] number
+     -
+      --[binary expr start] number
+       2
+      ^
+       2
+      --[binary expr end]
+     --[unary expr end]
+    ==
+     --[unary expr start] integer
+     -
+      4
+     --[unary expr end]
+    --[binary expr end]
+   ,
+    --[binary expr start] boolean
+     --[binary expr start] number
+      --[suffixed expr start] integer
+       --[primary start] integer
+        --[unary expr start] integer
+        -
+         2
+        --[unary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ^
+      2
+     --[binary expr end]
+    ==
+     4
+    --[binary expr end]
+   ,
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      --[binary expr start] integer
+       --[binary expr start] integer
+        2
+       *
+        2
+       --[binary expr end]
+      -
+       3
+      --[binary expr end]
+     -
+      1
+     --[binary expr end]
+    ==
+     0
+    --[binary expr end]
+end
+L0 (entry)
+	POW {2 Kint(0), 2 Kint(0)} {Tflt(0)}
+	UNMf {Tflt(0)} {Tflt(1)}
+	UNMi {4 Kint(1)} {Tint(0)}
+	EQ {Tflt(1), Tint(0)} {T(0)}
+	UNMi {2 Kint(0)} {Tint(0)}
+	POW {Tint(0), 2 Kint(0)} {Tflt(1)}
+	EQ {Tflt(1), 4 Kint(1)} {T(1)}
+	MULii {2 Kint(0), 2 Kint(0)} {Tint(0)}
+	SUBii {Tint(0), 3 Kint(2)} {Tint(1)}
+	SUBii {Tint(1), 1 Kint(3)} {Tint(0)}
+	EQii {Tint(0), 0 Kint(4)} {T(2)}
+	RET {T(0), T(1), T(2)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -3 == 2, -3+5 == 2" 
+function()
+  return
+    --[binary expr start] any
+     --[unary expr start] any
+     -
+      3
+     --[unary expr end]
+    ==
+     2
+    --[binary expr end]
+   ,
+    --[binary expr start] any
+     --[binary expr start] any
+      --[unary expr start] any
+      -
+       3
+      --[unary expr end]
+     +
+      5
+     --[binary expr end]
+    ==
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[unary expr start] integer
+     -
+      3
+     --[unary expr end]
+    ==
+     2
+    --[binary expr end]
+   ,
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      --[unary expr start] integer
+      -
+       3
+      --[unary expr end]
+     +
+      5
+     --[binary expr end]
+    ==
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {3 Kint(0)} {Tint(0)}
+	EQii {Tint(0), 2 Kint(1)} {T(0)}
+	UNMi {3 Kint(0)} {Tint(0)}
+	ADDii {Tint(0), 5 Kint(2)} {Tint(1)}
+	EQii {Tint(1), 2 Kint(1)} {T(1)}
+	RET {T(0), T(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      240
+     |
+      --[binary expr start] any
+       204
+      ~
+       --[binary expr start] any
+        170
+       &
+        253
+       --[binary expr end]
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     244
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      240
+     |
+      --[binary expr start] integer
+       204
+      ~
+       --[binary expr start] integer
+        170
+       &
+        253
+       --[binary expr end]
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     244
+    --[binary expr end]
+end
+L0 (entry)
+	BANDii {170 Kint(2), 253 Kint(3)} {Tint(0)}
+	BXORii {204 Kint(1), Tint(0)} {Tint(1)}
+	BORii {240 Kint(0), Tint(1)} {Tint(0)}
+	EQii {Tint(0), 244 Kint(4)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] any
+        253
+       &
+        170
+       --[binary expr end]
+      ~
+       204
+      --[binary expr end]
+     |
+      240
+     --[binary expr end]
+    ==
+     244
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      --[binary expr start] integer
+       --[binary expr start] integer
+        253
+       &
+        170
+       --[binary expr end]
+      ~
+       204
+      --[binary expr end]
+     |
+      240
+     --[binary expr end]
+    ==
+     244
+    --[binary expr end]
+end
+L0 (entry)
+	BANDii {253 Kint(0), 170 Kint(1)} {Tint(0)}
+	BXORii {Tint(0), 204 Kint(2)} {Tint(1)}
+	BORii {Tint(1), 240 Kint(3)} {Tint(0)}
+	EQii {Tint(0), 244 Kint(4)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0 & 0x0F + 1 == 0x10" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      240
+     &
+      --[binary expr start] any
+       15
+      +
+       1
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     16
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] boolean
+     --[binary expr start] integer
+      240
+     &
+      --[binary expr start] integer
+       15
+      +
+       1
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     16
+    --[binary expr end]
+end
+L0 (entry)
+	ADDii {15 Kint(1), 1 Kint(2)} {Tint(0)}
+	BANDii {240 Kint(0), Tint(0)} {Tint(1)}
+	EQii {Tint(1), 16 Kint(3)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 3^4//2^3//5 == 2" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] any
+        3
+       ^
+        4
+       --[binary expr end]
+      //
+       --[binary expr start] any
+        2
+       ^
+        3
+       --[binary expr end]
+      --[binary expr end]
+     //
+      5
+     --[binary expr end]
+    ==
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] number
+        3
+       ^
+        4
+       --[binary expr end]
+      //
+       --[binary expr start] number
+        2
+       ^
+        3
+       --[binary expr end]
+      --[binary expr end]
+     //
+      5
+     --[binary expr end]
+    ==
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	POW {3 Kint(0), 4 Kint(1)} {Tflt(0)}
+	POW {2 Kint(2), 3 Kint(0)} {Tflt(1)}
+	IDIV {Tflt(0), Tflt(1)} {T(0)}
+	IDIV {T(0), 5 Kint(3)} {T(1)}
+	EQ {T(1), 2 Kint(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -3+4*5//2^3^2//9+40/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((40)/3)" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      +
+       --[binary expr start] any
+        --[binary expr start] any
+         --[binary expr start] any
+          4
+         *
+          5
+         --[binary expr end]
+        //
+         --[binary expr start] any
+          2
+         ^
+          --[binary expr start] any
+           3
+          ^
+           2
+          --[binary expr end]
+         --[binary expr end]
+        --[binary expr end]
+       //
+        9
+       --[binary expr end]
+      --[binary expr end]
+     +
+      --[binary expr start] any
+       40
+      /
+       3
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[unary expr start] any
+         -
+          3
+         --[unary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+            --[binary expr start] any
+             --[suffixed expr start] any
+              --[primary start] any
+               --[binary expr start] any
+                4
+               *
+                5
+               --[binary expr end]
+              --[primary end]
+             --[suffixed expr end]
+            //
+             --[suffixed expr start] any
+              --[primary start] any
+               --[binary expr start] any
+                2
+               ^
+                --[suffixed expr start] any
+                 --[primary start] any
+                  --[binary expr start] any
+                   3
+                  ^
+                   2
+                  --[binary expr end]
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+              --[primary end]
+             --[suffixed expr end]
+            --[binary expr end]
+           --[primary end]
+          --[suffixed expr end]
+         //
+          9
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[binary expr end]
+     +
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[suffixed expr start] integer
+          --[primary start] integer
+           40
+          --[primary end]
+         --[suffixed expr end]
+        /
+         3
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      +
+       --[binary expr start] any
+        --[binary expr start] any
+         --[binary expr start] integer
+          4
+         *
+          5
+         --[binary expr end]
+        //
+         --[binary expr start] number
+          2
+         ^
+          --[binary expr start] number
+           3
+          ^
+           2
+          --[binary expr end]
+         --[binary expr end]
+        --[binary expr end]
+       //
+        9
+       --[binary expr end]
+      --[binary expr end]
+     +
+      --[binary expr start] number
+       40
+      /
+       3
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] integer
+        --[primary start] integer
+         --[unary expr start] integer
+         -
+          3
+         --[unary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+            --[binary expr start] any
+             --[suffixed expr start] integer
+              --[primary start] integer
+               --[binary expr start] integer
+                4
+               *
+                5
+               --[binary expr end]
+              --[primary end]
+             --[suffixed expr end]
+            //
+             --[suffixed expr start] number
+              --[primary start] number
+               --[binary expr start] number
+                2
+               ^
+                --[suffixed expr start] number
+                 --[primary start] number
+                  --[binary expr start] number
+                   3
+                  ^
+                   2
+                  --[binary expr end]
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+              --[primary end]
+             --[suffixed expr end]
+            --[binary expr end]
+           --[primary end]
+          --[suffixed expr end]
+         //
+          9
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[binary expr end]
+     +
+      --[suffixed expr start] number
+       --[primary start] number
+        --[binary expr start] number
+         --[suffixed expr start] integer
+          --[primary start] integer
+           40
+          --[primary end]
+         --[suffixed expr end]
+        /
+         3
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	UNMi {3 Kint(0)} {Tint(0)}
+	MULii {4 Kint(1), 5 Kint(2)} {Tint(1)}
+	POW {3 Kint(0), 2 Kint(3)} {Tflt(0)}
+	POW {2 Kint(3), Tflt(0)} {Tflt(1)}
+	IDIV {Tint(1), Tflt(1)} {T(0)}
+	IDIV {T(0), 9 Kint(4)} {T(1)}
+	ADD {Tint(0), T(1)} {T(0)}
+	DIVii {40 Kint(5), 3 Kint(0)} {Tflt(1)}
+	ADD {T(0), Tflt(1)} {T(1)}
+	UNMi {3 Kint(0)} {Tint(0)}
+	MULii {4 Kint(1), 5 Kint(2)} {Tint(1)}
+	POW {3 Kint(0), 2 Kint(3)} {Tflt(1)}
+	POW {2 Kint(3), Tflt(1)} {Tflt(0)}
+	IDIV {Tint(1), Tflt(0)} {T(0)}
+	IDIV {T(0), 9 Kint(4)} {T(2)}
+	ADD {Tint(0), T(2)} {T(0)}
+	DIVii {40 Kint(5), 3 Kint(0)} {Tflt(0)}
+	ADD {T(0), Tflt(0)} {T(2)}
+	EQ {T(1), T(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @integer 1" 
+function()
+  return
+    --[unary expr start] any
+    @integer
+     1
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] integer
+    @integer
+     1
+    --[unary expr end]
+end
+L0 (entry)
+	RET {1 Kint(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @string 'hello'" 
+function()
+  return
+    --[unary expr start] any
+    @string
+     'hello'
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] string
+    @string
+     'hello'
+    --[unary expr end]
+end
+L0 (entry)
+	RET {'hello' Ks(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @table {}" 
+function()
+  return
+    --[unary expr start] any
+    @table
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] table
+    @table
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+L0 (entry)
+	NEWTABLE {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @integer[] {}" 
+function()
+  return
+    --[unary expr start] any
+    @integer[]
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] integer[]
+    @integer[]
+     { --[table constructor start] integer[]
+     } --[table constructor end]
+    --[unary expr end]
+end
+L0 (entry)
+	NEWIARRAY {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @number[] {}" 
+function()
+  return
+    --[unary expr start] any
+    @number[]
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] number[]
+    @number[]
+     { --[table constructor start] number[]
+     } --[table constructor end]
+    --[unary expr end]
+end
+L0 (entry)
+	NEWFARRAY {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @closure function() end" 
+function()
+  return
+    --[unary expr start] any
+    @closure
+     function()
+     end
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] closure
+    @closure
+     function()
+     end
+    --[unary expr end]
+end
+L0 (entry)
+	CLOSURE {Proc(000002877F792588)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @number 54.4" 
+function()
+  return
+    --[unary expr start] any
+    @number
+     54.3999999999999986
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] number
+    @number
+     54.3999999999999986
+    --[unary expr end]
+end
+L0 (entry)
+	RET {54.400000000000 Kflt(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @User.Type a" 
+function()
+  return
+    --[unary expr start] any
+    @<usertype>
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] User.Type
+    @<usertype>
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	LOADGLOBAL {a} {T(0)}
+	TOTYPE {'User.Type' Ks(0)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return {1,2,3}" 
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] integer
+      --[value start]
+       1
+      --[value end]
+      --[indexed assign end]
+     ,
+      --[indexed assign start] integer
+      --[value start]
+       2
+      --[value end]
+      --[indexed assign end]
+     ,
+      --[indexed assign start] integer
+      --[value start]
+       3
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] integer
+      --[value start]
+       1
+      --[value end]
+      --[indexed assign end]
+     ,
+      --[indexed assign start] integer
+      --[value start]
+       2
+      --[value end]
+      --[indexed assign end]
+     ,
+      --[indexed assign start] integer
+      --[value start]
+       3
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+L0 (entry)
+	NEWTABLE {T(0)}
+	TPUTik {1 Kint(0), 1 Kint(0)} {T(0)}
+	TPUTik {2 Kint(1), 2 Kint(1)} {T(0)}
+	TPUTik {3 Kint(2), 3 Kint(2)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return {[1] = a}" 
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[index start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+      --[index end]
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          a --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[index start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+      --[index end]
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          a --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+L0 (entry)
+	NEWTABLE {T(0)}
+	LOADGLOBAL {a} {T(1)}
+	TPUTik {1 Kint(0), T(1)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return {a = b}" 
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[index start]
+       --[field selector start] any
+        .
+         'a'
+       --[field selector end]
+      --[index end]
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          b --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[index start]
+       --[field selector start] any
+        .
+         'a'
+       --[field selector end]
+      --[index end]
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          b --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+end
+L0 (entry)
+	NEWTABLE {T(0)}
+	LOADGLOBAL {b} {T(1)}
+	TPUTsk {'a' Ks(0), T(1)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @integer[]{[1] = 5.5, [2] = 4}" 
+function()
+  return
+    --[unary expr start] any
+    @integer[]
+     { --[table constructor start] table
+       --[indexed assign start] number
+       --[index start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        5.5000000000000000
+       --[value end]
+       --[indexed assign end]
+      ,
+       --[indexed assign start] integer
+       --[index start]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        4
+       --[value end]
+       --[indexed assign end]
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] integer[]
+    @integer[]
+     { --[table constructor start] integer[]
+       --[indexed assign start] number
+       --[index start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        5.5000000000000000
+       --[value end]
+       --[indexed assign end]
+      ,
+       --[indexed assign start] integer
+       --[index start]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        4
+       --[value end]
+       --[indexed assign end]
+     } --[table constructor end]
+    --[unary expr end]
+end
+L0 (entry)
+	NEWIARRAY {T(0)}
+	IAPUT {1 Kint(0), 5.500000000000 Kflt(1)} {T(0)}
+	IAPUTiv {2 Kint(2), 4 Kint(3)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return @number[] {[1] = 4, [2] = 5.4}" 
+function()
+  return
+    --[unary expr start] any
+    @number[]
+     { --[table constructor start] table
+       --[indexed assign start] integer
+       --[index start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        4
+       --[value end]
+       --[indexed assign end]
+      ,
+       --[indexed assign start] number
+       --[index start]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        5.4000000000000004
+       --[value end]
+       --[indexed assign end]
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] number[]
+    @number[]
+     { --[table constructor start] number[]
+       --[indexed assign start] integer
+       --[index start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        4
+       --[value end]
+       --[indexed assign end]
+      ,
+       --[indexed assign start] number
+       --[index start]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+       --[index end]
+       --[value start]
+        5.4000000000000004
+       --[value end]
+       --[indexed assign end]
+     } --[table constructor end]
+    --[unary expr end]
+end
+L0 (entry)
+	NEWFARRAY {T(0)}
+	FAPUT {1 Kint(0), 4 Kint(1)} {T(0)}
+	FAPUTfv {2 Kint(2), 5.400000000000 Kflt(3)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "if 1 == 1 then return true else return false end" 
+function()
+  if
+   --[binary expr start] any
+    1
+   ==
+    1
+   --[binary expr end]
+  then
+    return
+      true
+  else
+    return
+      false
+  end
+end
+function()
+  if
+   --[binary expr start] boolean
+    1
+   ==
+    1
+   --[binary expr end]
+  then
+    return
+      true
+  else
+    return
+      false
+  end
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	EQii {1 Kint(0), 1 Kint(0)} {T(0)}
+	CBR {T(0)} {L3, L4}
+L3
+	RET {true} {L1}
+L4
+	RET {false} {L1}
+L5
+
+C:\work\github\ravi-compiler\tests\input>tparse "if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end" 
+function()
+  if
+   --[binary expr start] any
+    1
+   ~=
+    1
+   --[binary expr end]
+  then
+    return
+      0
+  elseif
+   --[binary expr start] any
+    1
+   <
+    2
+   --[binary expr end]
+  then
+    return
+      1
+  elseif
+   --[binary expr start] any
+    1
+   <
+    2
+   --[binary expr end]
+  then
+    return
+      2
+  else
+    return
+      5
+  end
+end
+function()
+  if
+   --[binary expr start] boolean
+    1
+   ~=
+    1
+   --[binary expr end]
+  then
+    return
+      0
+  elseif
+   --[binary expr start] boolean
+    1
+   <
+    2
+   --[binary expr end]
+  then
+    return
+      1
+  elseif
+   --[binary expr start] boolean
+    1
+   <
+    2
+   --[binary expr end]
+  then
+    return
+      2
+  else
+    return
+      5
+  end
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	EQii {1 Kint(0), 1 Kint(0)} {T(0)}
+	CBR {T(0)} {L5, L3}
+L3
+	LIii {1 Kint(0), 2 Kint(1)} {T(1)}
+	CBR {T(1)} {L6, L4}
+L4
+	LIii {1 Kint(0), 2 Kint(1)} {T(2)}
+	CBR {T(2)} {L7, L8}
+L5
+	RET {0 Kint(2)} {L1}
+L6
+	RET {1 Kint(0)} {L1}
+L7
+	RET {2 Kint(1)} {L1}
+L8
+	RET {5 Kint(3)} {L1}
+L9
+
+C:\work\github\ravi-compiler\tests\input>tparse "if 1 == 1 then return 'hi' end" 
+function()
+  if
+   --[binary expr start] any
+    1
+   ==
+    1
+   --[binary expr end]
+  then
+    return
+      'hi'
+  end
+end
+function()
+  if
+   --[binary expr start] boolean
+    1
+   ==
+    1
+   --[binary expr end]
+  then
+    return
+      'hi'
+  end
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	EQii {1 Kint(0), 1 Kint(0)} {T(0)}
+	CBR {T(0)} {L3, L4}
+L3
+	RET {'hi' Ks(1)} {L1}
+L4
+
+C:\work\github\ravi-compiler\tests\input>tparse "if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end" 
+function()
+  if
+   --[binary expr start] any
+    --[binary expr start] any
+     5
+    +
+     5
+    --[binary expr end]
+   ==
+    10
+   --[binary expr end]
+  then
+    return
+      'got it'
+  else
+    if
+     --[binary expr start] any
+      6
+     <
+      7
+     --[binary expr end]
+    then
+      return
+        4
+    end
+  end
+end
+function()
+  if
+   --[binary expr start] boolean
+    --[binary expr start] integer
+     5
+    +
+     5
+    --[binary expr end]
+   ==
+    10
+   --[binary expr end]
+  then
+    return
+      'got it'
+  else
+    if
+     --[binary expr start] boolean
+      6
+     <
+      7
+     --[binary expr end]
+    then
+      return
+        4
+    end
+  end
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {5 Kint(0), 5 Kint(0)} {Tint(0)}
+	EQii {Tint(0), 10 Kint(1)} {T(0)}
+	CBR {T(0)} {L3, L4}
+L3
+	RET {'got it' Ks(2)} {L1}
+L4
+	BR {L6}
+L5
+L6
+	LIii {6 Kint(3), 7 Kint(4)} {T(1)}
+	CBR {T(1)} {L7, L8}
+L7
+	RET {4 Kint(5)} {L1}
+L8
+	BR {L5}
+
+C:\work\github\ravi-compiler\tests\input>tparse "if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end" 
+function()
+  if
+   --[binary expr start] any
+    --[binary expr start] any
+     5
+    +
+     5
+    --[binary expr end]
+   ==
+    10
+   --[binary expr end]
+  then
+    return
+      'got it'
+  elseif
+   --[binary expr start] any
+    6
+   <
+    7
+   --[binary expr end]
+  then
+    return
+      4
+  end
+end
+function()
+  if
+   --[binary expr start] boolean
+    --[binary expr start] integer
+     5
+    +
+     5
+    --[binary expr end]
+   ==
+    10
+   --[binary expr end]
+  then
+    return
+      'got it'
+  elseif
+   --[binary expr start] boolean
+    6
+   <
+    7
+   --[binary expr end]
+  then
+    return
+      4
+  end
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {5 Kint(0), 5 Kint(0)} {Tint(0)}
+	EQii {Tint(0), 10 Kint(1)} {T(0)}
+	CBR {T(0)} {L4, L3}
+L3
+	LIii {6 Kint(2), 7 Kint(3)} {T(1)}
+	CBR {T(1)} {L5, L6}
+L4
+	RET {'got it' Ks(4)} {L1}
+L5
+	RET {4 Kint(5)} {L1}
+L6

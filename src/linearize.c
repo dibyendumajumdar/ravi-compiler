@@ -990,7 +990,7 @@ static struct basic_block *create_block(struct proc *proc)
  */
 static void start_block(struct proc *proc, struct basic_block *bb)
 {
-	printf("Starting block %d\n", bb->index);
+	//printf("Starting block %d\n", bb->index);
 	if (proc->current_bb && !is_block_terminated(proc->current_bb)) {
 		instruct_br(proc, bb);
 	}
@@ -1207,5 +1207,5 @@ void raviX_output_linearizer(struct linearizer *linearizer, FILE *fp)
 	membuff_t mb;
 	membuff_init(&mb, 4096);
 	raviX_show_linearizer(linearizer, &mb);
-	fprintf(fp, "%s", mb.buf);
+	fputs(mb.buf, fp);
 }
