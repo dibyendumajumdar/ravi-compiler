@@ -25,6 +25,7 @@ static void linearize_statement_list(struct proc *proc, struct ast_node_list *li
 static void start_scope(struct linearizer *linearizer, struct proc *proc, struct block_scope *scope);
 static void end_scope(struct linearizer *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct basic_block *target_block);
+static bool is_block_terminated(struct basic_block *block);
 
 static inline unsigned alloc_reg(struct pseudo_generator *generator)
 {
@@ -411,10 +412,79 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 	return target;
 }
 
+static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src)
+{
+	struct instruction *mov = alloc_instruction(proc, op_mov);
+	ptrlist_add((struct ptr_list **)&mov->operands, src, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&mov->targets, target, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, mov, &proc->linearizer->ptrlist_allocator);
+	return target;
+}
+
+static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, struct basic_block *true_block,
+			 struct basic_block *false_block)
+{
+	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
+	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
+	struct instruction *insn = alloc_instruction(proc, op_cbr);
+	ptrlist_add((struct ptr_list **)&insn->operands, conditin_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, true_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, false_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+static void instruct_br(struct proc *proc, struct basic_block *target_block)
+{
+	if (is_block_terminated(proc->current_bb)) {
+		start_block(proc, create_block(proc));
+	}
+	struct pseudo *pseudo = allocate_block_pseudo(proc, target_block);
+	struct instruction *insn = alloc_instruction(proc, op_br);
+	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+static struct pseudo *linearize_and(struct proc *proc, struct ast_node *node)
+{
+	struct ast_node *e1 = node->binary_expr.expr_left;
+	struct ast_node *e2 = node->binary_expr.expr_right;
+
+	struct basic_block *first_block = create_block(proc);
+	struct basic_block *second_block = create_block(proc);
+	struct basic_block *end_block = create_block(proc);
+
+	struct pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
+	instruct_move(proc, result, allocate_boolean_pseudo(proc, false));
+
+	struct pseudo *operand1 = linearize_expression(proc, e1);
+	instruct_cbr(proc, operand1, first_block, end_block);
+
+	start_block(proc, first_block);
+	instruct_move(proc, result, operand1);
+	free_temp_pseudo(proc, operand1);
+
+	struct pseudo *operand2 = linearize_expression(proc, e2);
+	instruct_cbr(proc, operand2, second_block, end_block);
+
+	start_block(proc, second_block);
+	instruct_move(proc, result, operand2);
+	free_temp_pseudo(proc, operand2);
+	instruct_br(proc, end_block);
+
+	start_block(proc, end_block);
+
+	return result;
+}
+
 /* Type checker - WIP  */
 static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *node)
 {
 	BinOpr op = node->binary_expr.binary_op;
+
+	if (op == OPR_AND) {
+		return linearize_and(proc, node);
+	}
+
 	struct ast_node *e1 = node->binary_expr.expr_left;
 	struct ast_node *e2 = node->binary_expr.expr_right;
 	struct pseudo *operand1 = linearize_expression(proc, e1);
@@ -775,29 +845,6 @@ static bool is_block_terminated(struct basic_block *block)
 	return false;
 }
 
-static void instruct_br(struct proc *proc, struct basic_block *target_block)
-{
-	if (is_block_terminated(proc->current_bb)) {
-		start_block(proc, create_block(proc));
-	}
-	struct pseudo *pseudo = allocate_block_pseudo(proc, target_block);
-	struct instruction *insn = alloc_instruction(proc, op_br);
-	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-}
-
-static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, struct basic_block *true_block,
-			 struct basic_block *false_block)
-{
-	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
-	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
-	struct instruction *insn = alloc_instruction(proc, op_cbr);
-	ptrlist_add((struct ptr_list **)&insn->operands, conditin_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, true_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, false_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-}
-
 static void linearize_test_cond(struct proc *proc, struct ast_node *node, struct basic_block *true_block,
 				struct basic_block *false_block)
 {
@@ -990,7 +1037,7 @@ static struct basic_block *create_block(struct proc *proc)
  */
 static void start_block(struct proc *proc, struct basic_block *bb)
 {
-	//printf("Starting block %d\n", bb->index);
+	// printf("Starting block %d\n", bb->index);
 	if (proc->current_bb && !is_block_terminated(proc->current_bb)) {
 		instruct_br(proc, bb);
 	}
@@ -1129,7 +1176,7 @@ static const char *op_codenames[] = {
     "LE",     "LEii",	    "LEff",	"MOD",	     "POW",	  "CLOSURE",  "UNM",	  "UNMi",    "UNMf",   "LEN",
     "LENi",   "TOINT",	    "TOFLT",	"TOCLOSURE", "TOSTRING",  "TOIARRAY", "TOFARRAY", "TOTABLE", "TOTYPE", "NOT",
     "BNOT",   "LOADGLOBAL", "NEWTABLE", "NEWIARRAY", "NEWFARRAY", "PUT",      "PUTik",	  "PUTsk",   "TPUT",   "TPUTik",
-    "TPUTsk", "IAPUT",	    "IAPUTiv",	"FAPUT",     "FAPUTfv",	  "CBR",      "BR"};
+    "TPUTsk", "IAPUT",	    "IAPUTiv",	"FAPUT",     "FAPUTfv",	  "CBR",      "BR",	  "MOV"};
 
 void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {
@@ -1169,9 +1216,9 @@ void output_instructions(struct instruction_list *list, membuff_t *mb)
 void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
 {
 	membuff_add_fstring(mb, "L%d", bb->index);
-	if (bb == proc->entry) {
+	if (bb2n(bb) == proc->entry) {
 		membuff_add_string(mb, " (entry)\n");
-	} else if (bb == proc->exit) {
+	} else if (bb2n(bb) == proc->exit) {
 		membuff_add_string(mb, " (exit)\n");
 	} else {
 		membuff_add_string(mb, "\n");

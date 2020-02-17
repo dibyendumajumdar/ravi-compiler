@@ -488,6 +488,7 @@ enum opcode {
 	op_faput_fval,
 	op_cbr,
 	op_br,
+	op_mov,
 };
 
 enum pseudo_type {
