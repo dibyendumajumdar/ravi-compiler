@@ -33,6 +33,7 @@
 #define ravicomp_FNV_HASH_H
 
 #include <inttypes.h>
+#include <stdlib.h>
 
 uint32_t fnv1_hash_string(const char *key);
 uint32_t fnv1_hash_data(const void *data, size_t size);

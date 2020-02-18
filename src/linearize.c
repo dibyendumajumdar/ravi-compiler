@@ -450,23 +450,16 @@ static struct pseudo *linearize_and(struct proc *proc, struct ast_node *node)
 	struct ast_node *e2 = node->binary_expr.expr_right;
 
 	struct basic_block *first_block = create_block(proc);
-	struct basic_block *second_block = create_block(proc);
 	struct basic_block *end_block = create_block(proc);
 
 	struct pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
-	instruct_move(proc, result, allocate_boolean_pseudo(proc, false));
-
 	struct pseudo *operand1 = linearize_expression(proc, e1);
-	instruct_cbr(proc, operand1, first_block, end_block);
-
-	start_block(proc, first_block);
 	instruct_move(proc, result, operand1);
 	free_temp_pseudo(proc, operand1);
+	instruct_cbr(proc, result, first_block, end_block); // If first value is true then evaluate the second
 
+	start_block(proc, first_block);
 	struct pseudo *operand2 = linearize_expression(proc, e2);
-	instruct_cbr(proc, operand2, second_block, end_block);
-
-	start_block(proc, second_block);
 	instruct_move(proc, result, operand2);
 	free_temp_pseudo(proc, operand2);
 	instruct_br(proc, end_block);
