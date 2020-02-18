@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000002877F792588)} {T(0)}
+	CLOSURE {Proc(000002D401A015A8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -2567,3 +2567,139 @@ L4
 L5
 	RET {4 Kint(5)} {L1}
 L6
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1 and 2" 
+function()
+  return
+    --[binary expr start] any
+     1
+    and
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     1
+    and
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {1 Kint(0)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L1 (exit)
+L2
+	MOV {2 Kint(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 3 and 4 and 5" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      3
+     and
+      4
+     --[binary expr end]
+    and
+     5
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      3
+     and
+      4
+     --[binary expr end]
+    and
+     5
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {3 Kint(0)} {T(1)}
+	CBR {T(1)} {L4, L5}
+L1 (exit)
+L2
+	MOV {5 Kint(2)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {4 Kint(1)} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 1 or 2" 
+function()
+  return
+    --[binary expr start] any
+     1
+    or
+     2
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     1
+    or
+     2
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {1 Kint(0)} {T(0)}
+	CBR {T(0)} {L3, L2}
+L1 (exit)
+L2
+	MOV {2 Kint(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 3 or 4 or 5" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      3
+     or
+      4
+     --[binary expr end]
+    or
+     5
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      3
+     or
+      4
+     --[binary expr end]
+    or
+     5
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {3 Kint(0)} {T(1)}
+	CBR {T(1)} {L5, L4}
+L1 (exit)
+L2
+	MOV {5 Kint(2)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {4 Kint(1)} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L3, L2}

@@ -62,3 +62,6 @@ tparse "if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end"
 
 tparse "return 1 and 2"
 tparse "return 3 and 4 and 5"
+
+tparse "return 1 or 2"
+tparse "return 3 or 4 or 5"

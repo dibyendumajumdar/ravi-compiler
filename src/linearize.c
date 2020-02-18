@@ -444,7 +444,7 @@ static void instruct_br(struct proc *proc, struct basic_block *target_block)
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
-static struct pseudo *linearize_and(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, bool is_and)
 {
 	struct ast_node *e1 = node->binary_expr.expr_left;
 	struct ast_node *e2 = node->binary_expr.expr_right;
@@ -456,7 +456,10 @@ static struct pseudo *linearize_and(struct proc *proc, struct ast_node *node)
 	struct pseudo *operand1 = linearize_expression(proc, e1);
 	instruct_move(proc, result, operand1);
 	free_temp_pseudo(proc, operand1);
-	instruct_cbr(proc, result, first_block, end_block); // If first value is true then evaluate the second
+	if (is_and)
+		instruct_cbr(proc, result, first_block, end_block); // If first value is true then evaluate the second
+	else
+		instruct_cbr(proc, result, end_block, first_block);
 
 	start_block(proc, first_block);
 	struct pseudo *operand2 = linearize_expression(proc, e2);
@@ -475,7 +478,9 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 	BinOpr op = node->binary_expr.binary_op;
 
 	if (op == OPR_AND) {
-		return linearize_and(proc, node);
+		return linearize_bool(proc, node, true);
+	} else if (op == OPR_OR) {
+		return linearize_bool(proc, node, false);
 	}
 
 	struct ast_node *e1 = node->binary_expr.expr_left;
