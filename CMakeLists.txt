@@ -22,11 +22,11 @@ set(SRCS
         src/hash_table.c
         src/int_set.c
         src/set.c
-        src/lex.c
-        src/parse.c
+        src/lexer.c
+        src/parser.c
         src/print.c
-        src/typecheck.c
-        src/linearize.c
+        src/typechecker.c
+        src/linearizer.c
         src/membuf.c
         )
 

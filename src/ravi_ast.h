@@ -501,7 +501,8 @@ enum pseudo_type {
 	PSEUDO_NIL,
 	PSEUDO_TRUE,
 	PSEUDO_FALSE,
-	PSEUDO_BLOCK, 
+	PSEUDO_BLOCK,
+	PSEUDO_RANGE,
 };
 
 /* pseudo represents a pseudo (virtual) register */
@@ -512,7 +513,8 @@ struct pseudo {
 		const struct constant *constant; /* PSEUDO_CONSTANT */
 		ravitype_t temp_type;		 /* PSEUDO_TEMP* */
 		struct proc *proc;		 /* PSEUDO_PROC */
-		struct basic_block* block; /* PSEUDO_BLOCK */
+		struct basic_block *block;	 /* PSEUDO_BLOCK */
+		int range;			 /* PSEUDO_RANGE */
 	};
 };
 
@@ -543,7 +545,6 @@ struct basic_block {
 	struct instruction_list *insns;
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
-
 
 #define CFG_FIELDS                                                                                                     \
 	unsigned node_count;                                                                                           \
@@ -622,6 +623,6 @@ void raviX_init_linearizer(struct linearizer *linearizer, struct ast_container *
 void raviX_destroy_linearizer(struct linearizer *linearizer);
 int raviX_ast_linearize(struct linearizer *linearizer);
 void raviX_show_linearizer(struct linearizer *linearizer, membuff_t *mb);
-void raviX_output_linearizer(struct linearizer* linearizer, FILE* fp);
+void raviX_output_linearizer(struct linearizer *linearizer, FILE *fp);
 
 #endif
