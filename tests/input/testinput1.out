@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000002D401A015A8)} {T(0)}
+	CLOSURE {Proc(0000020F045525C8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -2703,3 +2703,341 @@ L4
 L5
 	MOV {T(1)} {T(0)}
 	CBR {T(0)} {L3, L2}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x[1]" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	RET {T(1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x()" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	CALL {T(0)} {T(0..-1)}
+	RET {T(0..-1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x[1]()" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	CALL {T(1)} {T(1..-1)}
+	RET {T(1..-1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x[1]:name()" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        : name (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        : name (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	GETsk {T(1), 'name' Ks(1)} {T(2)}
+	CALL {T(2), T(1)} {T(2..-1)}
+	RET {T(2..-1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x[1]:name(1,2)" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        : name (
+          1
+         ,
+          2
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[Y index start] any
+        [
+         1
+        ]
+       --[Y index end]
+       --[function call start] any
+        : name (
+          1
+         ,
+          2
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	GETsk {T(1), 'name' Ks(1)} {T(2)}
+	CALL {T(2), T(1), 1 Kint(0), 2 Kint(2)} {T(2..-1)}
+	RET {T(2..-1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return x(), y()" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	CALL {T(0)} {T(0..1)}
+	LOADGLOBAL {y} {T(1)}
+	CALL {T(1)} {T(1..-1)}
+	RET {T(0..1), T(1..-1)} {L1}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return y(x())" 
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+          --[suffixed expr start] any
+           --[primary start] any
+             x --global symbol any 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+          --[suffixed expr start] any
+           --[primary start] any
+             x --global symbol any 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {y} {T(0)}
+	LOADGLOBAL {x} {T(1)}
+	CALL {T(1)} {T(1..-1)}
+	CALL {T(0), T(1..-1)} {T(0..-1)}
+	RET {T(0..-1)} {L1}
+L1 (exit)

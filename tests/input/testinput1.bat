@@ -65,3 +65,11 @@ tparse "return 3 and 4 and 5"
 
 tparse "return 1 or 2"
 tparse "return 3 or 4 or 5"
+
+tparse "return x[1]"
+tparse "return x()"
+tparse "return x[1]()"
+tparse "return x[1]:name()"
+tparse "return x[1]:name(1,2)"
+tparse "return x(), y()"
+tparse "return y(x())"

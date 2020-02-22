@@ -239,6 +239,7 @@ struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum, int ran
 	pseudo->type = PSEUDO_RANGE;
 	pseudo->regnum = regnum;
 	pseudo->range = range;
+	return pseudo;
 }
 
 void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
@@ -670,9 +671,87 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	}
 }
 
-static struct pseudo *linearize_index_expression(struct proc *proc, struct ast_node *expr)
+//static struct pseudo *linearize_index_expression(struct proc *proc, struct ast_node *expr)
+//{
+//	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
+//}
+
+static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
+				   ravitype_t key_type, struct pseudo *key_pseudo, ravitype_t target_type)
 {
-	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
+	enum opcode op = op_get;
+	switch (container_type) {
+	case RAVI_TTABLE:
+		op = op_tget;
+		break;
+	case RAVI_TARRAYINT:
+		op = op_iaget;
+		break;
+	case RAVI_TARRAYFLT:
+		op = op_faget;
+		break;
+	}
+	/* Note we rely upon ordering of enums here */
+	switch (key_type) {
+	case RAVI_TNUMINT:
+		op++;
+		break;
+	case RAVI_TSTRING:
+		assert(container_type != RAVI_TARRAYINT && container_type != RAVI_TARRAYFLT);
+		op += 2;
+		break;
+	}
+	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
+	struct instruction *insn = alloc_instruction(proc, op);
+	ptrlist_add((struct ptr_list **)&insn->operands, container_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+
+	return target_pseudo;
+}
+
+/**
+ * Lua function calls can return multiple values, and the caller decides how many values to accept.
+ * We indicate multiple values using a PSEUDO_RANGE with range = -1.
+ */
+static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
+							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
+{
+	struct instruction *insn = alloc_instruction(proc, op_call);
+	struct pseudo *self_arg = NULL;
+	if (expr->function_call_expr.method_name) {
+		const struct constant *name_constant =
+		    allocate_string_constant(proc, expr->function_call_expr.method_name);
+		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
+		self_arg = callsite_pseudo;
+		callsite_pseudo = instruct_get(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
+					       RAVI_TSTRING, name_pseudo, RAVI_TANY);
+	}
+
+	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
+	if (self_arg)
+		ptrlist_add((struct ptr_list **)&insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
+
+	struct ast_node *arg;
+	int argc = ptrlist_size((const struct ptr_list *)expr->function_call_expr.arg_list);
+	FOR_EACH_PTR(expr->function_call_expr.arg_list, arg)
+	{
+		argc -= 1;
+		struct pseudo *arg_pseudo = linearize_expression(proc, arg);
+		if (argc != 0 && arg_pseudo->type == PSEUDO_RANGE) {
+			// Not last one, so range can only be 1
+			arg_pseudo->range = 1;
+		}
+		ptrlist_add((struct ptr_list **)&insn->operands, arg_pseudo, &proc->linearizer->ptrlist_allocator);
+	}
+	END_FOR_EACH_PTR(arg);
+
+	struct pseudo *return_pseudo = allocate_range_pseudo(
+	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
+	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list**)& proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	return return_pseudo;
 }
 
 /*
@@ -689,12 +768,20 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 	struct ast_node *this_node;
 	FOR_EACH_PTR(node->suffixed_expr.suffix_list, this_node)
 	{
-		if (this_node->type == AST_Y_INDEX_EXPR) {
-		} else if (this_node->type == AST_FIELD_SELECTOR_EXPR) {
+		struct pseudo *next;
+		if (this_node->type == AST_Y_INDEX_EXPR || this_node->type == AST_FIELD_SELECTOR_EXPR) {
+			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
+			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
+			next = instruct_get(proc, prev_node->common_expr.type.type_code, prev_psedo, key_type,
+					    key_pseudo, this_node->common_expr.type.type_code);
 		} else if (this_node->type == AST_FUNCTION_CALL_EXPR) {
-			handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+			next = linearize_function_call_expression(proc, this_node, prev_node, prev_psedo);
+		} else {
+			next = NULL;
+			handle_error(proc->linearizer->ast_container, "Unexpected expr type in suffix list");
 		}
 		prev_node = this_node;
+		prev_psedo = next;
 	}
 	END_FOR_EACH_PTR(node);
 	// copy_type(node->suffixed_expr.type, prev_node->common_expr.type);
@@ -780,82 +867,6 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	return target;
 }
 
-static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
-				   ravitype_t key_type, struct pseudo *key_pseudo, ravitype_t target_type)
-{
-	enum opcode op = op_get;
-	switch (container_type) {
-	case RAVI_TTABLE:
-		op = op_tget;
-		break;
-	case RAVI_TARRAYINT:
-		op = op_iaget;
-		break;
-	case RAVI_TARRAYFLT:
-		op = op_faget;
-		break;
-	}
-	/* Note we rely upon ordering of enums here */
-	switch (key_type) {
-	case RAVI_TNUMINT:
-		op++;
-		break;
-	case RAVI_TSTRING:
-		assert(container_type != RAVI_TARRAYINT && container_type != RAVI_TARRAYFLT);
-		op += 2;
-		break;
-	}
-	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
-	struct instruction *insn = alloc_instruction(proc, op);
-	ptrlist_add((struct ptr_list **)&insn->operands, container_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-
-	return target_pseudo;
-}
-
-/**
- * Lua function calls can return multiple values, and the caller decides how many values to accept.
- * We indicate multiple values using a PSEUDO_RANGE with range = -1.
- */
-static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
-							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
-{
-	struct instruction *insn = alloc_instruction(proc, op_call);
-	struct pseudo *self_arg = NULL;
-	if (expr->function_call_expr.method_name) {
-		struct constant *name_constant = allocate_string_constant(proc, expr->function_call_expr.method_name);
-		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
-		self_arg = callsite_pseudo;
-		callsite_pseudo = instruct_get(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
-					       RAVI_TSTRING, name_pseudo, RAVI_TANY);
-	}
-
-	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
-	if (self_arg)
-		ptrlist_add((struct ptr_list **)&insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
-
-	struct ast_node *arg;
-	int argc = ptrlist_size(expr->function_call_expr.arg_list);
-	FOR_EACH_PTR(expr->function_call_expr.arg_list, arg)
-	{
-		argc -= 1;
-		struct pseudo *arg_pseudo = linearize_expression(proc, arg);
-		if (argc != 0 && arg_pseudo->type == PSEUDO_RANGE) {
-			// Not last one, so range can only be 1
-			arg_pseudo->range = 1;
-		}
-		ptrlist_add((struct ptr_list **)&insn->operands, arg, &proc->linearizer->ptrlist_allocator);
-	}
-	END_FOR_EACH_PTR(arg);
-
-	struct pseudo *return_pseudo = allocate_range_pseudo(
-	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
-	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
-	return return_pseudo;
-}
-
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
 {
 	switch (expr->type) {
@@ -880,10 +891,10 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 	case AST_TABLE_EXPR: {
 		return linearize_table_constructor(proc, expr);
 	} break;
-	// case AST_Y_INDEX_EXPR:
-	// case AST_FIELD_SELECTOR_EXPR: {
-	//	return linearize_index_expression(proc, expr);
-	//} break;
+	case AST_Y_INDEX_EXPR:
+	case AST_FIELD_SELECTOR_EXPR: {
+		return linearize_expression(proc, expr->index_expr.expr);
+	} break;
 	// case AST_FUNCTION_CALL_EXPR: {
 	//	return linearize_function_call_expression(proc, expr);
 	//} break;
@@ -899,9 +910,14 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 				struct pseudo_list **pseudo_list)
 {
 	struct ast_node *expr;
+	int ne = ptrlist_size((const struct ptr_list*) expr_list);
 	FOR_EACH_PTR(expr_list, expr)
 	{
+		ne -= 1;
 		struct pseudo *pseudo = linearize_expression(proc, expr);
+		if (ne != 0 && pseudo->type == PSEUDO_RANGE) {
+			pseudo->range = 1; // Only accept one result unless it is the last expr
+		}
 		ptrlist_add((struct ptr_list **)pseudo_list, pseudo, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(expr);
@@ -1037,34 +1053,33 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	}
 	case AST_RETURN_STMT: {
 		linearize_return(proc, node);
-		// typecheck_ast_list(container, function, node->return_stmt.expr_list);
 		break;
 	}
 	case AST_LOCAL_STMT: {
 		// typecheck_local_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_LOCAL_STMT not yet implemented");
 		break;
 	}
 	case AST_FUNCTION_STMT: {
 		// typecheck_ast_node(container, function, node->function_stmt.function_expr);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_FUNCTION_STMT not yet implemented");
 		break;
 	}
 	case AST_LABEL_STMT: {
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_LABEL_STMT not yet implemented");
 		break;
 	}
 	case AST_GOTO_STMT: {
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_GOTO_STMT not yet implemented");
 		break;
 	}
 	case AST_DO_STMT: {
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_DO_STMT not yet implemented");
 		break;
 	}
 	case AST_EXPR_STMT: {
 		// typecheck_expr_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_EXPR_STMT not yet implemented");
 		break;
 	}
 	case AST_IF_STMT: {
@@ -1074,17 +1089,17 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	case AST_WHILE_STMT:
 	case AST_REPEAT_STMT: {
 		// typecheck_while_or_repeat_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_WHILE_STMT/AST_REPEAT_STMT not yet implemented");
 		break;
 	}
 	case AST_FORIN_STMT: {
 		// typecheck_for_in_statment(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_FORIN_STMT not yet implemented");
 		break;
 	}
 	case AST_FORNUM_STMT: {
 		// typecheck_for_num_statment(container, function, node);
-		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
+		handle_error(proc->linearizer->ast_container, "AST_FORNUM_STMT not yet implemented");
 		break;
 	}
 	default:
@@ -1250,18 +1265,25 @@ void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		membuff_add_fstring(mb, "L%d", pseudo->block->index);
 		break;
 	}
+	case PSEUDO_RANGE: {
+		membuff_add_fstring(mb, "T(%d..%d)", pseudo->regnum, pseudo->range);
+		break;
+	}
 	}
 }
 
 static const char *op_codenames[] = {
-    "NOOP",   "RET",	    "LOADK",	"LOADNIL",   "LOADBOOL",  "ADD",      "ADDff",	  "ADDfi",   "ADDii",  "SUB",
-    "SUBff",  "SUBfi",	    "SUBif",	"SUBii",     "MUL",	  "MULff",    "MULfi",	  "MULii",   "DIV",    "DIVff",
-    "DIVfi",  "DIVif",	    "DIVii",	"IDIV",	     "BAND",	  "BANDii",   "BOR",	  "BORii",   "BXOR",   "BXORii",
-    "SHL",    "SHLii",	    "SHR",	"SHRii",     "EQ",	  "EQii",     "EQff",	  "LT",	     "LIii",   "LTff",
-    "LE",     "LEii",	    "LEff",	"MOD",	     "POW",	  "CLOSURE",  "UNM",	  "UNMi",    "UNMf",   "LEN",
-    "LENi",   "TOINT",	    "TOFLT",	"TOCLOSURE", "TOSTRING",  "TOIARRAY", "TOFARRAY", "TOTABLE", "TOTYPE", "NOT",
-    "BNOT",   "LOADGLOBAL", "NEWTABLE", "NEWIARRAY", "NEWFARRAY", "PUT",      "PUTik",	  "PUTsk",   "TPUT",   "TPUTik",
-    "TPUTsk", "IAPUT",	    "IAPUTiv",	"FAPUT",     "FAPUTfv",	  "CBR",      "BR",	  "MOV"};
+    "NOOP",	 "RET",	      "LOADK",	  "LOADNIL", "LOADBOOL", "ADD",	    "ADDff",  "ADDfi",	    "ADDii",
+    "SUB",	 "SUBff",     "SUBfi",	  "SUBif",   "SUBii",	 "MUL",	    "MULff",  "MULfi",	    "MULii",
+    "DIV",	 "DIVff",     "DIVfi",	  "DIVif",   "DIVii",	 "IDIV",    "BAND",   "BANDii",	    "BOR",
+    "BORii",	 "BXOR",      "BXORii",	  "SHL",     "SHLii",	 "SHR",	    "SHRii",  "EQ",	    "EQii",
+    "EQff",	 "LT",	      "LIii",	  "LTff",    "LE",	 "LEii",    "LEff",   "MOD",	    "POW",
+    "CLOSURE",	 "UNM",	      "UNMi",	  "UNMf",    "LEN",	 "LENi",    "TOINT",  "TOFLT",	    "TOCLOSURE",
+    "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
+    "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
+    "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
+    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",
+};
 
 void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {
