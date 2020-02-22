@@ -671,7 +671,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	}
 }
 
-//static struct pseudo *linearize_index_expression(struct proc *proc, struct ast_node *expr)
+// static struct pseudo *linearize_index_expression(struct proc *proc, struct ast_node *expr)
 //{
 //	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
 //}
@@ -709,6 +709,42 @@ static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type,
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 
 	return target_pseudo;
+}
+
+static void instruct_put(struct proc *proc, ravitype_t table_type, struct pseudo *table, struct pseudo *index_pseudo,
+			 ravitype_t index_type, struct pseudo *value_pseudo, ravitype_t value_type)
+{
+	// TODO validate the type of assignment
+	// Insert type assertions if needed
+	enum opcode op;
+	switch (table_type) {
+	case RAVI_TARRAYINT:
+		op = op_iaput;
+		if (value_type == RAVI_TNUMINT) {
+			op = op_iaput_ival;
+		}
+		break;
+	case RAVI_TARRAYFLT:
+		op = op_faput;
+		if (value_type == RAVI_TNUMFLT) {
+			op = op_faput_fval;
+		}
+		break;
+	default:
+		op = table_type == RAVI_TTABLE ? op_tput : op_put;
+		if (index_type == RAVI_TNUMINT) {
+			op += 1;
+		} else if (index_type == RAVI_TSTRING) {
+			op += 2;
+		}
+		break;
+	}
+
+	struct instruction *insn = alloc_instruction(proc, op);
+	ptrlist_add((struct ptr_list **)&insn->operands, index_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, table, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
 /**
@@ -750,7 +786,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
 	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list**)& proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 	return return_pseudo;
 }
 
@@ -792,51 +828,19 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 				    struct ast_node *expr, int next)
 {
 	struct pseudo *index_pseudo;
+	ravitype_t index_type;
 	if (expr->indexed_assign_expr.index_expr) {
 		index_pseudo = linearize_expression(proc, expr->indexed_assign_expr.index_expr);
+		index_type = expr->indexed_assign_expr.index_expr->index_expr.expr->common_expr.type.type_code;
 		// TODO check valid index
 	} else {
 		const struct constant *constant = allocate_constant_for_i(proc, next++);
 		index_pseudo = allocate_constant_pseudo(proc, constant);
+		index_type = RAVI_TNUMINT;
 	}
 	struct pseudo *value_pseudo = linearize_expression(proc, expr->indexed_assign_expr.value_expr);
-	// TODO validate the type of assignment
-	// Insert type assertions if needed
-	enum opcode op;
-	switch (table_type) {
-	case RAVI_TARRAYINT:
-		op = op_iaput;
-		if (expr->indexed_assign_expr.value_expr->common_expr.type.type_code == RAVI_TNUMINT) {
-			op = op_iaput_ival;
-		}
-		break;
-	case RAVI_TARRAYFLT:
-		op = op_faput;
-		if (expr->indexed_assign_expr.value_expr->common_expr.type.type_code == RAVI_TNUMFLT) {
-			op = op_faput_fval;
-		}
-		break;
-	default:
-		op = table_type == RAVI_TTABLE ? op_tput : op_put;
-		if (expr->indexed_assign_expr.index_expr &&
-			expr->indexed_assign_expr.index_expr->index_expr.expr->common_expr.type.type_code ==
-			    RAVI_TNUMINT ||
-		    !expr->indexed_assign_expr.index_expr) {
-			op += 1;
-		} else if (expr->indexed_assign_expr.index_expr &&
-			   expr->indexed_assign_expr.index_expr->index_expr.expr->common_expr.type.type_code ==
-			       RAVI_TSTRING) {
-			op += 2;
-		}
-		break;
-	}
-
-	struct instruction *insn = alloc_instruction(proc, op);
-	ptrlist_add((struct ptr_list **)&insn->operands, index_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, table, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-
+	ravitype_t value_type = expr->indexed_assign_expr.value_expr->common_expr.type.type_code;
+	instruct_put(proc, table_type, table, index_pseudo, index_type, value_pseudo, value_type);
 	free_temp_pseudo(proc, index_pseudo);
 	free_temp_pseudo(proc, value_pseudo);
 	return next;
@@ -910,7 +914,7 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 				struct pseudo_list **pseudo_list)
 {
 	struct ast_node *expr;
-	int ne = ptrlist_size((const struct ptr_list*) expr_list);
+	int ne = ptrlist_size((const struct ptr_list *)expr_list);
 	FOR_EACH_PTR(expr_list, expr)
 	{
 		ne -= 1;
