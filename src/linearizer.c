@@ -848,6 +848,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		}
 		ptrlist_add((struct ptr_list **)&insn->operands, arg, &proc->linearizer->ptrlist_allocator);
 	}
+	END_FOR_EACH_PTR(arg);
 
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
@@ -879,13 +880,13 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 	case AST_TABLE_EXPR: {
 		return linearize_table_constructor(proc, expr);
 	} break;
-	case AST_Y_INDEX_EXPR:
-	case AST_FIELD_SELECTOR_EXPR: {
-		return linearize_index_expression(proc, expr);
-	} break;
-	case AST_FUNCTION_CALL_EXPR: {
-		return linearize_function_call_expression(proc, expr);
-	} break;
+	// case AST_Y_INDEX_EXPR:
+	// case AST_FIELD_SELECTOR_EXPR: {
+	//	return linearize_index_expression(proc, expr);
+	//} break;
+	// case AST_FUNCTION_CALL_EXPR: {
+	//	return linearize_function_call_expression(proc, expr);
+	//} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
