@@ -20,3 +20,18 @@ This project will create a new parser and code generator that is not a replaceme
 ## Technology
 
 This project is written in C for maximum portability like Lua. I considered using Rust or D and may eventually port it to one of these languages but for now it is good old C.
+
+## Building 
+
+You will need CMake installation. The build steps are fairly simple on Linux:
+
+```
+mkdir build
+cd build
+cmake ..
+make 
+```
+
+## Testing
+
+At the moment we have a simple test driver program named `tparse`. It takes a string input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking and also any linear IR output if supported. Example of the output can be fund in the `tests` folder.
