@@ -489,6 +489,17 @@ enum opcode {
 	op_cbr,
 	op_br,
 	op_mov,
+	op_call,
+	op_get,
+	op_get_ikey,
+	op_get_skey,
+	op_tget,
+	op_tget_ikey,
+	op_tget_skey,
+	op_iaget,
+	op_iaget_ikey,
+	op_faget,
+	op_faget_ikey,
 };
 
 enum pseudo_type {

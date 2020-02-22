@@ -233,6 +233,14 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	return pseudo;
 }
 
+struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum, int range)
+{
+	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
+	pseudo->type = PSEUDO_RANGE;
+	pseudo->regnum = regnum;
+	pseudo->range = range;
+}
+
 void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 {
 	struct pseudo_generator *gen;
@@ -772,6 +780,81 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	return target;
 }
 
+static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
+				   ravitype_t key_type, struct pseudo *key_pseudo, ravitype_t target_type)
+{
+	enum opcode op = op_get;
+	switch (container_type) {
+	case RAVI_TTABLE:
+		op = op_tget;
+		break;
+	case RAVI_TARRAYINT:
+		op = op_iaget;
+		break;
+	case RAVI_TARRAYFLT:
+		op = op_faget;
+		break;
+	}
+	/* Note we rely upon ordering of enums here */
+	switch (key_type) {
+	case RAVI_TNUMINT:
+		op++;
+		break;
+	case RAVI_TSTRING:
+		assert(container_type != RAVI_TARRAYINT && container_type != RAVI_TARRAYFLT);
+		op += 2;
+		break;
+	}
+	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
+	struct instruction *insn = alloc_instruction(proc, op);
+	ptrlist_add((struct ptr_list **)&insn->operands, container_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+
+	return target_pseudo;
+}
+
+/**
+ * Lua function calls can return multiple values, and the caller decides how many values to accept.
+ * We indicate multiple values using a PSEUDO_RANGE with range = -1.
+ */
+static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
+							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
+{
+	struct instruction *insn = alloc_instruction(proc, op_call);
+	struct pseudo *self_arg = NULL;
+	if (expr->function_call_expr.method_name) {
+		struct constant *name_constant = allocate_string_constant(proc, expr->function_call_expr.method_name);
+		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
+		self_arg = callsite_pseudo;
+		callsite_pseudo = instruct_get(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
+					       RAVI_TSTRING, name_pseudo, RAVI_TANY);
+	}
+
+	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
+	if (self_arg)
+		ptrlist_add((struct ptr_list **)&insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
+
+	struct ast_node *arg;
+	int argc = ptrlist_size(expr->function_call_expr.arg_list);
+	FOR_EACH_PTR(expr->function_call_expr.arg_list, arg)
+	{
+		argc -= 1;
+		struct pseudo *arg_pseudo = linearize_expression(proc, arg);
+		if (argc != 0 && arg_pseudo->type == PSEUDO_RANGE) {
+			// Not last one, so range can only be 1
+			arg_pseudo->range = 1;
+		}
+		ptrlist_add((struct ptr_list **)&insn->operands, arg, &proc->linearizer->ptrlist_allocator);
+	}
+
+	struct pseudo *return_pseudo = allocate_range_pseudo(
+	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
+	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
+	return return_pseudo;
+}
+
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
 {
 	switch (expr->type) {
@@ -799,6 +882,9 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 	case AST_Y_INDEX_EXPR:
 	case AST_FIELD_SELECTOR_EXPR: {
 		return linearize_index_expression(proc, expr);
+	} break;
+	case AST_FUNCTION_CALL_EXPR: {
+		return linearize_function_call_expression(proc, expr);
 	} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
