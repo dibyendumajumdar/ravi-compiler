@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(0000023CB19B05C8)} {T(0)}
+	CLOSURE {Proc(000001D18F8E1598)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -3508,8 +3508,78 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {x} {T(0)}
-	MOV {1 Kint(0)} {T(0)}
+	LOADGLOBAL {y} {T(0)}
+	MOV {2 Kint(1)} {T(0)}
+	LOADGLOBAL {x} {T(1)}
+	MOV {1 Kint(0)} {T(1)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "x,y = f()" 
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        f --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        f --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+L0 (entry)
+	LOADGLOBAL {f} {T(0)}
+	CALL {T(0)} {T(0..-1)}
 	LOADGLOBAL {y} {T(1)}
-	MOV {2 Kint(1)} {T(1)}
+	MOV {T(1..1)} {T(1)}
+	LOADGLOBAL {x} {T(2)}
+	MOV {T(0..1)} {T(2)}
 L1 (exit)

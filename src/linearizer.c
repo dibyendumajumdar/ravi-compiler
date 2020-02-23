@@ -677,8 +677,9 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 //	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
 //}
 
-static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
-				   ravitype_t key_type, struct pseudo *key_pseudo, ravitype_t target_type)
+static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t container_type,
+					    struct pseudo *container_pseudo, ravitype_t key_type,
+					    struct pseudo *key_pseudo, ravitype_t target_type)
 {
 	enum opcode op = op_get;
 	switch (container_type) {
@@ -712,8 +713,9 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 	return target_pseudo;
 }
 
-static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, struct pseudo *table, struct pseudo *index_pseudo,
-			 ravitype_t index_type, struct pseudo *value_pseudo, ravitype_t value_type)
+static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, struct pseudo *table,
+				   struct pseudo *index_pseudo, ravitype_t index_type, struct pseudo *value_pseudo,
+				   ravitype_t value_type)
 {
 	// TODO validate the type of assignment
 	// Insert type assertions if needed
@@ -804,8 +806,8 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		    allocate_string_constant(proc, expr->function_call_expr.method_name);
 		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
 		self_arg = callsite_pseudo; /* The original callsite must be passed as 'self' */
-		callsite_pseudo = instruct_indexed_load(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
-					       RAVI_TSTRING, name_pseudo, RAVI_TANY);
+		callsite_pseudo = instruct_indexed_load(proc, callsite_expr->common_expr.type.type_code,
+							callsite_pseudo, RAVI_TSTRING, name_pseudo, RAVI_TANY);
 	}
 
 	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
@@ -840,9 +842,9 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
  * x.y[1]
  *
  * The result type of a suffixed expression may initially be an indexed load, but when used in the context of
- * an assignment statement the load will be converted to a store. 
+ * an assignment statement the load will be converted to a store.
  * Lua parser adoes this by creating a VINDEXED node which is only coverted to load/store
- * when the VINDEXED node is used. 
+ * when the VINDEXED node is used.
  */
 static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node *node)
 {
@@ -859,7 +861,7 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
 			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
-					    key_pseudo, this_node->common_expr.type.type_code);
+						     key_pseudo, this_node->common_expr.type.type_code);
 		} else if (this_node->type == AST_FUNCTION_CALL_EXPR) {
 			next = linearize_function_call_expression(proc, this_node, prev_node, prev_pseudo);
 		} else {
@@ -921,11 +923,11 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	return target;
 }
 
-static void linearize_store_var(struct proc *proc, struct ast_node *var_node, struct pseudo *var_pseudo,
-				struct ast_node *val_node, struct pseudo *val_pseudo)
+static void linearize_store_var(struct proc *proc, ravitype_t var_type, struct pseudo *var_pseudo, ravitype_t val_type,
+				struct pseudo *val_pseudo)
 {
-	ravitype_t var_type = var_node->common_expr.type.type_code;
-	ravitype_t val_type = var_node->common_expr.type.type_code;
+	// ravitype_t var_type = var_node->common_expr.type.type_code;
+	// ravitype_t val_type = var_node->common_expr.type.type_code;
 
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
 		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
@@ -934,15 +936,46 @@ static void linearize_store_var(struct proc *proc, struct ast_node *var_node, st
 	}
 }
 
+struct pending_var_stor {
+	struct ast_node *var_node;
+	ravitype_t value_type;
+	struct pseudo *value_pseudo;
+};
+
+DECLARE_PTR_LIST(pending_var_stor_list, struct pending_var_stor);
+
+static struct pending_var_stor *allocate_pending_var_stor(struct proc *proc, struct pending_var_stor_list **list,
+							  struct ast_node *var_node, ravitype_t value_type,
+							  struct pseudo *value_pseudo)
+{
+	struct pending_var_stor *pvs = (struct pending_var_stor *)calloc(1, sizeof(struct pending_var_stor));
+	pvs->var_node = var_node;
+	pvs->value_type = value_type;
+	pvs->value_pseudo = value_pseudo;
+	ptrlist_add(list, pvs, &proc->linearizer->ptrlist_allocator);
+}
+
+static void free_pending_var_stor_list(struct pending_var_stor_list *list)
+{
+	int size = ptrlist_size((const struct ptr_list *)list);
+	if (size > 0) {
+		void **data = alloca(size * sizeof(void *));
+		ptrlist_linearize(list, data, size);
+		for (int i = 0; i < size; i++)
+			free(data[i]);
+	}
+	ptrlist_remove_all(&list);
+}
+
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {
 	struct ast_node *var;
 	struct ast_node *expr;
 
+	struct pending_var_stor_list *list = NULL;
+
 	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
 	int ne = ptrlist_size((const struct ptr_list *)node->expression_stmt.expr_list);
-	PREPARE_PTR_LIST(node->expression_stmt.var_expr_list, var);
-	PREPARE_PTR_LIST(node->expression_stmt.expr_list, expr);
 
 	/*
 	Cases we need to handle:
@@ -953,49 +986,82 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	any range expr that is not last gets truncated to 1 result if used
 	*/
 
-	while (expr != NULL) {
-		struct pseudo *expr_pseudo = linearize_expression(proc, expr);
-		ne -= 1;
-		// if not last expr
-		if (ne != 0) {
-			if (expr_pseudo->type == PSEUDO_RANGE)
-				expr_pseudo->range = 1; // we can only accept one value
-			if (var) {
-				struct pseudo *var_pseudo = linearize_expression(proc, var);
-				linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
-				nv -= 1;
-				NEXT_PTR_LIST(var);
-			} else {
-				free_temp_pseudo(proc, expr_pseudo);
-			}
-		}
-		// last expr
-		else {
-			if (expr_pseudo->type == PSEUDO_RANGE) {
-				unsigned start_reg = expr_pseudo->regnum;
-				while (nv > 0) {
-					struct pseudo *var_pseudo = linearize_expression(proc, var);
-					linearize_store_var(proc, var, var_pseudo, expr,
-							    allocate_range_pseudo(proc, start_reg, 1));
-					start_reg += 1;
-					nv -= 1;
-					NEXT_PTR_LIST(var);
-				}
-			} else {
+	/*
+	We have two pass approach.
+	In the first pass the expressions are linearized, progressive consuming stack space
+	In the second pass the variables are processed in a reverse order, the last variable first.
+	TODO we have to set an excess vars to nil. 
+	*/
+
+	{
+		PREPARE_PTR_LIST(node->expression_stmt.var_expr_list, var);
+		PREPARE_PTR_LIST(node->expression_stmt.expr_list, expr);
+		while (expr != NULL) {
+			struct pseudo *expr_pseudo = linearize_expression(proc, expr);
+			ne -= 1;
+			// if not last expr
+			if (ne != 0) {
+				if (expr_pseudo->type == PSEUDO_RANGE)
+					expr_pseudo->range = 1; // we can only accept one value
 				if (var) {
-					struct pseudo *var_pseudo = linearize_expression(proc, var);
-					linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
+					allocate_pending_var_stor(proc, &list, var, expr->common_expr.type.type_code,
+								  expr_pseudo);
+					// struct pseudo *var_pseudo = linearize_expression(proc, var);
+					// linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
 					nv -= 1;
 					NEXT_PTR_LIST(var);
 				} else {
 					free_temp_pseudo(proc, expr_pseudo);
 				}
 			}
+			// last expr
+			else {
+				if (expr_pseudo->type == PSEUDO_RANGE) {
+					unsigned start_reg = expr_pseudo->regnum;
+					while (nv > 0) {
+						allocate_pending_var_stor(proc, &list, var,
+									  expr->common_expr.type.type_code,
+									  allocate_range_pseudo(proc, start_reg, 1));
+						// struct pseudo *var_pseudo = linearize_expression(proc, var);
+						// linearize_store_var(proc, var, var_pseudo, expr,
+						//		    allocate_range_pseudo(proc, start_reg, 1));
+						start_reg += 1;
+						nv -= 1;
+						NEXT_PTR_LIST(var);
+					}
+				} else {
+					if (var) {
+						allocate_pending_var_stor(
+						    proc, &list, var, expr->common_expr.type.type_code, expr_pseudo);
+						// struct pseudo *var_pseudo = linearize_expression(proc, var);
+						// linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
+						nv -= 1;
+						NEXT_PTR_LIST(var);
+					} else {
+						free_temp_pseudo(proc, expr_pseudo);
+					}
+				}
+			}
+			NEXT_PTR_LIST(expr);
 		}
-		NEXT_PTR_LIST(expr);
+		FINISH_PTR_LIST(expr);
+		FINISH_PTR_LIST(var);
 	}
-	FINISH_PTR_LIST(expr);
-	FINISH_PTR_LIST(var);
+
+	/* Now process vars in reverse order */
+	int size = ptrlist_size((const struct ptr_list *)list);
+	if (size > 0) {
+		struct pending_var_stor **data = (struct pending_var_stor **)alloca(size * sizeof(void *));
+		ptrlist_linearize(list, data, size);
+		for (int i = size - 1; i >= 0; i--) {
+			struct pending_var_stor *pvs = data[i];
+			struct pseudo *var_pseudo = linearize_expression(proc, pvs->var_node);
+			linearize_store_var(proc, pvs->var_node->common_expr.type.type_code, var_pseudo,
+					    pvs->value_type, pvs->value_pseudo);
+		}
+	}
+
+	free_pending_var_stor_list(list);
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
