@@ -500,6 +500,8 @@ enum opcode {
 	op_iaget_ikey,
 	op_faget,
 	op_faget_ikey,
+	op_movi,
+	op_movf,
 };
 
 enum pseudo_type {
@@ -519,6 +521,7 @@ enum pseudo_type {
 /* pseudo represents a pseudo (virtual) register */
 struct pseudo {
 	unsigned type : 4, regnum : 16;
+	struct instruction *insn; /* instruction that created this pseudo */
 	union {
 		struct lua_symbol *symbol;	 /* PSEUDO_SYMBOL */
 		const struct constant *constant; /* PSEUDO_CONSTANT */

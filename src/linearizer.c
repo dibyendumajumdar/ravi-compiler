@@ -26,6 +26,7 @@ static void start_scope(struct linearizer *linearizer, struct proc *proc, struct
 static void end_scope(struct linearizer *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct basic_block *target_block);
 static bool is_block_terminated(struct basic_block *block);
+static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
 
 static inline unsigned alloc_reg(struct pseudo_generator *generator)
 {
@@ -707,7 +708,7 @@ static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type,
 	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-
+	target_pseudo->insn = insn;
 	return target_pseudo;
 }
 
@@ -741,10 +742,50 @@ static void instruct_put(struct proc *proc, ravitype_t table_type, struct pseudo
 	}
 
 	struct instruction *insn = alloc_instruction(proc, op);
+	ptrlist_add((struct ptr_list **)&insn->operands, table, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, index_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, table, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+static void change_get_to_put(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
+			      ravitype_t value_type)
+{
+	enum opcode putop;
+	switch (insn->opcode) {
+	case op_iaget:
+	case op_iaget_ikey:
+		putop = value_type == RAVI_TNUMINT ? op_iaput_ival : op_iaput;
+		break;
+	case op_faget:
+	case op_faget_ikey:
+		putop = value_type == RAVI_TNUMFLT ? op_faput_fval : op_faput;
+		break;
+	case op_tget:
+		putop = op_tput;
+		break;
+	case op_tget_ikey:
+		putop = op_tput_ikey;
+		break;
+	case op_tget_skey:
+		putop = op_tput_skey;
+		break;
+	case op_get:
+		putop = op_put;
+		break;
+	case op_get_ikey:
+		putop = op_put_ikey;
+		break;
+	case op_get_skey:
+		putop = op_put_skey;
+		break;
+	default:
+		return;
+	}
+	insn->opcode = putop;
+	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
+	free_temp_pseudo(proc, get_target);
 }
 
 /**
@@ -869,6 +910,84 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	END_FOR_EACH_PTR(ia);
 
 	return target;
+}
+
+static void linearize_store_var(struct proc *proc, struct ast_node *var_node, struct pseudo *var_pseudo,
+				struct ast_node *val_node, struct pseudo *val_pseudo)
+{
+	ravitype_t var_type = var_node->common_expr.type.type_code;
+	ravitype_t val_type = var_node->common_expr.type.type_code;
+
+	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
+		// Conver get to put
+		change_get_to_put(proc, var_pseudo->insn, val_pseudo, val_type);
+	} else {
+		instruct_move(proc, var_pseudo, val_pseudo); // TODO add type specialization
+	}
+}
+
+static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
+{
+	struct ast_node *var;
+	struct ast_node *expr;
+
+	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
+	int ne = ptrlist_size((const struct ptr_list *)node->expression_stmt.expr_list);
+	PREPARE_PTR_LIST(node->expression_stmt.var_expr_list, var);
+	PREPARE_PTR_LIST(node->expression_stmt.expr_list, expr);
+
+	/*
+	Cases we need to handle:
+
+	#vars < #exprs; excess expression result to be discarded
+	#vars >= #exprs; last expr if range gets stored to all the vars >= last expr
+
+	any range expr that is not last gets truncated to 1 result if used
+	*/
+
+	while (expr != NULL) {
+		struct pseudo *expr_pseudo = linearize_expression(proc, expr);
+		ne -= 1;
+		// if not last expr
+		if (ne != 0) {
+			if (expr_pseudo->type == PSEUDO_RANGE)
+				expr_pseudo->range = 1; // we can only accept one value
+			if (var) {
+				struct pseudo *var_pseudo = linearize_expression(proc, var);
+				linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
+				nv -= 1;
+				NEXT_PTR_LIST(var);
+			} else {
+				free_temp_pseudo(proc, expr_pseudo);
+			}
+		}
+		// last expr
+		else {
+			if (expr_pseudo->type == PSEUDO_RANGE) {
+				unsigned start_reg = expr_pseudo->regnum;
+				while (nv > 0) {
+					struct pseudo *var_pseudo = linearize_expression(proc, var);
+					linearize_store_var(proc, var, var_pseudo, expr,
+							    allocate_range_pseudo(proc, start_reg, 1));
+					start_reg += 1;
+					nv -= 1;
+					NEXT_PTR_LIST(var);
+				}
+			} else {
+				if (var) {
+					struct pseudo *var_pseudo = linearize_expression(proc, var);
+					linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
+					nv -= 1;
+					NEXT_PTR_LIST(var);
+				} else {
+					free_temp_pseudo(proc, expr_pseudo);
+				}
+			}
+		}
+		NEXT_PTR_LIST(expr);
+	}
+	FINISH_PTR_LIST(expr);
+	FINISH_PTR_LIST(var);
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
@@ -1082,8 +1201,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_EXPR_STMT: {
-		// typecheck_expr_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "AST_EXPR_STMT not yet implemented");
+		linearize_expression_statement(proc, node);
 		break;
 	}
 	case AST_IF_STMT: {
@@ -1286,7 +1404,9 @@ static const char *op_codenames[] = {
     "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
     "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
     "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
-    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",
+    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",    "MOVi",
+    "MOVf",
+
 };
 
 void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
