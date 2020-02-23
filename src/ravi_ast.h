@@ -500,6 +500,7 @@ enum opcode {
 	op_iaget_ikey,
 	op_faget,
 	op_faget_ikey,
+	op_storeglobal,
 };
 
 enum pseudo_type {

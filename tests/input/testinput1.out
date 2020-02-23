@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000001D18F8E1598)} {T(0)}
+	CLOSURE {Proc(000001932E28F028)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -2977,10 +2977,10 @@ function()
 end
 L0 (entry)
 	LOADGLOBAL {x} {T(0)}
-	CALL {T(0)} {T(0..1)}
+	CALL {T(0)} {T(0)}
 	LOADGLOBAL {y} {T(1)}
 	CALL {T(1)} {T(1..-1)}
-	RET {T(0..1), T(1..-1)} {L1}
+	RET {T(0), T(1..-1)} {L1}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return y(x())" 
@@ -3072,8 +3072,7 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {x} {T(0)}
-	MOV {1 Kint(0)} {T(0)}
+	STOREGLOBAL {x, 1 Kint(0)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x = 1, 2" 
@@ -3110,8 +3109,7 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {x} {T(0)}
-	MOV {1 Kint(0)} {T(0)}
+	STOREGLOBAL {x, 2 Kint(1)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1] = 1" 
@@ -3214,9 +3212,9 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {b} {T(0)}
-	LOADGLOBAL {x} {T(1)}
-	PUTik {T(1), 1 Kint(0), T(0)}
+	LOADGLOBAL {x} {T(0)}
+	LOADGLOBAL {b} {T(2)}
+	PUTik {T(0), 1 Kint(0), T(2)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1][1] = b" 
@@ -3281,10 +3279,10 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {b} {T(0)}
-	LOADGLOBAL {x} {T(1)}
-	GETik {T(1), 1 Kint(0)} {T(2)}
-	PUTik {T(2), 1 Kint(0), T(0)}
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {b} {T(3)}
+	PUTik {T(1), 1 Kint(0), T(3)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x()" 
@@ -3374,8 +3372,8 @@ function()
 end
 L0 (entry)
 	LOADGLOBAL {x} {T(0)}
-	CALL {T(0)} {T(0..1)}
-	GETik {T(0..1), 1 Kint(0)} {T(1)}
+	CALL {T(0)} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x()[1](a,b)" 
@@ -3455,8 +3453,8 @@ function()
 end
 L0 (entry)
 	LOADGLOBAL {x} {T(0)}
-	CALL {T(0)} {T(0..1)}
-	GETik {T(0..1), 1 Kint(0)} {T(1)}
+	CALL {T(0)} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
 	LOADGLOBAL {a} {T(2)}
 	LOADGLOBAL {b} {T(3)}
 	CALL {T(1), T(2), T(3)} {T(1..-1)}
@@ -3508,10 +3506,8 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {y} {T(0)}
-	MOV {2 Kint(1)} {T(0)}
-	LOADGLOBAL {x} {T(1)}
-	MOV {1 Kint(0)} {T(1)}
+	STOREGLOBAL {y, 2 Kint(1)}
+	STOREGLOBAL {x, 1 Kint(0)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x,y = f()" 
@@ -3576,10 +3572,275 @@ function()
   --[expression statement end]
 end
 L0 (entry)
-	LOADGLOBAL {f} {T(0)}
-	CALL {T(0)} {T(0..-1)}
-	LOADGLOBAL {y} {T(1)}
-	MOV {T(1..1)} {T(1)}
-	LOADGLOBAL {x} {T(2)}
-	MOV {T(0..1)} {T(2)}
+	LOADGLOBAL {f} {T(2)}
+	CALL {T(2)} {T(2..-1)}
+	STOREGLOBAL {y, T(3)}
+	STOREGLOBAL {x, T(2)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "x[1],y[1],c,d = 1,z()" 
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        c --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        d --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        c --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        d --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	LOADGLOBAL {y} {T(2)}
+	LOADGLOBAL {z} {T(6)}
+	CALL {T(6)} {T(6..-1)}
+	STOREGLOBAL {d, T(8)}
+	STOREGLOBAL {c, T(7)}
+	PUTik {T(2), 1 Kint(0), T(6)}
+	PUTik {T(0), 1 Kint(0), 1 Kint(0)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "x[1][2],y[1],c,d = 1,z()" 
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        c --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        d --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        c --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        d --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {y} {T(3)}
+	LOADGLOBAL {z} {T(7)}
+	CALL {T(7)} {T(7..-1)}
+	STOREGLOBAL {d, T(9)}
+	STOREGLOBAL {c, T(8)}
+	PUTik {T(3), 1 Kint(0), T(7)}
+	PUTik {T(1), 2 Kint(1), 1 Kint(0)}
 L1 (exit)

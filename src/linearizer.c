@@ -660,6 +660,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
 		struct pseudo *operand = allocate_symbol_pseudo(proc, sym, 0); // no register actually
 		struct instruction *insn = alloc_instruction(proc, op_loadglobal);
+		target->insn = insn;
 		ptrlist_add((struct ptr_list **)&insn->operands, operand, &proc->linearizer->ptrlist_allocator);
 		ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
 		ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
@@ -750,6 +751,16 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
+static void convert_loadglobal_to_store(struct proc* proc, struct instruction* insn, struct pseudo* value_pseudo,
+	ravitype_t value_type) {
+	ptrlist_remove((struct ptr_list**) & proc->current_bb->insns, insn, 1);
+	insn->opcode = op_storeglobal;
+	ptrlist_add((struct ptr_list**) & insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	struct pseudo* get_target = ptrlist_delete_last((struct ptr_list**) & insn->targets);
+	free_temp_pseudo(proc, get_target);
+	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
 static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					  ravitype_t value_type)
 {
@@ -784,10 +795,12 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	default:
 		return;
 	}
+	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
 	insn->opcode = putop;
 	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
 /**
@@ -931,137 +944,75 @@ static void linearize_store_var(struct proc *proc, ravitype_t var_type, struct p
 
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
 		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
-	} else {
+	}  
+	else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
+		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
+	}
+	else {
 		instruct_move(proc, var_pseudo, val_pseudo); // TODO add type specialization
 	}
 }
 
-struct pending_var_stor {
-	struct ast_node *var_node;
-	ravitype_t value_type;
-	struct pseudo *value_pseudo;
+struct node_info {
+	struct ast_node *node;
+	struct pseudo *pseudo;
 };
-
-DECLARE_PTR_LIST(pending_var_stor_list, struct pending_var_stor);
-
-static struct pending_var_stor *allocate_pending_var_stor(struct proc *proc, struct pending_var_stor_list **list,
-							  struct ast_node *var_node, ravitype_t value_type,
-							  struct pseudo *value_pseudo)
-{
-	struct pending_var_stor *pvs = (struct pending_var_stor *)calloc(1, sizeof(struct pending_var_stor));
-	pvs->var_node = var_node;
-	pvs->value_type = value_type;
-	pvs->value_pseudo = value_pseudo;
-	ptrlist_add(list, pvs, &proc->linearizer->ptrlist_allocator);
-}
-
-static void free_pending_var_stor_list(struct pending_var_stor_list *list)
-{
-	int size = ptrlist_size((const struct ptr_list *)list);
-	if (size > 0) {
-		void **data = alloca(size * sizeof(void *));
-		ptrlist_linearize(list, data, size);
-		for (int i = 0; i < size; i++)
-			free(data[i]);
-	}
-	ptrlist_remove_all(&list);
-}
 
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {
 	struct ast_node *var;
 	struct ast_node *expr;
 
-	struct pending_var_stor_list *list = NULL;
-
 	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
-	int ne = ptrlist_size((const struct ptr_list *)node->expression_stmt.expr_list);
-
-	/*
-	Cases we need to handle:
-
-	#vars < #exprs; excess expression result to be discarded
-	#vars >= #exprs; last expr if range gets stored to all the vars >= last expr
-
-	any range expr that is not last gets truncated to 1 result if used
-	*/
-
-	/*
-	We have two pass approach.
-	In the first pass the expressions are linearized, progressive consuming stack space
-	In the second pass the variables are processed in a reverse order, the last variable first.
-	TODO we have to set an excess vars to nil. 
-	*/
-
+	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
+	int i = 0;
+	FOR_EACH_PTR(node->expression_stmt.var_expr_list, var)
 	{
-		PREPARE_PTR_LIST(node->expression_stmt.var_expr_list, var);
-		PREPARE_PTR_LIST(node->expression_stmt.expr_list, expr);
-		while (expr != NULL) {
-			struct pseudo *expr_pseudo = linearize_expression(proc, expr);
-			ne -= 1;
-			// if not last expr
-			if (ne != 0) {
-				if (expr_pseudo->type == PSEUDO_RANGE)
-					expr_pseudo->range = 1; // we can only accept one value
-				if (var) {
-					allocate_pending_var_stor(proc, &list, var, expr->common_expr.type.type_code,
-								  expr_pseudo);
-					// struct pseudo *var_pseudo = linearize_expression(proc, var);
-					// linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
-					nv -= 1;
-					NEXT_PTR_LIST(var);
-				} else {
-					free_temp_pseudo(proc, expr_pseudo);
-				}
-			}
-			// last expr
-			else {
-				if (expr_pseudo->type == PSEUDO_RANGE) {
-					unsigned start_reg = expr_pseudo->regnum;
-					while (nv > 0) {
-						allocate_pending_var_stor(proc, &list, var,
-									  expr->common_expr.type.type_code,
-									  allocate_range_pseudo(proc, start_reg, 1));
-						// struct pseudo *var_pseudo = linearize_expression(proc, var);
-						// linearize_store_var(proc, var, var_pseudo, expr,
-						//		    allocate_range_pseudo(proc, start_reg, 1));
-						start_reg += 1;
-						nv -= 1;
-						NEXT_PTR_LIST(var);
-					}
-				} else {
-					if (var) {
-						allocate_pending_var_stor(
-						    proc, &list, var, expr->common_expr.type.type_code, expr_pseudo);
-						// struct pseudo *var_pseudo = linearize_expression(proc, var);
-						// linearize_store_var(proc, var, var_pseudo, expr, expr_pseudo);
-						nv -= 1;
-						NEXT_PTR_LIST(var);
-					} else {
-						free_temp_pseudo(proc, expr_pseudo);
-					}
-				}
-			}
-			NEXT_PTR_LIST(expr);
-		}
-		FINISH_PTR_LIST(expr);
-		FINISH_PTR_LIST(var);
+		struct pseudo *var_pseudo = linearize_expression(proc, var);
+		varinfo[i].node = var;
+		varinfo[i].pseudo = var_pseudo;
+		i++;
 	}
+	END_FOR_EACH_PTR(var);
 
-	/* Now process vars in reverse order */
-	int size = ptrlist_size((const struct ptr_list *)list);
-	if (size > 0) {
-		struct pending_var_stor **data = (struct pending_var_stor **)alloca(size * sizeof(void *));
-		ptrlist_linearize(list, data, size);
-		for (int i = size - 1; i >= 0; i--) {
-			struct pending_var_stor *pvs = data[i];
-			struct pseudo *var_pseudo = linearize_expression(proc, pvs->var_node);
-			linearize_store_var(proc, pvs->var_node->common_expr.type.type_code, var_pseudo,
-					    pvs->value_type, pvs->value_pseudo);
+	int ne = ptrlist_size((const struct ptr_list *)node->expression_stmt.expr_list);
+	struct node_info *valinfo = (struct node_info *)alloca(ne * sizeof(struct node_info));
+	struct pseudo *last_val_pseudo = NULL;
+	i = 0;
+	FOR_EACH_PTR(node->expression_stmt.expr_list, expr)
+	{
+		struct pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
+		valinfo[i].node = expr;
+		valinfo[i].pseudo = val_pseudo;
+		i++;
+		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
+			val_pseudo->range = 1;
 		}
 	}
+	END_FOR_EACH_PTR(var);
 
-	free_pending_var_stor_list(list);
+	while (nv > 0) {
+		if (nv > ne) {
+			if (last_val_pseudo->type == PSEUDO_RANGE) {
+				int regnum = last_val_pseudo->regnum + (nv - ne);
+				linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
+						    varinfo[nv - 1].pseudo,
+						    valinfo[ne - 1].node->common_expr.type.type_code,
+						    allocate_range_pseudo(proc, regnum, 1));
+			} else {
+				// TODO store NIL
+			}
+			nv--;
+		} else {
+			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE && valinfo[ne - 1].pseudo->range != 1)
+				valinfo[ne - 1].pseudo = allocate_range_pseudo(proc, valinfo[ne - 1].pseudo->regnum, 1);
+			linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
+					    varinfo[nv - 1].pseudo, valinfo[ne - 1].node->common_expr.type.type_code,
+					    valinfo[ne - 1].pseudo);
+			nv--;
+			ne--;
+		}
+	}
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
@@ -1462,7 +1413,12 @@ void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		break;
 	}
 	case PSEUDO_RANGE: {
-		membuff_add_fstring(mb, "T(%d..%d)", pseudo->regnum, pseudo->range);
+		if (pseudo->range != 1) {
+			membuff_add_fstring(mb, "T(%d..%d)", pseudo->regnum, pseudo->range);
+		}
+		else {
+			membuff_add_fstring(mb, "T(%d)", pseudo->regnum, pseudo->range);
+		}
 		break;
 	}
 	}
@@ -1478,7 +1434,7 @@ static const char *op_codenames[] = {
     "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
     "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
     "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
-    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",
+    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik", "STOREGLOBAL"
 };
 
 void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
