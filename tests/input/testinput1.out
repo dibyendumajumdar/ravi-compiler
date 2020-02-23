@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(0000021C909FF5E8)} {T(0)}
+	CLOSURE {Proc(0000023CB19B05C8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -3460,4 +3460,56 @@ L0 (entry)
 	LOADGLOBAL {a} {T(2)}
 	LOADGLOBAL {b} {T(3)}
 	CALL {T(1), T(2), T(3)} {T(1..-1)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "x,y = 1,2" 
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     2
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        x --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+    ,
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+    ,
+     2
+   --[expression list end]
+  --[expression statement end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	MOV {1 Kint(0)} {T(0)}
+	LOADGLOBAL {y} {T(1)}
+	MOV {2 Kint(1)} {T(1)}
 L1 (exit)
