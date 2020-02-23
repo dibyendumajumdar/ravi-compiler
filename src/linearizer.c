@@ -677,7 +677,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 //	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
 //}
 
-static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
+static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t container_type, struct pseudo *container_pseudo,
 				   ravitype_t key_type, struct pseudo *key_pseudo, ravitype_t target_type)
 {
 	enum opcode op = op_get;
@@ -712,7 +712,7 @@ static struct pseudo *instruct_get(struct proc *proc, ravitype_t container_type,
 	return target_pseudo;
 }
 
-static void instruct_put(struct proc *proc, ravitype_t table_type, struct pseudo *table, struct pseudo *index_pseudo,
+static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, struct pseudo *table, struct pseudo *index_pseudo,
 			 ravitype_t index_type, struct pseudo *value_pseudo, ravitype_t value_type)
 {
 	// TODO validate the type of assignment
@@ -748,8 +748,8 @@ static void instruct_put(struct proc *proc, ravitype_t table_type, struct pseudo
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
-static void change_get_to_put(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
-			      ravitype_t value_type)
+static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
+					  ravitype_t value_type)
 {
 	enum opcode putop;
 	switch (insn->opcode) {
@@ -791,6 +791,8 @@ static void change_get_to_put(struct proc *proc, struct instruction *insn, struc
 /**
  * Lua function calls can return multiple values, and the caller decides how many values to accept.
  * We indicate multiple values using a PSEUDO_RANGE with range = -1.
+ * We also handle method call:
+ * <pseudo>:name(...) -> is translated to <pseudo>.name(<pseudo>, ...)
  */
 static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
 							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
@@ -801,8 +803,8 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		const struct constant *name_constant =
 		    allocate_string_constant(proc, expr->function_call_expr.method_name);
 		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
-		self_arg = callsite_pseudo;
-		callsite_pseudo = instruct_get(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
+		self_arg = callsite_pseudo; /* The original callsite must be passed as 'self' */
+		callsite_pseudo = instruct_indexed_load(proc, callsite_expr->common_expr.type.type_code, callsite_pseudo,
 					       RAVI_TSTRING, name_pseudo, RAVI_TANY);
 	}
 
@@ -836,33 +838,40 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
  * f()[1]
  * x[1][2]
  * x.y[1]
+ *
+ * The result type of a suffixed expression may initially be an indexed load, but when used in the context of
+ * an assignment statement the load will be converted to a store. 
+ * Lua parser adoes this by creating a VINDEXED node which is only coverted to load/store
+ * when the VINDEXED node is used. 
  */
 static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node *node)
 {
 	/* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
-	struct pseudo *prev_psedo = linearize_expression(proc, node->suffixed_expr.primary_expr);
+	struct pseudo *prev_pseudo = linearize_expression(proc, node->suffixed_expr.primary_expr);
 	struct ast_node *prev_node = node->suffixed_expr.primary_expr;
 	struct ast_node *this_node;
 	FOR_EACH_PTR(node->suffixed_expr.suffix_list, this_node)
 	{
 		struct pseudo *next;
+		if (prev_pseudo->type == PSEUDO_RANGE)
+			prev_pseudo->range = 1;
 		if (this_node->type == AST_Y_INDEX_EXPR || this_node->type == AST_FIELD_SELECTOR_EXPR) {
 			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
-			next = instruct_get(proc, prev_node->common_expr.type.type_code, prev_psedo, key_type,
+			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
 					    key_pseudo, this_node->common_expr.type.type_code);
 		} else if (this_node->type == AST_FUNCTION_CALL_EXPR) {
-			next = linearize_function_call_expression(proc, this_node, prev_node, prev_psedo);
+			next = linearize_function_call_expression(proc, this_node, prev_node, prev_pseudo);
 		} else {
 			next = NULL;
 			handle_error(proc->linearizer->ast_container, "Unexpected expr type in suffix list");
 		}
 		prev_node = this_node;
-		prev_psedo = next;
+		prev_pseudo = next;
 	}
 	END_FOR_EACH_PTR(node);
 	// copy_type(node->suffixed_expr.type, prev_node->common_expr.type);
-	return prev_psedo;
+	return prev_pseudo;
 }
 
 static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, ravitype_t table_type,
@@ -881,7 +890,7 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 	}
 	struct pseudo *value_pseudo = linearize_expression(proc, expr->indexed_assign_expr.value_expr);
 	ravitype_t value_type = expr->indexed_assign_expr.value_expr->common_expr.type.type_code;
-	instruct_put(proc, table_type, table, index_pseudo, index_type, value_pseudo, value_type);
+	instruct_indexed_store(proc, table_type, table, index_pseudo, index_type, value_pseudo, value_type);
 	free_temp_pseudo(proc, index_pseudo);
 	free_temp_pseudo(proc, value_pseudo);
 	return next;
@@ -919,8 +928,7 @@ static void linearize_store_var(struct proc *proc, struct ast_node *var_node, st
 	ravitype_t val_type = var_node->common_expr.type.type_code;
 
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
-		// Conver get to put
-		change_get_to_put(proc, var_pseudo->insn, val_pseudo, val_type);
+		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
 	} else {
 		instruct_move(proc, var_pseudo, val_pseudo); // TODO add type specialization
 	}
@@ -1404,7 +1412,7 @@ static const char *op_codenames[] = {
     "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
     "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
     "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
-    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",   
+    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",
 };
 
 void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
