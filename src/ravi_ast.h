@@ -500,8 +500,6 @@ enum opcode {
 	op_iaget_ikey,
 	op_faget,
 	op_faget_ikey,
-	op_movi,
-	op_movf,
 };
 
 enum pseudo_type {
