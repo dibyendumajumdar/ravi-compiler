@@ -894,9 +894,9 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 {
 	struct pseudo *index_pseudo;
 	ravitype_t index_type;
-	if (expr->indexed_assign_expr.index_expr) {
-		index_pseudo = linearize_expression(proc, expr->indexed_assign_expr.index_expr);
-		index_type = expr->indexed_assign_expr.index_expr->index_expr.expr->common_expr.type.type_code;
+	if (expr->indexed_assign_expr.key_expr) {
+		index_pseudo = linearize_expression(proc, expr->indexed_assign_expr.key_expr);
+		index_type = expr->indexed_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
 		// TODO check valid index
 	} else {
 		const struct constant *constant = allocate_constant_for_i(proc, next++);

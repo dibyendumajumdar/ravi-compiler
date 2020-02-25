@@ -351,7 +351,7 @@ struct ast_node {
 		} function_expr; /* a literal expression whose result is a value of type function */
 		struct {	 /* AST_INDEXED_ASSIGN_EXPR - used in table constructor */
 			struct var_type type;
-			struct ast_node *index_expr; /* If NULL means this is a list field with next available index,
+			struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
 							else specifies index expression */
 			struct ast_node *value_expr;
 		} indexed_assign_expr; /* Assign values in table constructor */

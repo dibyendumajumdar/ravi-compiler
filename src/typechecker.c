@@ -466,8 +466,8 @@ static void typecheck_ast_node(struct ast_container *container, struct ast_node 
 		break;
 	}
 	case AST_INDEXED_ASSIGN_EXPR: {
-		if (node->indexed_assign_expr.index_expr) {
-			typecheck_ast_node(container, function, node->indexed_assign_expr.index_expr);
+		if (node->indexed_assign_expr.key_expr) {
+			typecheck_ast_node(container, function, node->indexed_assign_expr.key_expr);
 		}
 		typecheck_ast_node(container, function, node->indexed_assign_expr.value_expr);
 		copy_type(node->indexed_assign_expr.type, node->indexed_assign_expr.value_expr->common_expr.type);

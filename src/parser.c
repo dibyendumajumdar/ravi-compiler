@@ -396,12 +396,12 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 ** =======================================================================
 */
 
-static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, struct ast_node *index_expr,
+static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, struct ast_node *key_expr,
 						struct ast_node *value_expr)
 {
 	struct ast_node *set = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	set->type = AST_INDEXED_ASSIGN_EXPR;
-	set->indexed_assign_expr.index_expr = index_expr;
+	set->indexed_assign_expr.key_expr = key_expr;
 	set->indexed_assign_expr.value_expr = value_expr;
 	set->indexed_assign_expr.type =
 	    value_expr->common_expr.type; /* type of indexed assignment is same as the value*/

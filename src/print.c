@@ -496,9 +496,9 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 	}
 	case AST_INDEXED_ASSIGN_EXPR: {
 		printf_buf(buf, "%p%c %T\n", level, "[indexed assign start]", &node->indexed_assign_expr.type);
-		if (node->indexed_assign_expr.index_expr) {
+		if (node->indexed_assign_expr.key_expr) {
 			printf_buf(buf, "%p%c\n", level, "[index start]");
-			raviX_print_ast_node(buf, node->indexed_assign_expr.index_expr, level + 1);
+			raviX_print_ast_node(buf, node->indexed_assign_expr.key_expr, level + 1);
 			printf_buf(buf, "%p%c\n", level, "[index end]");
 		}
 		printf_buf(buf, "%p%c\n", level, "[value start]");
