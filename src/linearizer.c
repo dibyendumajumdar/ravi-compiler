@@ -43,6 +43,9 @@ static inline void free_reg(struct pseudo_generator *generator, unsigned reg)
 		fprintf(stderr, "Out of register space\n");
 		abort();
 	}
+	for (int i = 0; i < generator->free_pos; i++) {
+		assert(generator->free_regs[i] != reg);
+	}
 	generator->free_regs[generator->free_pos++] = (uint8_t)reg;
 }
 
@@ -236,6 +239,7 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 
 struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum, int range)
 {
+	assert(range != -1 || proc->temp_pseudos.next_reg >= regnum);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_RANGE;
 	pseudo->regnum = regnum;
@@ -253,6 +257,9 @@ void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 	case PSEUDO_TEMP_INT:
 		gen = &proc->temp_flt_pseudos;
 		break;
+	case PSEUDO_RANGE:
+		if (pseudo->range != -1)
+			return;
 	case PSEUDO_TEMP_ANY:
 		gen = &proc->temp_pseudos;
 		break;
@@ -1009,6 +1016,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 			linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
 					    varinfo[nv - 1].pseudo, valinfo[ne - 1].node->common_expr.type.type_code,
 					    valinfo[ne - 1].pseudo);
+			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
 			nv--;
 			ne--;
 		}
