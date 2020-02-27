@@ -28,7 +28,7 @@ static void instruct_br(struct proc *proc, struct basic_block *target_block);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
 
-static inline unsigned alloc_reg(struct pseudo_generator *generator)
+static inline unsigned allocate_register(struct pseudo_generator *generator)
 {
 	if (generator->free_pos > 0) {
 		return generator->free_regs[--generator->free_pos];
@@ -36,13 +36,14 @@ static inline unsigned alloc_reg(struct pseudo_generator *generator)
 	return generator->next_reg++;
 }
 
-static inline void free_reg(struct pseudo_generator *generator, unsigned reg)
+static inline void free_register(struct pseudo_generator *generator, unsigned reg)
 {
 	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
 		/* TODO proper error handling */
 		fprintf(stderr, "Out of register space\n");
 		abort();
 	}
+	// Debug check - ensure register being freed hasn't already been freed
 	for (int i = 0; i < generator->free_pos; i++) {
 		assert(generator->free_regs[i] != reg);
 	}
@@ -145,7 +146,7 @@ static const struct constant *allocate_constant(struct proc *proc, struct ast_no
 	return add_constant(proc, &c);
 }
 
-static const struct constant *allocate_constant_for_i(struct proc *proc, int i)
+static const struct constant *allocate_integer_constant(struct proc *proc, int i)
 {
 	struct constant c = {.type = RAVI_TNUMINT, .i = i};
 	return add_constant(proc, &c);
@@ -229,7 +230,7 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 		pseudo_type = PSEUDO_TEMP_ANY;
 		break;
 	}
-	unsigned reg = alloc_reg(gen);
+	unsigned reg = allocate_register(gen);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = pseudo_type;
 	pseudo->regnum = reg;
@@ -267,7 +268,7 @@ void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 		// Not a temp, so no need to do anything
 		return;
 	}
-	free_reg(gen, pseudo->regnum);
+	free_register(gen, pseudo->regnum);
 }
 
 /**
@@ -322,11 +323,27 @@ static void linearize_statement_list(struct proc *proc, struct ast_node_list *li
 	END_FOR_EACH_PTR(node);
 }
 
-static struct instruction *alloc_instruction(struct proc *proc, enum opcode op)
+static struct instruction *allocate_instruction(struct proc *proc, enum opcode op)
 {
 	struct instruction *insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
 	insn->opcode = op;
 	return insn;
+}
+
+static void free_instruction_operand_pseudos(struct proc* proc, struct instruction* insn) {
+	struct pseudo* operand;
+	FOR_EACH_PTR_REVERSE(insn->operands, operand) {
+		free_temp_pseudo(proc, operand);
+	}
+	END_FOR_EACH_PTR_REVERSE(operand);
+}
+
+static inline void add_instruction(struct proc* proc, struct instruction* insn) {
+	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+}
+
+static inline void remove_instruction(struct proc* proc, struct instruction* insn) {
+	ptrlist_remove((struct ptr_list**) & proc->current_bb->insns, insn, 1);
 }
 
 static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr)
@@ -411,7 +428,7 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 	if (targetop == op_nop) {
 		return subexpr;
 	}
-	struct instruction *insn = alloc_instruction(proc, targetop);
+	struct instruction *insn = allocate_instruction(proc, targetop);
 	struct pseudo *target = subexpr;
 	if (op == OPR_TO_TYPE) {
 		const struct constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
@@ -425,16 +442,16 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 		target = allocate_temp_pseudo(proc, subexpr_type);
 	}
 	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 	return target;
 }
 
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src)
 {
-	struct instruction *mov = alloc_instruction(proc, op_mov);
+	struct instruction *mov = allocate_instruction(proc, op_mov);
 	ptrlist_add((struct ptr_list **)&mov->operands, src, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&mov->targets, target, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, mov, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, mov);
 	return target;
 }
 
@@ -443,11 +460,11 @@ static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, stru
 {
 	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
 	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
-	struct instruction *insn = alloc_instruction(proc, op_cbr);
+	struct instruction *insn = allocate_instruction(proc, op_cbr);
 	ptrlist_add((struct ptr_list **)&insn->operands, conditin_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, true_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, false_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 }
 
 static void instruct_br(struct proc *proc, struct basic_block *target_block)
@@ -456,9 +473,9 @@ static void instruct_br(struct proc *proc, struct basic_block *target_block)
 		start_block(proc, create_block(proc));
 	}
 	struct pseudo *pseudo = allocate_block_pseudo(proc, target_block);
-	struct instruction *insn = alloc_instruction(proc, op_br);
+	struct instruction *insn = allocate_instruction(proc, op_br);
 	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 }
 
 static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, bool is_and)
@@ -629,11 +646,11 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 
 	ravitype_t target_type = node->binary_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
-	struct instruction *insn = alloc_instruction(proc, targetop);
+	struct instruction *insn = allocate_instruction(proc, targetop);
 	ptrlist_add((struct ptr_list **)&insn->operands, operand1, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, operand2, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 	free_temp_pseudo(proc, operand1);
 	free_temp_pseudo(proc, operand2);
 
@@ -652,10 +669,10 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	ravitype_t target_type = expr->function_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
 	struct pseudo *operand = allocate_closure_pseudo(proc->linearizer, newproc);
-	struct instruction *insn = alloc_instruction(proc, op_closure);
+	struct instruction *insn = allocate_instruction(proc, op_closure);
 	ptrlist_add((struct ptr_list **)&insn->operands, operand, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 
 	return target;
 }
@@ -666,11 +683,11 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	if (sym->symbol_type == SYM_GLOBAL) {
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
 		struct pseudo *operand = allocate_symbol_pseudo(proc, sym, 0); // no register actually
-		struct instruction *insn = alloc_instruction(proc, op_loadglobal);
+		struct instruction *insn = allocate_instruction(proc, op_loadglobal);
 		target->insn = insn;
 		ptrlist_add((struct ptr_list **)&insn->operands, operand, &proc->linearizer->ptrlist_allocator);
 		ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
-		ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+		add_instruction(proc, insn);
 		return target;
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->var.pseudo;
@@ -679,11 +696,6 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 		return NULL;
 	}
 }
-
-// static struct pseudo *linearize_index_expression(struct proc *proc, struct ast_node *expr)
-//{
-//	return linearize_expression(proc, expr->indexed_assign_expr.index_expr);
-//}
 
 static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t container_type,
 					    struct pseudo *container_pseudo, ravitype_t key_type,
@@ -712,11 +724,11 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 		break;
 	}
 	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
-	struct instruction *insn = alloc_instruction(proc, op);
+	struct instruction *insn = allocate_instruction(proc, op);
 	ptrlist_add((struct ptr_list **)&insn->operands, container_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 	target_pseudo->insn = insn;
 	return target_pseudo;
 }
@@ -751,21 +763,21 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 		break;
 	}
 
-	struct instruction *insn = alloc_instruction(proc, op);
+	struct instruction *insn = allocate_instruction(proc, op);
 	ptrlist_add((struct ptr_list **)&insn->operands, table, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, index_pseudo, &proc->linearizer->ptrlist_allocator);
 	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 }
 
 static void convert_loadglobal_to_store(struct proc* proc, struct instruction* insn, struct pseudo* value_pseudo,
 	ravitype_t value_type) {
-	ptrlist_remove((struct ptr_list**) & proc->current_bb->insns, insn, 1);
+	remove_instruction(proc, insn);
 	insn->opcode = op_storeglobal;
 	ptrlist_add((struct ptr_list**) & insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
 	struct pseudo* get_target = ptrlist_delete_last((struct ptr_list**) & insn->targets);
 	free_temp_pseudo(proc, get_target);
-	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 }
 
 static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
@@ -802,12 +814,12 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	default:
 		return;
 	}
-	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
+	remove_instruction(proc, insn);
 	insn->opcode = putop;
 	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 }
 
 /**
@@ -819,7 +831,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
 							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
 {
-	struct instruction *insn = alloc_instruction(proc, op_call);
+	struct instruction *insn = allocate_instruction(proc, op_call);
 	struct pseudo *self_arg = NULL;
 	if (expr->function_call_expr.method_name) {
 		const struct constant *name_constant =
@@ -851,7 +863,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
 	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 	return return_pseudo;
 }
 
@@ -906,7 +918,7 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 		index_type = expr->indexed_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
 		// TODO check valid index
 	} else {
-		const struct constant *constant = allocate_constant_for_i(proc, next++);
+		const struct constant *constant = allocate_integer_constant(proc, next++);
 		index_pseudo = allocate_constant_pseudo(proc, constant);
 		index_type = RAVI_TNUMINT;
 	}
@@ -927,9 +939,9 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 		op = op_newiarray;
 	else if (expr->table_expr.type.type_code == RAVI_TARRAYFLT)
 		op = op_newfarray;
-	struct instruction *insn = alloc_instruction(proc, op);
+	struct instruction *insn = allocate_instruction(proc, op);
 	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 
 	/*TODO process constructor elements */
 	struct ast_node *ia;
@@ -1051,9 +1063,6 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 	case AST_FIELD_SELECTOR_EXPR: {
 		return linearize_expression(proc, expr->index_expr.expr);
 	} break;
-	// case AST_FUNCTION_CALL_EXPR: {
-	//	return linearize_function_call_expression(proc, expr);
-	//} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
@@ -1082,11 +1091,11 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 static void linearize_return(struct proc *proc, struct ast_node *node)
 {
 	assert(node->type == AST_RETURN_STMT);
-	struct instruction *insn = alloc_instruction(proc, op_ret);
+	struct instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
 	ptrlist_add((struct ptr_list **)&insn->targets, allocate_block_pseudo(proc, n2bb(proc->exit)),
 		    &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	add_instruction(proc, insn);
 	// FIXME add edge to exit block
 	// FIXME terminate block
 	// FIXME free all temps
@@ -1321,7 +1330,7 @@ static void start_scope(struct linearizer *linearizer, struct proc *proc, struct
 	FOR_EACH_PTR(scope->symbol_list, sym)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
-			uint8_t reg = alloc_reg(&proc->local_pseudos);
+			uint8_t reg = allocate_register(&proc->local_pseudos);
 			allocate_symbol_pseudo(proc, sym, reg);
 			// printf("Assigning register %d to local %s\n", (int)reg, getstr(sym->var.var_name));
 		}
@@ -1344,7 +1353,7 @@ static void end_scope(struct linearizer *linearizer, struct proc *proc)
 			struct pseudo *pseudo = sym->var.pseudo;
 			assert(pseudo && pseudo->type == PSEUDO_SYMBOL && pseudo->symbol == sym);
 			// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
-			free_reg(&proc->local_pseudos, pseudo->regnum);
+			free_register(&proc->local_pseudos, pseudo->regnum);
 		}
 	}
 	END_FOR_EACH_PTR_REVERSE(sym);
