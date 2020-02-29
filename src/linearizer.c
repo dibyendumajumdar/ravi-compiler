@@ -927,9 +927,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
 	add_instruction(proc, insn);
 
-	struct pseudo *operand;
-	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
-	END_FOR_EACH_PTR_REVERSE(operand);
+	free_instruction_operand_pseudos(proc, insn);
 
 	return return_pseudo;
 }

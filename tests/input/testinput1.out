@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(00000186CA68F608)} {T(0)}
+	CLOSURE {Proc(00000122FC6BF5C8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
