@@ -228,6 +228,17 @@ struct pseudo *allocate_block_pseudo(struct proc *proc, struct basic_block *bloc
 	return pseudo;
 }
 
+/*
+We have several types of temp pseudos.
+Specific types for floating and integer values so that we can
+localise the assignment of these to registers.
+The generic 'any' type is used for other types
+but has variant called PSEUDO_RANGE. This is used in function calls
+to represent multiple return values, and will most likely also
+be used to represent var arg. Most of the time these get converted
+back to normal temp pseudo, but in some cases we need to reference
+a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
+*/
 struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 {
 	struct pseudo_generator *gen;
@@ -254,15 +265,18 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	return pseudo;
 }
 
-struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum, int range)
+struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum)
 {
-	assert(range != -1 || proc->temp_pseudos.next_reg >= regnum);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_RANGE;
 	pseudo->regnum = regnum;
 	return pseudo;
 }
 
+/*
+A PSEUDO_RANGE_SELECT picks or selects a particular offset in the range
+specified by a PSEUDO_RANGE.
+*/
 struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *range_pseudo, int pick)
 {
 	assert(range_pseudo->type == PSEUDO_RANGE);
@@ -275,6 +289,8 @@ struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *ra
 
 void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 {
+	if (pseudo->freed)
+		return;
 	struct pseudo_generator *gen;
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
@@ -370,12 +386,14 @@ static inline void remove_instruction(struct proc *proc, struct instruction *ins
 	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
 }
 
-static inline struct pseudo *convert_pseudo_to_range(struct pseudo *pseudo)
-{
-	assert(pseudo->type == PSEUDO_TEMP_ANY);
-	pseudo->type = PSEUDO_RANGE;
-	return pseudo;
-}
+// static inline struct pseudo *convert_pseudo_to_range(struct proc *proc, struct pseudo *pseudo)
+//{
+//	if (pseudo->type == PSEUDO_RANGE)
+//		return pseudo;
+//	assert(pseudo->type == PSEUDO_TEMP_ANY);
+//	pseudo->type = PSEUDO_RANGE;
+//	return pseudo;
+//}
 
 static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 {
@@ -863,7 +881,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 
 /**
  * Lua function calls can return multiple values, and the caller decides how many values to accept.
- * We indicate multiple values using a PSEUDO_RANGE with range = -1.
+ * We indicate multiple values using a PSEUDO_RANGE.
  * We also handle method call:
  * <pseudo>:name(...) -> is translated to <pseudo>.name(<pseudo>, ...)
  */
@@ -871,19 +889,21 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
 {
 	struct instruction *insn = allocate_instruction(proc, op_call);
-	struct pseudo *self_arg = NULL;
+	struct pseudo *self_arg = NULL; /* For method call */
 	if (expr->function_call_expr.method_name) {
 		const struct constant *name_constant =
 		    allocate_string_constant(proc, expr->function_call_expr.method_name);
 		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
 		self_arg = callsite_pseudo; /* The original callsite must be passed as 'self' */
+		/* create new call site as callsite[name] */
 		callsite_pseudo = instruct_indexed_load(proc, callsite_expr->common_expr.type.type_code,
 							callsite_pseudo, RAVI_TSTRING, name_pseudo, RAVI_TANY);
 	}
 
 	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
-	if (self_arg)
-		ptrlist_add((struct ptr_list **)&insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
+	if (self_arg) {
+		ptrlist_add((struct ptr_list**) & insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
+	}
 
 	struct ast_node *arg;
 	int argc = ptrlist_size((const struct ptr_list *)expr->function_call_expr.arg_list);
@@ -900,9 +920,15 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	END_FOR_EACH_PTR(arg);
 
 	struct pseudo *return_pseudo = allocate_range_pseudo(
-	    proc, callsite_pseudo->regnum, -1); /* Base reg for function call - where return values will be placed */
+	    proc, callsite_pseudo->regnum); /* Base reg for function call - where return values will be placed */
+	callsite_pseudo->freed = 1;	    /* Because we are using the same reg in the result */
 	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
 	add_instruction(proc, insn);
+
+	struct pseudo *operand;
+	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
+	END_FOR_EACH_PTR_REVERSE(operand);
+
 	return return_pseudo;
 }
 
@@ -943,7 +969,6 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 		prev_pseudo = next;
 	}
 	END_FOR_EACH_PTR(node);
-	// copy_type(node->suffixed_expr.type, prev_node->common_expr.type);
 	return prev_pseudo;
 }
 

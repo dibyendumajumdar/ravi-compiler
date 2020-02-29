@@ -520,12 +520,12 @@ enum pseudo_type {
 
 /* pseudo represents a pseudo (virtual) register */
 struct pseudo {
-	unsigned type : 4, regnum : 16;
+	unsigned type : 4, regnum : 16, freed: 1;
 	struct instruction *insn; /* instruction that created this pseudo */
 	union {
 		struct lua_symbol *symbol;	 /* PSEUDO_SYMBOL */
 		const struct constant *constant; /* PSEUDO_CONSTANT */
-		ravitype_t temp_type;		 /* PSEUDO_TEMP* */
+		ravitype_t temp_type;		 /* PSEUDO_TEMP - not sure we need this */
 		struct proc *proc;		 /* PSEUDO_PROC */
 		struct basic_block *block;	 /* PSEUDO_BLOCK */
 		struct pseudo* range_pseudo; /* PSEUDO_RANGE_SELECT */
