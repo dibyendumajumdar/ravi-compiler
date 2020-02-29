@@ -265,11 +265,14 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	return pseudo;
 }
 
-struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum)
+struct pseudo *allocate_range_pseudo(struct proc *proc, struct pseudo *orig_pseudo)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_RANGE;
-	pseudo->regnum = regnum;
+	pseudo->regnum = orig_pseudo->regnum;
+	if (orig_pseudo->type == PSEUDO_TEMP_ANY) {
+		orig_pseudo->freed = 1;
+	}
 	return pseudo;
 }
 
@@ -920,8 +923,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	END_FOR_EACH_PTR(arg);
 
 	struct pseudo *return_pseudo = allocate_range_pseudo(
-	    proc, callsite_pseudo->regnum); /* Base reg for function call - where return values will be placed */
-	callsite_pseudo->freed = 1;	    /* Because we are using the same reg in the result */
+	    proc, callsite_pseudo); /* Base reg for function call - where return values will be placed */
 	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
 	add_instruction(proc, insn);
 
