@@ -28,6 +28,10 @@ static void instruct_br(struct proc *proc, struct basic_block *target_block);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
 
+/**
+ * Allocates a register by reusing a free'd register if possible otherwise
+ * allocating a new one
+ */
 static inline unsigned allocate_register(struct pseudo_generator *generator)
 {
 	if (generator->free_pos > 0) {
@@ -36,6 +40,9 @@ static inline unsigned allocate_register(struct pseudo_generator *generator)
 	return generator->next_reg++;
 }
 
+/**
+ * Puts a register in the free list (must not already have been put there).
+ */
 static inline void free_register(struct pseudo_generator *generator, unsigned reg)
 {
 	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
@@ -50,7 +57,7 @@ static inline void free_register(struct pseudo_generator *generator, unsigned re
 	generator->free_regs[generator->free_pos++] = (uint8_t)reg;
 }
 
-/* Linearizer - WIP  */
+/* Linearizer initialization  */
 void raviX_init_linearizer(struct linearizer *linearizer, struct ast_container *container)
 {
 	memset(linearizer, 0, sizeof *linearizer);
@@ -89,6 +96,11 @@ void raviX_destroy_linearizer(struct linearizer *linearizer)
 	raviX_allocator_destroy(&linearizer->constant_allocator);
 }
 
+/**
+ * Right now we assume strings are all interned and can be compared by
+ * address but this is probably not a good idea. However Lua allows strings to have
+ * embedded 0 so we need string length to do proper string compare.
+ */
 static int compare_constants(const void *a, const void *b)
 {
 	const struct constant *c1 = (const struct constant *)a;
@@ -103,6 +115,10 @@ static int compare_constants(const void *a, const void *b)
 		return c1->s == c2->s;
 }
 
+/**
+ * String hashing is a problem right now as we do not have the length of the
+ * string.
+ */
 static uint32_t hash_constant(const void *c)
 {
 	const struct constant *c1 = (const struct constant *)c;
@@ -244,7 +260,16 @@ struct pseudo *allocate_range_pseudo(struct proc *proc, unsigned regnum, int ran
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_RANGE;
 	pseudo->regnum = regnum;
-	pseudo->range = range;
+	return pseudo;
+}
+
+struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *range_pseudo, int pick)
+{
+	assert(range_pseudo->type == PSEUDO_RANGE);
+	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
+	pseudo->type = PSEUDO_RANGE_SELECT;
+	pseudo->regnum = range_pseudo->regnum + pick;
+	pseudo->range_pseudo = range_pseudo;
 	return pseudo;
 }
 
@@ -259,8 +284,6 @@ void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 		gen = &proc->temp_flt_pseudos;
 		break;
 	case PSEUDO_RANGE:
-		if (pseudo->range != -1)
-			return;
 	case PSEUDO_TEMP_ANY:
 		gen = &proc->temp_pseudos;
 		break;
@@ -330,20 +353,35 @@ static struct instruction *allocate_instruction(struct proc *proc, enum opcode o
 	return insn;
 }
 
-static void free_instruction_operand_pseudos(struct proc* proc, struct instruction* insn) {
-	struct pseudo* operand;
-	FOR_EACH_PTR_REVERSE(insn->operands, operand) {
-		free_temp_pseudo(proc, operand);
-	}
+static void free_instruction_operand_pseudos(struct proc *proc, struct instruction *insn)
+{
+	struct pseudo *operand;
+	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
 	END_FOR_EACH_PTR_REVERSE(operand);
 }
 
-static inline void add_instruction(struct proc* proc, struct instruction* insn) {
-	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+static inline void add_instruction(struct proc *proc, struct instruction *insn)
+{
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 }
 
-static inline void remove_instruction(struct proc* proc, struct instruction* insn) {
-	ptrlist_remove((struct ptr_list**) & proc->current_bb->insns, insn, 1);
+static inline void remove_instruction(struct proc *proc, struct instruction *insn)
+{
+	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
+}
+
+static inline struct pseudo *convert_pseudo_to_range(struct pseudo *pseudo)
+{
+	assert(pseudo->type == PSEUDO_TEMP_ANY);
+	pseudo->type = PSEUDO_RANGE;
+	return pseudo;
+}
+
+static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
+{
+	assert(pseudo->type == PSEUDO_RANGE);
+	pseudo->type = PSEUDO_TEMP_ANY;
+	return pseudo;
 }
 
 static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr)
@@ -770,12 +808,13 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 	add_instruction(proc, insn);
 }
 
-static void convert_loadglobal_to_store(struct proc* proc, struct instruction* insn, struct pseudo* value_pseudo,
-	ravitype_t value_type) {
+static void convert_loadglobal_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
+					ravitype_t value_type)
+{
 	remove_instruction(proc, insn);
 	insn->opcode = op_storeglobal;
-	ptrlist_add((struct ptr_list**) & insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
-	struct pseudo* get_target = ptrlist_delete_last((struct ptr_list**) & insn->targets);
+	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target);
 	add_instruction(proc, insn);
 }
@@ -854,7 +893,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		struct pseudo *arg_pseudo = linearize_expression(proc, arg);
 		if (argc != 0 && arg_pseudo->type == PSEUDO_RANGE) {
 			// Not last one, so range can only be 1
-			arg_pseudo->range = 1;
+			convert_range_to_temp(arg_pseudo);
 		}
 		ptrlist_add((struct ptr_list **)&insn->operands, arg_pseudo, &proc->linearizer->ptrlist_allocator);
 	}
@@ -888,7 +927,7 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 	{
 		struct pseudo *next;
 		if (prev_pseudo->type == PSEUDO_RANGE)
-			prev_pseudo->range = 1;
+			convert_range_to_temp(prev_pseudo);
 		if (this_node->type == AST_Y_INDEX_EXPR || this_node->type == AST_FIELD_SELECTOR_EXPR) {
 			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
@@ -963,11 +1002,9 @@ static void linearize_store_var(struct proc *proc, ravitype_t var_type, struct p
 
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
 		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
-	}  
-	else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
+	} else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
 		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
-	}
-	else {
+	} else {
 		instruct_move(proc, var_pseudo, val_pseudo); // TODO add type specialization
 	}
 }
@@ -1005,26 +1042,30 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 		valinfo[i].pseudo = val_pseudo;
 		i++;
 		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
-			val_pseudo->range = 1;
+			convert_range_to_temp(val_pseudo);
 		}
 	}
 	END_FOR_EACH_PTR(var);
 
+	int note_ne = ne;
 	while (nv > 0) {
 		if (nv > ne) {
 			if (last_val_pseudo->type == PSEUDO_RANGE) {
-				int regnum = last_val_pseudo->regnum + (nv - ne);
+				int pick = nv - ne;
 				linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
 						    varinfo[nv - 1].pseudo,
 						    valinfo[ne - 1].node->common_expr.type.type_code,
-						    allocate_range_pseudo(proc, regnum, 1));
+						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
 			} else {
 				// TODO store NIL
 			}
 			nv--;
 		} else {
-			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE && valinfo[ne - 1].pseudo->range != 1)
-				valinfo[ne - 1].pseudo = allocate_range_pseudo(proc, valinfo[ne - 1].pseudo->regnum, 1);
+			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE) {
+				/* Only the topmost expression can be a range ... assert */
+				assert(ne == note_ne);
+				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
+			}
 			linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
 					    varinfo[nv - 1].pseudo, valinfo[ne - 1].node->common_expr.type.type_code,
 					    valinfo[ne - 1].pseudo);
@@ -1081,7 +1122,7 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 		ne -= 1;
 		struct pseudo *pseudo = linearize_expression(proc, expr);
 		if (ne != 0 && pseudo->type == PSEUDO_RANGE) {
-			pseudo->range = 1; // Only accept one result unless it is the last expr
+			convert_range_to_temp(pseudo); // Only accept one result unless it is the last expr
 		}
 		ptrlist_add((struct ptr_list **)pseudo_list, pseudo, &proc->linearizer->ptrlist_allocator);
 	}
@@ -1373,7 +1414,7 @@ static void linearize_function(struct linearizer *linearizer)
 	end_scope(linearizer, proc);
 }
 
-void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
+static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 {
 	switch (pseudo->type) {
 	case PSEUDO_CONSTANT: {
@@ -1399,6 +1440,9 @@ void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		break;
 	case PSEUDO_TEMP_ANY:
 		membuff_add_fstring(mb, "T(%d)", pseudo->regnum);
+		break;
+	case PSEUDO_RANGE_SELECT:
+		membuff_add_fstring(mb, "T(%d[%d..])", pseudo->regnum, pseudo->range_pseudo->regnum);
 		break;
 	case PSEUDO_PROC:
 		membuff_add_fstring(mb, "Proc(%p)", pseudo->proc);
@@ -1430,12 +1474,7 @@ void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		break;
 	}
 	case PSEUDO_RANGE: {
-		if (pseudo->range != 1) {
-			membuff_add_fstring(mb, "T(%d..%d)", pseudo->regnum, pseudo->range);
-		}
-		else {
-			membuff_add_fstring(mb, "T(%d)", pseudo->regnum, pseudo->range);
-		}
+		membuff_add_fstring(mb, "T(%d..)", pseudo->regnum);
 		break;
 	}
 	}
@@ -1451,10 +1490,9 @@ static const char *op_codenames[] = {
     "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
     "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
     "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
-    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik", "STOREGLOBAL"
-};
+    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",    "STOREGLOBAL"};
 
-void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
+static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {
 	struct pseudo *pseudo;
 	membuff_add_string(mb, " {");
@@ -1470,7 +1508,7 @@ void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 	membuff_add_string(mb, "}");
 }
 
-void output_instruction(struct instruction *insn, membuff_t *mb)
+static void output_instruction(struct instruction *insn, membuff_t *mb)
 {
 	membuff_add_fstring(mb, "\t%s", op_codenames[insn->opcode]);
 	if (insn->operands) {
@@ -1482,14 +1520,14 @@ void output_instruction(struct instruction *insn, membuff_t *mb)
 	membuff_add_string(mb, "\n");
 }
 
-void output_instructions(struct instruction_list *list, membuff_t *mb)
+static void output_instructions(struct instruction_list *list, membuff_t *mb)
 {
 	struct instruction *insn;
 	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb); }
 	END_FOR_EACH_PTR(insn);
 }
 
-void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
+static void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
 {
 	membuff_add_fstring(mb, "L%d", bb->index);
 	if (bb2n(bb) == proc->entry) {
@@ -1502,7 +1540,7 @@ void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb
 	output_instructions(bb->insns, mb);
 }
 
-void output_proc(struct proc *proc, membuff_t *mb)
+static void output_proc(struct proc *proc, membuff_t *mb)
 {
 	struct basic_block *bb;
 	for (int i = 0; i < (int)proc->node_count; i++) {

@@ -515,6 +515,7 @@ enum pseudo_type {
 	PSEUDO_FALSE,
 	PSEUDO_BLOCK,
 	PSEUDO_RANGE,
+	PSEUDO_RANGE_SELECT,
 };
 
 /* pseudo represents a pseudo (virtual) register */
@@ -527,7 +528,7 @@ struct pseudo {
 		ravitype_t temp_type;		 /* PSEUDO_TEMP* */
 		struct proc *proc;		 /* PSEUDO_PROC */
 		struct basic_block *block;	 /* PSEUDO_BLOCK */
-		int range;			 /* PSEUDO_RANGE */
+		struct pseudo* range_pseudo; /* PSEUDO_RANGE_SELECT */
 	};
 };
 
