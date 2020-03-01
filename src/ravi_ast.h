@@ -537,6 +537,7 @@ struct instruction {
 	unsigned opcode : 8;
 	struct pseudo_list *operands;
 	struct pseudo_list *targets;
+	struct basic_block* block; /* owning block */
 };
 
 struct edge {

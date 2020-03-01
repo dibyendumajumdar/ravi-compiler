@@ -6,6 +6,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include "ptrlist.h"
 #include "ravi_ast.h"
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -381,12 +382,24 @@ static void free_instruction_operand_pseudos(struct proc *proc, struct instructi
 
 static inline void add_instruction(struct proc *proc, struct instruction *insn)
 {
+	assert(insn->block == NULL || insn->block == proc->current_bb);
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	insn->block = proc->current_bb;
 }
 
 static inline void remove_instruction(struct proc *proc, struct instruction *insn)
 {
 	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
+}
+
+static inline void add_instruction_operand(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
+{
+	ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
+}
+
+static inline void add_instruction_target(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
+{
+	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
 // static inline struct pseudo *convert_pseudo_to_range(struct proc *proc, struct pseudo *pseudo)
@@ -492,15 +505,15 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 	if (op == OPR_TO_TYPE) {
 		const struct constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
 		struct pseudo *tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
-		ptrlist_add((struct ptr_list **)&insn->operands, tname_pseudo, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, tname_pseudo);
 	} else if (op == OPR_NOT || op == OPR_BNOT) {
-		ptrlist_add((struct ptr_list **)&insn->operands, target, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, target);
 		target = allocate_temp_pseudo(proc, RAVI_TANY);
 	} else if (op == OPR_MINUS || op == OPR_LEN) {
-		ptrlist_add((struct ptr_list **)&insn->operands, target, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, target);
 		target = allocate_temp_pseudo(proc, subexpr_type);
 	}
-	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
+	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 	return target;
 }
@@ -508,8 +521,8 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src)
 {
 	struct instruction *mov = allocate_instruction(proc, op_mov);
-	ptrlist_add((struct ptr_list **)&mov->operands, src, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&mov->targets, target, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, mov, src);
+	add_instruction_target(proc, mov, target);
 	add_instruction(proc, mov);
 	return target;
 }
@@ -520,9 +533,9 @@ static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, stru
 	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
 	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
 	struct instruction *insn = allocate_instruction(proc, op_cbr);
-	ptrlist_add((struct ptr_list **)&insn->operands, conditin_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, true_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, false_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, conditin_pseudo);
+	add_instruction_target(proc, insn, true_pseudo);
+	add_instruction_target(proc, insn, false_pseudo);
 	add_instruction(proc, insn);
 }
 
@@ -533,7 +546,7 @@ static void instruct_br(struct proc *proc, struct basic_block *target_block)
 	}
 	struct pseudo *pseudo = allocate_block_pseudo(proc, target_block);
 	struct instruction *insn = allocate_instruction(proc, op_br);
-	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_target(proc, insn, pseudo);
 	add_instruction(proc, insn);
 }
 
@@ -706,9 +719,9 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 	ravitype_t target_type = node->binary_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
 	struct instruction *insn = allocate_instruction(proc, targetop);
-	ptrlist_add((struct ptr_list **)&insn->operands, operand1, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, operand2, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, operand1);
+	add_instruction_operand(proc, insn, operand2);
+	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 	free_temp_pseudo(proc, operand1);
 	free_temp_pseudo(proc, operand2);
@@ -729,8 +742,8 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
 	struct pseudo *operand = allocate_closure_pseudo(proc->linearizer, newproc);
 	struct instruction *insn = allocate_instruction(proc, op_closure);
-	ptrlist_add((struct ptr_list **)&insn->operands, operand, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, operand);
+	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 
 	return target;
@@ -744,8 +757,8 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 		struct pseudo *operand = allocate_symbol_pseudo(proc, sym, 0); // no register actually
 		struct instruction *insn = allocate_instruction(proc, op_loadglobal);
 		target->insn = insn;
-		ptrlist_add((struct ptr_list **)&insn->operands, operand, &proc->linearizer->ptrlist_allocator);
-		ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, operand);
+		add_instruction_target(proc, insn, target);
 		add_instruction(proc, insn);
 		return target;
 	} else if (sym->symbol_type == SYM_LOCAL) {
@@ -784,9 +797,9 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 	}
 	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
 	struct instruction *insn = allocate_instruction(proc, op);
-	ptrlist_add((struct ptr_list **)&insn->operands, container_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, key_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->targets, target_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, container_pseudo);
+	add_instruction_operand(proc, insn, key_pseudo);
+	add_instruction_target(proc, insn, target_pseudo);
 	add_instruction(proc, insn);
 	target_pseudo->insn = insn;
 	return target_pseudo;
@@ -823,18 +836,19 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 	}
 
 	struct instruction *insn = allocate_instruction(proc, op);
-	ptrlist_add((struct ptr_list **)&insn->operands, table, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, index_pseudo, &proc->linearizer->ptrlist_allocator);
-	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, table);
+	add_instruction_operand(proc, insn, index_pseudo);
+	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
 
 static void convert_loadglobal_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					ravitype_t value_type)
 {
+	assert(proc->current_bb == insn->block);
 	remove_instruction(proc, insn);
 	insn->opcode = op_storeglobal;
-	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target);
 	add_instruction(proc, insn);
@@ -843,6 +857,7 @@ static void convert_loadglobal_to_store(struct proc *proc, struct instruction *i
 static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					  ravitype_t value_type)
 {
+	assert(proc->current_bb == insn->block);
 	enum opcode putop;
 	switch (insn->opcode) {
 	case op_iaget:
@@ -876,7 +891,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	}
 	remove_instruction(proc, insn);
 	insn->opcode = putop;
-	ptrlist_add((struct ptr_list **)&insn->operands, value_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target);
 	add_instruction(proc, insn);
@@ -903,9 +918,9 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 							callsite_pseudo, RAVI_TSTRING, name_pseudo, RAVI_TANY);
 	}
 
-	ptrlist_add((struct ptr_list **)&insn->operands, callsite_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_operand(proc, insn, callsite_pseudo);
 	if (self_arg) {
-		ptrlist_add((struct ptr_list**) & insn->operands, self_arg, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, self_arg);
 	}
 
 	struct ast_node *arg;
@@ -918,13 +933,13 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 			// Not last one, so range can only be 1
 			convert_range_to_temp(arg_pseudo);
 		}
-		ptrlist_add((struct ptr_list **)&insn->operands, arg_pseudo, &proc->linearizer->ptrlist_allocator);
+		add_instruction_operand(proc, insn, arg_pseudo);
 	}
 	END_FOR_EACH_PTR(arg);
 
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo); /* Base reg for function call - where return values will be placed */
-	ptrlist_add((struct ptr_list **)&insn->targets, return_pseudo, &proc->linearizer->ptrlist_allocator);
+	add_instruction_target(proc, insn, return_pseudo);
 	add_instruction(proc, insn);
 
 	free_instruction_operand_pseudos(proc, insn);
@@ -1004,7 +1019,7 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	else if (expr->table_expr.type.type_code == RAVI_TARRAYFLT)
 		op = op_newfarray;
 	struct instruction *insn = allocate_instruction(proc, op);
-	ptrlist_add((struct ptr_list **)&insn->targets, target, &proc->linearizer->ptrlist_allocator);
+	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 
 	/*TODO process constructor elements */
@@ -1159,8 +1174,7 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	assert(node->type == AST_RETURN_STMT);
 	struct instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
-	ptrlist_add((struct ptr_list **)&insn->targets, allocate_block_pseudo(proc, n2bb(proc->exit)),
-		    &proc->linearizer->ptrlist_allocator);
+	add_instruction_target(proc, insn, allocate_block_pseudo(proc, n2bb(proc->exit)));
 	add_instruction(proc, insn);
 	// FIXME add edge to exit block
 	// FIXME terminate block
