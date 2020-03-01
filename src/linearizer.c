@@ -44,12 +44,12 @@ static inline unsigned allocate_register(struct pseudo_generator *generator)
 /**
  * Puts a register in the free list (must not already have been put there).
  */
-static inline void free_register(struct pseudo_generator *generator, unsigned reg)
+static inline void free_register(struct proc *proc, struct pseudo_generator *generator, unsigned reg)
 {
 	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
 		/* TODO proper error handling */
-		fprintf(stderr, "Out of register space\n");
-		abort();
+		handle_error(proc->linearizer->ast_container, "Out of register space\n");
+		return;
 	}
 	// Debug check - ensure register being freed hasn't already been freed
 	for (int i = 0; i < generator->free_pos; i++) {
@@ -311,7 +311,7 @@ void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 		// Not a temp, so no need to do anything
 		return;
 	}
-	free_register(gen, pseudo->regnum);
+	free_register(proc, gen, pseudo->regnum);
 }
 
 /**
@@ -1433,7 +1433,7 @@ static void end_scope(struct linearizer *linearizer, struct proc *proc)
 			struct pseudo *pseudo = sym->var.pseudo;
 			assert(pseudo && pseudo->type == PSEUDO_SYMBOL && pseudo->symbol == sym);
 			// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
-			free_register(&proc->local_pseudos, pseudo->regnum);
+			free_register(proc, &proc->local_pseudos, pseudo->regnum);
 		}
 	}
 	END_FOR_EACH_PTR_REVERSE(sym);
