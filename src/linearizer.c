@@ -1054,12 +1054,60 @@ struct node_info {
 	struct pseudo *pseudo;
 };
 
+static void linearize_assignment(struct proc* proc, struct ast_node_list* expr_list, struct node_info* varinfo, int nv)
+{
+	struct ast_node* expr;
 
+	int ne = ptrlist_size((const struct ptr_list*)expr_list);
+	struct node_info* valinfo = (struct node_info*)alloca(ne * sizeof(struct node_info));
+	struct pseudo* last_val_pseudo = NULL;
+	int i = 0;
+	FOR_EACH_PTR(expr_list, expr)
+	{
+		struct pseudo* val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
+		valinfo[i].type_code = expr->common_expr.type.type_code;
+		valinfo[i].pseudo = val_pseudo;
+		i++;
+		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
+			convert_range_to_temp(val_pseudo);
+		}
+	}
+	END_FOR_EACH_PTR(expr);
+
+	int note_ne = ne;
+	while (nv > 0) {
+		if (nv > ne) {
+			if (last_val_pseudo->type == PSEUDO_RANGE) {
+				int pick = nv - ne;
+				linearize_store_var(proc, varinfo[nv - 1].type_code,
+					varinfo[nv - 1].pseudo,
+					valinfo[ne - 1].type_code,
+					allocate_range_select_pseudo(proc, last_val_pseudo, pick));
+			}
+			else {
+				// TODO store NIL
+			}
+			nv--;
+		}
+		else {
+			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE) {
+				/* Only the topmost expression can be a range ... assert */
+				assert(ne == note_ne);
+				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
+			}
+			linearize_store_var(proc, varinfo[nv - 1].type_code,
+				varinfo[nv - 1].pseudo, valinfo[ne - 1].type_code,
+				valinfo[ne - 1].pseudo);
+			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
+			nv--;
+			ne--;
+		}
+	}
+}
 
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {
 	struct ast_node *var;
-	struct ast_node *expr;
 
 	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
 	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
@@ -1073,49 +1121,28 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	}
 	END_FOR_EACH_PTR(var);
 
-	int ne = ptrlist_size((const struct ptr_list *)node->expression_stmt.expr_list);
-	struct node_info *valinfo = (struct node_info *)alloca(ne * sizeof(struct node_info));
-	struct pseudo *last_val_pseudo = NULL;
-	i = 0;
-	FOR_EACH_PTR(node->expression_stmt.expr_list, expr)
+	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv);
+}
+
+static void linearize_local_statement(struct proc* proc, struct ast_node* stmt) {
+
+	struct lua_symbol* sym;
+
+	int nv = ptrlist_size((const struct ptr_list*)stmt->local_stmt.var_list);
+	struct node_info* varinfo = (struct node_info*)alloca(nv * sizeof(struct node_info));
+	int i = 0;
+
+	FOR_EACH_PTR(stmt->local_stmt.var_list, sym)
 	{
-		struct pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
-		valinfo[i].type_code = expr->common_expr.type.type_code;
-		valinfo[i].pseudo = val_pseudo;
+		struct pseudo* var_pseudo = sym->var.pseudo;
+		assert(var_pseudo);
+		varinfo[i].type_code = sym->value_type.type_code;
+		varinfo[i].pseudo = var_pseudo;
 		i++;
-		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
-			convert_range_to_temp(val_pseudo);
-		}
 	}
 	END_FOR_EACH_PTR(var);
 
-	int note_ne = ne;
-	while (nv > 0) {
-		if (nv > ne) {
-			if (last_val_pseudo->type == PSEUDO_RANGE) {
-				int pick = nv - ne;
-				linearize_store_var(proc, varinfo[nv - 1].type_code,
-						    varinfo[nv - 1].pseudo,
-						    valinfo[ne - 1].type_code,
-						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
-			} else {
-				// TODO store NIL
-			}
-			nv--;
-		} else {
-			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE) {
-				/* Only the topmost expression can be a range ... assert */
-				assert(ne == note_ne);
-				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
-			}
-			linearize_store_var(proc, varinfo[nv - 1].type_code,
-					    varinfo[nv - 1].pseudo, valinfo[ne - 1].type_code,
-					    valinfo[ne - 1].pseudo);
-			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
-			nv--;
-			ne--;
-		}
-	}
+	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv);
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
@@ -1303,8 +1330,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_LOCAL_STMT: {
-		// typecheck_local_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "AST_LOCAL_STMT not yet implemented");
+		linearize_local_statement(proc, node);
 		break;
 	}
 	case AST_FUNCTION_STMT: {
@@ -1499,8 +1525,11 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		break;
 	case PSEUDO_SYMBOL:
 		switch (pseudo->symbol->symbol_type) {
+		case SYM_LOCAL: {
+			membuff_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name, pseudo->regnum);
+			break;
+		} 
 		case SYM_UPVALUE:
-		case SYM_LOCAL:
 		case SYM_GLOBAL: {
 			membuff_add_string(mb, pseudo->symbol->var.var_name);
 			break;
