@@ -1050,9 +1050,11 @@ static void linearize_store_var(struct proc *proc, ravitype_t var_type, struct p
 }
 
 struct node_info {
-	struct ast_node *node;
+	ravitype_t type_code;
 	struct pseudo *pseudo;
 };
+
+
 
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {
@@ -1065,7 +1067,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	FOR_EACH_PTR(node->expression_stmt.var_expr_list, var)
 	{
 		struct pseudo *var_pseudo = linearize_expression(proc, var);
-		varinfo[i].node = var;
+		varinfo[i].type_code = var->common_expr.type.type_code;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
@@ -1078,7 +1080,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	FOR_EACH_PTR(node->expression_stmt.expr_list, expr)
 	{
 		struct pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
-		valinfo[i].node = expr;
+		valinfo[i].type_code = expr->common_expr.type.type_code;
 		valinfo[i].pseudo = val_pseudo;
 		i++;
 		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
@@ -1092,9 +1094,9 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 		if (nv > ne) {
 			if (last_val_pseudo->type == PSEUDO_RANGE) {
 				int pick = nv - ne;
-				linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
+				linearize_store_var(proc, varinfo[nv - 1].type_code,
 						    varinfo[nv - 1].pseudo,
-						    valinfo[ne - 1].node->common_expr.type.type_code,
+						    valinfo[ne - 1].type_code,
 						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
 			} else {
 				// TODO store NIL
@@ -1106,8 +1108,8 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 				assert(ne == note_ne);
 				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
 			}
-			linearize_store_var(proc, varinfo[nv - 1].node->common_expr.type.type_code,
-					    varinfo[nv - 1].pseudo, valinfo[ne - 1].node->common_expr.type.type_code,
+			linearize_store_var(proc, varinfo[nv - 1].type_code,
+					    varinfo[nv - 1].pseudo, valinfo[ne - 1].type_code,
 					    valinfo[ne - 1].pseudo);
 			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
 			nv--;
