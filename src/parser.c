@@ -25,6 +25,7 @@ static struct block_scope *new_scope(struct parser_state *parser);
 static void end_scope(struct parser_state *parser);
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type);
 static struct ast_node *generate_label(struct parser_state *parser, const char *label);
+static void add_local_symbol_to_current_scope(struct parser_state* parser, struct lua_symbol* sym);
 
 static void add_symbol(struct ast_container *container, struct lua_symbol_list **list, struct lua_symbol *sym)
 {
@@ -131,10 +132,6 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const ch
 	symbol->var.block = scope;
 	symbol->var.var_name = name;
 	symbol->var.pseudo = NULL;
-	add_symbol(parser->container, &scope->symbol_list, symbol); // Add to the end of the symbol list
-	add_symbol(parser->container, &scope->function->function_expr.locals, symbol);
-	// Note that Lua allows multiple local declarations of the same name
-	// so a new instance just gets added to the end
 	return symbol;
 }
 
@@ -576,6 +573,7 @@ static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_
 					/* RAVI change - add type */
 				struct lua_symbol *symbol = declare_local_variable(parser);
 				add_symbol(parser->container, list, symbol);
+				add_local_symbol_to_current_scope(parser, symbol);
 				nparams++;
 				break;
 			}
@@ -978,6 +976,14 @@ static struct ast_node *parse_expression(struct parser_state *parser)
 ** =======================================================================
 */
 
+static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym)
+{
+	// Note that Lua allows multiple local declarations of the same name
+	// so a new instance just gets added to the end
+	add_symbol(parser->container, &parser->current_scope->symbol_list, sym); 
+	add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
+}
+
 static struct block_scope *parse_block(struct parser_state *parser, struct ast_node_list **statement_list)
 {
 	/* block -> statlist */
@@ -1215,6 +1221,8 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
 	LexState *ls = parser->ls;
 	struct lua_symbol *symbol =
 	    new_local_symbol(parser, check_name_and_next(ls), RAVI_TFUNCTION, NULL); /* new local variable */
+	/* local function f ... is parsed as local f; f = function ... */
+	add_local_symbol_to_current_scope(parser, symbol);
 	struct ast_node *function_ast = new_function(parser);
 	parse_function_body(parser, function_ast, 0, ls->linenumber); /* function created in next register */
 	end_function(parser);
@@ -1250,6 +1258,10 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
 		/* nexps = 0; */
 		;
 	}
+	/* local symbols are only added to scope at the end of the local statement */
+	struct lua_symbol *sym = NULL;
+	FOR_EACH_PTR(node->local_stmt.var_list, sym) { add_local_symbol_to_current_scope(parser, sym); }
+	END_FOR_EACH_PTR(sym);
 	return node;
 }
 

@@ -1908,7 +1908,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(0000017E9F8205C8)} {T(0)}
+	CLOSURE {Proc(000001E0444B0598)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4259,4 +4259,163 @@ L0 (entry)
 	CALL {T(1), T(3), 5 Kint(1), T(4..)} {T(1..)}
 	CALL {T(0), T(1..)} {T(0)}
 	PUTik {T(0), 1 Kint(2), 9 Kint(3)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "local i = 0" 
+function()
+--locals  i
+  local
+  --[symbols]
+    i --local symbol any 
+  --[expressions]
+    0
+end
+function()
+--locals  i
+  local
+  --[symbols]
+    i --local symbol any 
+  --[expressions]
+    0
+end
+L0 (entry)
+	MOV {0 Kint(0)} {local(i, 0)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "local i, j = 1, 2" 
+function()
+--locals  i, j
+  local
+  --[symbols]
+    i --local symbol any 
+   ,
+    j --local symbol any 
+  --[expressions]
+    1
+   ,
+    2
+end
+function()
+--locals  i, j
+  local
+  --[symbols]
+    i --local symbol any 
+   ,
+    j --local symbol any 
+  --[expressions]
+    1
+   ,
+    2
+end
+L0 (entry)
+	MOV {2 Kint(1)} {local(j, 1)}
+	MOV {1 Kint(0)} {local(i, 0)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "local a = a" 
+function()
+--locals  a
+  local
+  --[symbols]
+    a --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+--locals  a
+  local
+  --[symbols]
+    a --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {a} {T(0)}
+	MOV {T(0)} {local(a, 0)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "local a = b" 
+function()
+--locals  a
+  local
+  --[symbols]
+    a --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       b --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+--locals  a
+  local
+  --[symbols]
+    a --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       b --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {b} {T(0)}
+	MOV {T(0)} {local(a, 0)}
+L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "local a, b = x, y" 
+function()
+--locals  a, b
+  local
+  --[symbols]
+    a --local symbol any 
+   ,
+    b --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+--locals  a, b
+  local
+  --[symbols]
+    a --local symbol any 
+   ,
+    b --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       x --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       y --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(0)}
+	LOADGLOBAL {y} {T(1)}
+	MOV {T(1)} {local(b, 1)}
+	MOV {T(0)} {local(a, 0)}
 L1 (exit)
