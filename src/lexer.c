@@ -182,8 +182,10 @@ static void inclinenumber(LexState *ls)
 		lexerror(ls, "chunk has too many lines", 0);
 }
 
-void raviX_setinput(struct compiler_state *container, LexState *ls, const char *buf, size_t buflen, const char *source)
+struct lexer_state *raviX_init_lexer(struct compiler_state *container, const char *buf, size_t buflen,
+				     const char *source)
 {
+	struct lexer_state *ls = (struct lexer_state *)calloc(1, sizeof(struct lexer_state));
 	ls->container = container;
 	ls->t.token = 0;
 	ls->buf = buf;
@@ -197,6 +199,14 @@ void raviX_setinput(struct compiler_state *container, LexState *ls, const char *
 	ls->source = source;
 	ls->envn = raviX_create_string(ls->container, LUA_ENV, strlen(LUA_ENV)); /* get env name */
 	ls->buff = &container->buff;
+	return ls;
+}
+
+void raviX_destroy_lexer(struct lexer_state *ls)
+{
+	if (ls == NULL)
+		return;
+	free(ls);
 }
 
 /*
@@ -509,7 +519,7 @@ static void read_long_string(LexState *ls, SemInfo *seminfo, int sep)
 			const char *what = (seminfo ? "string" : "comment");
 			const char *msg = "";
 			//			    luaO_pushfstring(ls->L, "unfinished long %s (starting at line %d)",
-			//what, line);
+			// what, line);
 			lexerror(ls, msg, TK_EOS);
 			break; /* to avoid warnings */
 		}
@@ -902,3 +912,5 @@ int raviX_lookahead(LexState *ls)
 	ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
 	return ls->lookahead.token;
 }
+
+const char *raviX_get_last_error(struct compiler_state *container) { return container->error_message.buf; }

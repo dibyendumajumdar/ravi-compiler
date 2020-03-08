@@ -11,6 +11,8 @@ a) Generate syntax tree
 b) Perform type checking (Ravi enhancement)
 */
 
+#include "ravi_compiler.h"
+
 #include "allocate.h"
 #include "lua_defs.h"
 #include "membuf.h"
@@ -31,7 +33,7 @@ enum { MAXVARS = 125 };
 //////////////////////////
 
 struct lua_symbol_list;
-struct linearizer;
+struct linearizer_state;
 struct lexer_state;
 
 /*
@@ -48,7 +50,7 @@ struct compiler_state {
 	struct allocator string_object_allocator;
 	struct set *strings;
 	struct ast_node *main_function;
-	struct linearizer *linearizer;
+	struct linearizer_state *linearizer;
 	int (*error_handler)(const char *fmt, ...);
 	Mbuffer buff;		 /* temp storage for literals */
 	jmp_buf env;		 /* For error handling */
@@ -603,7 +605,7 @@ struct constant {
 /* proc is a type of cfg */
 struct proc {
 	CFG_FIELDS;
-	struct linearizer *linearizer;
+	struct linearizer_state *linearizer;
 	struct proc_list *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
 	struct ast_node *function_expr; /* function ast that we are compiling */
@@ -620,7 +622,7 @@ struct proc {
 static inline struct basic_block *n2bb(struct node *n) { return (struct basic_block *)n; }
 static inline struct node *bb2n(struct basic_block *bb) { return (struct node *)bb; }
 
-struct linearizer {
+struct linearizer_state {
 	struct allocator instruction_allocator;
 	struct allocator edge_allocator;
 	struct allocator pseudo_allocator;
@@ -635,21 +637,8 @@ struct linearizer {
 	struct proc *current_proc;   /* proc being compiled */
 };
 
-extern struct compiler_state *raviX_new_ast_container();
-void raviX_destroy_ast_container(struct compiler_state *container);
-void raviX_next(LexState *ls);
-int raviX_lookahead(LexState *ls);
-void raviX_setinput(struct compiler_state *container, LexState *ls, const char *buf, size_t buflen, const char *source);
-void raviX_syntaxerror(LexState *ls, const char *msg);
-const char *raviX_create_string(struct compiler_state *container, const char *s, size_t len);
-int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name);
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
-void raviX_output_ast(struct compiler_state *container, FILE *fp);
-int raviX_ast_typecheck(struct compiler_state *container); /* Perform type checks and assign types to AST */
-void raviX_init_linearizer(struct linearizer *linearizer, struct compiler_state *container);
-void raviX_destroy_linearizer(struct linearizer *linearizer);
-int raviX_ast_linearize(struct linearizer *linearizer);
-void raviX_show_linearizer(struct linearizer *linearizer, membuff_t *mb);
-void raviX_output_linearizer(struct linearizer *linearizer, FILE *fp);
+void raviX_show_linearizer(struct linearizer_state* linearizer, membuff_t* mb);
+void raviX_syntaxerror(struct lexer_state* ls, const char* msg);
 
 #endif

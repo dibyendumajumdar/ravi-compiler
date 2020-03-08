@@ -1,8 +1,11 @@
-#include <ravi_ast.h>
+#include <ravi_compiler.h>
+
+#include <string.h>
+
 
 int main(int argc, const char *argv[]) {
 
-	struct compiler_state *container = raviX_new_ast_container();
+	struct compiler_state *container = raviX_init_compiler();
 	int rc = 0;
 
 	const char *s1 = "Test String";
@@ -16,7 +19,7 @@ int main(int argc, const char *argv[]) {
 		rc++;
 	if (strcmp(s1, s3) != 0)
 		rc++;
-	raviX_destroy_ast_container(container);
+	raviX_destroy_compiler(container);
 
 	return rc;
 }

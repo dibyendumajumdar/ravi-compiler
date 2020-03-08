@@ -4,6 +4,7 @@ project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 option(LUA_BINDING "Controls whether Lua/Ravi bindings will be generated, default is OFF" OFF)
 
 set(HEADERS
+        include/ravi_compiler.h
         src/allocate.h
         src/port.h
         src/ptrlist.h
@@ -42,18 +43,29 @@ if (WIN32)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
+include(GNUInstallDirs)
+
+set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+
 add_library(ravicomp STATIC
         ${HEADERS}
         ${SRCS})
 target_include_directories(ravicomp
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/src")
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src")
+include(GenerateExportHeader)
+generate_export_header(ravicomp)
 
 add_executable(test_stringset tests/tstrset.c)
 target_link_libraries(test_stringset ravicomp)
 target_include_directories(test_stringset
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/src")
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(tparse tests/tparse.c)
 target_link_libraries(tparse ravicomp)
 target_include_directories(tparse
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/src")
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+

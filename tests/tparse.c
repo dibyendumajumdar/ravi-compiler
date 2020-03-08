@@ -1,6 +1,8 @@
 /* simple smoke test for parser */
 
-#include "ravi_ast.h"
+#include "ravi_compiler.h"
+
+#include <string.h>
 
 int main(int argc, const char *argv[])
 {
@@ -14,35 +16,34 @@ int main(int argc, const char *argv[])
 	}
 
 	int rc = 0;
-	struct compiler_state *container = raviX_new_ast_container();
+	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
-		fprintf(stderr, container->error_message.buf);
+		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_exit;
 	}
 	raviX_output_ast(container, stdout);
 	rc = raviX_ast_typecheck(container);
 	if (rc != 0) {
-		fprintf(stderr, container->error_message.buf);
+		fprintf(stderr, raviX_get_last_error(container));
 		goto L_exit;
 	}
 	raviX_output_ast(container, stdout);
 
-	struct linearizer linearizer;
-	raviX_init_linearizer(&linearizer, container);
+	struct linearizer_state *linearizer = raviX_init_linearizer(container);
 
-	rc = raviX_ast_linearize(&linearizer);
+	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
-		fprintf(stderr, container->error_message.buf);
+		fprintf(stderr, raviX_get_last_error(container));
 		goto L_linend;
 	}
-	raviX_output_linearizer(&linearizer, stdout);
+	raviX_output_linearizer(linearizer, stdout);
 
 L_linend:
-	raviX_destroy_linearizer(&linearizer);
+	raviX_destroy_linearizer(linearizer);
 
 L_exit:
-	raviX_destroy_ast_container(container);
+	raviX_destroy_compiler(container);
 
 	return rc;
 }

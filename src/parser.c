@@ -1535,23 +1535,18 @@ static void parser_state_init(struct parser_state *parser, LexState *ls, struct 
 ** Parse the given source 'chunk' and build an abstract
 ** syntax tree; return 0 on success / non-zero return code on
 ** failure
-** On success will push a userdata object containing the abstract
-** syntax tree.
-** On failure push an error message.
 */
 int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name)
 {
-	LexState lexstate;
-	raviX_setinput(container, &lexstate, buffer, buflen, name);
+	struct lexer_state *lexstate = raviX_init_lexer(container, buffer, buflen, name);
 	struct parser_state parser_state;
-	parser_state_init(&parser_state, &lexstate, container);
+	parser_state_init(&parser_state, lexstate, container);
 	int rc = setjmp(container->env);
 	if (rc == 0) {
-		parse_lua_chunk(&parser_state); // FIXME must be protected call
-	} else {
-		return rc;
+		parse_lua_chunk(&parser_state);
 	}
-	return 0;
+	raviX_destroy_lexer(lexstate);
+	return rc;
 }
 
 /* Converts the AST to a string representation */
@@ -1597,7 +1592,7 @@ const char *raviX_create_string(struct compiler_state *container, const char *in
 	}
 }
 
-struct compiler_state *raviX_new_ast_container()
+struct compiler_state *raviX_init_compiler()
 {
 	struct compiler_state *container = (struct compiler_state *)calloc(1, sizeof(struct compiler_state));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(struct ast_node), sizeof(double),
@@ -1617,7 +1612,7 @@ struct compiler_state *raviX_new_ast_container()
 	return container;
 }
 
-void raviX_destroy_ast_container(struct compiler_state *container)
+void raviX_destroy_compiler(struct compiler_state *container)
 {
 	if (!container->killed) {
 		if (container->linearizer) {
@@ -1634,25 +1629,4 @@ void raviX_destroy_ast_container(struct compiler_state *container)
 		raviX_allocator_destroy(&container->string_object_allocator);
 		container->killed = true;
 	}
-}
-
-static int ast_linearize(struct compiler_state *container)
-{
-	if (container->linearizer) {
-		return -1;
-	}
-	struct linearizer *linearizer = (struct linearizer *)calloc(1, sizeof(struct linearizer));
-	raviX_init_linearizer(linearizer, container);
-	container->linearizer = linearizer;
-	raviX_ast_linearize(container->linearizer);
-	return 0;
-}
-
-static int ast_show_linearized(struct compiler_state *container, membuff_t *mbuf)
-{
-	if (!container->linearizer) {
-		return -1;
-	}
-	raviX_show_linearizer(container->linearizer, mbuf);
-	return 0;
 }
