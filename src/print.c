@@ -519,7 +519,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 	}
 }
 
-void raviX_output_ast(struct ast_container *container, FILE *fp)
+void raviX_output_ast(struct compiler_state *container, FILE *fp)
 {
 	membuff_t mbuf;
 	membuff_init(&mbuf, 1024);

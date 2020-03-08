@@ -35,13 +35,11 @@ struct linearizer;
 struct lexer_state;
 
 /*
- * Userdata object to hold the abstract syntax tree;
- * All memory is held by this object. Memory is freed when
- * the object is GC collected; or when
- * ast_container:release() method is called
- * by user.
+ * Encapsulate all the compiler state.
+ * All memory is held by this object or sub-objects. Memory is freed when
+ * the object is destroyed.
  */
-struct ast_container {
+struct compiler_state {
 	struct allocator ast_node_allocator;
 	struct allocator ptrlist_allocator;
 	struct allocator block_scope_allocator;
@@ -137,7 +135,7 @@ struct lexer_state {
 	int lastline;	 /* line of last token 'consumed' */
 	Token t;	 /* current token */
 	Token lookahead; /* look ahead token */
-	struct ast_container *container;
+	struct compiler_state *container;
 	const char *buf;
 	size_t bufsize;
 	size_t n;
@@ -400,7 +398,7 @@ static inline void copy_type(struct var_type* a, const struct var_type* b) {
 
 struct parser_state {
 	struct lexer_state *ls;
-	struct ast_container *container;
+	struct compiler_state *container;
 	struct ast_node *current_function;
 	struct block_scope *current_scope;
 };
@@ -631,24 +629,24 @@ struct linearizer {
 	struct allocator proc_allocator;
 	struct allocator unsized_allocator;
 	struct allocator constant_allocator;
-	struct ast_container *ast_container;
+	struct compiler_state *ast_container;
 	struct proc *main_proc;	     /* The root of the compiled chunk of code */
 	struct proc_list *all_procs; /* All procs allocated by the linearizer */
 	struct proc *current_proc;   /* proc being compiled */
 };
 
-extern struct ast_container *raviX_new_ast_container();
-void raviX_destroy_ast_container(struct ast_container *container);
+extern struct compiler_state *raviX_new_ast_container();
+void raviX_destroy_ast_container(struct compiler_state *container);
 void raviX_next(LexState *ls);
 int raviX_lookahead(LexState *ls);
-void raviX_setinput(struct ast_container *container, LexState *ls, const char *buf, size_t buflen, const char *source);
+void raviX_setinput(struct compiler_state *container, LexState *ls, const char *buf, size_t buflen, const char *source);
 void raviX_syntaxerror(LexState *ls, const char *msg);
-const char *raviX_create_string(struct ast_container *container, const char *s, size_t len);
-int raviX_parse(struct ast_container *container, const char *buffer, size_t buflen, const char *name);
+const char *raviX_create_string(struct compiler_state *container, const char *s, size_t len);
+int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name);
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
-void raviX_output_ast(struct ast_container *container, FILE *fp);
-int raviX_ast_typecheck(struct ast_container *container); /* Perform type checks and assign types to AST */
-void raviX_init_linearizer(struct linearizer *linearizer, struct ast_container *container);
+void raviX_output_ast(struct compiler_state *container, FILE *fp);
+int raviX_ast_typecheck(struct compiler_state *container); /* Perform type checks and assign types to AST */
+void raviX_init_linearizer(struct linearizer *linearizer, struct compiler_state *container);
 void raviX_destroy_linearizer(struct linearizer *linearizer);
 int raviX_ast_linearize(struct linearizer *linearizer);
 void raviX_show_linearizer(struct linearizer *linearizer, membuff_t *mb);

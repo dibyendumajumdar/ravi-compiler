@@ -182,7 +182,7 @@ static void inclinenumber(LexState *ls)
 		lexerror(ls, "chunk has too many lines", 0);
 }
 
-void raviX_setinput(struct ast_container *container, LexState *ls, const char *buf, size_t buflen, const char *source)
+void raviX_setinput(struct compiler_state *container, LexState *ls, const char *buf, size_t buflen, const char *source)
 {
 	ls->container = container;
 	ls->t.token = 0;

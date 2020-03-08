@@ -37,6 +37,11 @@ if ($ENV{CLION_IDE})
     include_directories("${RaviCompiler_SOURCE_DIR}/dmr_c/src")
 endif ()
 
+if (WIN32)
+    # disable warnings about C string functions
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif()
+
 add_library(ravicomp STATIC
         ${HEADERS}
         ${SRCS})

@@ -27,12 +27,12 @@ static struct ast_node *new_literal_expression(struct parser_state *parser, ravi
 static struct ast_node *generate_label(struct parser_state *parser, const char *label);
 static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym);
 
-static void add_symbol(struct ast_container *container, struct lua_symbol_list **list, struct lua_symbol *sym)
+static void add_symbol(struct compiler_state *container, struct lua_symbol_list **list, struct lua_symbol *sym)
 {
 	ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
 }
 
-static void add_ast_node(struct ast_container *container, struct ast_node_list **list, struct ast_node *node)
+static void add_ast_node(struct compiler_state *container, struct ast_node_list **list, struct ast_node *node)
 {
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
@@ -1447,7 +1447,7 @@ static void parse_statement_list(struct parser_state *parser, struct ast_node_li
  */
 static struct block_scope *new_scope(struct parser_state *parser)
 {
-	struct ast_container *container = parser->container;
+	struct compiler_state *container = parser->container;
 	struct block_scope *scope = raviX_allocator_allocate(&container->block_scope_allocator, 0);
 	scope->symbol_list = NULL;
 	// scope->do_statement_list = NULL;
@@ -1474,7 +1474,7 @@ to previous scope which may be of parent function.
 */
 static struct ast_node *new_function(struct parser_state *parser)
 {
-	struct ast_container *container = parser->container;
+	struct compiler_state *container = parser->container;
 	struct ast_node *node = raviX_allocator_allocate(&container->ast_node_allocator, 0);
 	node->type = AST_FUNCTION_EXPR;
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
@@ -1523,7 +1523,7 @@ static void parse_lua_chunk(struct parser_state *parser)
 	check(parser->ls, TK_EOS);
 }
 
-static void parser_state_init(struct parser_state *parser, LexState *ls, struct ast_container *container)
+static void parser_state_init(struct parser_state *parser, LexState *ls, struct compiler_state *container)
 {
 	parser->ls = ls;
 	parser->container = container;
@@ -1539,7 +1539,7 @@ static void parser_state_init(struct parser_state *parser, LexState *ls, struct 
 ** syntax tree.
 ** On failure push an error message.
 */
-int raviX_parse(struct ast_container *container, const char *buffer, size_t buflen, const char *name)
+int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name)
 {
 	LexState lexstate;
 	raviX_setinput(container, &lexstate, buffer, buflen, name);
@@ -1555,7 +1555,7 @@ int raviX_parse(struct ast_container *container, const char *buffer, size_t bufl
 }
 
 /* Converts the AST to a string representation */
-static void ast_container_to_string(struct ast_container *container, membuff_t *mbuf)
+static void ast_container_to_string(struct compiler_state *container, membuff_t *mbuf)
 {
 	raviX_print_ast_node(mbuf, container->main_function, 0);
 }
@@ -1580,7 +1580,7 @@ static uint32_t string_hash(const void *c)
 	return fnv1_hash_data(c1->str, c1->len);
 }
 
-const char *raviX_create_string(struct ast_container *container, const char *input, size_t len)
+const char *raviX_create_string(struct compiler_state *container, const char *input, size_t len)
 {
 	struct string_object temp = {.len = len, .str = input};
 	struct set_entry *entry = set_search(container->strings, &temp);
@@ -1597,9 +1597,9 @@ const char *raviX_create_string(struct ast_container *container, const char *inp
 	}
 }
 
-struct ast_container *raviX_new_ast_container()
+struct compiler_state *raviX_new_ast_container()
 {
-	struct ast_container *container = (struct ast_container *)calloc(1, sizeof(struct ast_container));
+	struct compiler_state *container = (struct compiler_state *)calloc(1, sizeof(struct compiler_state));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(struct ast_node), sizeof(double),
 			     CHUNK);
 	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double), CHUNK);
@@ -1617,7 +1617,7 @@ struct ast_container *raviX_new_ast_container()
 	return container;
 }
 
-void raviX_destroy_ast_container(struct ast_container *container)
+void raviX_destroy_ast_container(struct compiler_state *container)
 {
 	if (!container->killed) {
 		if (container->linearizer) {
@@ -1636,7 +1636,7 @@ void raviX_destroy_ast_container(struct ast_container *container)
 	}
 }
 
-static int ast_linearize(struct ast_container *container)
+static int ast_linearize(struct compiler_state *container)
 {
 	if (container->linearizer) {
 		return -1;
@@ -1648,7 +1648,7 @@ static int ast_linearize(struct ast_container *container)
 	return 0;
 }
 
-static int ast_show_linearized(struct ast_container *container, membuff_t *mbuf)
+static int ast_show_linearized(struct compiler_state *container, membuff_t *mbuf)
 {
 	if (!container->linearizer) {
 		return -1;

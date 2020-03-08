@@ -2,7 +2,7 @@
 
 int main(int argc, const char *argv[]) {
 
-	struct ast_container *container = raviX_new_ast_container();
+	struct compiler_state *container = raviX_new_ast_container();
 	int rc = 0;
 
 	const char *s1 = "Test String";

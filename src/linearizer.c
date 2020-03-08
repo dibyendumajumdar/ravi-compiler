@@ -11,7 +11,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include <stdlib.h>
 #include <string.h>
 
-static void handle_error(struct ast_container *container, const char *msg)
+static void handle_error(struct compiler_state *container, const char *msg)
 {
 	// TODO source and line number
 	membuff_add_string(&container->error_message, msg);
@@ -59,7 +59,7 @@ static inline void free_register(struct proc *proc, struct pseudo_generator *gen
 }
 
 /* Linearizer initialization  */
-void raviX_init_linearizer(struct linearizer *linearizer, struct ast_container *container)
+void raviX_init_linearizer(struct linearizer *linearizer, struct compiler_state *container)
 {
 	memset(linearizer, 0, sizeof *linearizer);
 	linearizer->ast_container = container;

@@ -14,7 +14,7 @@ int main(int argc, const char *argv[])
 	}
 
 	int rc = 0;
-	struct ast_container *container = raviX_new_ast_container();
+	struct compiler_state *container = raviX_new_ast_container();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
 		fprintf(stderr, container->error_message.buf);
