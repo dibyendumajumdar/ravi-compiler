@@ -25,7 +25,7 @@ static struct block_scope *new_scope(struct parser_state *parser);
 static void end_scope(struct parser_state *parser);
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type);
 static struct ast_node *generate_label(struct parser_state *parser, const char *label);
-static void add_local_symbol_to_current_scope(struct parser_state* parser, struct lua_symbol* sym);
+static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym);
 
 static void add_symbol(struct ast_container *container, struct lua_symbol_list **list, struct lua_symbol *sym)
 {
@@ -980,7 +980,7 @@ static void add_local_symbol_to_current_scope(struct parser_state *parser, struc
 {
 	// Note that Lua allows multiple local declarations of the same name
 	// so a new instance just gets added to the end
-	add_symbol(parser->container, &parser->current_scope->symbol_list, sym); 
+	add_symbol(parser->container, &parser->current_scope->symbol_list, sym);
 	add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
 }
 
@@ -1099,7 +1099,9 @@ static void parse_fornum_statement(struct parser_state *parser, struct ast_node 
 {
 	LexState *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
-	add_symbol(parser->container, &stmt->for_stmt.symbols, new_local_symbol(parser, varname, RAVI_TANY, NULL));
+	struct lua_symbol *local = new_local_symbol(parser, varname, RAVI_TANY, NULL);
+	add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+	add_local_symbol_to_current_scope(parser, local);
 	checknext(ls, '=');
 	/* get the type of each expression */
 	add_ast_node(parser->container, &stmt->for_stmt.expr_list, parse_expression(parser)); /* initial value */
@@ -1119,10 +1121,13 @@ static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, c
 	/* forlist -> NAME {,NAME} IN explist forbody */
 	int nvars = 4; /* gen, state, control, plus at least one declared var */
 	/* create declared variables */
-	add_symbol(parser->container, &stmt->for_stmt.symbols, new_local_symbol(parser, indexname, RAVI_TANY, NULL));
+	struct lua_symbol *local = new_local_symbol(parser, indexname, RAVI_TANY, NULL);
+	add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+	add_local_symbol_to_current_scope(parser, local);
 	while (testnext(ls, ',')) {
-		add_symbol(parser->container, &stmt->for_stmt.symbols,
-			   new_local_symbol(parser, check_name_and_next(ls), RAVI_TANY, NULL));
+		local = new_local_symbol(parser, check_name_and_next(ls), RAVI_TANY, NULL);
+		add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+		add_local_symbol_to_current_scope(parser, local);
 		nvars++;
 	}
 	checknext(ls, TK_IN);
