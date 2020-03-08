@@ -378,11 +378,25 @@ struct ast_node {
 	};
 };
 
-#define set_typecode(vt, t) (vt).type_code = t
-#define set_type(vt, t) (vt).type_code = t, (vt).type_name = NULL
-#define set_typename(vt, t, name) (vt).type_code = t, (vt).type_name = (name)
-#define is_type_same(a, b) ((a).type_code == (b).type_code && (a).type_name == (b).type_name)
-#define copy_type(a, b) (a).type_code = (b).type_code, (a).type_name = (b).type_name
+static inline void set_typecode(struct var_type* vt, ravitype_t t) {
+	vt->type_code = t;
+}
+static inline void set_type(struct var_type* vt, ravitype_t t) {
+	vt->type_code = t;
+	vt->type_name = NULL;
+}
+static void inline set_typename(struct var_type* vt, ravitype_t t, const char* name) {
+	vt->type_code = t;
+	vt->type_name = name;
+}
+static bool is_type_same(const struct var_type* a, const struct var_type* b) {
+	// Relies upon strings being interned
+	return a->type_code == b->type_code && a->type_name == b->type_name;
+}
+static inline void copy_type(struct var_type* a, const struct var_type* b) {
+	a->type_code = b->type_code;
+	a->type_name = b->type_name;
+}
 
 struct parser_state {
 	struct lexer_state *ls;

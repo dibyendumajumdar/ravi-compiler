@@ -127,7 +127,7 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const ch
 {
 	struct block_scope *scope = parser->current_scope;
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-	set_typename(symbol->value_type, tt, usertype);
+	set_typename(&symbol->value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
 	symbol->var.block = scope;
 	symbol->var.var_name = name;
@@ -141,7 +141,7 @@ static struct lua_symbol *new_label(struct parser_state *parser, const char *nam
 	struct block_scope *scope = parser->current_scope;
 	assert(scope);
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-	set_type(symbol->value_type, RAVI_TANY);
+	set_type(&symbol->value_type, RAVI_TANY);
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
 	symbol->label.label_name = name;
@@ -237,7 +237,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	upvalue->symbol_type = SYM_UPVALUE;
 	upvalue->upvalue.var = sym;
 	upvalue->upvalue.function = function;
-	copy_type(upvalue->value_type, sym->value_type);
+	copy_type(&upvalue->value_type, &sym->value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
 	return true;
 }
@@ -323,7 +323,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 		global->symbol_type = SYM_GLOBAL;
 		global->var.var_name = varname;
 		global->var.block = NULL;
-		set_type(global->value_type, RAVI_TANY); // Globals are always ANY type
+		set_type(&global->value_type, RAVI_TANY); // Globals are always ANY type
 		// We don't add globals to any scope so that they are
 		// always looked up
 		symbol = global;
@@ -343,7 +343,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const ch
 {
 	struct ast_node *node = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = AST_LITERAL_EXPR;
-	set_type(node->literal_expr.type, RAVI_TSTRING);
+	set_type(&node->literal_expr.type, RAVI_TSTRING);
 	node->literal_expr.u.s = ts;
 	return node;
 }
@@ -353,7 +353,7 @@ static struct ast_node *new_field_selector(struct parser_state *parser, const ch
 	struct ast_node *index = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	index->type = AST_FIELD_SELECTOR_EXPR;
 	index->index_expr.expr = new_string_literal(parser, ts);
-	set_type(index->index_expr.type, RAVI_TANY);
+	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
 }
 
@@ -383,7 +383,7 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 	struct ast_node *index = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	index->type = AST_Y_INDEX_EXPR;
 	index->index_expr.expr = expr;
-	set_type(index->index_expr.type, RAVI_TANY);
+	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
 }
 
@@ -459,7 +459,7 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
 	int line = ls->linenumber;
 	checknext(ls, '{');
 	struct ast_node *table_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	set_type(table_expr->table_expr.type, RAVI_TTABLE);
+	set_type(&table_expr->table_expr.type, RAVI_TTABLE);
 	table_expr->table_expr.expr_list = NULL;
 	table_expr->type = AST_TABLE_EXPR;
 	do {
@@ -631,7 +631,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const c
 	call_expr->type = AST_FUNCTION_CALL_EXPR;
 	call_expr->function_call_expr.method_name = methodname;
 	call_expr->function_call_expr.arg_list = NULL;
-	set_type(call_expr->function_call_expr.type, RAVI_TANY);
+	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
 	switch (ls->t.token) {
 	case '(': { /* funcargs -> '(' [ explist ] ')' */
 		raviX_next(ls);
@@ -711,13 +711,13 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 		case '.': { /* fieldsel */
 			struct ast_node *suffix = parse_field_selector(parser);
 			add_ast_node(parser->container, &suffixed_expr->suffixed_expr.suffix_list, suffix);
-			set_type(suffixed_expr->suffixed_expr.type, RAVI_TANY);
+			set_type(&suffixed_expr->suffixed_expr.type, RAVI_TANY);
 			break;
 		}
 		case '[': { /* '[' exp1 ']' */
 			struct ast_node *suffix = parse_yindex(parser);
 			add_ast_node(parser->container, &suffixed_expr->suffixed_expr.suffix_list, suffix);
-			set_type(suffixed_expr->suffixed_expr.type, RAVI_TANY);
+			set_type(&suffixed_expr->suffixed_expr.type, RAVI_TANY);
 			break;
 		}
 		case ':': { /* ':' NAME funcargs */
@@ -744,7 +744,7 @@ static struct ast_node *new_literal_expression(struct parser_state *parser, ravi
 {
 	struct ast_node *expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	expr->type = AST_LITERAL_EXPR;
-	set_type(expr->literal_expr.type, type);
+	set_type(&expr->literal_expr.type, type);
 	expr->literal_expr.u.i = 0; /* initialize */
 	return expr;
 }
@@ -1477,7 +1477,7 @@ static struct ast_node *new_function(struct parser_state *parser)
 	struct ast_container *container = parser->container;
 	struct ast_node *node = raviX_allocator_allocate(&container->ast_node_allocator, 0);
 	node->type = AST_FUNCTION_EXPR;
-	set_type(node->function_expr.type, RAVI_TFUNCTION);
+	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;
 	node->function_expr.is_vararg = false;
 	node->function_expr.args = NULL;

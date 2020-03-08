@@ -29,46 +29,46 @@ static void typecheck_unaryop(struct ast_container *container, struct ast_node *
 	switch (op) {
 	case OPR_MINUS:
 		if (subexpr_type == RAVI_TNUMINT) {
-			set_type(node->unary_expr.type, RAVI_TNUMINT);
+			set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		} else if (subexpr_type == RAVI_TNUMFLT) {
-			set_type(node->unary_expr.type, RAVI_TNUMFLT);
+			set_type(&node->unary_expr.type, RAVI_TNUMFLT);
 		}
 		break;
 	case OPR_LEN:
 		if (subexpr_type == RAVI_TARRAYINT || subexpr_type == RAVI_TARRAYFLT) {
-			set_type(node->unary_expr.type, RAVI_TNUMINT);
+			set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		}
 		break;
 	case OPR_TO_INTEGER:
-		set_type(node->unary_expr.type, RAVI_TNUMINT);
+		set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		break;
 	case OPR_TO_NUMBER:
-		set_type(node->unary_expr.type, RAVI_TNUMFLT);
+		set_type(&node->unary_expr.type, RAVI_TNUMFLT);
 		break;
 	case OPR_TO_CLOSURE:
-		set_type(node->unary_expr.type, RAVI_TFUNCTION);
+		set_type(&node->unary_expr.type, RAVI_TFUNCTION);
 		break;
 	case OPR_TO_STRING:
-		set_type(node->unary_expr.type, RAVI_TSTRING);
+		set_type(&node->unary_expr.type, RAVI_TSTRING);
 		break;
 	case OPR_TO_INTARRAY:
-		set_type(node->unary_expr.type, RAVI_TARRAYINT);
+		set_type(&node->unary_expr.type, RAVI_TARRAYINT);
 		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
-			set_type(node->unary_expr.expr->table_expr.type, RAVI_TARRAYINT);
+			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYINT);
 		}
 		break;
 	case OPR_TO_NUMARRAY:
-		set_type(node->unary_expr.type, RAVI_TARRAYFLT);
+		set_type(&node->unary_expr.type, RAVI_TARRAYFLT);
 		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
-			set_type(node->unary_expr.expr->table_expr.type, RAVI_TARRAYFLT);
+			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYFLT);
 		}
 		break;
 	case OPR_TO_TABLE:
-		set_type(node->unary_expr.type, RAVI_TTABLE);
+		set_type(&node->unary_expr.type, RAVI_TTABLE);
 		break;
 	case OPR_TO_TYPE:
 		assert(node->unary_expr.type.type_name != NULL); // Should already be set by the parser
-		set_typecode(node->unary_expr.type, RAVI_TUSERDATA);
+		set_typecode(&node->unary_expr.type, RAVI_TUSERDATA);
 		break;
 	default:
 		break;
@@ -89,23 +89,23 @@ static void typecheck_binaryop(struct ast_container *container, struct ast_node 
 	case OPR_MUL:
 	case OPR_DIV:
 		if (e1->common_expr.type.type_code == RAVI_TNUMFLT && e2->common_expr.type.type_code == RAVI_TNUMFLT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		else if (e1->common_expr.type.type_code == RAVI_TNUMFLT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMINT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		else if (e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMFLT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		else if (op != OPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMINT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMINT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		else if (op == OPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMINT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		break;
 	case OPR_IDIV:
 		if (e1->common_expr.type.type_code == RAVI_TNUMINT && e2->common_expr.type.type_code == RAVI_TNUMINT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMINT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		// FIXME missing cases
 		break;
 	case OPR_BAND:
@@ -116,7 +116,7 @@ static void typecheck_binaryop(struct ast_container *container, struct ast_node 
 		if ((e1->common_expr.type.type_code == RAVI_TNUMFLT ||
 		     e1->common_expr.type.type_code == RAVI_TNUMINT) &&
 		    (e2->common_expr.type.type_code == RAVI_TNUMFLT || e2->common_expr.type.type_code == RAVI_TNUMINT))
-			set_typecode(node->binary_expr.type, RAVI_TNUMINT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		break;
 	case OPR_EQ:
 	case OPR_NE:
@@ -129,25 +129,25 @@ static void typecheck_binaryop(struct ast_container *container, struct ast_node 
 		     e1->common_expr.type.type_code == RAVI_TBOOLEAN) &&
 		    (e2->common_expr.type.type_code == RAVI_TNUMFLT || e2->common_expr.type.type_code == RAVI_TNUMINT ||
 		     e2->common_expr.type.type_code == RAVI_TBOOLEAN))
-			set_typecode(node->binary_expr.type, RAVI_TBOOLEAN);
+			set_typecode(&node->binary_expr.type, RAVI_TBOOLEAN);
 		break;
 	case OPR_POW:
 		if ((e1->common_expr.type.type_code == RAVI_TNUMFLT ||
 		     e1->common_expr.type.type_code == RAVI_TNUMINT) &&
 		    (e2->common_expr.type.type_code == RAVI_TNUMFLT || e2->common_expr.type.type_code == RAVI_TNUMINT))
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		break;
 	case OPR_MOD:
 		if (e1->common_expr.type.type_code == RAVI_TNUMINT && e2->common_expr.type.type_code == RAVI_TNUMINT)
-			set_typecode(node->binary_expr.type, RAVI_TNUMINT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		else if ((e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			  e2->common_expr.type.type_code == RAVI_TNUMFLT) ||
 			 (e1->common_expr.type.type_code == RAVI_TNUMFLT &&
 			  e2->common_expr.type.type_code == RAVI_TNUMINT))
-			set_typecode(node->binary_expr.type, RAVI_TNUMFLT);
+			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		break;
 	default:
-		set_typecode(node->binary_expr.type, RAVI_TANY);
+		set_typecode(&node->binary_expr.type, RAVI_TANY);
 		break;
 	}
 }
@@ -182,13 +182,13 @@ static void typecheck_suffixedexpr(struct ast_container *container, struct ast_n
 		if (this_node->type == AST_Y_INDEX_EXPR) {
 			if (prev_node->common_expr.type.type_code == RAVI_TARRAYFLT) {
 				if (this_node->index_expr.expr->common_expr.type.type_code == RAVI_TNUMINT) {
-					set_typecode(this_node->index_expr.type, RAVI_TNUMFLT);
+					set_typecode(&this_node->index_expr.type, RAVI_TNUMFLT);
 				} else {
 					handle_error(container, "invalid type in index");
 				}
 			} else if (prev_node->common_expr.type.type_code == RAVI_TARRAYINT) {
 				if (this_node->index_expr.expr->common_expr.type.type_code == RAVI_TNUMINT) {
-					set_typecode(this_node->index_expr.type, RAVI_TNUMINT);
+					set_typecode(&this_node->index_expr.type, RAVI_TNUMINT);
 				} else {
 					handle_error(container, "invalid type in index");
 				}
@@ -199,7 +199,7 @@ static void typecheck_suffixedexpr(struct ast_container *container, struct ast_n
 		prev_node = this_node;
 	}
 	END_FOR_EACH_PTR(node);
-	copy_type(node->suffixed_expr.type, prev_node->common_expr.type);
+	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
 static void insert_cast(struct ast_container *container, struct ast_node *expr, UnOpr opcode, ravitype_t target_type)
@@ -210,7 +210,7 @@ static void insert_cast(struct ast_container *container, struct ast_node *expr, 
 	expr->type = AST_UNARY_EXPR;
 	expr->unary_expr.expr = copy_expr;
 	expr->unary_expr.unary_op = opcode;
-	set_typecode(expr->unary_expr.type, target_type);
+	set_typecode(&expr->unary_expr.type, target_type);
 }
 
 static void typecheck_var_assignment(struct ast_container *container, struct var_type *var_type, struct ast_node *expr,
@@ -242,7 +242,7 @@ static void typecheck_var_assignment(struct ast_container *container, struct var
 		return;
 	}
 	// all other types must strictly match
-	if (!is_type_same(*var_type, *expr_type)) { // We should probably check type convert-ability here
+	if (!is_type_same(var_type, expr_type)) { // We should probably check type convert-ability here
 		fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
 	}
 }
@@ -342,7 +342,7 @@ static void typecheck_for_num_statment(struct ast_container *container, struct a
 		FOR_EACH_PTR(symbols, sym)
 		{
 			if (sym->symbol_type == SYM_LOCAL) {
-				set_typecode(sym->value_type, symbol_type);
+				set_typecode(&sym->value_type, symbol_type);
 			} else {
 				assert(0); /* cannot happen */
 			}
@@ -442,7 +442,7 @@ static void typecheck_ast_node(struct ast_container *container, struct ast_node 
 	}
 	case AST_SYMBOL_EXPR: {
 		/* symbol type should have been set when symbol was created */
-		copy_type(node->symbol_expr.type, node->symbol_expr.var->value_type);
+		copy_type(&node->symbol_expr.type, &node->symbol_expr.var->value_type);
 		break;
 	}
 	case AST_BINARY_EXPR: {
@@ -470,7 +470,7 @@ static void typecheck_ast_node(struct ast_container *container, struct ast_node 
 			typecheck_ast_node(container, function, node->indexed_assign_expr.key_expr);
 		}
 		typecheck_ast_node(container, function, node->indexed_assign_expr.value_expr);
-		copy_type(node->indexed_assign_expr.type, node->indexed_assign_expr.value_expr->common_expr.type);
+		copy_type(&node->indexed_assign_expr.type, &node->indexed_assign_expr.value_expr->common_expr.type);
 		break;
 	}
 	case AST_TABLE_EXPR: {
