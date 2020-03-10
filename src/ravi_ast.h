@@ -58,76 +58,9 @@ struct compiler_state {
 	bool killed;		 /* flag to check if this is already destroyed */
 };
 
-#define FIRST_RESERVED 257
-
-/*
- * WARNING: if you change the order of this enumeration,
- * grep "ORDER RESERVED"
- */
-enum RESERVED {
-	/* terminal symbols denoted by reserved words */
-	TK_AND = FIRST_RESERVED,
-	TK_BREAK,
-	TK_DO,
-	TK_ELSE,
-	TK_ELSEIF,
-	TK_END,
-	TK_FALSE,
-	TK_FOR,
-	TK_FUNCTION,
-	TK_GOTO,
-	TK_IF,
-	TK_IN,
-	TK_LOCAL,
-	TK_DEFER,
-	TK_NIL,
-	TK_NOT,
-	TK_OR,
-	TK_REPEAT,
-	TK_RETURN,
-	TK_THEN,
-	TK_TRUE,
-	TK_UNTIL,
-	TK_WHILE,
-	/* other terminal symbols */
-	TK_IDIV,
-	TK_CONCAT,
-	TK_DOTS,
-	TK_EQ,
-	TK_GE,
-	TK_LE,
-	TK_NE,
-	TK_SHL,
-	TK_SHR,
-	TK_DBCOLON,
-	TK_EOS,
-	TK_FLT,
-	TK_INT,
-	TK_NAME,
-	TK_STRING,
-	/** RAVI extensions */
-	TK_TO_INTEGER,
-	TK_TO_NUMBER,
-	TK_TO_INTARRAY,
-	TK_TO_NUMARRAY,
-	TK_TO_TABLE,
-	TK_TO_STRING,
-	TK_TO_CLOSURE
-};
 
 /* number of reserved words */
 #define NUM_RESERVED ((int)(TK_WHILE - FIRST_RESERVED + 1))
-
-typedef union {
-	lua_Number r;
-	lua_Integer i;
-	const char *ts;
-} SemInfo; /* semantics information */
-
-typedef struct Token {
-	int token;
-	SemInfo seminfo;
-} Token;
 
 /* state of the lexer plus state of the parser when shared by all
    functions */
@@ -146,7 +79,6 @@ struct lexer_state {
 	const char *source; /* current source name */
 	const char *envn;   /* environment variable name */
 };
-typedef struct lexer_state LexState;
 
 struct ast_node;
 DECLARE_PTR_LIST(ast_node_list, struct ast_node);
