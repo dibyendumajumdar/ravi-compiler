@@ -30,7 +30,7 @@ extern "C" {
 */
 
 #ifndef LIST_NODE_NR
-#define LIST_NODE_NR (29)
+#define LIST_NODE_NR (7)
 #endif
 
 #define DECLARE_PTR_LIST(listname, type)                                       \

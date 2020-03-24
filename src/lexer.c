@@ -158,9 +158,7 @@ void luaX_init(struct lexer_state *ls)
 }
 
 /*
-** creates a new string and anchors it in scanner's table so that
-** it will not be collected until the end of the compilation
-** (by that time it should be anchored somewhere)
+** creates a new interned string. 
 */
 const char *luaX_newstring(struct lexer_state *ls, const char *str, size_t l)
 {

@@ -1,6 +1,6 @@
 tparse "return"
 tparse "return 1"
-tparse "return 42, 4.2, true, "hello""
+tparse "return 42, 4.2, true, 'hello'"
 tparse "return a"
 tparse "return 1+2"
 tparse "return 2^3-5*4"
@@ -16,9 +16,6 @@ tparse "return 3^-1"
 tparse "return (1 + 1)^(50 + 50)"
 tparse "return (-2)^(31 - 2)"
 tparse "return (-3^0 + 5) // 3.0"
-tparse "return -3 % 5"
-tparse "return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3"
-tparse "return -((2^8 + -(-1)) % 8)//2 * 4 - 3"
 tparse "return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD"
 tparse "return ~(~0xFF0 | 0xFF0)"
 tparse "return ~~-100024.0"
@@ -29,7 +26,6 @@ tparse "return 2^3*4 == (2^3)*4"
 tparse "return 2.0^-2 == 1/4, -2^- -2 == - - -4"
 tparse "return -3-1-5 == 0+0-9"
 tparse "return -2^2 == -4, (-2)^2 == 4, 2*2-3-1 == 0"
-tparse "return -3%5 == 2, -3+5 == 2"
 
 tparse "return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4"
 tparse "return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4"
@@ -37,7 +33,6 @@ tparse "return 0xF0 & 0x0F + 1 == 0x10"
 
 tparse "return 3^4//2^3//5 == 2"
 
-tparse "return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)"
 
 tparse "return @integer 1"
 tparse "return @string 'hello'"
@@ -92,7 +87,29 @@ tparse "i = 3; i, a[i] = i+1, 20"
 tparse "x(y(a[10],5,z()))[1] = 9"
 tparse "local i = 0"
 tparse "local i, j = 1, 2"
-@rem following is wrongly parsed
 tparse "local a = a"
 tparse "local a = b"
 tparse "local a, b = x, y"
+
+tparse "local a: integer return a+3"
+tparse "local i: integer; return t[i/5]"
+tparse "local t: integer[]; return t[0]"
+tparse "return f()[1]"
+tparse "return x.y[1]"
+
+tparse "local t: integer[] if (t[1] == 5) then return true end return false"
+tparse "local t: table local len: integer = #t return len"
+tparse "return function(t: table, i: integer) i = #t end"
+
+tparse -f t001.lua
+tparse -f t002.lua
+tparse -f t003.lua
+tparse -f t004.lua
+tparse -f t005.lua
+tparse -f t006.lua
+tparse -f t007.lua
+tparse -f t008.lua
+tparse -f t009.lua
+tparse -f t010.lua
+tparse -f t011.lua
+tparse -f t012.lua

@@ -63,19 +63,19 @@ struct linearizer_state* raviX_init_linearizer(struct compiler_state *container)
 {
 	struct linearizer_state* linearizer = (struct linearizer_state* ) calloc(1, sizeof(struct linearizer_state));
 	linearizer->ast_container = container;
-	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double), CHUNK);
+	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double), sizeof(struct edge)*32);
 	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(struct instruction),
-			     sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct instruction)*128);
 	raviX_allocator_init(&linearizer->ptrlist_allocator, "ptrlist_allocator", sizeof(struct ptr_list),
-			     sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct ptr_list)*64);
 	raviX_allocator_init(&linearizer->pseudo_allocator, "pseudo_allocator", sizeof(struct pseudo), sizeof(double),
-			     CHUNK);
+		sizeof(struct pseudo)*128);
 	raviX_allocator_init(&linearizer->basic_block_allocator, "basic_block_allocator", sizeof(struct basic_block),
-			     sizeof(double), CHUNK);
-	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(struct proc), sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct basic_block)*32);
+	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(struct proc), sizeof(double), sizeof(struct proc)*32);
 	raviX_allocator_init(&linearizer->unsized_allocator, "unsized_allocator", 0, sizeof(double), CHUNK);
 	raviX_allocator_init(&linearizer->constant_allocator, "constant_allocator", sizeof(struct constant),
-			     sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct constant)*64);
 	return linearizer;
 }
 
@@ -1081,7 +1081,7 @@ static void linearize_assignment(struct proc* proc, struct ast_node_list* expr_l
 	int note_ne = ne;
 	while (nv > 0) {
 		if (nv > ne) {
-			if (last_val_pseudo->type == PSEUDO_RANGE) {
+			if (last_val_pseudo != NULL && last_val_pseudo->type == PSEUDO_RANGE) {
 				int pick = nv - ne;
 				linearize_store_var(proc, varinfo[nv - 1].type_code,
 					varinfo[nv - 1].pseudo,
@@ -1108,6 +1108,12 @@ static void linearize_assignment(struct proc* proc, struct ast_node_list* expr_l
 		}
 	}
 }
+
+/*
+The handling of local and expression statements can be partially combined
+because the main difference is the LHS sie of it. The rest of the processing has to be
+the same.
+*/
 
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {

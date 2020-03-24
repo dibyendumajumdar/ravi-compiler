@@ -20,12 +20,13 @@ typedef long long lua_Integer;
 typedef double lua_Number;
 
 
-/* Initiaze the compiler state */
+/* Initialize the compiler state */
 RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler();
 /* Destroy the compiler state */
-RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *container);
+RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
 /* ------------------------ LEXICAL ANALYZER -------------------------------*/
+/* This is derived from PuC Lua implementation                              */
 enum RESERVED {
 	/* terminal symbols denoted by reserved words */
 	FIRST_RESERVED = 257,
@@ -82,7 +83,7 @@ typedef union {
 	lua_Number r;
 	lua_Integer i;
 	const char* ts;
-} SemInfo; /* semantics information */
+} SemInfo; /* semantic information */
 
 typedef struct Token {
 	int token;

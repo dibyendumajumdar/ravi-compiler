@@ -1596,14 +1596,14 @@ struct compiler_state *raviX_init_compiler()
 {
 	struct compiler_state *container = (struct compiler_state *)calloc(1, sizeof(struct compiler_state));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(struct ast_node), sizeof(double),
-			     CHUNK);
-	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double), CHUNK);
+		sizeof(struct ast_node)*32);
+	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double), sizeof(struct ptr_list)*32);
 	raviX_allocator_init(&container->block_scope_allocator, "block scopes", sizeof(struct block_scope),
-			     sizeof(double), CHUNK);
-	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double), CHUNK);
-	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct block_scope)*32);
+	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double), sizeof(struct lua_symbol)*64);
+	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), 1024);
 	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(struct string_object),
-			     sizeof(double), CHUNK);
+			     sizeof(double), sizeof(struct string_object)*64);
 	luaZ_initbuffer(&container->buff);
 	container->strings = set_create(string_hash, string_equal);
 	container->main_function = NULL;
@@ -1612,9 +1612,19 @@ struct compiler_state *raviX_init_compiler()
 	return container;
 }
 
+static void show_allocations(struct compiler_state* compiler) {
+	raviX_allocator_show_allocations(&compiler->symbol_allocator);
+	raviX_allocator_show_allocations(&compiler->block_scope_allocator);
+	raviX_allocator_show_allocations(&compiler->ast_node_allocator);
+	raviX_allocator_show_allocations(&compiler->ptrlist_allocator);
+	raviX_allocator_show_allocations(&compiler->string_allocator);
+	raviX_allocator_show_allocations(&compiler->string_object_allocator);
+}
+
 void raviX_destroy_compiler(struct compiler_state *container)
 {
 	if (!container->killed) {
+		//show_allocations(container);
 		if (container->linearizer) {
 			raviX_destroy_linearizer(container->linearizer);
 			free(container->linearizer);
