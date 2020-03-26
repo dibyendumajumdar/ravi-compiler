@@ -23,15 +23,39 @@ tparse "return ((100 << 6) << -4) >> 2"
 
 tparse "return 2^3^2 == 2^(3^2)"
 tparse "return 2^3*4 == (2^3)*4"
-tparse "return 2.0^-2 == 1/4, -2^- -2 == - - -4"
+tparse "return 2.0^-2 == 1/4 and -2^- -2 == - - -4"
+tparse "return not nil and 2 and not(2>3 or 3<2)"
 tparse "return -3-1-5 == 0+0-9"
-tparse "return -2^2 == -4, (-2)^2 == 4, 2*2-3-1 == 0"
+tparse "return -2^2 == -4 and (-2)^2 == 4 and 2*2-3-1 == 0"
+tparse ""
+tparse "return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'"
+tparse "return not(2+1 > 3*1) and 'a'..'b' > 'a'"
+
+tparse "return '7' .. 3 << 1 == 146"
+tparse "return 10 >> 1 .. '9' == 0"
+tparse "return 10 | 1 .. '9' == 27"
 
 tparse "return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4"
 tparse "return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4"
 tparse "return 0xF0 & 0x0F + 1 == 0x10"
 
 tparse "return 3^4//2^3//5 == 2"
+
+tparse "return not ((true or false) and nil)"
+tparse "return true or false and nil"
+
+tparse "return (((1 or false) and true) or false) == true"
+tparse "return (((nil and true) or false) and true) == false"
+
+tparse "return -(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75"
+tparse "return (b or a)+1 == 2 and (10 or a)+1 == 11"
+tparse "return ((2<3) or 1) == true and (2<3 and 4) == 4"
+
+tparse "return (x>y) and x or y == 2"
+
+tparse "function x() for i = 1, 10 do; print(i); end end"
+
+tparse "function x() local a=1; function y() return function() return a end end; end"
 
 
 tparse "return @integer 1"

@@ -809,106 +809,114 @@ L0 (entry)
 	RET {T(0)} {L1}
 L1 (exit)
 
-C:\work\github\ravi-compiler\tests\input>tparse "return 2.0^-2 == 1/4, -2^- -2 == - - -4" 
+C:\work\github\ravi-compiler\tests\input>tparse "return 2.0^-2 == 1/4 and -2^- -2 == - - -4" 
 function()
   return
     --[binary expr start] any
      --[binary expr start] any
-      2.0000000000000000
-     ^
+      --[binary expr start] any
+       2.0000000000000000
+      ^
+       --[unary expr start] any
+       -
+        2
+       --[unary expr end]
+      --[binary expr end]
+     ==
+      --[binary expr start] any
+       1
+      /
+       4
+      --[binary expr end]
+     --[binary expr end]
+    and
+     --[binary expr start] any
       --[unary expr start] any
       -
-       2
+       --[binary expr start] any
+        2
+       ^
+        --[unary expr start] any
+        -
+         --[unary expr start] any
+         -
+          2
+         --[unary expr end]
+        --[unary expr end]
+       --[binary expr end]
       --[unary expr end]
-     --[binary expr end]
-    ==
-     --[binary expr start] any
-      1
-     /
-      4
-     --[binary expr end]
-    --[binary expr end]
-   ,
-    --[binary expr start] any
-     --[unary expr start] any
-     -
-      --[binary expr start] any
-       2
-      ^
+     ==
+      --[unary expr start] any
+      -
        --[unary expr start] any
        -
         --[unary expr start] any
         -
-         2
+         4
         --[unary expr end]
        --[unary expr end]
-      --[binary expr end]
-     --[unary expr end]
-    ==
-     --[unary expr start] any
-     -
-      --[unary expr start] any
-      -
-       --[unary expr start] any
-       -
-        4
-       --[unary expr end]
       --[unary expr end]
-     --[unary expr end]
+     --[binary expr end]
     --[binary expr end]
 end
 function()
   return
-    --[binary expr start] boolean
-     --[binary expr start] number
-      2.0000000000000000
-     ^
+    --[binary expr start] any
+     --[binary expr start] boolean
+      --[binary expr start] number
+       2.0000000000000000
+      ^
+       --[unary expr start] integer
+       -
+        2
+       --[unary expr end]
+      --[binary expr end]
+     ==
+      --[binary expr start] number
+       1
+      /
+       4
+      --[binary expr end]
+     --[binary expr end]
+    and
+     --[binary expr start] boolean
+      --[unary expr start] number
+      -
+       --[binary expr start] number
+        2
+       ^
+        --[unary expr start] integer
+        -
+         --[unary expr start] integer
+         -
+          2
+         --[unary expr end]
+        --[unary expr end]
+       --[binary expr end]
+      --[unary expr end]
+     ==
       --[unary expr start] integer
       -
-       2
-      --[unary expr end]
-     --[binary expr end]
-    ==
-     --[binary expr start] number
-      1
-     /
-      4
-     --[binary expr end]
-    --[binary expr end]
-   ,
-    --[binary expr start] boolean
-     --[unary expr start] number
-     -
-      --[binary expr start] number
-       2
-      ^
        --[unary expr start] integer
        -
         --[unary expr start] integer
         -
-         2
+         4
         --[unary expr end]
        --[unary expr end]
-      --[binary expr end]
-     --[unary expr end]
-    ==
-     --[unary expr start] integer
-     -
-      --[unary expr start] integer
-      -
-       --[unary expr start] integer
-       -
-        4
-       --[unary expr end]
       --[unary expr end]
-     --[unary expr end]
+     --[binary expr end]
     --[binary expr end]
 end
 L0 (entry)
 	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
 	POW {2.000000000000 Kflt(0), Tint(0)} {Tflt(0)}
 	DIVii {1 Kint(1), 4 Kint(2)} {Tflt(1)}
-	EQff {Tflt(0), Tflt(1)} {T(0)}
+	EQff {Tflt(0), Tflt(1)} {T(1)}
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L1 (exit)
+L2
 	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
 	UNMi {Tint(0)} {Tint(1)}
 	POW {2.000000000000 Kflt(0), Tint(1)} {Tflt(1)}
@@ -917,8 +925,105 @@ L0 (entry)
 	UNMi {Tint(1)} {Tint(2)}
 	UNMi {Tint(2)} {Tint(3)}
 	EQ {Tflt(0), Tint(3)} {T(1)}
-	RET {T(0), T(1)} {L1}
+	MOV {T(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return not nil and 2 and not(2>3 or 3<2)" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[unary expr start] any
+      not
+       nil
+      --[unary expr end]
+     and
+      2
+     --[binary expr end]
+    and
+     --[unary expr start] any
+     not
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[binary expr start] any
+          2
+         >
+          3
+         --[binary expr end]
+        or
+         --[binary expr start] any
+          3
+         <
+          2
+         --[binary expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[unary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[unary expr start] any
+      not
+       nil
+      --[unary expr end]
+     and
+      2
+     --[binary expr end]
+    and
+     --[unary expr start] any
+     not
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[binary expr start] boolean
+          2
+         >
+          3
+         --[binary expr end]
+        or
+         --[binary expr start] boolean
+          3
+         <
+          2
+         --[binary expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[unary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	NOT {nil} {T(2)}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L4, L5}
 L1 (exit)
+L2
+	LIii {3 Kint(1), 2 Kint(0)} {T(2)}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L7, L6}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {2 Kint(0)} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L6
+	LIii {3 Kint(1), 2 Kint(0)} {T(2)}
+	MOV {T(2)} {T(1)}
+	BR {L7}
+L7
+	NOT {T(1)} {T(2)}
+	MOV {T(2)} {T(0)}
+	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return -3-1-5 == 0+0-9" 
 function()
@@ -985,127 +1090,411 @@ L0 (entry)
 	RET {T(0)} {L1}
 L1 (exit)
 
-C:\work\github\ravi-compiler\tests\input>tparse "return -2^2 == -4, (-2)^2 == 4, 2*2-3-1 == 0" 
+C:\work\github\ravi-compiler\tests\input>tparse "return -2^2 == -4 and (-2)^2 == 4 and 2*2-3-1 == 0" 
 function()
   return
     --[binary expr start] any
-     --[unary expr start] any
-     -
-      --[binary expr start] any
-       2
-      ^
-       2
-      --[binary expr end]
-     --[unary expr end]
-    ==
-     --[unary expr start] any
-     -
-      4
-     --[unary expr end]
-    --[binary expr end]
-   ,
-    --[binary expr start] any
      --[binary expr start] any
-      --[suffixed expr start] any
-       --[primary start] any
-        --[unary expr start] any
-        -
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        --[binary expr start] any
          2
-        --[unary expr end]
-       --[primary end]
-      --[suffixed expr end]
-     ^
-      2
+        ^
+         2
+        --[binary expr end]
+       --[unary expr end]
+      ==
+       --[unary expr start] any
+       -
+        4
+       --[unary expr end]
+      --[binary expr end]
+     and
+      --[binary expr start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[unary expr start] any
+          -
+           2
+          --[unary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       ^
+        2
+       --[binary expr end]
+      ==
+       4
+      --[binary expr end]
      --[binary expr end]
-    ==
-     4
-    --[binary expr end]
-   ,
-    --[binary expr start] any
+    and
      --[binary expr start] any
       --[binary expr start] any
        --[binary expr start] any
-        2
-       *
-        2
+        --[binary expr start] any
+         2
+        *
+         2
+        --[binary expr end]
+       -
+        3
        --[binary expr end]
       -
-       3
+       1
       --[binary expr end]
-     -
-      1
+     ==
+      0
      --[binary expr end]
-    ==
-     0
     --[binary expr end]
 end
 function()
   return
-    --[binary expr start] boolean
-     --[unary expr start] number
-     -
-      --[binary expr start] number
-       2
-      ^
-       2
-      --[binary expr end]
-     --[unary expr end]
-    ==
-     --[unary expr start] integer
-     -
-      4
-     --[unary expr end]
-    --[binary expr end]
-   ,
-    --[binary expr start] boolean
-     --[binary expr start] number
-      --[suffixed expr start] integer
-       --[primary start] integer
-        --[unary expr start] integer
-        -
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] boolean
+       --[unary expr start] number
+       -
+        --[binary expr start] number
          2
-        --[unary expr end]
-       --[primary end]
-      --[suffixed expr end]
-     ^
-      2
-     --[binary expr end]
-    ==
-     4
-    --[binary expr end]
-   ,
-    --[binary expr start] boolean
-     --[binary expr start] integer
-      --[binary expr start] integer
-       --[binary expr start] integer
-        2
-       *
+        ^
+         2
+        --[binary expr end]
+       --[unary expr end]
+      ==
+       --[unary expr start] integer
+       -
+        4
+       --[unary expr end]
+      --[binary expr end]
+     and
+      --[binary expr start] boolean
+       --[binary expr start] number
+        --[suffixed expr start] integer
+         --[primary start] integer
+          --[unary expr start] integer
+          -
+           2
+          --[unary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       ^
         2
        --[binary expr end]
-      -
-       3
+      ==
+       4
       --[binary expr end]
-     -
-      1
      --[binary expr end]
-    ==
-     0
+    and
+     --[binary expr start] boolean
+      --[binary expr start] integer
+       --[binary expr start] integer
+        --[binary expr start] integer
+         2
+        *
+         2
+        --[binary expr end]
+       -
+        3
+       --[binary expr end]
+      -
+       1
+      --[binary expr end]
+     ==
+      0
+     --[binary expr end]
     --[binary expr end]
 end
 L0 (entry)
 	POW {2 Kint(0), 2 Kint(0)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
 	UNMi {4 Kint(1)} {Tint(0)}
-	EQ {Tflt(1), Tint(0)} {T(0)}
-	UNMi {2 Kint(0)} {Tint(0)}
-	POW {Tint(0), 2 Kint(0)} {Tflt(1)}
-	EQ {Tflt(1), 4 Kint(1)} {T(1)}
+	EQ {Tflt(1), Tint(0)} {T(2)}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L4, L5}
+L1 (exit)
+L2
 	MULii {2 Kint(0), 2 Kint(0)} {Tint(0)}
 	SUBii {Tint(0), 3 Kint(2)} {Tint(1)}
 	SUBii {Tint(1), 1 Kint(3)} {Tint(0)}
-	EQii {Tint(0), 0 Kint(4)} {T(2)}
-	RET {T(0), T(1), T(2)} {L1}
+	EQii {Tint(0), 0 Kint(4)} {T(1)}
+	MOV {T(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+L4
+	UNMi {2 Kint(0)} {Tint(0)}
+	POW {Tint(0), 2 Kint(0)} {Tflt(1)}
+	EQ {Tflt(1), 4 Kint(1)} {T(2)}
+	MOV {T(2)} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "" 
+function()
+end
+function()
+end
+L0 (entry)
 L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] any
+        2
+       *
+        1
+       --[binary expr end]
+      +
+       --[binary expr start] any
+        3
+       /
+        3
+       --[binary expr end]
+      --[binary expr end]
+     ==
+      3
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] any
+        1
+       +
+        2
+       --[binary expr end]
+      ..
+       --[binary expr start] any
+        3
+       *
+        1
+       --[binary expr end]
+      --[binary expr end]
+     ==
+      '33'
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] boolean
+      --[binary expr start] number
+       --[binary expr start] integer
+        2
+       *
+        1
+       --[binary expr end]
+      +
+       --[binary expr start] number
+        3
+       /
+        3
+       --[binary expr end]
+      --[binary expr end]
+     ==
+      3
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[binary expr start] integer
+        1
+       +
+        2
+       --[binary expr end]
+      ..
+       --[binary expr start] integer
+        3
+       *
+        1
+       --[binary expr end]
+      --[binary expr end]
+     ==
+      '33'
+     --[binary expr end]
+    --[binary expr end]
+end
+
+C:\work\github\ravi-compiler\tests\input>tparse "return not(2+1 > 3*1) and 'a'..'b' > 'a'" 
+function()
+  return
+    --[binary expr start] any
+     --[unary expr start] any
+     not
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[binary expr start] any
+          2
+         +
+          1
+         --[binary expr end]
+        >
+         --[binary expr start] any
+          3
+         *
+          1
+         --[binary expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[unary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       'a'
+      ..
+       'b'
+      --[binary expr end]
+     >
+      'a'
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[unary expr start] any
+     not
+      --[suffixed expr start] boolean
+       --[primary start] boolean
+        --[binary expr start] boolean
+         --[binary expr start] integer
+          2
+         +
+          1
+         --[binary expr end]
+        >
+         --[binary expr start] integer
+          3
+         *
+          1
+         --[binary expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     --[unary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       'a'
+      ..
+       'b'
+      --[binary expr end]
+     >
+      'a'
+     --[binary expr end]
+    --[binary expr end]
+end
+
+C:\work\github\ravi-compiler\tests\input>tparse "return '7' .. 3 << 1 == 146" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       '7'
+      ..
+       3
+      --[binary expr end]
+     <<
+      1
+     --[binary expr end]
+    ==
+     146
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       '7'
+      ..
+       3
+      --[binary expr end]
+     <<
+      1
+     --[binary expr end]
+    ==
+     146
+    --[binary expr end]
+end
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 10 >> 1 .. '9' == 0" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      10
+     >>
+      --[binary expr start] any
+       1
+      ..
+       '9'
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     0
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      10
+     >>
+      --[binary expr start] any
+       1
+      ..
+       '9'
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     0
+    --[binary expr end]
+end
+
+C:\work\github\ravi-compiler\tests\input>tparse "return 10 | 1 .. '9' == 27" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      10
+     |
+      --[binary expr start] any
+       1
+      ..
+       '9'
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     27
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      10
+     |
+      --[binary expr start] any
+       1
+      ..
+       '9'
+      --[binary expr end]
+     --[binary expr end]
+    ==
+     27
+    --[binary expr end]
+end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4" 
 function()
@@ -1303,6 +1692,969 @@ L0 (entry)
 	RET {T(0)} {L1}
 L1 (exit)
 
+C:\work\github\ravi-compiler\tests\input>tparse "return not ((true or false) and nil)" 
+function()
+  return
+    --[unary expr start] any
+    not
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           true
+          or
+           false
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       and
+        nil
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+  return
+    --[unary expr start] any
+    not
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           true
+          or
+           false
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       and
+        nil
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+L0 (entry)
+	MOV {true} {T(1)}
+	CBR {T(1)} {L5, L4}
+L1 (exit)
+L2
+	MOV {nil} {T(0)}
+	BR {L3}
+L3
+	NOT {T(0)} {T(1)}
+	RET {T(1)} {L1}
+L4
+	MOV {false} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return true or false and nil" 
+function()
+  return
+    --[binary expr start] any
+     true
+    or
+     --[binary expr start] any
+      false
+     and
+      nil
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     true
+    or
+     --[binary expr start] any
+      false
+     and
+      nil
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {true} {T(0)}
+	CBR {T(0)} {L3, L2}
+L1 (exit)
+L2
+	MOV {false} {T(1)}
+	CBR {T(1)} {L4, L5}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {nil} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	BR {L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (((1 or false) and true) or false) == true" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+             --[binary expr start] any
+              1
+             or
+              false
+             --[binary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          and
+           true
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       or
+        false
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ==
+     true
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+             --[binary expr start] any
+              1
+             or
+              false
+             --[binary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          and
+           true
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       or
+        false
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ==
+     true
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {1 Kint(0)} {T(2)}
+	CBR {T(2)} {L7, L6}
+L1 (exit)
+L2
+	MOV {false} {T(0)}
+	BR {L3}
+L3
+	EQ {T(0), true} {T(1)}
+	RET {T(1)} {L1}
+L4
+	MOV {true} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L3, L2}
+L6
+	MOV {false} {T(2)}
+	BR {L7}
+L7
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L4, L5}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (((nil and true) or false) and true) == false" 
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+             --[binary expr start] any
+              nil
+             and
+              true
+             --[binary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          or
+           false
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       and
+        true
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ==
+     false
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[suffixed expr start] any
+      --[primary start] any
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+             --[binary expr start] any
+              nil
+             and
+              true
+             --[binary expr end]
+            --[primary end]
+           --[suffixed expr end]
+          or
+           false
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       and
+        true
+       --[binary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    ==
+     false
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {nil} {T(2)}
+	CBR {T(2)} {L6, L7}
+L1 (exit)
+L2
+	MOV {true} {T(0)}
+	BR {L3}
+L3
+	EQ {T(0), false} {T(1)}
+	RET {T(1)} {L1}
+L4
+	MOV {false} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L6
+	MOV {true} {T(2)}
+	BR {L7}
+L7
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L5, L4}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return -(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[unary expr start] any
+      -
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          1
+         or
+          2
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[unary expr end]
+     ==
+      --[unary expr start] any
+      -
+       1
+      --[unary expr end]
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          1
+         and
+          2
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[unary expr start] any
+          -
+           1.2500000000000000
+          --[unary expr end]
+         or
+          --[unary expr start] any
+          -
+           4
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[binary expr end]
+     ==
+      0.7500000000000000
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[unary expr start] any
+      -
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          1
+         or
+          2
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[unary expr end]
+     ==
+      --[unary expr start] integer
+      -
+       1
+      --[unary expr end]
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          1
+         and
+          2
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[unary expr start] number
+          -
+           1.2500000000000000
+          --[unary expr end]
+         or
+          --[unary expr start] integer
+          -
+           4
+          --[unary expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      --[binary expr end]
+     ==
+      0.7500000000000000
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	MOV {1 Kint(0)} {T(1)}
+	CBR {T(1)} {L5, L4}
+L1 (exit)
+L2
+	MOV {1 Kint(0)} {T(3)}
+	CBR {T(3)} {L6, L7}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {2 Kint(1)} {T(1)}
+	BR {L5}
+L5
+	UNM {T(1)} {T(2)}
+	UNMi {1 Kint(0)} {Tint(0)}
+	EQ {T(2), Tint(0)} {T(3)}
+	MOV {T(3)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L6
+	MOV {2 Kint(1)} {T(3)}
+	BR {L7}
+L7
+	UNMf {1 Kint(0)} {Tflt(0)}
+	MOV {Tflt(0)} {T(2)}
+	CBR {T(2)} {L9, L8}
+L8
+	UNMi {4 Kint(2)} {Tint(0)}
+	MOV {Tint(0)} {T(2)}
+	BR {L9}
+L9
+	ADD {T(3), T(2)} {T(4)}
+	EQ {T(4), 0.750000000000 Kflt(3)} {T(2)}
+	MOV {T(2)} {T(0)}
+	BR {L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (b or a)+1 == 2 and (10 or a)+1 == 11" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             b --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         or
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       1
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          10
+         or
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       1
+      --[binary expr end]
+     ==
+      11
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             b --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         or
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       1
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+         --[binary expr start] any
+          10
+         or
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        --[primary end]
+       --[suffixed expr end]
+      +
+       1
+      --[binary expr end]
+     ==
+      11
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	LOADGLOBAL {b} {T(2)}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L5, L4}
+L1 (exit)
+L2
+	MOV {10 Kint(2)} {T(1)}
+	CBR {T(1)} {L7, L6}
+L3
+	RET {T(0)} {L1}
+L4
+	LOADGLOBAL {a} {T(2)}
+	MOV {T(2)} {T(1)}
+	BR {L5}
+L5
+	ADD {T(1), 1 Kint(0)} {T(2)}
+	EQ {T(2), 2 Kint(1)} {T(1)}
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L6
+	LOADGLOBAL {a} {T(2)}
+	MOV {T(2)} {T(1)}
+	BR {L7}
+L7
+	ADD {T(1), 1 Kint(0)} {T(2)}
+	EQ {T(2), 11 Kint(3)} {T(1)}
+	MOV {T(1)} {T(0)}
+	BR {L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return ((2<3) or 1) == true and (2<3 and 4) == 4" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[suffixed expr start] any
+          --[primary start] any
+           --[binary expr start] any
+            2
+           <
+            3
+           --[binary expr end]
+          --[primary end]
+         --[suffixed expr end]
+        or
+         1
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      true
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[binary expr start] any
+          2
+         <
+          3
+         --[binary expr end]
+        and
+         4
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[suffixed expr start] boolean
+          --[primary start] boolean
+           --[binary expr start] boolean
+            2
+           <
+            3
+           --[binary expr end]
+          --[primary end]
+         --[suffixed expr end]
+        or
+         1
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      true
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[binary expr start] boolean
+          2
+         <
+          3
+         --[binary expr end]
+        and
+         4
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      4
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	LIii {2 Kint(0), 3 Kint(1)} {T(2)}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L5, L4}
+L1 (exit)
+L2
+	LIii {2 Kint(0), 3 Kint(1)} {T(1)}
+	MOV {T(1)} {T(2)}
+	CBR {T(2)} {L6, L7}
+L3
+	RET {T(0)} {L1}
+L4
+	MOV {1 Kint(2)} {T(1)}
+	BR {L5}
+L5
+	EQ {T(1), true} {T(2)}
+	MOV {T(2)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L6
+	MOV {4 Kint(3)} {T(2)}
+	BR {L7}
+L7
+	EQ {T(2), 4 Kint(3)} {T(1)}
+	MOV {T(1)} {T(0)}
+	BR {L3}
+
+C:\work\github\ravi-compiler\tests\input>tparse "return (x>y) and x or y == 2" 
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[suffixed expr start] any
+          --[primary start] any
+            x --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+        >
+         --[suffixed expr start] any
+          --[primary start] any
+            y --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     and
+      --[suffixed expr start] any
+       --[primary start] any
+         x --global symbol any 
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    or
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+         y --global symbol any 
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      2
+     --[binary expr end]
+    --[binary expr end]
+end
+function()
+  return
+    --[binary expr start] any
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+        --[binary expr start] any
+         --[suffixed expr start] any
+          --[primary start] any
+            x --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+        >
+         --[suffixed expr start] any
+          --[primary start] any
+            y --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+        --[binary expr end]
+       --[primary end]
+      --[suffixed expr end]
+     and
+      --[suffixed expr start] any
+       --[primary start] any
+         x --global symbol any 
+       --[primary end]
+      --[suffixed expr end]
+     --[binary expr end]
+    or
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+         y --global symbol any 
+       --[primary end]
+      --[suffixed expr end]
+     ==
+      2
+     --[binary expr end]
+    --[binary expr end]
+end
+L0 (entry)
+	LOADGLOBAL {x} {T(2)}
+	LOADGLOBAL {y} {T(3)}
+	LT {T(3), T(2)} {T(4)}
+	MOV {T(4)} {T(1)}
+	CBR {T(1)} {L4, L5}
+L1 (exit)
+L2
+	LOADGLOBAL {y} {T(1)}
+	EQ {T(1), 2 Kint(0)} {T(4)}
+	MOV {T(4)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
+L4
+	LOADGLOBAL {x} {T(4)}
+	MOV {T(4)} {T(1)}
+	BR {L5}
+L5
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L3, L2}
+
+C:\work\github\ravi-compiler\tests\input>tparse "function x() for i = 1, 10 do; print(i); end end" 
+function()
+   x --global symbol any 
+   =
+    function()
+    --locals  i
+      for
+        i --local symbol any 
+      =
+        1
+       ,
+        10
+      do
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               print --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     i --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
+      end
+    end
+end
+function()
+   x --global symbol any 
+   =
+    function()
+    --locals  i
+      for
+        i --local symbol integer 
+      =
+        1
+       ,
+        10
+      do
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               print --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     i --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
+      end
+    end
+end
+
+C:\work\github\ravi-compiler\tests\input>tparse "function x() local a=1; function y() return function() return a end end; end" 
+function()
+   x --global symbol any 
+   =
+    function()
+    --locals  a
+      local
+      --[symbols]
+        a --local symbol any 
+      --[expressions]
+        1
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            functionx --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            y --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           functionx --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+    end
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+   x --global symbol any 
+   =
+    function()
+    --locals  a
+      local
+      --[symbols]
+        a --local symbol any 
+      --[expressions]
+        1
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            functionx --global symbol any 
+          --[primary end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            y --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           functionx --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+    end
+  return
+    --[suffixed expr start] any
+     --[primary start] any
+       a --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+end
+
 C:\work\github\ravi-compiler\tests\input>tparse "return @integer 1" 
 function()
   return
@@ -1425,7 +2777,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000001672BDCA8C8)} {T(0)}
+	CLOSURE {Proc(00000216D956D4C8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4374,7 +5726,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(00000185C7F6D048)} {T(0)}
+	CLOSURE {Proc(0000028FAD00D088)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4462,7 +5814,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001506208B568)} {T(0)}
+	CLOSURE {Proc(000002558F11DCF8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4646,7 +5998,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001EBC606E2B8)} {T(0)}
+	CLOSURE {Proc(000002092FD9E2A8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4732,7 +6084,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001CE2980C4C8)} {T(0)}
+	CLOSURE {Proc(000001788610D088)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4840,7 +6192,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(00000172FE8FC388)} {T(0)}
+	CLOSURE {Proc(0000020239D8C708)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -4922,7 +6274,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001B65236D138)} {T(0)}
+	CLOSURE {Proc(0000019AA378D108)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -5094,7 +6446,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001A4C8F8CBD8)} {T(0)}
+	CLOSURE {Proc(000002AD24ABCBD8)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 
@@ -6125,30 +7477,78 @@ C:\work\github\ravi-compiler\tests\input>tparse -f t009.lua
 function()
   return
     --[binary expr start] any
-     --[unary expr start] any
-     -
-      3
-     --[unary expr end]
-    %
-     5
+     --[binary expr start] any
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      %
+       5
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
+    and
+     --[binary expr start] any
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      +
+       5
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
     --[binary expr end]
 end
 function()
   return
-    --[binary expr start] integer
-     --[unary expr start] integer
-     -
-      3
-     --[unary expr end]
-    %
-     5
+    --[binary expr start] any
+     --[binary expr start] boolean
+      --[binary expr start] integer
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      %
+       5
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
+    and
+     --[binary expr start] boolean
+      --[binary expr start] integer
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      +
+       5
+      --[binary expr end]
+     ==
+      2
+     --[binary expr end]
     --[binary expr end]
 end
 L0 (entry)
 	UNMi {3 Kint(0)} {Tint(0)}
 	MOD {Tint(0), 5 Kint(1)} {Tint(1)}
-	RET {Tint(1)} {L1}
+	EQii {Tint(1), 2 Kint(2)} {T(1)}
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
 L1 (exit)
+L2
+	UNMi {3 Kint(0)} {Tint(1)}
+	ADDii {Tint(1), 5 Kint(1)} {Tint(0)}
+	EQii {Tint(0), 2 Kint(2)} {T(1)}
+	MOV {T(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t010.lua 
 function()
@@ -6379,64 +7779,74 @@ function()
   return
     --[binary expr start] any
      --[binary expr start] any
-      --[unary expr start] any
-      -
-       3
-      --[unary expr end]
-     %
-      5
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      %
+       5
+      --[binary expr end]
+     ==
+      2
      --[binary expr end]
-    ==
-     2
-    --[binary expr end]
-   ,
-    --[binary expr start] any
+    and
      --[binary expr start] any
-      --[unary expr start] any
-      -
-       3
-      --[unary expr end]
-     +
-      5
+      --[binary expr start] any
+       --[unary expr start] any
+       -
+        3
+       --[unary expr end]
+      +
+       5
+      --[binary expr end]
+     ==
+      2
      --[binary expr end]
-    ==
-     2
     --[binary expr end]
 end
 function()
   return
-    --[binary expr start] boolean
-     --[binary expr start] integer
-      --[unary expr start] integer
-      -
-       3
-      --[unary expr end]
-     %
-      5
+    --[binary expr start] any
+     --[binary expr start] boolean
+      --[binary expr start] integer
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      %
+       5
+      --[binary expr end]
+     ==
+      2
      --[binary expr end]
-    ==
-     2
-    --[binary expr end]
-   ,
-    --[binary expr start] boolean
-     --[binary expr start] integer
-      --[unary expr start] integer
-      -
-       3
-      --[unary expr end]
-     +
-      5
+    and
+     --[binary expr start] boolean
+      --[binary expr start] integer
+       --[unary expr start] integer
+       -
+        3
+       --[unary expr end]
+      +
+       5
+      --[binary expr end]
+     ==
+      2
      --[binary expr end]
-    ==
-     2
     --[binary expr end]
 end
 L0 (entry)
 	UNMi {3 Kint(0)} {Tint(0)}
 	MOD {Tint(0), 5 Kint(1)} {Tint(1)}
-	EQii {Tint(1), 2 Kint(2)} {T(0)}
+	EQii {Tint(1), 2 Kint(2)} {T(1)}
+	MOV {T(1)} {T(0)}
+	CBR {T(0)} {L2, L3}
+L1 (exit)
+L2
 	UNMi {3 Kint(0)} {Tint(1)}
 	ADDii {Tint(1), 5 Kint(1)} {Tint(0)}
 	EQii {Tint(0), 2 Kint(2)} {T(1)}
-	RET {T(0), T(1)} {L1}
-L1 (exit)
+	MOV {T(1)} {T(0)}
+	BR {L3}
+L3
+	RET {T(0)} {L1}
