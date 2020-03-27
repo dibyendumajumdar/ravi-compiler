@@ -2777,8 +2777,10 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(00000216D956D4C8)} {T(0)}
+	CLOSURE {Proc(0000025FFEEC9758)} {T(0)}
 	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @number 54.4" 
@@ -5726,8 +5728,13 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(0000028FAD00D088)} {T(0)}
+	CLOSURE {Proc(000001EE325BC0C8)} {T(0)}
 	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	LEN {local(t, 0)} {T(0)}
+	TOINT {T(0)}
+	MOV {T(0)} {local(i, 1)}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t001.lua 
@@ -5814,8 +5821,15 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000002558F11DCF8)} {T(0)}
+	CLOSURE {Proc(0000014658F2B518)} {T(0)}
 	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	MOV {1 Kint(0)} {local(a, 0)}
+	LOADGLOBAL {y} {T(0)}
+	CALL {T(0)} {T(0..)}
+	CALL {local(functionlocal, 1)} {T(1..)}
+	RET {T(1..)} {L1}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t002.lua 
@@ -5997,10 +6011,6 @@ function()
       ::l4::
     end
 end
-L0 (entry)
-	CLOSURE {Proc(000002092FD9E2A8)} {T(0)}
-	RET {T(0)} {L1}
-L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t003.lua 
 function()
@@ -6083,10 +6093,6 @@ function()
       end
     end
 end
-L0 (entry)
-	CLOSURE {Proc(000001788610D088)} {T(0)}
-	RET {T(0)} {L1}
-L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t004.lua 
 function()
@@ -6191,10 +6197,6 @@ function()
       ::L1::
     end
 end
-L0 (entry)
-	CLOSURE {Proc(0000020239D8C708)} {T(0)}
-	RET {T(0)} {L1}
-L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t005.lua 
 function()
@@ -6274,8 +6276,18 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(0000019AA378D108)} {T(0)}
+	CLOSURE {Proc(00000204A371B5F8)} {T(0)}
 	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	CLOSURE {Proc(00000204A371BA68)} {T(0)}
+	NEWTABLE {T(1)}
+	LOADGLOBAL {f} {T(2)}
+	CALL {T(2)} {T(2..)}
+	TPUTik {T(1), 1 Kint(0), T(2..)}
+	CALL {T(0), T(1)} {T(0..)}
+L1 (exit)
+L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t006.lua 
@@ -6445,10 +6457,6 @@ function()
         --[suffixed expr end]
     end
 end
-L0 (entry)
-	CLOSURE {Proc(000002AD24ABCBD8)} {T(0)}
-	RET {T(0)} {L1}
-L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t007.lua 
 function()

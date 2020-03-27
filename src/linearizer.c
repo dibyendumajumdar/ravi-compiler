@@ -28,6 +28,7 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct basic_block *target_block);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
+static void linearize_function(struct linearizer_state *linearizer);
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
@@ -59,23 +60,25 @@ static inline void free_register(struct proc *proc, struct pseudo_generator *gen
 }
 
 /* Linearizer initialization  */
-struct linearizer_state* raviX_init_linearizer(struct compiler_state *container)
+struct linearizer_state *raviX_init_linearizer(struct compiler_state *container)
 {
-	struct linearizer_state* linearizer = (struct linearizer_state* ) calloc(1, sizeof(struct linearizer_state));
+	struct linearizer_state *linearizer = (struct linearizer_state *)calloc(1, sizeof(struct linearizer_state));
 	linearizer->ast_container = container;
-	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double), sizeof(struct edge)*32);
+	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double),
+			     sizeof(struct edge) * 32);
 	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(struct instruction),
-			     sizeof(double), sizeof(struct instruction)*128);
+			     sizeof(double), sizeof(struct instruction) * 128);
 	raviX_allocator_init(&linearizer->ptrlist_allocator, "ptrlist_allocator", sizeof(struct ptr_list),
-			     sizeof(double), sizeof(struct ptr_list)*64);
+			     sizeof(double), sizeof(struct ptr_list) * 64);
 	raviX_allocator_init(&linearizer->pseudo_allocator, "pseudo_allocator", sizeof(struct pseudo), sizeof(double),
-		sizeof(struct pseudo)*128);
+			     sizeof(struct pseudo) * 128);
 	raviX_allocator_init(&linearizer->basic_block_allocator, "basic_block_allocator", sizeof(struct basic_block),
-			     sizeof(double), sizeof(struct basic_block)*32);
-	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(struct proc), sizeof(double), sizeof(struct proc)*32);
+			     sizeof(double), sizeof(struct basic_block) * 32);
+	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(struct proc), sizeof(double),
+			     sizeof(struct proc) * 32);
 	raviX_allocator_init(&linearizer->unsized_allocator, "unsized_allocator", 0, sizeof(double), CHUNK);
 	raviX_allocator_init(&linearizer->constant_allocator, "constant_allocator", sizeof(struct constant),
-			     sizeof(double), sizeof(struct constant)*64);
+			     sizeof(double), sizeof(struct constant) * 64);
 	return linearizer;
 }
 
@@ -357,8 +360,9 @@ static void linearize_function_args(struct linearizer_state *linearizer)
 	struct lua_symbol *sym;
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
-		handle_error(linearizer->ast_container, "feature not yet implemented");
-		// printf("Assigning register %d to argument %s\n", (int)reg, getstr(sym->var.var_name));
+		/* The arg symbols already have register assigned by the local scope */
+		/* TODO we need to add type assertion operators for typed args */
+		// handle_error(linearizer->ast_container, "feature not yet implemented");
 	}
 	END_FOR_EACH_PTR(sym);
 }
@@ -740,7 +744,7 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	struct proc *newproc = allocate_proc(proc->linearizer, expr);
 	set_current_proc(proc->linearizer, newproc);
 	// printf("linearizing function\n");
-
+	linearize_function(proc->linearizer);
 	set_current_proc(proc->linearizer, curproc); // restore the proc
 	ravitype_t target_type = expr->function_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
@@ -767,6 +771,12 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 		return target;
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->var.pseudo;
+	} else if (sym->symbol_type == SYM_UPVALUE) {
+		/* uvalue index is the positin of upvalue in the function, we treat this as the pseudo register for the
+		 * upvalue */
+		/* TODO maybe the pseudo be pre-created when we start linearizing the funcon and stored in the symbol
+		 * like we do for locals? */
+		return allocate_symbol_pseudo(proc, sym, sym->upvalue.upvalue_index);
 	} else {
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		return NULL;
@@ -1058,17 +1068,17 @@ struct node_info {
 	struct pseudo *pseudo;
 };
 
-static void linearize_assignment(struct proc* proc, struct ast_node_list* expr_list, struct node_info* varinfo, int nv)
+static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_list, struct node_info *varinfo, int nv)
 {
-	struct ast_node* expr;
+	struct ast_node *expr;
 
-	int ne = ptrlist_size((const struct ptr_list*)expr_list);
-	struct node_info* valinfo = (struct node_info*)alloca(ne * sizeof(struct node_info));
-	struct pseudo* last_val_pseudo = NULL;
+	int ne = ptrlist_size((const struct ptr_list *)expr_list);
+	struct node_info *valinfo = (struct node_info *)alloca(ne * sizeof(struct node_info));
+	struct pseudo *last_val_pseudo = NULL;
 	int i = 0;
 	FOR_EACH_PTR(expr_list, expr)
 	{
-		struct pseudo* val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
+		struct pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
 		valinfo[i].type_code = expr->common_expr.type.type_code;
 		valinfo[i].pseudo = val_pseudo;
 		i++;
@@ -1078,30 +1088,28 @@ static void linearize_assignment(struct proc* proc, struct ast_node_list* expr_l
 	}
 	END_FOR_EACH_PTR(expr);
 
+	/* TODO do we need to insert type assertions in some cases such as function return values ? */
+
 	int note_ne = ne;
 	while (nv > 0) {
 		if (nv > ne) {
 			if (last_val_pseudo != NULL && last_val_pseudo->type == PSEUDO_RANGE) {
 				int pick = nv - ne;
-				linearize_store_var(proc, varinfo[nv - 1].type_code,
-					varinfo[nv - 1].pseudo,
-					valinfo[ne - 1].type_code,
-					allocate_range_select_pseudo(proc, last_val_pseudo, pick));
-			}
-			else {
+				linearize_store_var(proc, varinfo[nv - 1].type_code, varinfo[nv - 1].pseudo,
+						    valinfo[ne - 1].type_code,
+						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
+			} else {
 				// TODO store NIL
 			}
 			nv--;
-		}
-		else {
+		} else {
 			if (valinfo[ne - 1].pseudo->type == PSEUDO_RANGE) {
 				/* Only the topmost expression can be a range ... assert */
 				assert(ne == note_ne);
 				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
 			}
-			linearize_store_var(proc, varinfo[nv - 1].type_code,
-				varinfo[nv - 1].pseudo, valinfo[ne - 1].type_code,
-				valinfo[ne - 1].pseudo);
+			linearize_store_var(proc, varinfo[nv - 1].type_code, varinfo[nv - 1].pseudo,
+					    valinfo[ne - 1].type_code, valinfo[ne - 1].pseudo);
 			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
 			nv--;
 			ne--;
@@ -1134,17 +1142,18 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv);
 }
 
-static void linearize_local_statement(struct proc* proc, struct ast_node* stmt) {
+static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
+{
 
-	struct lua_symbol* sym;
+	struct lua_symbol *sym;
 
-	int nv = ptrlist_size((const struct ptr_list*)stmt->local_stmt.var_list);
-	struct node_info* varinfo = (struct node_info*)alloca(nv * sizeof(struct node_info));
+	int nv = ptrlist_size((const struct ptr_list *)stmt->local_stmt.var_list);
+	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
 	int i = 0;
 
 	FOR_EACH_PTR(stmt->local_stmt.var_list, sym)
 	{
-		struct pseudo* var_pseudo = sym->var.pseudo;
+		struct pseudo *var_pseudo = sym->var.pseudo;
 		assert(var_pseudo);
 		varinfo[i].type_code = sym->value_type.type_code;
 		varinfo[i].pseudo = var_pseudo;
@@ -1538,8 +1547,11 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		case SYM_LOCAL: {
 			membuff_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name, pseudo->regnum);
 			break;
-		} 
-		case SYM_UPVALUE:
+		}
+		case SYM_UPVALUE: {
+			membuff_add_fstring(mb, "Upval(%u)", pseudo->regnum);
+			break;
+		}
 		case SYM_GLOBAL: {
 			membuff_add_string(mb, pseudo->symbol->var.var_name);
 			break;
@@ -1641,7 +1653,18 @@ int raviX_ast_linearize(struct linearizer_state *linearizer)
 	return rc;
 }
 
-void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb) { output_proc(linearizer->main_proc, mb); }
+void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb)
+{
+	output_proc(linearizer->main_proc, mb);
+	struct proc *proc;
+	FOR_EACH_PTR(linearizer->all_procs, proc)
+	{
+		if (proc == linearizer->main_proc)
+			continue;
+		output_proc(proc, mb);
+	}
+	END_FOR_EACH_PTR(proc);
+}
 
 void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp)
 {

@@ -237,6 +237,8 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	upvalue->symbol_type = SYM_UPVALUE;
 	upvalue->upvalue.var = sym;
 	upvalue->upvalue.function = function;
+	upvalue->upvalue.upvalue_index = ptrlist_size(
+	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->value_type, &sym->value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
 	return true;
@@ -482,7 +484,7 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
  * Note that the returned string will be anchored in the Lexer and must
  * be anchored somewhere else by the time parsing finishes
  */
-static const char *user_defined_type_name(struct lexer_state *ls, const char *typename)
+static const char *parse_user_defined_type_name(struct lexer_state *ls, const char *typename)
 {
 	size_t len = 0;
 	if (testnext(ls, '.')) {
@@ -515,7 +517,7 @@ static const char *user_defined_type_name(struct lexer_state *ls, const char *ty
  *   where type is 'integer', 'integer[]',
  *                 'number', 'number[]'
  */
-static struct lua_symbol *declare_local_variable(struct parser_state *parser)
+static struct lua_symbol *parse_local_variable_declaration(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* assume a dynamic type */
@@ -545,7 +547,7 @@ static struct lua_symbol *declare_local_variable(struct parser_state *parser)
 		else {
 			/* default is a userdata type */
 			tt = RAVI_TUSERDATA;
-			typename = user_defined_type_name(ls, typename);
+			typename = parse_user_defined_type_name(ls, typename);
 			// str = getstr(typename);
 			pusertype = typename;
 		}
@@ -571,7 +573,7 @@ static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_
 			switch (ls->t.token) {
 			case TK_NAME: { /* param -> NAME */
 					/* RAVI change - add type */
-				struct lua_symbol *symbol = declare_local_variable(parser);
+				struct lua_symbol *symbol = parse_local_variable_declaration(parser);
 				add_symbol(parser->container, list, symbol);
 				add_local_symbol_to_current_scope(parser, symbol);
 				nparams++;
@@ -928,7 +930,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 			usertype = ls->t.seminfo.ts;
 			raviX_next(ls);
 			// Check and expand to extended name if necessary
-			usertype = user_defined_type_name(ls, usertype);
+			usertype = parse_user_defined_type_name(ls, usertype);
 		} else {
 			raviX_next(ls);
 		}
@@ -1251,7 +1253,7 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
 	int nvars = 0;
 	do {
 		/* local name : type = value */
-		struct lua_symbol *symbol = declare_local_variable(parser);
+		struct lua_symbol *symbol = parse_local_variable_declaration(parser);
 		add_symbol(parser->container, &node->local_stmt.var_list, symbol);
 		nvars++;
 		if (nvars >= MAXVARS)
@@ -1596,14 +1598,16 @@ struct compiler_state *raviX_init_compiler()
 {
 	struct compiler_state *container = (struct compiler_state *)calloc(1, sizeof(struct compiler_state));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(struct ast_node), sizeof(double),
-		sizeof(struct ast_node)*32);
-	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double), sizeof(struct ptr_list)*32);
+			     sizeof(struct ast_node) * 32);
+	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
+			     sizeof(struct ptr_list) * 32);
 	raviX_allocator_init(&container->block_scope_allocator, "block scopes", sizeof(struct block_scope),
-			     sizeof(double), sizeof(struct block_scope)*32);
-	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double), sizeof(struct lua_symbol)*64);
+			     sizeof(double), sizeof(struct block_scope) * 32);
+	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double),
+			     sizeof(struct lua_symbol) * 64);
 	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), 1024);
 	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(struct string_object),
-			     sizeof(double), sizeof(struct string_object)*64);
+			     sizeof(double), sizeof(struct string_object) * 64);
 	luaZ_initbuffer(&container->buff);
 	container->strings = set_create(string_hash, string_equal);
 	container->main_function = NULL;
@@ -1612,7 +1616,8 @@ struct compiler_state *raviX_init_compiler()
 	return container;
 }
 
-static void show_allocations(struct compiler_state* compiler) {
+static void show_allocations(struct compiler_state *compiler)
+{
 	raviX_allocator_show_allocations(&compiler->symbol_allocator);
 	raviX_allocator_show_allocations(&compiler->block_scope_allocator);
 	raviX_allocator_show_allocations(&compiler->ast_node_allocator);
@@ -1624,7 +1629,7 @@ static void show_allocations(struct compiler_state* compiler) {
 void raviX_destroy_compiler(struct compiler_state *container)
 {
 	if (!container->killed) {
-		//show_allocations(container);
+		// show_allocations(container);
 		if (container->linearizer) {
 			raviX_destroy_linearizer(container->linearizer);
 			free(container->linearizer);

@@ -144,6 +144,7 @@ struct lua_symbol {
 		struct {
 			struct lua_symbol *var;	   /* variable reference */
 			struct ast_node *function; /* Where the upvalue lives */
+			uint32_t upvalue_index;    /* index of the upvalue in function */
 		} upvalue;
 	};
 };
@@ -461,7 +462,7 @@ enum pseudo_type {
 	PSEUDO_FALSE,
 	PSEUDO_BLOCK,
 	PSEUDO_RANGE,
-	PSEUDO_RANGE_SELECT,
+	PSEUDO_RANGE_SELECT
 };
 
 /* pseudo represents a pseudo (virtual) register */
