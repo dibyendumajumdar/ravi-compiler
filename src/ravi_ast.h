@@ -58,7 +58,6 @@ struct compiler_state {
 	bool killed;		 /* flag to check if this is already destroyed */
 };
 
-
 /* number of reserved words */
 #define NUM_RESERVED ((int)(TK_WHILE - FIRST_RESERVED + 1))
 
@@ -144,7 +143,8 @@ struct lua_symbol {
 		struct {
 			struct lua_symbol *var;	   /* variable reference */
 			struct ast_node *function; /* Where the upvalue lives */
-			uint32_t upvalue_index;    /* index of the upvalue in function */
+			uint32_t upvalue_index;	   /* index of the upvalue in function */
+						   /*TODO add pseudo ?*/
 		} upvalue;
 	};
 };
@@ -191,22 +191,22 @@ struct ast_node {
 	union {
 		struct {
 			struct ast_node_list *expr_list;
-		} return_stmt;
+		} return_stmt; /*AST_RETURN_STMT */
 		struct {
 			struct lua_symbol *symbol;
-		} label_stmt;
+		} label_stmt; /* AST_LABEL_STMT */
 		struct {
 			const char *name;	     /* target label, used to resolve the goto destination */
 			struct ast_node *label_stmt; /* Initially this will be NULL; set by a separate pass */
-		} goto_stmt;
+		} goto_stmt;			     /* AST_GOTO_STMT */
 		struct {
 			struct lua_symbol_list *var_list;
 			struct ast_node_list *expr_list;
-		} local_stmt; /* local declarations */
+		} local_stmt; /* AST_LOCAL_STMT local variable declarations */
 		struct {
 			struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
 			struct ast_node_list *expr_list;     /* Comma separated expressions */
-		} expression_stmt;			     /* Also covers assignments */
+		} expression_stmt;			     /* AST_EXPR_STMT: Also covers assignments */
 		struct {
 			struct ast_node *name;		 /* base symbol to be looked up */
 			struct ast_node_list *selectors; /* Optional */
@@ -311,22 +311,24 @@ struct ast_node {
 	};
 };
 
-static inline void set_typecode(struct var_type* vt, ravitype_t t) {
-	vt->type_code = t;
-}
-static inline void set_type(struct var_type* vt, ravitype_t t) {
+static inline void set_typecode(struct var_type *vt, ravitype_t t) { vt->type_code = t; }
+static inline void set_type(struct var_type *vt, ravitype_t t)
+{
 	vt->type_code = t;
 	vt->type_name = NULL;
 }
-static void inline set_typename(struct var_type* vt, ravitype_t t, const char* name) {
+static void inline set_typename(struct var_type *vt, ravitype_t t, const char *name)
+{
 	vt->type_code = t;
 	vt->type_name = name;
 }
-static bool is_type_same(const struct var_type* a, const struct var_type* b) {
+static bool is_type_same(const struct var_type *a, const struct var_type *b)
+{
 	// Relies upon strings being interned
 	return a->type_code == b->type_code && a->type_name == b->type_name;
 }
-static inline void copy_type(struct var_type* a, const struct var_type* b) {
+static inline void copy_type(struct var_type *a, const struct var_type *b)
+{
 	a->type_code = b->type_code;
 	a->type_name = b->type_name;
 }
@@ -467,7 +469,7 @@ enum pseudo_type {
 
 /* pseudo represents a pseudo (virtual) register */
 struct pseudo {
-	unsigned type : 4, regnum : 16, freed: 1;
+	unsigned type : 4, regnum : 16, freed : 1;
 	struct instruction *insn; /* instruction that created this pseudo */
 	union {
 		struct lua_symbol *symbol;	 /* PSEUDO_SYMBOL */
@@ -475,7 +477,7 @@ struct pseudo {
 		ravitype_t temp_type;		 /* PSEUDO_TEMP - not sure we need this */
 		struct proc *proc;		 /* PSEUDO_PROC */
 		struct basic_block *block;	 /* PSEUDO_BLOCK */
-		struct pseudo* range_pseudo; /* PSEUDO_RANGE_SELECT */
+		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
 	};
 };
 
@@ -484,7 +486,7 @@ struct instruction {
 	unsigned opcode : 8;
 	struct pseudo_list *operands;
 	struct pseudo_list *targets;
-	struct basic_block* block; /* owning block */
+	struct basic_block *block; /* owning block */
 };
 
 struct edge {
@@ -571,7 +573,7 @@ struct linearizer_state {
 };
 
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
-void raviX_show_linearizer(struct linearizer_state* linearizer, membuff_t* mb);
-void raviX_syntaxerror(struct lexer_state* ls, const char* msg);
+void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
+void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
 
 #endif
