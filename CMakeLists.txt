@@ -18,6 +18,7 @@ set(HEADERS
 
 set(SRCS
         src/allocate.c
+        src/ast_walker.c
         src/ptrlist.c
         src/fnv_hash.c
         src/hash_table.c
