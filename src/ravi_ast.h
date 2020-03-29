@@ -14,7 +14,6 @@ b) Perform type checking (Ravi enhancement)
 #include "ravi_compiler.h"
 
 #include "allocate.h"
-#include "lua_defs.h"
 #include "membuf.h"
 #include "ptrlist.h"
 #include "set.h"
@@ -29,6 +28,11 @@ b) Perform type checking (Ravi enhancement)
 #include <string.h>
 
 enum { MAXVARS = 125 };
+#define LUA_ENV "_ENV"
+#define LUA_MAXINTEGER INT_MAX
+
+typedef unsigned long long lua_Unsigned;
+typedef unsigned char lu_byte;
 
 //////////////////////////
 

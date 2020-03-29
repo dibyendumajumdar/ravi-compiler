@@ -12,7 +12,30 @@ enum event_type {
 	EV_INDEX_START,
 	EV_INDEX_END,
 	EV_VALUE_START,
-	EV_VALUE_END
+	EV_VALUE_END,
+	EV_Y_INDEX_START,
+	EV_Y_INDEX_END,
+	EV_FIELD_SELECTOR_START,
+	EV_FIELD_SELECTOR_END,
+	EV_UNARY_EXPRESSION_START,
+	EV_UNARY_EXPRESSION_END,
+	EV_BINARY_EXPRESSION_START,
+	EV_BINARY_EXPRESSION_END,
+	EV_SUFFIXED_EXPRESSION_START,
+	EV_SUFFIXED_EXPRESSION_END,
+	EV_PRIMARY_EXPRESSION_START,
+	EV_PRIMARY_EXPRESSION_END,
+	EV_SUFFIX_LIST_START,
+	EV_SUFFIX_LIST_END,
+	EV_FORNUM_STATEMENT_START,
+	EV_FORNUM_STATEMENT_END,
+	EV_FORNUM_SYMBOLS_START,
+	EV_FORNUM_SYMBOLS_END,
+	EV_FORNUM_EXPRESSIONS_START,
+	EV_FORNUM_EXPRESSIONS_END,
+	EV_FORNUM_BODY_START,
+	EV_FORNUM_BODY_END,
+
 };
 
 struct event {
@@ -20,9 +43,17 @@ struct event {
 	const struct var_type *var_type;
 };
 
+struct literal_event {
+	ravitype_t type_code;
+	SemInfo info;
+};
+
 struct visitor {
 	void *userdata;
 	void (*handle_event)(struct event event);
+	void (*handle_literal)(struct literal_event event);
+	void (*handle_unary_expr)(struct event event, UnOpr op);
+	void (*handle_binary_expr)(struct event event, BinOpr op);
 };
 
 void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor);
@@ -239,17 +270,18 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		break;
 	}
 	case AST_SUFFIXED_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[suffixed expr start]", &node->suffixed_expr.type);
-		// printf_buf(buf, "%p%c %T\n", level + 1, "[primary start]",
-		//&node->suffixed_expr.primary_expr->common_expr.type);
+		visitor->handle_event(
+		    (struct event){.event_type = EV_SUFFIXED_EXPRESSION_START, .var_type = &node->suffixed_expr.type});
+		visitor->handle_event((struct event){.event_type = EV_PRIMARY_EXPRESSION_START,
+						     .var_type = &node->suffixed_expr.primary_expr->common_expr.type});
 		raviX_walk_ast_node(node->suffixed_expr.primary_expr, visitor);
-		// printf_buf(buf, "%p%c\n", level + 1, "[primary end]");
+		visitor->handle_event((struct event){.event_type = EV_PRIMARY_EXPRESSION_END});
 		if (node->suffixed_expr.suffix_list) {
-			// printf_buf(buf, "%p%c\n", level + 1, "[suffix list start]");
+			visitor->handle_event((struct event){.event_type = EV_SUFFIX_LIST_START});
 			walk_ast_node_list(node->suffixed_expr.suffix_list, visitor);
-			// printf_buf(buf, "%p%c\n", level + 1, "[suffix list end]");
+			visitor->handle_event((struct event){.event_type = EV_SUFFIX_LIST_END});
 		}
-		// printf_buf(buf, "%p%c\n", level, "[suffixed expr end]");
+		visitor->handle_event((struct event){.event_type = EV_SUFFIXED_EXPRESSION_END});
 		break;
 	}
 	case AST_FUNCTION_CALL_EXPR: {
@@ -269,57 +301,62 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		break;
 	}
 	case AST_BINARY_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[binary expr start]", &node->binary_expr.type);
+		visitor->handle_binary_expr(
+		    (struct event){.event_type = EV_BINARY_EXPRESSION_START, .var_type = &node->binary_expr.type},
+		    node->binary_expr.binary_op);
 		raviX_walk_ast_node(node->binary_expr.expr_left, visitor);
-		// printf_buf(buf, "%p%s\n", level, get_binary_opr_str(node->binary_expr.binary_op));
 		raviX_walk_ast_node(node->binary_expr.expr_right, visitor);
-		// printf_buf(buf, "%p%c\n", level, "[binary expr end]");
+		visitor->handle_binary_expr((struct event){.event_type = EV_BINARY_EXPRESSION_END},
+					    node->binary_expr.binary_op);
 		break;
 	}
 	case AST_UNARY_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[unary expr start]", &node->unary_expr.type);
-		// printf_buf(buf, "%p%s\n", level, get_unary_opr_str(node->unary_expr.unary_op));
+		visitor->handle_unary_expr(
+		    (struct event){.event_type = EV_UNARY_EXPRESSION_START, .var_type = &node->unary_expr.type},
+		    node->unary_expr.unary_op);
 		raviX_walk_ast_node(node->unary_expr.expr, visitor);
-		// printf_buf(buf, "%p%c\n", level, "[unary expr end]");
+		visitor->handle_unary_expr((struct event){.event_type = EV_UNARY_EXPRESSION_END},
+					   node->unary_expr.unary_op);
 		break;
 	}
 	case AST_LITERAL_EXPR: {
-		// printf_buf(buf, "%p", level);
 		switch (node->literal_expr.type.type_code) {
 		case RAVI_TNIL:
-			// printf_buf(buf, "nil");
+			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code});
 			break;
 		case RAVI_TBOOLEAN:
-			// printf_buf(buf, "%b", node->literal_expr.u.i);
+			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+								       .info.i = node->literal_expr.u.i});
 			break;
 		case RAVI_TNUMINT:
-			// printf_buf(buf, "%i", node->literal_expr.u.i);
+			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+								       .info.i = node->literal_expr.u.i});
 			break;
 		case RAVI_TNUMFLT:
-			// printf_buf(buf, "%f", node->literal_expr.u.n);
+			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+								       .info.r = node->literal_expr.u.n});
 			break;
 		case RAVI_TSTRING:
-			// printf_buf(buf, "'%t'", node->literal_expr.u.s);
+			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+								       .info.ts = node->literal_expr.u.s});
 			break;
 		default:
 			assert(0);
 		}
-		// printf_buf(buf, "\n");
 		break;
 	}
 	case AST_FIELD_SELECTOR_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[field selector start]", &node->index_expr.type);
-		// printf_buf(buf, "%p.\n", level + 1);
+		visitor->handle_event(
+		    (struct event){.event_type = EV_FIELD_SELECTOR_START, .var_type = &node->index_expr.type});
 		raviX_walk_ast_node(node->index_expr.expr, visitor);
-		// printf_buf(buf, "%p%c\n", level, "[field selector end]");
+		visitor->handle_event((struct event){.event_type = EV_FIELD_SELECTOR_END});
 		break;
 	}
 	case AST_Y_INDEX_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[Y index start]", &node->index_expr.type);
-		// printf_buf(buf, "%p[\n", level + 1);
+		visitor->handle_event(
+		    (struct event){.event_type = EV_Y_INDEX_START, .var_type = &node->index_expr.type});
 		raviX_walk_ast_node(node->index_expr.expr, visitor);
-		// printf_buf(buf, "%p]\n", level + 1);
-		// printf_buf(buf, "%p%c\n", level, "[Y index end]");
+		visitor->handle_event((struct event){.event_type = EV_Y_INDEX_END});
 		break;
 	}
 	case AST_INDEXED_ASSIGN_EXPR: {

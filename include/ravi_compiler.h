@@ -127,4 +127,29 @@ RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer
 /* utilies */
 RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *container);
 
+
+/*
+** grep "ORDER OPR" if you change these enums  (ORDER OP)
+*/
+typedef enum BinOpr {
+	OPR_ADD, OPR_SUB, OPR_MUL, OPR_MOD, OPR_POW,
+	OPR_DIV,
+	OPR_IDIV,
+	OPR_BAND, OPR_BOR, OPR_BXOR,
+	OPR_SHL, OPR_SHR,
+	OPR_CONCAT,
+	OPR_EQ, OPR_LT, OPR_LE,
+	OPR_NE, OPR_GT, OPR_GE,
+	OPR_AND, OPR_OR,
+	OPR_NOBINOPR
+} BinOpr;
+
+/** RAVI change */
+typedef enum UnOpr {
+	OPR_MINUS, OPR_BNOT, OPR_NOT, OPR_LEN, OPR_TO_INTEGER,
+	OPR_TO_NUMBER, OPR_TO_INTARRAY, OPR_TO_NUMARRAY, OPR_TO_TABLE, OPR_TO_STRING,
+	OPR_TO_CLOSURE, OPR_TO_TYPE, OPR_NOUNOPR
+} UnOpr;
+
+
 #endif
