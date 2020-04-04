@@ -5,7 +5,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 
 static bool is_type_same(const struct var_type *a, const struct var_type *b)
 {
-	// Relies upon strings being interned
+	// String comparion of type_name relies upon strings being interned
 	return a->type_code == b->type_code && a->type_name == b->type_name;
 }
 

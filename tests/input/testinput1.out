@@ -2776,7 +2776,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000002315E38A4E0)} {T(0)}
+	CLOSURE {Proc(00000227E9B0AFA0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5779,7 +5779,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001AC2E76CE80)} {T(0)}
+	CLOSURE {Proc(0000022329C1CE60)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5933,27 +5933,27 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001510DD8AB80)} {T(0)}
+	CLOSURE {Proc(000001CEB954BC30)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
-	CLOSURE {Proc(000001510DD8AFF8)} {T(0)}
+	CLOSURE {Proc(000001CEB954C0A8)} {T(0)}
 	MOV {T(0)} {local(y, 1)}
 	MOV {5 Kint(1)} {local(a, 2)}
-	CLOSURE {Proc(000001510DD8B8E8)} {T(0)}
+	CLOSURE {Proc(000001CEB954C998)} {T(0)}
 	MOV {T(0)} {local(z, 3)}
 	RET {local(y, 1), local(z, 3)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001510DD8B470)} {T(0)}
+	CLOSURE {Proc(000001CEB954C520)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	RET {Upval(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001510DD8BD60)} {T(0)}
+	CLOSURE {Proc(000001CEB954CE10)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -6420,11 +6420,11 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001E60CC5AA70)} {T(0)}
+	CLOSURE {Proc(00000149651FAAD0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001E60CC5AEE8)} {T(0)}
+	CLOSURE {Proc(00000149651FAF48)} {T(0)}
 	NEWTABLE {T(1)}
 	LOADGLOBAL {f} {T(2)}
 	CALL {T(2)} {T(2..)}

@@ -1,5 +1,5 @@
-#ifndef ravicomp_ast_h
-#define ravicomp_ast_h
+#ifndef ravicomp_RAVI_AST_H
+#define ravicomp_RAVI_AST_H
 
 /*
 A parser and syntax tree builder for Ravi. This is work in progress.

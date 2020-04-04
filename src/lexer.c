@@ -31,19 +31,28 @@ static const char *const luaX_tokens[] = {
     ">=",     "<=",	  "~=",	      "<<",	 ">>",	       "::",	    "<eof>",  "<number>", "<integer>",
     "<name>", "<string>", "@integer", "@number", "@integer[]", "@number[]", "@table", "@string",  "@closure"};
 
+/* Says whther the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
 
+/* 
+Creates a new string object. string objects are interned in a hash set.
+If the string matches a keyword then the reserved attribute will be set to the token id associated
+with the keyword else this attribute will be -1. The hash value of the string is stored the 'hash'
+attribute. Note that we need to allow strings that have embedded 0 character hence the length
+is explicit. But all tokens and reserved keywords are expected to be standard C strings.
+*/
 const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
 {
 	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
 	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
 	if (entry != NULL)
-		return (const struct string_object *)entry->key;
+		/* found the string */
+		return (const struct string_object *)entry->key; 
 	else {
 		struct string_object *newobj = raviX_allocator_allocate(&container->string_object_allocator, 0);
 		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1);
 		memcpy(s, input, len);
-		s[len] = 0;
+		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
 		newobj->str = s;
 		newobj->len = len;
 		newobj->hash = temp.hash;
@@ -51,7 +60,7 @@ const struct string_object *raviX_create_string(struct compiler_state *container
 		/* Check if this is a keyword */
 		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
 			if (strcmp(luaX_tokens[i], s) == 0) {
-				newobj->reserved = i;
+				newobj->reserved = i; /* save index of the keyword */
 				break;
 			}
 		}
@@ -64,7 +73,7 @@ enum { ALPHABIT = 0, DIGITBIT = 1, PRINTBIT = 2, SPACEBIT = 3, XDIGITBIT = 4 };
 
 #define MASK(B) (1 << (B))
 
-const lu_byte luai_ctype_[UCHAR_MAX + 2] = {
+static const lu_byte luai_ctype_[UCHAR_MAX + 2] = {
     0x00,											    /* EOZ */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,						    /* 0. */
     0x00, 0x08, 0x08, 0x08, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 1. */

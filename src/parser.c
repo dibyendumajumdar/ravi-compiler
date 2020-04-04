@@ -110,16 +110,6 @@ static const struct string_object *check_name_and_next(struct lexer_state *ls)
 	return ts;
 }
 
-/* Check that current token is a name, and advance */
-static const struct string_object *str_checkname(struct lexer_state *ls)
-{
-	const struct string_object *ts;
-	check(ls, TK_NAME);
-	ts = ls->t.seminfo.ts;
-	raviX_next(ls);
-	return ts;
-}
-
 /* create a new local variable in function scope, and set the
  * variable type (RAVI - added type tt) */
 static struct lua_symbol *new_local_symbol(struct parser_state *parser, const struct string_object *name, ravitype_t tt,
@@ -145,10 +135,10 @@ static struct lua_symbol *new_label(struct parser_state *parser, const struct st
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
 	symbol->label.label_name = name->str;
-	add_symbol(parser->container, &scope->symbol_list,
-		   symbol); // Add to the end of the symbol list
-			    // Note that Lua allows multiple local declarations of the same name
-			    // so a new instance just gets added to the end
+	// Add to the end of the symbol list
+	// Note that Lua allows multiple local declarations of the same name
+	// so a new instance just gets added to the end
+	add_symbol(parser->container, &scope->symbol_list, symbol); 
 	return symbol;
 }
 
@@ -489,7 +479,7 @@ static const struct string_object *parse_user_defined_type_name(struct lexer_sta
 {
 	size_t len = 0;
 	if (testnext(ls, '.')) {
-		char buffer[128] = {0};
+		char buffer[256] = {0};
 		const char *str = typename->str;
 		len = strlen(str);
 		if (len >= sizeof buffer) {
@@ -498,7 +488,7 @@ static const struct string_object *parse_user_defined_type_name(struct lexer_sta
 		}
 		snprintf(buffer, sizeof buffer, "%s", str);
 		do {
-			typename = str_checkname(ls);
+			typename = check_name_and_next(ls);
 			str = typename->str;
 			size_t newlen = len + strlen(str) + 1;
 			if (newlen >= sizeof buffer) {
@@ -526,7 +516,7 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 	const struct string_object *name = check_name_and_next(ls);
 	const char *pusertype = NULL;
 	if (testnext(ls, ':')) {
-		const struct string_object *typename = str_checkname(ls); /* we expect a type name */
+		const struct string_object *typename = check_name_and_next(ls); /* we expect a type name */
 		const char *str = typename->str;
 		/* following is not very nice but easy as
 		 * the lexer doesn't need to be changed
