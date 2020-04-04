@@ -14,4 +14,4 @@
 * `hash_table.c` - hash table
 * `set.c` - set data structure
 * `ptrlist.c` - a hybrid array/linked list data structure
-* `membuf.c` - dynamic memory buffer hat supports formatted input - used to build strings incrementally
+* `membuf.c` - dynamic memory buffer that supports formatted input - used to build strings incrementally
