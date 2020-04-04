@@ -177,10 +177,9 @@ static const struct constant *allocate_integer_constant(struct proc *proc, int i
 	return add_constant(proc, &c);
 }
 
-static const struct constant *allocate_string_constant(struct proc *proc, const char *s)
+static const struct constant *allocate_string_constant(struct proc *proc, const struct string_object *s)
 {
-	const struct string_object *so = raviX_create_string(proc->linearizer->ast_container, s, (uint32_t)strlen(s));
-	struct constant c = {.type = RAVI_TSTRING, .s = so};
+	struct constant c = {.type = RAVI_TSTRING, .s = s};
 	return add_constant(proc, &c);
 }
 
@@ -1548,7 +1547,8 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 	case PSEUDO_SYMBOL:
 		switch (pseudo->symbol->symbol_type) {
 		case SYM_LOCAL: {
-			raviX_buffer_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name, pseudo->regnum);
+			raviX_buffer_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name->str,
+						 pseudo->regnum);
 			break;
 		}
 		case SYM_UPVALUE: {
@@ -1556,7 +1556,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			break;
 		}
 		case SYM_GLOBAL: {
-			raviX_buffer_add_string(mb, pseudo->symbol->var.var_name);
+			raviX_buffer_add_string(mb, pseudo->symbol->var.var_name->str);
 			break;
 		}
 		default:

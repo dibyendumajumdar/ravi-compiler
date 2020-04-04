@@ -57,9 +57,9 @@ struct compiler_state {
 	struct ast_node *main_function;
 	struct linearizer_state *linearizer;
 	int (*error_handler)(const char *fmt, ...);
-	membuff_t buff;		 /* temp storage for literals */
+	membuff_t buff;		 /* temp storage for literals, used by the lexer and parser */
 	jmp_buf env;		 /* For error handling */
-	membuff_t error_message; /* For error handling */
+	membuff_t error_message; /* For error handling, error message is saved here */
 	bool killed;		 /* flag to check if this is already destroyed */
 };
 
@@ -79,7 +79,7 @@ struct lexer_state {
 	size_t bufsize;
 	size_t n;
 	const char *p;
-	membuff_t *buff;	    /* buffer for tokens */
+	membuff_t *buff;    /* buffer for tokens, points to the buffer in compiler_state */
 	const char *source; /* current source name */
 	const char *envn;   /* environment variable name */
 };
@@ -113,8 +113,9 @@ typedef enum {
 /* Lua type info. We need to support user defined types too which are known by name */
 struct var_type {
 	ravitype_t type_code;
-	const char *type_name; /* type name for user defined types; used to lookup metatable in registry, only set when
-				     type_code is RAVI_TUSERDATA */
+	/* type name for user defined types; used to lookup metatable in registry, only set when type_code is
+	 * RAVI_TUSERDATA */
+	const struct string_object *type_name;
 };
 
 struct pseudo;
@@ -137,12 +138,12 @@ struct lua_symbol {
 	struct var_type value_type;
 	union {
 		struct {
-			const char *var_name;	   /* name of the variable */
+			const struct string_object *var_name; /* name of the variable */
 			struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
 			struct pseudo *pseudo;	   /* backend data for the symbol */
 		} var;
 		struct {
-			const char *label_name;
+			const struct string_object *label_name;
 			struct block_scope *block;
 		} label;
 		struct {
@@ -201,9 +202,9 @@ struct ast_node {
 			struct lua_symbol *symbol;
 		} label_stmt; /* AST_LABEL_STMT */
 		struct {
-			const char *name;	     /* target label, used to resolve the goto destination */
-			struct ast_node *label_stmt; /* Initially this will be NULL; set by a separate pass */
-		} goto_stmt;			     /* AST_GOTO_STMT */
+			const struct string_object *name; /* target label, used to resolve the goto destination */
+			struct ast_node *label_stmt;	  /* Initially this will be NULL; set by a separate pass */
+		} goto_stmt;				  /* AST_GOTO_STMT */
 		struct {
 			struct lua_symbol_list *var_list;
 			struct ast_node_list *expr_list;
@@ -310,8 +311,8 @@ struct ast_node {
 			 * values do not overwrite the type of the variables in an inconsistent way.
 			 */
 			struct var_type type;
-			const char *method_name;	/* Optional method_name */
-			struct ast_node_list *arg_list; /* Call arguments */
+			const struct string_object *method_name; /* Optional method_name */
+			struct ast_node_list *arg_list;		 /* Call arguments */
 		} function_call_expr;
 	};
 };
@@ -322,7 +323,7 @@ static inline void set_type(struct var_type *vt, ravitype_t t)
 	vt->type_code = t;
 	vt->type_name = NULL;
 }
-static void inline set_typename(struct var_type *vt, ravitype_t t, const char *name)
+static void inline set_typename(struct var_type *vt, ravitype_t t, const struct string_object *name)
 {
 	vt->type_code = t;
 	vt->type_name = name;

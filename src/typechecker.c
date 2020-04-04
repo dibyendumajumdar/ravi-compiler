@@ -83,7 +83,8 @@ static void typecheck_unary_operator(struct compiler_state *container, struct as
 }
 
 /* Type checker - WIP  */
-static void typecheck_binary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_binary_operator(struct compiler_state *container, struct ast_node *function,
+				      struct ast_node *node)
 {
 	BinaryOperatorType op = node->binary_expr.binary_op;
 	struct ast_node *e1 = node->binary_expr.expr_left;
@@ -209,7 +210,8 @@ static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void insert_cast(struct compiler_state *container, struct ast_node *expr, UnaryOperatorType opcode, ravitype_t target_type)
+static void insert_cast(struct compiler_state *container, struct ast_node *expr, UnaryOperatorType opcode,
+			ravitype_t target_type)
 {
 	/* convert the node to @integer node, the original content of node goes into the subexpr */
 	struct ast_node *copy_expr = raviX_allocator_allocate(&container->ast_node_allocator, 0);
@@ -221,12 +223,12 @@ static void insert_cast(struct compiler_state *container, struct ast_node *expr,
 }
 
 static void typecheck_var_assignment(struct compiler_state *container, struct var_type *var_type, struct ast_node *expr,
-				     const char *var_name)
+				     const struct string_object *var_name)
 {
 	if (var_type->type_code == RAVI_TANY)
 		// Any value can be assigned to type ANY
 		return;
-
+	const char *variable_name = var_name ? var_name->str : "unknown-TODO";
 	struct var_type *expr_type = &expr->common_expr.type;
 
 	if (var_type->type_code == RAVI_TNUMINT) {
@@ -235,7 +237,7 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 		    (expr->type == AST_UNARY_EXPR && expr->unary_expr.unary_op == UNOPR_LEN)) {
 			insert_cast(container, expr, UNOPR_TO_INTEGER, RAVI_TNUMINT);
 		} else if (expr_type->type_code != RAVI_TNUMINT) {
-			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
+			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
 		}
 		return;
 	}
@@ -244,13 +246,13 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 			/* cast to number */
 			insert_cast(container, expr, UNOPR_TO_NUMBER, RAVI_TNUMFLT);
 		} else if (expr_type->type_code != RAVI_TNUMFLT) {
-			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
+			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
 		}
 		return;
 	}
 	// all other types must strictly match
 	if (!is_type_same(var_type, expr_type)) { // We should probably check type convert-ability here
-		fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
+		fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
 	}
 }
 
@@ -274,7 +276,7 @@ static void typecheck_local_statement(struct compiler_state *container, struct a
 			break;
 
 		struct var_type *var_type = &var->value_type;
-		const char *var_name = var->var.var_name;
+		const struct string_object *var_name = var->var.var_name;
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
 
@@ -302,7 +304,7 @@ static void typecheck_expr_statement(struct compiler_state *container, struct as
 			break;
 
 		struct var_type *var_type = &var->common_expr.type;
-		const char *var_name = ""; // FIXME how do we get this?
+		const struct string_object *var_name = NULL; // FIXME how do we get this?
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
 

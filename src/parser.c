@@ -113,14 +113,14 @@ static const struct string_object *check_name_and_next(struct lexer_state *ls)
 /* create a new local variable in function scope, and set the
  * variable type (RAVI - added type tt) */
 static struct lua_symbol *new_local_symbol(struct parser_state *parser, const struct string_object *name, ravitype_t tt,
-					   const char *usertype)
+					   const struct string_object *usertype)
 {
 	struct block_scope *scope = parser->current_scope;
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	set_typename(&symbol->value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
 	symbol->var.block = scope;
-	symbol->var.var_name = name->str;
+	symbol->var.var_name = name;
 	symbol->var.pseudo = NULL;
 	return symbol;
 }
@@ -134,11 +134,11 @@ static struct lua_symbol *new_label(struct parser_state *parser, const struct st
 	set_type(&symbol->value_type, RAVI_TANY);
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
-	symbol->label.label_name = name->str;
+	symbol->label.label_name = name;
 	// Add to the end of the symbol list
 	// Note that Lua allows multiple local declarations of the same name
 	// so a new instance just gets added to the end
-	add_symbol(parser->container, &scope->symbol_list, symbol); 
+	add_symbol(parser->container, &scope->symbol_list, symbol);
 	return symbol;
 }
 
@@ -153,7 +153,7 @@ static struct lua_symbol *new_localvarliteral_(struct parser_state *parser, cons
  */
 #define new_localvarliteral(parser, name) new_localvarliteral_(parser, "" name, (sizeof(name) / sizeof(char)) - 1)
 
-static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope, const char *varname)
+static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope, const struct string_object *varname)
 {
 	struct lua_symbol *symbol;
 	// Lookup in reverse order so that we discover the
@@ -181,7 +181,7 @@ static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope
 
 /* Each function has a list of upvalues, searches this list for given name
  */
-static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, const char *name)
+static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, const struct string_object *name)
 {
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
@@ -240,7 +240,8 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
  * the symbol is found or we exhaust the search. NULL is returned if search was
  * exhausted.
  */
-static struct lua_symbol *search_for_variable(struct parser_state *parser, const char *varname, bool *is_local)
+static struct lua_symbol *search_for_variable(struct parser_state *parser, const struct string_object *varname,
+					      bool *is_local)
 {
 	*is_local = false;
 	struct block_scope *current_scope = parser->current_scope;
@@ -289,7 +290,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 {
 	const struct string_object *varname = check_name_and_next(parser->ls);
 	bool is_local = false;
-	struct lua_symbol *symbol = search_for_variable(parser, varname->str, &is_local);
+	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local);
 	if (symbol) {
 		// we found a local or upvalue
 		if (!is_local) {
@@ -300,20 +301,20 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->var.block->function,
 						   symbol);
 			// TODO Following search could be avoided if above returned the symbol
-			symbol = search_upvalue_in_function(parser->current_function, varname->str);
+			symbol = search_upvalue_in_function(parser->current_function, varname);
 		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.function != parser->current_function) {
 			// We found an upvalue but it is not at the same level
 			// Ensure all levels have the upvalue
 			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.function,
 						   symbol->upvalue.var);
 			// TODO Following search could be avoided if above returned the symbol
-			symbol = search_upvalue_in_function(parser->current_function, varname->str);
+			symbol = search_upvalue_in_function(parser->current_function, varname);
 		}
 	} else {
 		// Return global symbol
 		struct lua_symbol *global = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 		global->symbol_type = SYM_GLOBAL;
-		global->var.var_name = varname->str;
+		global->var.var_name = varname;
 		global->var.block = NULL;
 		set_type(&global->value_type, RAVI_TANY); // Globals are always ANY type
 		// We don't add globals to any scope so that they are
@@ -514,7 +515,7 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 	/* assume a dynamic type */
 	ravitype_t tt = RAVI_TANY;
 	const struct string_object *name = check_name_and_next(ls);
-	const char *pusertype = NULL;
+	const struct string_object *pusertype = NULL;
 	if (testnext(ls, ':')) {
 		const struct string_object *typename = check_name_and_next(ls); /* we expect a type name */
 		const char *str = typename->str;
@@ -540,7 +541,7 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 			tt = RAVI_TUSERDATA;
 			typename = parse_user_defined_type_name(ls, typename);
 			// str = getstr(typename);
-			pusertype = typename->str;
+			pusertype = typename;
 		}
 		if (tt == RAVI_TNUMFLT || tt == RAVI_TNUMINT) {
 			/* if we see [] then it is an array type */
@@ -617,7 +618,8 @@ static int parse_expression_list(struct parser_state *parser, struct ast_node_li
 }
 
 /* parse function arguments */
-static struct ast_node *parse_function_call(struct parser_state *parser, const char *methodname, int line)
+static struct ast_node *parse_function_call(struct parser_state *parser, const struct string_object *methodname,
+					    int line)
 {
 	struct lexer_state *ls = parser->ls;
 	struct ast_node *call_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
@@ -716,7 +718,7 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 		case ':': { /* ':' NAME funcargs */
 			raviX_next(ls);
 			const struct string_object *methodname = check_name_and_next(ls);
-			struct ast_node *suffix = parse_function_call(parser, methodname->str, line);
+			struct ast_node *suffix = parse_function_call(parser, methodname, line);
 			add_ast_node(parser->container, &suffixed_expr->suffixed_expr.suffix_list, suffix);
 			break;
 		}
@@ -931,7 +933,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		expr->type = AST_UNARY_EXPR;
 		expr->unary_expr.expr = subexpr;
 		expr->unary_expr.unary_op = uop;
-		expr->unary_expr.type.type_name = usertype ? usertype->str : NULL;
+		expr->unary_expr.type.type_name = usertype;
 	} else {
 		expr = parse_simple_expression(parser);
 	}
@@ -1008,7 +1010,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 	// Resolve labels in the end?
 	struct ast_node *goto_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	goto_stmt->type = AST_GOTO_STMT;
-	goto_stmt->goto_stmt.name = label->str;
+	goto_stmt->goto_stmt.name = label;
 	goto_stmt->goto_stmt.label_stmt = NULL; // unresolved
 	return goto_stmt;
 }
