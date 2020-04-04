@@ -7,9 +7,9 @@ The compiler library will consist of distinct modules:
 * lexer - responsible for tokenizing an input buffer
 * parser - responsible for generating abstract syntax tree (AST).
 * typechecker - responsible for assigning types to variables when possible.
-* linearizer - responsible for constructing a linear IR representation of the AST.
-* optimizer - responsible for improving the code
-* codegenerator - responsible for generate bytecodes
+* linearizer (WIP) - responsible for constructing a linear IR representation of the AST.
+* optimizer (TODO) - responsible for improving the code
+* codegenerator (TODO) - responsible for generate bytecodes
 
 ## Why
 
