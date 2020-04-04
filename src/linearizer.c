@@ -106,9 +106,8 @@ void raviX_destroy_linearizer(struct linearizer_state *linearizer)
 }
 
 /**
- * Right now we assume strings are all interned and can be compared by
- * address but this is probably not a good idea. However Lua allows strings to have
- * embedded 0 so we need string length to do proper string compare.
+ * We assume strings are all interned and can be compared by
+ * address
  */
 static int compare_constants(const void *a, const void *b)
 {
@@ -125,8 +124,7 @@ static int compare_constants(const void *a, const void *b)
 }
 
 /**
- * String hashing is a problem right now as we do not have the length of the
- * string.
+ * Hashes a constant
  */
 static uint32_t hash_constant(const void *c)
 {
@@ -139,13 +137,17 @@ static uint32_t hash_constant(const void *c)
 		return (uint32_t)c1->s->hash;
 }
 
+/**
+ * Adds a constant to the proc's constant table. The constant is also assigned a
+ * pseudo register.
+ */
 static const struct constant *add_constant(struct proc *proc, const struct constant *c)
 {
 	struct set_entry *entry = set_search(proc->constants, c);
 	if (entry == NULL) {
 		int reg = proc->num_constants++;
 		struct constant *c1 = raviX_allocator_allocate(&proc->linearizer->constant_allocator, 0);
-		assert(c1);
+		assert(c1); // FIXME
 		memcpy(c1, c, sizeof(struct constant));
 		c1->index = reg;
 		set_add(proc->constants, c1);
@@ -158,6 +160,10 @@ static const struct constant *add_constant(struct proc *proc, const struct const
 	}
 }
 
+/**
+ * Allocates and adds a constant to the Proc's constants table.
+ * Input is expected to be AST_LITERAL_EXPR
+ */
 static const struct constant *allocate_constant(struct proc *proc, struct ast_node *node)
 {
 	assert(node->type == AST_LITERAL_EXPR);
@@ -323,8 +329,8 @@ void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 }
 
 /**
- * Allocate a new proc. If there is a current proc, then the new proc gets added to the
- * current procs children.
+ * Allocate a new Proc. If there is a current Proc, then the new Proc gets added to the
+ * current Proc's children.
  */
 static struct proc *allocate_proc(struct linearizer_state *linearizer, struct ast_node *function_expr)
 {
@@ -442,7 +448,7 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 	return pseudo;
 }
 
-static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_node *node)
 {
 	UnaryOperatorType op = node->unary_expr.unary_op;
 	struct pseudo *subexpr = linearize_expression(proc, node->unary_expr.expr);
@@ -520,6 +526,7 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src)
 {
+	// TODO we should use type specific MOVE instructions
 	struct instruction *mov = allocate_instruction(proc, op_mov);
 	add_instruction_operand(proc, mov, src);
 	add_instruction_target(proc, mov, target);
@@ -578,8 +585,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 	return result;
 }
 
-/* Type checker - WIP  */
-static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_node *node)
 {
 	BinaryOperatorType op = node->binary_expr.binary_op;
 
@@ -735,7 +741,7 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 	return target;
 }
 
-/* generates closure instruction - linearize a proc, and then add instruction to create closure from it */
+/* generates closure instruction - linearizes a Proc, and then adds instruction to create closure from it */
 static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node *expr)
 {
 	struct proc *curproc = proc->linearizer->current_proc;
@@ -770,7 +776,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->var.pseudo;
 	} else if (sym->symbol_type == SYM_UPVALUE) {
-		/* uvalue index is the positin of upvalue in the function, we treat this as the pseudo register for the
+		/* upvalue index is the position of upvalue in the function, we treat this as the pseudo register for the
 		 * upvalue */
 		/* TODO maybe the pseudo be pre-created when we start linearizing the funcon and stored in the symbol
 		 * like we do for locals? */
@@ -971,7 +977,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
  *
  * The result type of a suffixed expression may initially be an indexed load, but when used in the context of
  * an assignment statement the load will be converted to a store.
- * Lua parser adoes this by creating a VINDEXED node which is only coverted to load/store
+ * Lua parser does this by creating a VINDEXED node which is only converted to load/store
  * when the VINDEXED node is used.
  */
 static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node *node)
@@ -1121,10 +1127,9 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 
 /*
 The handling of local and expression statements can be partially combined
-because the main difference is the LHS sie of it. The rest of the processing has to be
+because the main difference is the LHS side of it. The rest of the processing has to be
 the same.
 */
-
 static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
 {
 	struct ast_node *var;
@@ -1146,7 +1151,6 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 
 static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 {
-
 	struct lua_symbol *sym;
 
 	int nv = ptrlist_size((const struct ptr_list *)stmt->local_stmt.var_list);
@@ -1173,13 +1177,13 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 		return linearize_literal(proc, expr);
 	} break;
 	case AST_BINARY_EXPR: {
-		return linearize_binaryop(proc, expr);
+		return linearize_binary_operator(proc, expr);
 	} break;
 	case AST_FUNCTION_EXPR: {
 		return linearize_function_expr(proc, expr);
 	} break;
 	case AST_UNARY_EXPR: {
-		return linearize_unaryop(proc, expr);
+		return linearize_unary_operator(proc, expr);
 	} break;
 	case AST_SUFFIXED_EXPR: {
 		return linearize_suffixedexpr(proc, expr);
