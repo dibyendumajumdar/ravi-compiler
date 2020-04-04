@@ -265,12 +265,12 @@ struct ast_node {
 		} index_expr;
 		struct { /* AST_UNARY_EXPR */
 			struct var_type type;
-			UnOpr unary_op;
+			UnaryOperatorType unary_op;
 			struct ast_node *expr;
 		} unary_expr;
 		struct {
 			struct var_type type;
-			BinOpr binary_op;
+			BinaryOperatorType binary_op;
 			struct ast_node *expr_left;
 			struct ast_node *expr_right;
 		} binary_expr;

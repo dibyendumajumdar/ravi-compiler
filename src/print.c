@@ -186,7 +186,7 @@ static void print_symbol_names(membuff_t *buf, struct lua_symbol_list *list)
 	END_FOR_EACH_PTR(node);
 }
 
-static const char *get_unary_opr_str(UnOpr op)
+static const char *get_unary_opr_str(UnaryOperatorType op)
 {
 	switch (op) {
 	case UNOPR_NOT:
@@ -218,7 +218,7 @@ static const char *get_unary_opr_str(UnOpr op)
 	}
 }
 
-static const char *get_binary_opr_str(BinOpr op)
+static const char *get_binary_opr_str(BinaryOperatorType op)
 {
 	switch (op) {
 	case BINOPR_ADD:

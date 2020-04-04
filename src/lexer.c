@@ -23,7 +23,7 @@ static inline bool currIsNewline(struct lexer_state *ls) { return ls->current ==
 #define lua_getlocaledecpoint() (localeconv()->decimal_point[0])
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-/* ORDER RESERVED */
+/* ORDER TokenType */
 static const char *const luaX_tokens[] = {
     "and",    "break",	  "do",	      "else",	 "elseif",     "end",	    "false",  "for",	  "function",
     "goto",   "if",	  "in",	      "local",	 "defer",      "nil",	    "not",    "or",	  "repeat",

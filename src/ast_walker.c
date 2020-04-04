@@ -52,8 +52,8 @@ struct visitor {
 	void *userdata;
 	void (*handle_event)(struct event event);
 	void (*handle_literal)(struct literal_event event);
-	void (*handle_unary_expr)(struct event event, UnOpr op);
-	void (*handle_binary_expr)(struct event event, BinOpr op);
+	void (*handle_unary_expr)(struct event event, UnaryOperatorType op);
+	void (*handle_binary_expr)(struct event event, BinaryOperatorType op);
 };
 
 void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor);

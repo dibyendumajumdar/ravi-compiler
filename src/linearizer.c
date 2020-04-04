@@ -445,7 +445,7 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 
 static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node)
 {
-	UnOpr op = node->unary_expr.unary_op;
+	UnaryOperatorType op = node->unary_expr.unary_op;
 	struct pseudo *subexpr = linearize_expression(proc, node->unary_expr.expr);
 	ravitype_t subexpr_type = node->unary_expr.expr->common_expr.type.type_code;
 	enum opcode targetop = op_nop;
@@ -582,7 +582,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 /* Type checker - WIP  */
 static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *node)
 {
-	BinOpr op = node->binary_expr.binary_op;
+	BinaryOperatorType op = node->binary_expr.binary_op;
 
 	if (op == BINOPR_AND) {
 		return linearize_bool(proc, node, true);

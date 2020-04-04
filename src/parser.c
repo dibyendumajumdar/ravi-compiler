@@ -802,7 +802,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	return expr;
 }
 
-static UnOpr get_unary_opr(int op)
+static UnaryOperatorType get_unary_opr(int op)
 {
 	switch (op) {
 	case TK_NOT:
@@ -834,7 +834,7 @@ static UnOpr get_unary_opr(int op)
 	}
 }
 
-static BinOpr get_binary_opr(int op)
+static BinaryOperatorType get_binary_opr(int op)
 {
 	switch (op) {
 	case '+':
@@ -907,11 +907,11 @@ static const struct {
 ** subexpr -> (simpleexp | unop subexpr) { binop subexpr }
 ** where 'binop' is any binary operator with a priority higher than 'limit'
 */
-static struct ast_node *parse_sub_expression(struct parser_state *parser, int limit, BinOpr *untreated_op)
+static struct ast_node *parse_sub_expression(struct parser_state *parser, int limit, BinaryOperatorType *untreated_op)
 {
 	struct lexer_state *ls = parser->ls;
-	BinOpr op;
-	UnOpr uop;
+	BinaryOperatorType op;
+	UnaryOperatorType uop;
 	struct ast_node *expr = NULL;
 	uop = get_unary_opr(ls->t.token);
 	if (uop != UNOPR_NOUNOPR) {
@@ -925,7 +925,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		} else {
 			raviX_next(ls);
 		}
-		BinOpr ignored;
+		BinaryOperatorType ignored;
 		struct ast_node *subexpr = parse_sub_expression(parser, UNARY_PRIORITY, &ignored);
 		expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 		expr->type = AST_UNARY_EXPR;
@@ -938,7 +938,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 	/* expand while operators have priorities higher than 'limit' */
 	op = get_binary_opr(ls->t.token);
 	while (op != BINOPR_NOBINOPR && priority[op].left > limit) {
-		BinOpr nextop;
+		BinaryOperatorType nextop;
 		raviX_next(ls);
 		/* read sub-expression with higher priority */
 		struct ast_node *exprright = parse_sub_expression(parser, priority[op].right, &nextop);
@@ -957,7 +957,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 
 static struct ast_node *parse_expression(struct parser_state *parser)
 {
-	BinOpr ignored;
+	BinaryOperatorType ignored;
 	return parse_sub_expression(parser, 0, &ignored);
 }
 

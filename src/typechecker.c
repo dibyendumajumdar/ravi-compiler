@@ -30,7 +30,7 @@ static void typecheck_ast_list(struct compiler_state *container, struct ast_node
 /* Type checker - WIP  */
 static void typecheck_unary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
 {
-	UnOpr op = node->unary_expr.unary_op;
+	UnaryOperatorType op = node->unary_expr.unary_op;
 	typecheck_ast_node(container, function, node->unary_expr.expr);
 	ravitype_t subexpr_type = node->unary_expr.expr->common_expr.type.type_code;
 	switch (op) {
@@ -85,7 +85,7 @@ static void typecheck_unary_operator(struct compiler_state *container, struct as
 /* Type checker - WIP  */
 static void typecheck_binary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
 {
-	BinOpr op = node->binary_expr.binary_op;
+	BinaryOperatorType op = node->binary_expr.binary_op;
 	struct ast_node *e1 = node->binary_expr.expr_left;
 	struct ast_node *e2 = node->binary_expr.expr_right;
 	typecheck_ast_node(container, function, e1);
@@ -209,7 +209,7 @@ static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void insert_cast(struct compiler_state *container, struct ast_node *expr, UnOpr opcode, ravitype_t target_type)
+static void insert_cast(struct compiler_state *container, struct ast_node *expr, UnaryOperatorType opcode, ravitype_t target_type)
 {
 	/* convert the node to @integer node, the original content of node goes into the subexpr */
 	struct ast_node *copy_expr = raviX_allocator_allocate(&container->ast_node_allocator, 0);

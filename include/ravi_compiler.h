@@ -29,7 +29,7 @@ RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
 /* ------------------------ LEXICAL ANALYZER -------------------------------*/
 /* This is derived from PuC Lua implementation                              */
-enum RESERVED {
+enum TokenType {
 	/* terminal symbols denoted by reserved words */
 	FIRST_RESERVED = 257,
 	TK_AND = FIRST_RESERVED,
@@ -151,10 +151,8 @@ RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer
 /* utilies */
 RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *container);
 
-/*
-** grep "ORDER OPR" if you change these enums  (ORDER OP)
-*/
-typedef enum BinOpr {
+/* Binary operators */
+typedef enum BinaryOperatorType {
 	BINOPR_ADD,
 	BINOPR_SUB,
 	BINOPR_MUL,
@@ -177,10 +175,10 @@ typedef enum BinOpr {
 	BINOPR_AND,
 	BINOPR_OR,
 	BINOPR_NOBINOPR
-} BinOpr;
+} BinaryOperatorType;
 
-/** RAVI change */
-typedef enum UnOpr {
+/* Unary operators */
+typedef enum UnaryOperatorType {
 	UNOPR_MINUS,
 	UNOPR_BNOT,
 	UNOPR_NOT,
@@ -194,6 +192,6 @@ typedef enum UnOpr {
 	UNOPR_TO_CLOSURE,
 	UNOPR_TO_TYPE,
 	UNOPR_NOUNOPR
-} UnOpr;
+} UnaryOperatorType;
 
 #endif
