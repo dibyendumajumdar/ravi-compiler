@@ -251,7 +251,7 @@ struct ast_node {
 			union {
 				lua_Integer i;
 				lua_Number n;
-				const char *s;
+				const struct string_object *s;
 			} u;
 		} literal_expr;
 		struct { /* primaryexp -> NAME | '(' expr ')', NAME is parsed as AST_SYMBOL_EXPR */
@@ -325,11 +325,6 @@ static void inline set_typename(struct var_type *vt, ravitype_t t, const char *n
 {
 	vt->type_code = t;
 	vt->type_name = name;
-}
-static bool is_type_same(const struct var_type *a, const struct var_type *b)
-{
-	// Relies upon strings being interned
-	return a->type_code == b->type_code && a->type_name == b->type_name;
 }
 static inline void copy_type(struct var_type *a, const struct var_type *b)
 {
@@ -537,13 +532,14 @@ struct constant {
 	union {
 		lua_Integer i;
 		lua_Number n;
-		const char *s;
+		const struct string_object *s;
 	};
 };
 
 /* proc is a type of cfg */
 struct proc {
 	CFG_FIELDS;
+	uint32_t id; /* ID for the proc */
 	struct linearizer_state *linearizer;
 	struct proc_list *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
@@ -554,7 +550,7 @@ struct proc {
 	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
 	struct pseudo_generator temp_pseudos;	  /* All other temporaries */
-	struct set *constants;
+	struct set *constants;			  /* constants used by this proc */
 	unsigned num_constants;
 };
 
@@ -574,6 +570,7 @@ struct linearizer_state {
 	struct proc *main_proc;	     /* The root of the compiled chunk of code */
 	struct proc_list *all_procs; /* All procs allocated by the linearizer */
 	struct proc *current_proc;   /* proc being compiled */
+	uint32_t proc_id;
 };
 
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */

@@ -1,5 +1,6 @@
 
 C:\work\github\ravi-compiler\tests\input>tparse "return" 
+return
 function()
   return
 end
@@ -11,6 +12,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1" 
+return 1
 function()
   return
     1
@@ -24,6 +26,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 42, 4.2, true, 'hello'" 
+return 42, 4.2, true, 'hello'
 function()
   return
     42
@@ -49,6 +52,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return a" 
+return a
 function()
   return
     --[suffixed expr start] any
@@ -71,6 +75,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1+2" 
+return 1+2
 function()
   return
     --[binary expr start] any
@@ -93,6 +98,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2^3-5*4" 
+return 2^3-5*4
 function()
   return
     --[binary expr start] any
@@ -133,6 +139,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1+1" 
+return 1+1
 function()
   return
     --[binary expr start] any
@@ -155,6 +162,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1+1+1" 
+return 1+1+1
 function()
   return
     --[binary expr start] any
@@ -186,6 +194,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2-3/5*4" 
+return 2-3/5*4
 function()
   return
     --[binary expr start] any
@@ -226,6 +235,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 4.2//5"	 
+return 4.2//5
 function()
   return
     --[binary expr start] any
@@ -248,6 +258,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0.0" 
+return 0.0
 function()
   return
     0.0000000000000000
@@ -261,6 +272,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0" 
+return 0
 function()
   return
     0
@@ -274,6 +286,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return -0//1" 
+return -0//1
 function()
   return
     --[binary expr start] any
@@ -303,6 +316,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 3^-1" 
+return 3^-1
 function()
   return
     --[binary expr start] any
@@ -332,6 +346,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (1 + 1)^(50 + 50)" 
+return (1 + 1)^(50 + 50)
 function()
   return
     --[binary expr start] any
@@ -388,6 +403,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (-2)^(31 - 2)" 
+return (-2)^(31 - 2)
 function()
   return
     --[binary expr start] any
@@ -442,6 +458,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (-3^0 + 5) // 3.0" 
+return (-3^0 + 5) // 3.0
 function()
   return
     --[binary expr start] any
@@ -497,6 +514,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD" 
+return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD
 function()
   return
     --[binary expr start] any
@@ -537,6 +555,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return ~(~0xFF0 | 0xFF0)" 
+return ~(~0xFF0 | 0xFF0)
 function()
   return
     --[unary expr start] any
@@ -581,6 +600,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return ~~-100024.0" 
+return ~~-100024.0
 function()
   return
     --[unary expr start] any
@@ -615,6 +635,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return ((100 << 6) << -4) >> 2" 
+return ((100 << 6) << -4) >> 2
 function()
   return
     --[binary expr start] any
@@ -678,6 +699,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2^3^2 == 2^(3^2)" 
+return 2^3^2 == 2^(3^2)
 function()
   return
     --[binary expr start] any
@@ -744,6 +766,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2^3*4 == (2^3)*4" 
+return 2^3*4 == (2^3)*4
 function()
   return
     --[binary expr start] any
@@ -810,6 +833,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2.0^-2 == 1/4 and -2^- -2 == - - -4" 
+return 2.0^-2 == 1/4 and -2^- -2 == - - -4
 function()
   return
     --[binary expr start] any
@@ -931,6 +955,7 @@ L3
 	RET {T(0)} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return not nil and 2 and not(2>3 or 3<2)" 
+return not nil and 2 and not(2>3 or 3<2)
 function()
   return
     --[binary expr start] any
@@ -1026,6 +1051,7 @@ L7
 	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return -3-1-5 == 0+0-9" 
+return -3-1-5 == 0+0-9
 function()
   return
     --[binary expr start] any
@@ -1091,6 +1117,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return -2^2 == -4 and (-2)^2 == 4 and 2*2-3-1 == 0" 
+return -2^2 == -4 and (-2)^2 == 4 and 2*2-3-1 == 0
 function()
   return
     --[binary expr start] any
@@ -1233,6 +1260,7 @@ L5
 	CBR {T(0)} {L2, L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "" 
+
 function()
 end
 function()
@@ -1241,6 +1269,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'" 
+return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'
 function()
   return
     --[binary expr start] any
@@ -1323,6 +1352,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return not(2+1 > 3*1) and 'a'..'b' > 'a'" 
+return not(2+1 > 3*1) and 'a'..'b' > 'a'
 function()
   return
     --[binary expr start] any
@@ -1395,6 +1425,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return '7' .. 3 << 1 == 146" 
+return '7' .. 3 << 1 == 146
 function()
   return
     --[binary expr start] any
@@ -1429,6 +1460,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 10 >> 1 .. '9' == 0" 
+return 10 >> 1 .. '9' == 0
 function()
   return
     --[binary expr start] any
@@ -1463,6 +1495,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 10 | 1 .. '9' == 27" 
+return 10 | 1 .. '9' == 27
 function()
   return
     --[binary expr start] any
@@ -1497,6 +1530,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4" 
+return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4
 function()
   return
     --[binary expr start] any
@@ -1546,6 +1580,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4" 
+return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4
 function()
   return
     --[binary expr start] any
@@ -1595,6 +1630,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 0xF0 & 0x0F + 1 == 0x10" 
+return 0xF0 & 0x0F + 1 == 0x10
 function()
   return
     --[binary expr start] any
@@ -1635,6 +1671,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 3^4//2^3//5 == 2" 
+return 3^4//2^3//5 == 2
 function()
   return
     --[binary expr start] any
@@ -1693,6 +1730,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return not ((true or false) and nil)" 
+return not ((true or false) and nil)
 function()
   return
     --[unary expr start] any
@@ -1757,6 +1795,7 @@ L5
 	CBR {T(0)} {L2, L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return true or false and nil" 
+return true or false and nil
 function()
   return
     --[binary expr start] any
@@ -1798,6 +1837,7 @@ L5
 	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (((1 or false) and true) or false) == true" 
+return (((1 or false) and true) or false) == true
 function()
   return
     --[binary expr start] any
@@ -1886,6 +1926,7 @@ L7
 	CBR {T(1)} {L4, L5}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (((nil and true) or false) and true) == false" 
+return (((nil and true) or false) and true) == false
 function()
   return
     --[binary expr start] any
@@ -1974,6 +2015,7 @@ L7
 	CBR {T(1)} {L5, L4}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return -(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75" 
+return -(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75
 function()
   return
     --[binary expr start] any
@@ -2122,6 +2164,7 @@ L9
 	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (b or a)+1 == 2 and (10 or a)+1 == 11" 
+return (b or a)+1 == 2 and (10 or a)+1 == 11
 function()
   return
     --[binary expr start] any
@@ -2256,6 +2299,7 @@ L7
 	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return ((2<3) or 1) == true and (2<3 and 4) == 4" 
+return ((2<3) or 1) == true and (2<3 and 4) == 4
 function()
   return
     --[binary expr start] any
@@ -2371,6 +2415,7 @@ L7
 	BR {L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return (x>y) and x or y == 2" 
+return (x>y) and x or y == 2
 function()
   return
     --[binary expr start] any
@@ -2474,6 +2519,7 @@ L5
 	CBR {T(0)} {L3, L2}
 
 C:\work\github\ravi-compiler\tests\input>tparse "function x() for i = 1, 10 do; print(i); end end" 
+function x() for i = 1, 10 do; print(i); end end
 function()
    x --global symbol any 
    =
@@ -2546,6 +2592,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "function x() local a=1; function y() return function() return a end end; end" 
+function x() local a=1; function y() return function() return a end end; end
 function()
    x --global symbol any 
    =
@@ -2556,49 +2603,22 @@ function()
         a --local symbol any 
       --[expressions]
         1
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            functionx --global symbol any 
-          --[primary end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            y --global symbol any 
-          --[primary end]
-          --[suffix list start]
-            --[function call start] any
-             (
-             )
-            --[function call end]
-          --[suffix list end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
-      return
-        --[suffixed expr start] any
-         --[primary start] any
-           functionx --global symbol any 
-         --[primary end]
-         --[suffix list start]
-           --[function call start] any
-            (
-            )
-           --[function call end]
-         --[suffix list end]
-        --[suffixed expr end]
+       y --global symbol any 
+       =
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
     end
-  return
-    --[suffixed expr start] any
-     --[primary start] any
-       a --global symbol any 
-     --[primary end]
-    --[suffixed expr end]
 end
 function()
    x --global symbol any 
@@ -2610,52 +2630,26 @@ function()
         a --local symbol any 
       --[expressions]
         1
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            functionx --global symbol any 
-          --[primary end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            y --global symbol any 
-          --[primary end]
-          --[suffix list start]
-            --[function call start] any
-             (
-             )
-            --[function call end]
-          --[suffix list end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
-      return
-        --[suffixed expr start] any
-         --[primary start] any
-           functionx --global symbol any 
-         --[primary end]
-         --[suffix list start]
-           --[function call start] any
-            (
-            )
-           --[function call end]
-         --[suffix list end]
-        --[suffixed expr end]
+       y --global symbol any 
+       =
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
     end
-  return
-    --[suffixed expr start] any
-     --[primary start] any
-       a --global symbol any 
-     --[primary end]
-    --[suffixed expr end]
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @integer 1" 
+return @integer 1
 function()
   return
     --[unary expr start] any
@@ -2675,6 +2669,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @string 'hello'" 
+return @string 'hello'
 function()
   return
     --[unary expr start] any
@@ -2694,6 +2689,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @table {}" 
+return @table {}
 function()
   return
     --[unary expr start] any
@@ -2716,6 +2712,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @integer[] {}" 
+return @integer[] {}
 function()
   return
     --[unary expr start] any
@@ -2738,6 +2735,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @number[] {}" 
+return @number[] {}
 function()
   return
     --[unary expr start] any
@@ -2760,6 +2758,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @closure function() end" 
+return @closure function() end
 function()
   return
     --[unary expr start] any
@@ -2777,13 +2776,14 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(0000025FFEEC9758)} {T(0)}
+	CLOSURE {Proc(000002315E38A4E0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @number 54.4" 
+return @number 54.4
 function()
   return
     --[unary expr start] any
@@ -2803,6 +2803,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @User.Type a" 
+return @User.Type a
 function()
   return
     --[unary expr start] any
@@ -2832,6 +2833,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return {1,2,3}" 
+return {1,2,3}
 function()
   return
     { --[table constructor start] table
@@ -2885,6 +2887,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return {[1] = a}" 
+return {[1] = a}
 function()
   return
     { --[table constructor start] table
@@ -2935,6 +2938,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return {a = b}" 
+return {a = b}
 function()
   return
     { --[table constructor start] table
@@ -2983,6 +2987,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @integer[]{[1] = 5.5, [2] = 4}" 
+return @integer[]{[1] = 5.5, [2] = 4}
 function()
   return
     --[unary expr start] any
@@ -3057,6 +3062,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return @number[] {[1] = 4, [2] = 5.4}" 
+return @number[] {[1] = 4, [2] = 5.4}
 function()
   return
     --[unary expr start] any
@@ -3131,6 +3137,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "if 1 == 1 then return true else return false end" 
+if 1 == 1 then return true else return false end
 function()
   if
    --[binary expr start] any
@@ -3174,6 +3181,7 @@ L4
 L5
 
 C:\work\github\ravi-compiler\tests\input>tparse "if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end" 
+if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end
 function()
   if
    --[binary expr start] any
@@ -3263,6 +3271,7 @@ L8
 L9
 
 C:\work\github\ravi-compiler\tests\input>tparse "if 1 == 1 then return 'hi' end" 
+if 1 == 1 then return 'hi' end
 function()
   if
    --[binary expr start] any
@@ -3298,6 +3307,7 @@ L3
 L4
 
 C:\work\github\ravi-compiler\tests\input>tparse "if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end" 
+if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end
 function()
   if
    --[binary expr start] any
@@ -3373,6 +3383,7 @@ L8
 	BR {L5}
 
 C:\work\github\ravi-compiler\tests\input>tparse "if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end" 
+if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end
 function()
   if
    --[binary expr start] any
@@ -3440,6 +3451,7 @@ L5
 L6
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1 and 2" 
+return 1 and 2
 function()
   return
     --[binary expr start] any
@@ -3467,6 +3479,7 @@ L3
 	RET {T(0)} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 3 and 4 and 5" 
+return 3 and 4 and 5
 function()
   return
     --[binary expr start] any
@@ -3508,6 +3521,7 @@ L5
 	CBR {T(0)} {L2, L3}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 1 or 2" 
+return 1 or 2
 function()
   return
     --[binary expr start] any
@@ -3535,6 +3549,7 @@ L3
 	RET {T(0)} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return 3 or 4 or 5" 
+return 3 or 4 or 5
 function()
   return
     --[binary expr start] any
@@ -3576,6 +3591,7 @@ L5
 	CBR {T(0)} {L3, L2}
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x[1]" 
+return x[1]
 function()
   return
     --[suffixed expr start] any
@@ -3613,6 +3629,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x()" 
+return x()
 function()
   return
     --[suffixed expr start] any
@@ -3648,6 +3665,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x[1]()" 
+return x[1]()
 function()
   return
     --[suffixed expr start] any
@@ -3694,6 +3712,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x[1]:name()" 
+return x[1]:name()
 function()
   return
     --[suffixed expr start] any
@@ -3741,6 +3760,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x[1]:name(1,2)" 
+return x[1]:name(1,2)
 function()
   return
     --[suffixed expr start] any
@@ -3794,6 +3814,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x(), y()" 
+return x(), y()
 function()
   return
     --[suffixed expr start] any
@@ -3855,6 +3876,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return y(x())" 
+return y(x())
 function()
   return
     --[suffixed expr start] any
@@ -3914,6 +3936,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x = 1" 
+x = 1
 function()
   --[expression statement start]
    --[var list start]
@@ -3947,6 +3970,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x = 1, 2" 
+x = 1, 2
 function()
   --[expression statement start]
    --[var list start]
@@ -3984,6 +4008,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1] = 1" 
+x[1] = 1
 function()
   --[expression statement start]
    --[var list start]
@@ -4032,6 +4057,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1] = b" 
+x[1] = b
 function()
   --[expression statement start]
    --[var list start]
@@ -4089,6 +4115,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1][1] = b" 
+x[1][1] = b
 function()
   --[expression statement start]
    --[var list start]
@@ -4157,6 +4184,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x()" 
+x()
 function()
   --[expression statement start]
    --[expression list start]
@@ -4197,6 +4225,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x()[1]" 
+x()[1]
 function()
   --[expression statement start]
    --[expression list start]
@@ -4248,6 +4277,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x()[1](a,b)" 
+x()[1](a,b)
 function()
   --[expression statement start]
    --[expression list start]
@@ -4332,6 +4362,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x,y = 1,2" 
+x,y = 1,2
 function()
   --[expression statement start]
    --[var list start]
@@ -4382,6 +4413,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x,y = f()" 
+x,y = f()
 function()
   --[expression statement start]
    --[var list start]
@@ -4450,6 +4482,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1],y[1],c,d = 1,z()" 
+x[1],y[1],c,d = 1,z()
 function()
   --[expression statement start]
    --[var list start]
@@ -4578,6 +4611,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x[1][2],y[1],c,d = 1,z()" 
+x[1][2],y[1],c,d = 1,z()
 function()
   --[expression statement start]
    --[var list start]
@@ -4717,6 +4751,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x,y = y,x" 
+x,y = y,x
 function()
   --[expression statement start]
    --[var list start]
@@ -4785,6 +4820,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x,y,z = z,y,x" 
+x,y,z = z,y,x
 function()
   --[expression statement start]
    --[var list start]
@@ -4879,6 +4915,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "i = 3; i, a[i] = i+1, 20" 
+i = 3; i, a[i] = i+1, 20
 function()
   --[expression statement start]
    --[var list start]
@@ -4996,6 +5033,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "x(y(a[10],5,z()))[1] = 9" 
+x(y(a[10],5,z()))[1] = 9
 function()
   --[expression statement start]
    --[var list start]
@@ -5133,6 +5171,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local i = 0" 
+local i = 0
 function()
 --locals  i
   local
@@ -5154,6 +5193,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local i, j = 1, 2" 
+local i, j = 1, 2
 function()
 --locals  i, j
   local
@@ -5184,6 +5224,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local a = a" 
+local a = a
 function()
 --locals  a
   local
@@ -5214,6 +5255,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local a = b" 
+local a = b
 function()
 --locals  a
   local
@@ -5244,6 +5286,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local a, b = x, y" 
+local a, b = x, y
 function()
 --locals  a, b
   local
@@ -5292,6 +5335,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local a: integer return a+3" 
+local a: integer return a+3
 function()
 --locals  a
   local
@@ -5330,6 +5374,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local i: integer; return t[i/5]" 
+local i: integer; return t[i/5]
 function()
 --locals  i
   local
@@ -5392,6 +5437,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local t: integer[]; return t[0]" 
+local t: integer[]; return t[0]
 function()
 --locals  t
   local
@@ -5436,6 +5482,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return f()[1]" 
+return f()[1]
 function()
   return
     --[suffixed expr start] any
@@ -5482,6 +5529,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return x.y[1]" 
+return x.y[1]
 function()
   return
     --[suffixed expr start] any
@@ -5528,6 +5576,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "local t: integer[] if (t[1] == 5) then return true end return false" 
+local t: integer[] if (t[1] == 5) then return true end return false
 function()
 --locals  t
   local
@@ -5607,6 +5656,7 @@ L4
 	RET {false} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse "local t: table local len: integer = #t return len" 
+local t: table local len: integer = #t return len
 function()
 --locals  t, len
   local
@@ -5666,6 +5716,7 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse "return function(t: table, i: integer) i = #t end" 
+return function(t: table, i: integer) i = #t end
 function()
   return
     function(
@@ -5728,7 +5779,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001EE325BC0C8)} {T(0)}
+	CLOSURE {Proc(000001AC2E76CE80)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5738,10 +5789,29 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t001.lua 
+return function()
+    local a = 1
+
+	local function y()
+		return function()
+			return a
+		end
+	end
+
+	local a = 5
+
+	local function z()
+		return function()
+			return a
+		end
+	end
+
+	return y, z
+end
 function()
   return
     function()
-    --locals  a, functionlocal
+    --locals  a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -5749,40 +5819,61 @@ function()
         1
       local
       --[symbols]
-        functionlocal --local symbol any 
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            y --global symbol any 
-          --[primary end]
-          --[suffix list start]
-            --[function call start] any
-             (
-             )
-            --[function call end]
-          --[suffix list end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
+        y --local symbol closure 
+      --[expressions]
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
+      local
+      --[symbols]
+        a --local symbol any 
+      --[expressions]
+        5
+      local
+      --[symbols]
+        z --local symbol closure 
+      --[expressions]
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
       return
-        --[suffixed expr start] any
-         --[primary start] any
-           functionlocal --local symbol any 
+        --[suffixed expr start] closure
+         --[primary start] closure
+           y --local symbol closure 
          --[primary end]
-         --[suffix list start]
-           --[function call start] any
-            (
-            )
-           --[function call end]
-         --[suffix list end]
+        --[suffixed expr end]
+       ,
+        --[suffixed expr start] closure
+         --[primary start] closure
+           z --local symbol closure 
+         --[primary end]
         --[suffixed expr end]
     end
 end
 function()
   return
     function()
-    --locals  a, functionlocal
+    --locals  a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -5790,49 +5881,96 @@ function()
         1
       local
       --[symbols]
-        functionlocal --local symbol any 
-      --[expression statement start]
-       --[expression list start]
-         --[suffixed expr start] any
-          --[primary start] any
-            y --global symbol any 
-          --[primary end]
-          --[suffix list start]
-            --[function call start] any
-             (
-             )
-            --[function call end]
-          --[suffix list end]
-         --[suffixed expr end]
-       --[expression list end]
-      --[expression statement end]
+        y --local symbol closure 
+      --[expressions]
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
+      local
+      --[symbols]
+        a --local symbol any 
+      --[expressions]
+        5
+      local
+      --[symbols]
+        z --local symbol closure 
+      --[expressions]
+        function()
+        --upvalues  a
+          return
+            function()
+            --upvalues  a
+              return
+                --[suffixed expr start] any
+                 --[primary start] any
+                   a --upvalue any 
+                 --[primary end]
+                --[suffixed expr end]
+            end
+        end
       return
-        --[suffixed expr start] any
-         --[primary start] any
-           functionlocal --local symbol any 
+        --[suffixed expr start] closure
+         --[primary start] closure
+           y --local symbol closure 
          --[primary end]
-         --[suffix list start]
-           --[function call start] any
-            (
-            )
-           --[function call end]
-         --[suffix list end]
+        --[suffixed expr end]
+       ,
+        --[suffixed expr start] closure
+         --[primary start] closure
+           z --local symbol closure 
+         --[primary end]
         --[suffixed expr end]
     end
 end
 L0 (entry)
-	CLOSURE {Proc(0000014658F2B518)} {T(0)}
+	CLOSURE {Proc(000001510DD8AB80)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
-	LOADGLOBAL {y} {T(0)}
-	CALL {T(0)} {T(0..)}
-	CALL {local(functionlocal, 1)} {T(1..)}
-	RET {T(1..)} {L1}
+	CLOSURE {Proc(000001510DD8AFF8)} {T(0)}
+	MOV {T(0)} {local(y, 1)}
+	MOV {5 Kint(1)} {local(a, 2)}
+	CLOSURE {Proc(000001510DD8B8E8)} {T(0)}
+	MOV {T(0)} {local(z, 3)}
+	RET {local(y, 1), local(z, 3)} {L1}
+L1 (exit)
+L0 (entry)
+	CLOSURE {Proc(000001510DD8B470)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	RET {Upval(0)} {L1}
+L1 (exit)
+L0 (entry)
+	CLOSURE {Proc(000001510DD8BD60)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	RET {Upval(0)} {L1}
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t002.lua 
+return function (a, b, c, d, e)
+    if a == b then goto l1
+    elseif a == c then goto l2
+    elseif a == d then goto l2
+    else if a == e then goto l3
+        else goto l3
+        end
+    end
+    ::l1:: ::l2:: ::l3:: ::l4::
+end
 function()
   return
     function(
@@ -6013,6 +6151,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t003.lua 
+return function (a) while a < 10 do a = a + 1 end end
 function()
   return
     function(
@@ -6095,6 +6234,8 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t004.lua 
+return function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
+                  goto L2; ::L1:: end
 function()
   return
     function(
@@ -6199,6 +6340,9 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t005.lua 
+return function ()
+    (function () end){f()}
+  end
 function()
   return
     function()
@@ -6276,11 +6420,11 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(00000204A371B5F8)} {T(0)}
+	CLOSURE {Proc(000001E60CC5AA70)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(00000204A371BA68)} {T(0)}
+	CLOSURE {Proc(000001E60CC5AEE8)} {T(0)}
 	NEWTABLE {T(1)}
 	LOADGLOBAL {f} {T(2)}
 	CALL {T(2)} {T(2..)}
@@ -6291,6 +6435,16 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t006.lua 
+return function ()
+    local sum 
+    for j = 1,500 do
+        sum = 0.0
+        for k = 1,10000 do
+            sum = sum + 1.0/(k*k)
+        end
+    end
+    return sum
+end
 function()
   return
     function()
@@ -6459,6 +6613,23 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t007.lua 
+function matmul(a: table, b: table)
+  	assert(@integer(#a[1]) == #b);
+  	local m: integer, n: integer, p: integer, x: table = #a, #a[1], #b[1], {};
+  	local c: table = matrix.T(b); -- transpose for efficiency
+  	for i = 1, m do
+  		local xi: number[] = table.numarray(p, 0.0)
+  		x[i] = xi
+  		for j = 1, p do
+  			local sum: number, ai: number[], cj: number[] = 0.0, @number[](a[i]), @number[](c[j]);
+  			-- for luajit, caching c[j] or not makes no difference; lua is not so clever
+  			for k = 1, n do sum = sum + ai[k] * cj[k] end
+  			xi[j] = sum;
+  		end
+  	end
+  	return x
+  end
+return matmul
 function()
    matmul --global symbol any 
    =
@@ -6615,7 +6786,7 @@ function()
             --[suffix list start]
               --[field selector start] any
                .
-                'numarrayj'
+                'numarray'
               --[field selector end]
               --[function call start] any
                (
@@ -6999,7 +7170,7 @@ function()
             --[suffix list start]
               --[field selector start] any
                .
-                'numarrayj'
+                'numarray'
               --[field selector end]
               --[function call start] any
                (
@@ -7220,6 +7391,7 @@ function()
 end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t008.lua 
+return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)
 function()
   return
     --[binary expr start] any
@@ -7482,6 +7654,8 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t009.lua 
+return -3%5 == 2 and -3+5 == 2
+
 function()
   return
     --[binary expr start] any
@@ -7559,6 +7733,8 @@ L3
 	RET {T(0)} {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t010.lua 
+return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3
+
 function()
   return
     --[binary expr start] any
@@ -7671,6 +7847,8 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t011.lua 
+return -((2^8 + -(-1)) % 8)//2 * 4 - 3
+
 function()
   return
     --[binary expr start] any
@@ -7783,6 +7961,8 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t012.lua 
+return -3%5 == 2 and -3+5 == 2
+
 function()
   return
     --[binary expr start] any

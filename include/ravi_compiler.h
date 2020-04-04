@@ -8,9 +8,10 @@ Copyright 2018-2020 Dibyendu Majumdar
 #ifndef _RAVI_COMPILER_H
 #define _RAVI_COMPILER_H
 
-#include <stdio.h>
-
 #include "ravicomp_export.h"
+
+#include <stdint.h>
+#include <stdio.h>
 
 struct compiler_state;
 struct lexer_state;
@@ -18,7 +19,6 @@ struct linearizer_state;
 
 typedef long long lua_Integer;
 typedef double lua_Number;
-
 
 /* Initialize the compiler state */
 RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler();
@@ -79,14 +79,21 @@ enum RESERVED {
 	TK_TO_CLOSURE
 };
 
+struct string_object {
+	uint32_t len;
+	int32_t reserved; /* if is this a keyword then token id else -1 */
+	uint32_t hash;
+	const char *str;
+};
+
 typedef union {
 	lua_Number r;
 	lua_Integer i;
-	const char* ts;
+	const struct string_object *ts;
 } SemInfo; /* semantic information */
 
 typedef struct Token {
-	int token;
+	int token; /* Token value or character value */
 	SemInfo seminfo;
 } Token;
 
@@ -99,8 +106,8 @@ typedef struct {
 } LexState;
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name*/
-RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf, size_t buflen,
-						     const char *source_name);
+RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
+						     size_t buflen, const char *source_name);
 /* Gets the lexer data structure that can be used to access the current token */
 RAVICOMP_EXPORT LexState *raviX_get_lexer_info(struct lexer_state *ls);
 /* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved,
@@ -112,7 +119,8 @@ RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
 RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
 
 /* parser and ast builder */
-RAVICOMP_EXPORT const char *raviX_create_string(struct compiler_state *container, const char *s, size_t len);
+RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
+								uint32_t len);
 RAVICOMP_EXPORT int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name);
 RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *container, FILE *fp);
 RAVICOMP_EXPORT int
@@ -127,29 +135,49 @@ RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer
 /* utilies */
 RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *container);
 
-
 /*
 ** grep "ORDER OPR" if you change these enums  (ORDER OP)
 */
 typedef enum BinOpr {
-	OPR_ADD, OPR_SUB, OPR_MUL, OPR_MOD, OPR_POW,
+	OPR_ADD,
+	OPR_SUB,
+	OPR_MUL,
+	OPR_MOD,
+	OPR_POW,
 	OPR_DIV,
 	OPR_IDIV,
-	OPR_BAND, OPR_BOR, OPR_BXOR,
-	OPR_SHL, OPR_SHR,
+	OPR_BAND,
+	OPR_BOR,
+	OPR_BXOR,
+	OPR_SHL,
+	OPR_SHR,
 	OPR_CONCAT,
-	OPR_EQ, OPR_LT, OPR_LE,
-	OPR_NE, OPR_GT, OPR_GE,
-	OPR_AND, OPR_OR,
+	OPR_EQ,
+	OPR_LT,
+	OPR_LE,
+	OPR_NE,
+	OPR_GT,
+	OPR_GE,
+	OPR_AND,
+	OPR_OR,
 	OPR_NOBINOPR
 } BinOpr;
 
 /** RAVI change */
 typedef enum UnOpr {
-	OPR_MINUS, OPR_BNOT, OPR_NOT, OPR_LEN, OPR_TO_INTEGER,
-	OPR_TO_NUMBER, OPR_TO_INTARRAY, OPR_TO_NUMARRAY, OPR_TO_TABLE, OPR_TO_STRING,
-	OPR_TO_CLOSURE, OPR_TO_TYPE, OPR_NOUNOPR
+	OPR_MINUS,
+	OPR_BNOT,
+	OPR_NOT,
+	OPR_LEN,
+	OPR_TO_INTEGER,
+	OPR_TO_NUMBER,
+	OPR_TO_INTARRAY,
+	OPR_TO_NUMARRAY,
+	OPR_TO_TABLE,
+	OPR_TO_STRING,
+	OPR_TO_CLOSURE,
+	OPR_TO_TYPE,
+	OPR_NOUNOPR
 } UnOpr;
-
 
 #endif

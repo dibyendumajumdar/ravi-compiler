@@ -47,9 +47,9 @@ static void printf_buf(membuff_t *buf, const char *format, ...)
 			snprintf(tbuf, sizeof tbuf, "%.*s", level, PADDING);
 			membuff_add_string(buf, tbuf);
 			cp++;
-		} else if (cp[0] == '%' && cp[1] == 't') { /* TString */
-			const char *s = va_arg(ap, const char *);
-			membuff_add_string(buf, s);
+		} else if (cp[0] == '%' && cp[1] == 't') { /* string_object */
+			const struct string_object *s = va_arg(ap, const struct string_object *);
+			membuff_add_string(buf, s->str);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'T') { /* struct var_type */
 			const struct var_type *type;
@@ -119,17 +119,17 @@ static void print_symbol(membuff_t *buf, struct lua_symbol *sym, int level)
 {
 	switch (sym->symbol_type) {
 	case SYM_GLOBAL: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->var.var_name, "global symbol",
+		printf_buf(buf, "%p%s %c %s %s\n", level, sym->var.var_name, "global symbol",
 			   type_name(sym->value_type.type_code), get_as_str(sym->value_type.type_name));
 		break;
 	}
 	case SYM_LOCAL: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->var.var_name, "local symbol",
+		printf_buf(buf, "%p%s %c %s %s\n", level, sym->var.var_name, "local symbol",
 			   type_name(sym->value_type.type_code), get_as_str(sym->value_type.type_name));
 		break;
 	}
 	case SYM_UPVALUE: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->upvalue.var->var.var_name, "upvalue",
+		printf_buf(buf, "%p%s %c %s %s\n", level, sym->upvalue.var->var.var_name, "upvalue",
 			   type_name(sym->upvalue.var->value_type.type_code),
 			   get_as_str(sym->upvalue.var->value_type.type_name));
 		break;
@@ -144,11 +144,11 @@ static void print_symbol_name(membuff_t *buf, struct lua_symbol *sym)
 	switch (sym->symbol_type) {
 	case SYM_LOCAL:
 	case SYM_GLOBAL: {
-		printf_buf(buf, "%t", sym->var.var_name);
+		printf_buf(buf, "%s", sym->var.var_name);
 		break;
 	}
 	case SYM_UPVALUE: {
-		printf_buf(buf, "%t", sym->upvalue.var->var.var_name);
+		printf_buf(buf, "%s", sym->upvalue.var->var.var_name);
 		break;
 	}
 	default:
@@ -325,11 +325,11 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		break;
 	}
 	case AST_LABEL_STMT: {
-		printf_buf(buf, "%p::%t::\n", level, node->label_stmt.symbol->label.label_name);
+		printf_buf(buf, "%p::%s::\n", level, node->label_stmt.symbol->label.label_name);
 		break;
 	}
 	case AST_GOTO_STMT: {
-		printf_buf(buf, "%pgoto %t\n", level, node->goto_stmt.name);
+		printf_buf(buf, "%pgoto %s\n", level, node->goto_stmt.name);
 		break;
 	}
 	case AST_DO_STMT: {
@@ -427,7 +427,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 	case AST_FUNCTION_CALL_EXPR: {
 		printf_buf(buf, "%p%c %T\n", level, "[function call start]", &node->function_call_expr.type);
 		if (node->function_call_expr.method_name) {
-			printf_buf(buf, "%p: %t (\n", level + 1, node->function_call_expr.method_name);
+			printf_buf(buf, "%p: %s (\n", level + 1, node->function_call_expr.method_name);
 		} else {
 			printf_buf(buf, "%p(\n", level + 1);
 		}

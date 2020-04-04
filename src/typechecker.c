@@ -3,7 +3,14 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 */
 #include <ravi_ast.h>
 
-static void handle_error(struct compiler_state* container, const char* msg) {
+static bool is_type_same(const struct var_type *a, const struct var_type *b)
+{
+	// Relies upon strings being interned
+	return a->type_code == b->type_code && a->type_name == b->type_name;
+}
+
+static void handle_error(struct compiler_state *container, const char *msg)
+{
 	// TODO source and line number
 	membuff_add_string(&container->error_message, msg);
 	longjmp(container->env, 1);
@@ -247,7 +254,8 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	}
 }
 
-static void typecheck_local_statement(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_local_statement(struct compiler_state *container, struct ast_node *function,
+				      struct ast_node *node)
 {
 	// The local vars should already be annotated
 	// We need to typecheck the expressions to the right of =
@@ -303,7 +311,8 @@ static void typecheck_expr_statement(struct compiler_state *container, struct as
 	}
 }
 
-static void typecheck_for_in_statment(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_for_in_statment(struct compiler_state *container, struct ast_node *function,
+				      struct ast_node *node)
 {
 	typecheck_ast_list(container, function, node->for_stmt.expr_list);
 	typecheck_ast_list(container, function, node->for_stmt.for_statement_list);

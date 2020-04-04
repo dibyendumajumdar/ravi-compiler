@@ -63,7 +63,7 @@ static const char *read_file(const char *filename)
 		fclose(fp);
 		return NULL;
 	}
-	char *buffer = calloc(1, len+10);
+	char *buffer = calloc(1, len + 10);
 	size_t n = fread(buffer, 1, len, fp);
 	if (n == 0) {
 		fprintf(stderr, "Failed to read file\n");
@@ -80,12 +80,13 @@ int main(int argc, const char *argv[])
 	struct arguments args;
 	parse_arguments(&args, argc, argv);
 
-	// const char* code = "return { say='hello world' }";
+	// const char *code = "return { say='hello world' }";
 	// const char* code = "if true then return 1 elseif false then return 2 else return 0 end";
 	// const char* code = "if 1 == 1 then return 1 else return 2 end";
-	//const char *code = "if 1 == 1 then return 1 elseif 1 > 2 then return 2 else return 2 end";
-	//const char* code = "local i: integer; return t[i/5]";
-	const char* code = "local i return function(a) i = a; return i end";
+	// const char *code = "if 1 == 1 then return 1 elseif 1 > 2 then return 2 else return 2 end";
+	// const char* code = "local i: integer; return t[i/5]";
+	// const char* code = "local i return function(a) i = a; return i end";
+	const char *code = "return -0//1";
 	if (args.code) {
 		code = args.code;
 	} else if (args.filename) {
@@ -96,6 +97,7 @@ int main(int argc, const char *argv[])
 		exit(1);
 	}
 
+	printf("%s\n", code);
 	int rc = 0;
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");

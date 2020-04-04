@@ -24,7 +24,7 @@ static struct ast_node *end_function(struct parser_state *parser);
 static struct block_scope *new_scope(struct parser_state *parser);
 static void end_scope(struct parser_state *parser);
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type);
-static struct ast_node *generate_label(struct parser_state *parser, const char *label);
+static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label);
 static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym);
 
 static void add_symbol(struct compiler_state *container, struct lua_symbol_list **list, struct lua_symbol *sym)
@@ -101,9 +101,9 @@ static void check_match(struct lexer_state *ls, int what, int who, int where)
 }
 
 /* Check that current token is a name, and advance */
-static const char *check_name_and_next(struct lexer_state *ls)
+static const struct string_object *check_name_and_next(struct lexer_state *ls)
 {
-	const char *ts;
+	const struct string_object *ts;
 	check(ls, TK_NAME);
 	ts = ls->t.seminfo.ts;
 	raviX_next(ls);
@@ -111,9 +111,9 @@ static const char *check_name_and_next(struct lexer_state *ls)
 }
 
 /* Check that current token is a name, and advance */
-static const char *str_checkname(struct lexer_state *ls)
+static const struct string_object *str_checkname(struct lexer_state *ls)
 {
-	const char *ts;
+	const struct string_object *ts;
 	check(ls, TK_NAME);
 	ts = ls->t.seminfo.ts;
 	raviX_next(ls);
@@ -122,7 +122,7 @@ static const char *str_checkname(struct lexer_state *ls)
 
 /* create a new local variable in function scope, and set the
  * variable type (RAVI - added type tt) */
-static struct lua_symbol *new_local_symbol(struct parser_state *parser, const char *name, ravitype_t tt,
+static struct lua_symbol *new_local_symbol(struct parser_state *parser, const struct string_object *name, ravitype_t tt,
 					   const char *usertype)
 {
 	struct block_scope *scope = parser->current_scope;
@@ -130,13 +130,13 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const ch
 	set_typename(&symbol->value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
 	symbol->var.block = scope;
-	symbol->var.var_name = name;
+	symbol->var.var_name = name->str;
 	symbol->var.pseudo = NULL;
 	return symbol;
 }
 
 /* create a new label */
-static struct lua_symbol *new_label(struct parser_state *parser, const char *name)
+static struct lua_symbol *new_label(struct parser_state *parser, const struct string_object *name)
 {
 	struct block_scope *scope = parser->current_scope;
 	assert(scope);
@@ -144,7 +144,7 @@ static struct lua_symbol *new_label(struct parser_state *parser, const char *nam
 	set_type(&symbol->value_type, RAVI_TANY);
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
-	symbol->label.label_name = name;
+	symbol->label.label_name = name->str;
 	add_symbol(parser->container, &scope->symbol_list,
 		   symbol); // Add to the end of the symbol list
 			    // Note that Lua allows multiple local declarations of the same name
@@ -156,7 +156,7 @@ static struct lua_symbol *new_label(struct parser_state *parser, const char *nam
  */
 static struct lua_symbol *new_localvarliteral_(struct parser_state *parser, const char *name, size_t sz)
 {
-	return new_local_symbol(parser, raviX_create_string(parser->container, name, sz), RAVI_TANY, NULL);
+	return new_local_symbol(parser, raviX_create_string(parser->container, name, (uint32_t)sz), RAVI_TANY, NULL);
 }
 
 /* create a new local variable
@@ -297,9 +297,9 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
  */
 static struct ast_node *new_symbol_reference(struct parser_state *parser)
 {
-	const char *varname = check_name_and_next(parser->ls);
+	const struct string_object *varname = check_name_and_next(parser->ls);
 	bool is_local = false;
-	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local);
+	struct lua_symbol *symbol = search_for_variable(parser, varname->str, &is_local);
 	if (symbol) {
 		// we found a local or upvalue
 		if (!is_local) {
@@ -310,20 +310,20 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->var.block->function,
 						   symbol);
 			// TODO Following search could be avoided if above returned the symbol
-			symbol = search_upvalue_in_function(parser->current_function, varname);
+			symbol = search_upvalue_in_function(parser->current_function, varname->str);
 		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.function != parser->current_function) {
 			// We found an upvalue but it is not at the same level
 			// Ensure all levels have the upvalue
 			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.function,
 						   symbol->upvalue.var);
 			// TODO Following search could be avoided if above returned the symbol
-			symbol = search_upvalue_in_function(parser->current_function, varname);
+			symbol = search_upvalue_in_function(parser->current_function, varname->str);
 		}
 	} else {
 		// Return global symbol
 		struct lua_symbol *global = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 		global->symbol_type = SYM_GLOBAL;
-		global->var.var_name = varname;
+		global->var.var_name = varname->str;
 		global->var.block = NULL;
 		set_type(&global->value_type, RAVI_TANY); // Globals are always ANY type
 		// We don't add globals to any scope so that they are
@@ -341,7 +341,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 /* GRAMMAR RULES */
 /*============================================================*/
 
-static struct ast_node *new_string_literal(struct parser_state *parser, const char *ts)
+static struct ast_node *new_string_literal(struct parser_state *parser, const struct string_object *ts)
 {
 	struct ast_node *node = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = AST_LITERAL_EXPR;
@@ -350,7 +350,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const ch
 	return node;
 }
 
-static struct ast_node *new_field_selector(struct parser_state *parser, const char *ts)
+static struct ast_node *new_field_selector(struct parser_state *parser, const struct string_object *ts)
 {
 	struct ast_node *index = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	index->type = AST_FIELD_SELECTOR_EXPR;
@@ -367,7 +367,7 @@ static struct ast_node *parse_field_selector(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	/* fieldsel -> ['.' | ':'] NAME */
 	raviX_next(ls); /* skip the dot or colon */
-	const char *ts = check_name_and_next(ls);
+	const struct string_object *ts = check_name_and_next(ls);
 	return new_field_selector(parser, ts);
 }
 
@@ -413,7 +413,7 @@ static struct ast_node *parse_recfield(struct parser_state *parser)
 	/* recfield -> (NAME | '['exp1']') = exp1 */
 	struct ast_node *index_expr;
 	if (ls->t.token == TK_NAME) {
-		const char *ts = check_name_and_next(ls);
+		const struct string_object *ts = check_name_and_next(ls);
 		index_expr = new_field_selector(parser, ts);
 	} else /* ls->t.token == '[' */
 		index_expr = parse_yindex(parser);
@@ -484,12 +484,13 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
  * Note that the returned string will be anchored in the Lexer and must
  * be anchored somewhere else by the time parsing finishes
  */
-static const char *parse_user_defined_type_name(struct lexer_state *ls, const char *typename)
+static const struct string_object *parse_user_defined_type_name(struct lexer_state *ls,
+								const struct string_object *typename)
 {
 	size_t len = 0;
 	if (testnext(ls, '.')) {
 		char buffer[128] = {0};
-		const char *str = typename;
+		const char *str = typename->str;
 		len = strlen(str);
 		if (len >= sizeof buffer) {
 			raviX_syntaxerror(ls, "User defined type name is too long");
@@ -498,7 +499,7 @@ static const char *parse_user_defined_type_name(struct lexer_state *ls, const ch
 		snprintf(buffer, sizeof buffer, "%s", str);
 		do {
 			typename = str_checkname(ls);
-			str = typename;
+			str = typename->str;
 			size_t newlen = len + strlen(str) + 1;
 			if (newlen >= sizeof buffer) {
 				raviX_syntaxerror(ls, "User defined type name is too long");
@@ -507,7 +508,7 @@ static const char *parse_user_defined_type_name(struct lexer_state *ls, const ch
 			snprintf(buffer + len, sizeof buffer - len, ".%s", str);
 			len = newlen;
 		} while (testnext(ls, '.'));
-		typename = raviX_create_string(ls->container, buffer, strlen(buffer));
+		typename = raviX_create_string(ls->container, buffer, (uint32_t)strlen(buffer));
 	}
 	return typename;
 }
@@ -522,11 +523,11 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 	struct lexer_state *ls = parser->ls;
 	/* assume a dynamic type */
 	ravitype_t tt = RAVI_TANY;
-	const char *name = check_name_and_next(ls);
+	const struct string_object *name = check_name_and_next(ls);
 	const char *pusertype = NULL;
 	if (testnext(ls, ':')) {
-		const char *typename = str_checkname(ls); /* we expect a type name */
-		const char *str = typename;
+		const struct string_object *typename = str_checkname(ls); /* we expect a type name */
+		const char *str = typename->str;
 		/* following is not very nice but easy as
 		 * the lexer doesn't need to be changed
 		 */
@@ -549,7 +550,7 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 			tt = RAVI_TUSERDATA;
 			typename = parse_user_defined_type_name(ls, typename);
 			// str = getstr(typename);
-			pusertype = typename;
+			pusertype = typename->str;
 		}
 		if (tt == RAVI_TNUMFLT || tt == RAVI_TNUMINT) {
 			/* if we see [] then it is an array type */
@@ -724,8 +725,8 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 		}
 		case ':': { /* ':' NAME funcargs */
 			raviX_next(ls);
-			const char *methodname = check_name_and_next(ls);
-			struct ast_node *suffix = parse_function_call(parser, methodname, line);
+			const struct string_object *methodname = check_name_and_next(ls);
+			struct ast_node *suffix = parse_function_call(parser, methodname->str, line);
 			add_ast_node(parser->container, &suffixed_expr->suffixed_expr.suffix_list, suffix);
 			break;
 		}
@@ -925,7 +926,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 	uop = get_unary_opr(ls->t.token);
 	if (uop != OPR_NOUNOPR) {
 		// RAVI change - get usertype if @<name>
-		const char *usertype = NULL;
+		const struct string_object *usertype = NULL;
 		if (uop == OPR_TO_TYPE) {
 			usertype = ls->t.seminfo.ts;
 			raviX_next(ls);
@@ -940,7 +941,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		expr->type = AST_UNARY_EXPR;
 		expr->unary_expr.expr = subexpr;
 		expr->unary_expr.unary_op = uop;
-		expr->unary_expr.type.type_name = usertype;
+		expr->unary_expr.type.type_name = usertype ? usertype->str : NULL;
 	} else {
 		expr = parse_simple_expression(parser);
 	}
@@ -1007,7 +1008,7 @@ static struct ast_node *parse_condition(struct parser_state *parser)
 static struct ast_node *parse_goto_statment(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
-	const char *label;
+	const struct string_object *label;
 	if (testnext(ls, TK_GOTO))
 		label = check_name_and_next(ls);
 	else {
@@ -1017,7 +1018,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 	// Resolve labels in the end?
 	struct ast_node *goto_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	goto_stmt->type = AST_GOTO_STMT;
-	goto_stmt->goto_stmt.name = label;
+	goto_stmt->goto_stmt.name = label->str;
 	goto_stmt->goto_stmt.label_stmt = NULL; // unresolved
 	return goto_stmt;
 }
@@ -1030,7 +1031,7 @@ static void skip_noop_statements(struct parser_state *parser)
 		parse_statement(parser);
 }
 
-static struct ast_node *generate_label(struct parser_state *parser, const char *label)
+static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label)
 {
 	struct lua_symbol *symbol = new_label(parser, label);
 	struct ast_node *label_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
@@ -1039,7 +1040,7 @@ static struct ast_node *generate_label(struct parser_state *parser, const char *
 	return label_stmt;
 }
 
-static struct ast_node *parse_label_statement(struct parser_state *parser, const char *label, int line)
+static struct ast_node *parse_label_statement(struct parser_state *parser, const struct string_object *label, int line)
 {
 	(void)line;
 	struct lexer_state *ls = parser->ls;
@@ -1097,7 +1098,8 @@ static void parse_forbody(struct parser_state *parser, struct ast_node *stmt, in
 }
 
 /* parse a numerical for loop */
-static void parse_fornum_statement(struct parser_state *parser, struct ast_node *stmt, const char *varname, int line)
+static void parse_fornum_statement(struct parser_state *parser, struct ast_node *stmt,
+				   const struct string_object *varname, int line)
 {
 	struct lexer_state *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
@@ -1117,7 +1119,7 @@ static void parse_fornum_statement(struct parser_state *parser, struct ast_node 
 }
 
 /* parse a generic for loop */
-static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, const char *indexname)
+static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, const struct string_object *indexname)
 {
 	struct lexer_state *ls = parser->ls;
 	/* forlist -> NAME {,NAME} IN explist forbody */
@@ -1143,7 +1145,7 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 {
 	struct lexer_state *ls = parser->ls;
 	/* forstat -> FOR (fornum | forlist) END */
-	const char *varname;
+	const struct string_object *varname;
 	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	stmt->type = AST_NONE;
 	stmt->for_stmt.symbols = NULL;
@@ -1552,21 +1554,16 @@ int raviX_parse(struct compiler_state *container, const char *buffer, size_t buf
 }
 
 /* Converts the AST to a string representation */
-static void ast_container_to_string(struct compiler_state *container, membuff_t *mbuf)
-{
-	raviX_print_ast_node(mbuf, container->main_function, 0);
-}
-
-struct string_object {
-	size_t len;
-	const char *str;
-};
+// static void ast_container_to_string(struct compiler_state *container, membuff_t *mbuf)
+//{
+//	raviX_print_ast_node(mbuf, container->main_function, 0);
+//}
 
 static int string_equal(const void *a, const void *b)
 {
 	const struct string_object *c1 = (const struct string_object *)a;
 	const struct string_object *c2 = (const struct string_object *)b;
-	if (c1->len != c2->len)
+	if (c1->len != c2->len || c1->hash != c2->hash)
 		return 0;
 	return memcmp(c1->str, c2->str, c1->len) == 0;
 }
@@ -1574,24 +1571,7 @@ static int string_equal(const void *a, const void *b)
 static uint32_t string_hash(const void *c)
 {
 	const struct string_object *c1 = (const struct string_object *)c;
-	return fnv1_hash_data(c1->str, c1->len);
-}
-
-const char *raviX_create_string(struct compiler_state *container, const char *input, size_t len)
-{
-	struct string_object temp = {.len = len, .str = input};
-	struct set_entry *entry = set_search(container->strings, &temp);
-	if (entry != NULL)
-		return ((struct string_object *)entry->key)->str;
-	else {
-		struct string_object *newobj = raviX_allocator_allocate(&container->string_object_allocator, 0);
-		char *s = raviX_allocator_allocate(&container->string_allocator, len);
-		memcpy(s, input, len);
-		newobj->str = s;
-		newobj->len = len;
-		set_add(container->strings, newobj);
-		return newobj->str;
-	}
+	return c1->hash;
 }
 
 struct compiler_state *raviX_init_compiler()
@@ -1616,15 +1596,15 @@ struct compiler_state *raviX_init_compiler()
 	return container;
 }
 
-static void show_allocations(struct compiler_state *compiler)
-{
-	raviX_allocator_show_allocations(&compiler->symbol_allocator);
-	raviX_allocator_show_allocations(&compiler->block_scope_allocator);
-	raviX_allocator_show_allocations(&compiler->ast_node_allocator);
-	raviX_allocator_show_allocations(&compiler->ptrlist_allocator);
-	raviX_allocator_show_allocations(&compiler->string_allocator);
-	raviX_allocator_show_allocations(&compiler->string_object_allocator);
-}
+// static void show_allocations(struct compiler_state *compiler)
+//{
+//	raviX_allocator_show_allocations(&compiler->symbol_allocator);
+//	raviX_allocator_show_allocations(&compiler->block_scope_allocator);
+//	raviX_allocator_show_allocations(&compiler->ast_node_allocator);
+//	raviX_allocator_show_allocations(&compiler->ptrlist_allocator);
+//	raviX_allocator_show_allocations(&compiler->string_allocator);
+//	raviX_allocator_show_allocations(&compiler->string_object_allocator);
+//}
 
 void raviX_destroy_compiler(struct compiler_state *container)
 {

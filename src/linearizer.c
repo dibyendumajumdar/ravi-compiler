@@ -79,6 +79,7 @@ struct linearizer_state *raviX_init_linearizer(struct compiler_state *container)
 	raviX_allocator_init(&linearizer->unsized_allocator, "unsized_allocator", 0, sizeof(double), CHUNK);
 	raviX_allocator_init(&linearizer->constant_allocator, "constant_allocator", sizeof(struct constant),
 			     sizeof(double), sizeof(struct constant) * 64);
+	linearizer->proc_id = 0;
 	return linearizer;
 }
 
@@ -135,7 +136,7 @@ static uint32_t hash_constant(const void *c)
 	else if (c1->type == RAVI_TNUMFLT)
 		return (uint32_t)c1->n; // FIXME maybe use Lua's hash gen
 	else
-		return (uint32_t)c1->s;
+		return (uint32_t)c1->s->hash;
 }
 
 static const struct constant *add_constant(struct proc *proc, const struct constant *c)
@@ -178,7 +179,8 @@ static const struct constant *allocate_integer_constant(struct proc *proc, int i
 
 static const struct constant *allocate_string_constant(struct proc *proc, const char *s)
 {
-	struct constant c = {.type = RAVI_TSTRING, .s = s};
+	const struct string_object *so = raviX_create_string(proc->linearizer->ast_container, s, (uint32_t)strlen(s));
+	struct constant c = {.type = RAVI_TSTRING, .s = so};
 	return add_constant(proc, &c);
 }
 
@@ -654,6 +656,8 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 		break;
 	default:
 		handle_error(proc->linearizer->ast_container, "unexpected binary op");
+		targetop = op_nop;
+		break;
 	}
 
 	ravitype_t t1 = e1->common_expr.type.type_code;
@@ -669,6 +673,8 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 	case op_lt:
 	case op_le:
 		swap = op == OPR_NE || op == OPR_GT || op == OPR_GE;
+		break;
+	default:
 		break;
 	}
 
@@ -721,6 +727,8 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 			targetop += 1;
 		else if (t1 == RAVI_TNUMFLT && t2 == RAVI_TNUMFLT)
 			targetop += 2;
+		break;
+	default:
 		break;
 	}
 
@@ -798,6 +806,8 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 	case RAVI_TARRAYFLT:
 		op = op_faget;
 		break;
+	default:
+		break;
 	}
 	/* Note we rely upon ordering of enums here */
 	switch (key_type) {
@@ -807,6 +817,8 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 	case RAVI_TSTRING:
 		assert(container_type != RAVI_TARRAYINT && container_type != RAVI_TARRAYFLT);
 		op += 2;
+		break;
+	default:
 		break;
 	}
 	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
@@ -1513,7 +1525,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			membuff_add_fstring(mb, "%ld", constant->i);
 			tc = "int";
 		} else {
-			membuff_add_fstring(mb, "'%s'", constant->s);
+			membuff_add_fstring(mb, "'%s'", constant->s->str);
 			tc = "s";
 		}
 		membuff_add_fstring(mb, " K%s(%d)", tc, pseudo->regnum);

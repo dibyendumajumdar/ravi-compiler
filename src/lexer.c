@@ -3,6 +3,7 @@
  * Copyright (C) 1994-2019 Lua.org, PUC-Rio.
  */
 
+#include "fnv_hash.h"
 #include "ravi_ast.h"
 
 #include <limits.h>
@@ -29,13 +30,34 @@ static const char *const luaX_tokens[] = {
     "return", "then",	  "true",     "until",	 "while",      "//",	    "..",     "...",	  "==",
     ">=",     "<=",	  "~=",	      "<<",	 ">>",	       "::",	    "<eof>",  "<number>", "<integer>",
     "<name>", "<string>", "@integer", "@number", "@integer[]", "@number[]", "@table", "@string",  "@closure"};
-static inline int is_reserved(const char *s)
+
+static inline int is_reserved(const struct string_object *s) { return s->reserved; }
+
+const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
 {
-	for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
-		if (strcmp(luaX_tokens[i], s) == 0)
-			return i;
+	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
+	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
+	if (entry != NULL)
+		return (const struct string_object *)entry->key;
+	else {
+		struct string_object *newobj = raviX_allocator_allocate(&container->string_object_allocator, 0);
+		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1);
+		memcpy(s, input, len);
+		s[len] = 0;
+		newobj->str = s;
+		newobj->len = len;
+		newobj->hash = temp.hash;
+		newobj->reserved = -1;
+		/* Check if this is a keyword */
+		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
+			if (strcmp(luaX_tokens[i], s) == 0) {
+				newobj->reserved = i;
+				break;
+			}
+		}
+		set_add_pre_hashed(container->strings, temp.hash, newobj);
+		return newobj;
 	}
-	return -1;
 }
 
 enum { ALPHABIT = 0, DIGITBIT = 1, PRINTBIT = 2, SPACEBIT = 3, XDIGITBIT = 4 };
@@ -75,7 +97,7 @@ static inline bool lislalpha(int c) { return testprop(c, MASK(ALPHABIT)); }
 static inline bool lislalnum(int c) { return testprop(c, (MASK(ALPHABIT) | MASK(DIGITBIT))); }
 static inline bool lisdigit(int c) { return testprop(c, MASK(DIGITBIT)); }
 static inline bool lisspace(int c) { return testprop(c, MASK(SPACEBIT)); }
-static inline bool lisprint(int c) { return testprop(c, MASK(PRINTBIT)); }
+// static inline bool lisprint(int c) { return testprop(c, MASK(PRINTBIT)); }
 static inline bool lisxdigit(int c) { return testprop(c, MASK(XDIGITBIT)); }
 
 /*
@@ -151,16 +173,16 @@ static inline void save_and_next(struct lexer_state *ls)
 void luaX_init(struct lexer_state *ls)
 {
 	int i;
-	raviX_create_string(ls->container, LUA_ENV, strlen(LUA_ENV)); /* create env name */
+	raviX_create_string(ls->container, LUA_ENV, (uint32_t)strlen(LUA_ENV)); /* create env name */
 	for (i = 0; i < NUM_RESERVED; i++) {
-		raviX_create_string(ls->container, luaX_tokens[i], strlen(luaX_tokens[i]));
+		raviX_create_string(ls->container, luaX_tokens[i], (uint32_t)strlen(luaX_tokens[i]));
 	}
 }
 
 /*
-** creates a new interned string. 
+** creates a new interned string.
 */
-const char *luaX_newstring(struct lexer_state *ls, const char *str, size_t l)
+const struct string_object *luaX_newstring(struct lexer_state *ls, const char *str, uint32_t l)
 {
 	return raviX_create_string(ls->container, str, l);
 }
@@ -195,7 +217,7 @@ struct lexer_state *raviX_init_lexer(struct compiler_state *container, const cha
 	ls->linenumber = 1;
 	ls->lastline = 1;
 	ls->source = source;
-	ls->envn = raviX_create_string(ls->container, LUA_ENV, strlen(LUA_ENV)); /* get env name */
+	ls->envn = raviX_create_string(ls->container, LUA_ENV, (uint32_t)strlen(LUA_ENV))->str; /* get env name */
 	ls->buff = &container->buff;
 	return ls;
 }
@@ -207,9 +229,7 @@ void raviX_destroy_lexer(struct lexer_state *ls)
 	free(ls);
 }
 
-LexState* raviX_get_lexer_info(struct lexer_state* ls) {
-	return (LexState*)ls;
-}
+LexState *raviX_get_lexer_info(struct lexer_state *ls) { return (LexState *)ls; }
 
 /*
 ** =======================================================
@@ -512,6 +532,7 @@ static int skip_sep(struct lexer_state *ls)
 static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 {
 	int line = ls->linenumber; /* initial line (for error message) */
+	(void)line;
 	save_and_next(ls);	   /* skip 2nd '[' */
 	if (currIsNewline(ls))	   /* string starts with a newline? */
 		inclinenumber(ls); /* skip it */
@@ -520,6 +541,7 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 		case EOZ: { /* error */
 			const char *what = (seminfo ? "string" : "comment");
 			const char *msg = "";
+			(void)what;
 			//			    luaO_pushfstring(ls->L, "unfinished long %s (starting at line %d)",
 			// what, line);
 			lexerror(ls, msg, TK_EOS);
@@ -550,8 +572,8 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 	}
 endloop:
 	if (seminfo)
-		seminfo->ts =
-		    luaX_newstring(ls, luaZ_buffer(ls->buff) + (2 + sep), luaZ_bufflen(ls->buff) - 2 * (2 + sep));
+		seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + (2 + sep),
+					     (uint32_t)(luaZ_bufflen(ls->buff) - 2 * (2 + sep)));
 }
 
 static void esccheck(struct lexer_state *ls, int c, const char *msg)
@@ -702,7 +724,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 		}
 	}
 	save_and_next(ls); /* skip delimiter */
-	seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + 1, luaZ_bufflen(ls->buff) - 2);
+	seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + 1, (uint32_t)(luaZ_bufflen(ls->buff) - 2));
 }
 
 /*
@@ -733,10 +755,10 @@ static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 	else if (strncmp(s, "@closure", n) == 0)
 		tok = TK_TO_CLOSURE;
 	else {
-		seminfo->ts = luaX_newstring(ls, s + 1, n - 1); /* omit @ */
+		seminfo->ts = luaX_newstring(ls, s + 1, (uint32_t)(n - 1)); /* omit @ */
 		tok = '@';
 	}
-	luaZ_buffremove(ls->buff, n); /* rewind but buffer still holds the saved characters */
+	luaZ_buffremove(ls->buff, (int)n); /* rewind but buffer still holds the saved characters */
 	return tok;
 }
 
@@ -876,11 +898,12 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 		}
 		default: {
 			if (lislalpha(ls->current)) { /* identifier or reserved word? */
-				const char *ts;
+				const struct string_object *ts;
 				do {
 					save_and_next(ls);
 				} while (lislalnum(ls->current));
-				ts = raviX_create_string(ls->container, luaZ_buffer(ls->buff), luaZ_bufflen(ls->buff));
+				ts = raviX_create_string(ls->container, luaZ_buffer(ls->buff),
+							 (int32_t)luaZ_bufflen(ls->buff));
 				seminfo->ts = ts;
 				int tok = is_reserved(ts);
 				if (tok != -1) /* reserved word? */

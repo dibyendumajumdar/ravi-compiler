@@ -10,7 +10,7 @@ set(HEADERS
         src/ptrlist.h
         src/fnv_hash.h
         src/hash_table.h
-        src/int_set.h
+        #src/int_set.h
         src/set.h
         src/membuf.h
         src/lua_defs.h
@@ -22,7 +22,7 @@ set(SRCS
         src/ptrlist.c
         src/fnv_hash.c
         src/hash_table.c
-        src/int_set.c
+        #src/int_set.c
         src/set.c
         src/lexer.c
         src/parser.c

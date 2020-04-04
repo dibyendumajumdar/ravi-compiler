@@ -61,7 +61,6 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor);
 static void walk_ast_node_list(struct ast_node_list *list, struct visitor *visitor)
 {
 	struct ast_node *node;
-	bool is_first = true;
 	FOR_EACH_PTR(list, node) { raviX_walk_ast_node(node, visitor); }
 	END_FOR_EACH_PTR(node);
 }
@@ -115,7 +114,6 @@ static void walk_symbol_name(struct lua_symbol *sym, struct visitor *visitor)
 static void walk_symbol_list(struct lua_symbol_list *list, struct visitor *visitor)
 {
 	struct lua_symbol *node;
-	bool is_first = true;
 	FOR_EACH_PTR(list, node) { walk_symbol(node, visitor); }
 	END_FOR_EACH_PTR(node);
 }
@@ -212,7 +210,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 	}
 	case AST_IF_STMT: {
 		struct ast_node *test_then_block;
-		bool is_first = true;
+		// bool is_first = true;
 		FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
 		{
 			// if (is_first) {
