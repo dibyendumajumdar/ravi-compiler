@@ -121,13 +121,13 @@ void luaX_token2str(struct lexer_state *ls, int token)
 {
 	if (token < FIRST_RESERVED) { /* single-byte symbols? */
 		assert(token == cast_uchar(token));
-		membuff_add_fstring(&ls->container->error_message, "'%c'", token);
+		raviX_buffer_add_fstring(&ls->container->error_message, "'%c'", token);
 	} else {
 		const char *s = luaX_tokens[token - FIRST_RESERVED];
 		if (token < TK_EOS) /* fixed format (symbols and reserved words)? */
-			membuff_add_fstring(&ls->container->error_message, "'%s'", s);
+			raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", s);
 		else /* names, strings, and numerals */
-			membuff_add_string(&ls->container->error_message, s);
+			raviX_buffer_add_string(&ls->container->error_message, s);
 	}
 }
 
@@ -139,16 +139,16 @@ static void txtToken(struct lexer_state *ls, int token)
 	case TK_FLT:
 	case TK_INT:
 		save(ls, '\0');
-		membuff_add_fstring(&ls->container->error_message, "'%s'", luaZ_buffer(ls->buff));
+		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_buffer(ls->buff));
 	default:
 		luaX_token2str(ls, token);
 	}
 }
 static void lexerror(struct lexer_state *ls, const char *msg, int token)
 {
-	membuff_add_fstring(&ls->container->error_message, "%s(%d): %s", ls->source, ls->linenumber, msg);
+	raviX_buffer_add_fstring(&ls->container->error_message, "%s(%d): %s", ls->source, ls->linenumber, msg);
 	if (token) {
-		membuff_add_string(&ls->container->error_message, " near ");
+		raviX_buffer_add_string(&ls->container->error_message, " near ");
 		txtToken(ls, token);
 	}
 	longjmp(ls->container->env, 1);
@@ -158,19 +158,19 @@ void raviX_syntaxerror(struct lexer_state *ls, const char *msg) { lexerror(ls, m
 
 static void save(struct lexer_state *ls, int c)
 {
-	Mbuffer *b = ls->buff;
-	if (luaZ_bufflen(b) + 1 > luaZ_sizebuffer(b)) {
+	membuff_t *b = ls->buff;
+	if (raviX_buffer_len(b) + 1 > raviX_buffer_size(b)) {
 		size_t newsize;
-		if (luaZ_sizebuffer(b) >= INT_MAX / 2)
+		if (raviX_buffer_size(b) >= INT_MAX / 2)
 			lexerror(ls, "lexical element too long", 0);
-		size_t oldsize = luaZ_sizebuffer(b);
+		size_t oldsize = raviX_buffer_size(b);
 		if (oldsize == 0)
 			newsize = 32;
 		else
 			newsize = oldsize * 2;
-		luaZ_resizebuffer(b, newsize);
+		raviX_buffer_resize(b, newsize);
 	}
-	luaZ_addc(b, c);
+	raviX_buffer_addc(b, c);
 }
 
 static inline void save_and_next(struct lexer_state *ls)
@@ -508,7 +508,7 @@ static int read_numeral(struct lexer_state *ls, SemInfo *seminfo)
 			break;
 	}
 	save(ls, '\0');
-	if (luaO_str2num(luaZ_buffer(ls->buff), &obj) == 0) /* format error? */
+	if (luaO_str2num(raviX_buffer_buffer(ls->buff), &obj) == 0) /* format error? */
 		lexerror(ls, "malformed number", TK_FLT);
 	if (obj.type == 1) {
 		seminfo->i = obj.i;
@@ -568,7 +568,7 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 			save(ls, '\n');
 			inclinenumber(ls);
 			if (!seminfo)
-				luaZ_resetbuffer(ls->buff); /* avoid wasting space */
+				raviX_buffer_reset(ls->buff); /* avoid wasting space */
 			break;
 		}
 		default: {
@@ -581,8 +581,8 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 	}
 endloop:
 	if (seminfo)
-		seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + (2 + sep),
-					     (uint32_t)(luaZ_bufflen(ls->buff) - 2 * (2 + sep)));
+		seminfo->ts = luaX_newstring(ls, raviX_buffer_buffer(ls->buff) + (2 + sep),
+					     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
 }
 
 static void esccheck(struct lexer_state *ls, int c, const char *msg)
@@ -605,7 +605,7 @@ static int readhexaesc(struct lexer_state *ls)
 {
 	int r = gethexa(ls);
 	r = (r << 4) + gethexa(ls);
-	luaZ_buffremove(ls->buff, 2); /* remove saved chars from buffer */
+	raviX_buffer_remove(ls->buff, 2); /* remove saved chars from buffer */
 	return r;
 }
 
@@ -622,7 +622,7 @@ static int readhexaesc(struct lexer_state *ls)
 //	}
 //	esccheck(ls, ls->current == '}', "missing '}'");
 //	next(ls);  /* skip '}' */
-//	luaZ_buffremove(ls->buff, i);  /* remove saved chars from buffer */
+//	raviX_buffer_remove(ls->buff, i);  /* remove saved chars from buffer */
 //	return r;
 //}
 //
@@ -643,7 +643,7 @@ static int readdecesc(struct lexer_state *ls)
 		save_and_next(ls);
 	}
 	esccheck(ls, r <= UCHAR_MAX, "decimal escape too large");
-	luaZ_buffremove(ls->buff, i); /* remove read digits from buffer */
+	raviX_buffer_remove(ls->buff, i); /* remove read digits from buffer */
 	return r;
 }
 
@@ -702,7 +702,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 			case EOZ:
 				goto no_save;		      /* will raise an error next loop */
 			case 'z': {			      /* zap following span of spaces */
-				luaZ_buffremove(ls->buff, 1); /* remove '\\' */
+				raviX_buffer_remove(ls->buff, 1); /* remove '\\' */
 				next(ls);		      /* skip the 'z' */
 				while (lisspace(ls->current)) {
 					if (currIsNewline(ls))
@@ -722,7 +722,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 			next(ls);
 		/* go through */
 		only_save:
-			luaZ_buffremove(ls->buff, 1); /* remove '\\' */
+			raviX_buffer_remove(ls->buff, 1); /* remove '\\' */
 			save(ls, c);
 		/* go through */
 		no_save:
@@ -733,7 +733,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 		}
 	}
 	save_and_next(ls); /* skip delimiter */
-	seminfo->ts = luaX_newstring(ls, luaZ_buffer(ls->buff) + 1, (uint32_t)(luaZ_bufflen(ls->buff) - 2));
+	seminfo->ts = luaX_newstring(ls, raviX_buffer_buffer(ls->buff) + 1, (uint32_t)(raviX_buffer_len(ls->buff) - 2));
 }
 
 /*
@@ -742,8 +742,8 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 */
 static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 {
-	size_t n = luaZ_bufflen(ls->buff);
-	const char *s = luaZ_buffer(ls->buff);
+	size_t n = raviX_buffer_len(ls->buff);
+	const char *s = raviX_buffer_buffer(ls->buff);
 	int tok;
 
 	/* @integer or @integer[] */
@@ -767,13 +767,13 @@ static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 		seminfo->ts = luaX_newstring(ls, s + 1, (uint32_t)(n - 1)); /* omit @ */
 		tok = '@';
 	}
-	luaZ_buffremove(ls->buff, (int)n); /* rewind but buffer still holds the saved characters */
+	raviX_buffer_remove(ls->buff, (int)n); /* rewind but buffer still holds the saved characters */
 	return tok;
 }
 
 static int llex(struct lexer_state *ls, SemInfo *seminfo)
 {
-	luaZ_resetbuffer(ls->buff);
+	raviX_buffer_reset(ls->buff);
 	for (;;) {
 		switch (ls->current) {
 		case '\n':
@@ -796,10 +796,10 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 			next(ls);
 			if (ls->current == '[') { /* long comment? */
 				int sep = skip_sep(ls);
-				luaZ_resetbuffer(ls->buff); /* 'skip_sep' may dirty the buffer */
+				raviX_buffer_reset(ls->buff); /* 'skip_sep' may dirty the buffer */
 				if (sep >= 0) {
 					read_long_string(ls, NULL, sep); /* skip long comment */
-					luaZ_resetbuffer(ls->buff);	 /* previous call may dirty the buff. */
+					raviX_buffer_reset(ls->buff);	 /* previous call may dirty the buff. */
 					break;
 				}
 			}
@@ -911,8 +911,8 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 				do {
 					save_and_next(ls);
 				} while (lislalnum(ls->current));
-				ts = raviX_create_string(ls->container, luaZ_buffer(ls->buff),
-							 (int32_t)luaZ_bufflen(ls->buff));
+				ts = raviX_create_string(ls->container, raviX_buffer_buffer(ls->buff),
+							 (int32_t)raviX_buffer_len(ls->buff));
 				seminfo->ts = ts;
 				int tok = is_reserved(ts);
 				if (tok != -1) /* reserved word? */

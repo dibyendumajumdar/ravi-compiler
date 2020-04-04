@@ -12,7 +12,7 @@ static bool is_type_same(const struct var_type *a, const struct var_type *b)
 static void handle_error(struct compiler_state *container, const char *msg)
 {
 	// TODO source and line number
-	membuff_add_string(&container->error_message, msg);
+	raviX_buffer_add_string(&container->error_message, msg);
 	longjmp(container->env, 1);
 }
 
@@ -501,7 +501,7 @@ static void typecheck_function(struct compiler_state *container, struct ast_node
 int raviX_ast_typecheck(struct compiler_state *container)
 {
 	struct ast_node *main_function = container->main_function;
-	membuff_rewindpos(&container->error_message);
+	raviX_buffer_rewindpos(&container->error_message);
 	int rc = setjmp(container->env);
 	if (rc == 0) {
 		typecheck_function(container, main_function);

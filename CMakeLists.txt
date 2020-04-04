@@ -12,7 +12,6 @@ set(HEADERS
         src/hash_table.h
         src/set.h
         src/membuf.h
-        src/lua_defs.h
         src/ravi_ast.h)
 
 set(SRCS

@@ -14,7 +14,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 static void handle_error(struct compiler_state *container, const char *msg)
 {
 	// TODO source and line number
-	membuff_add_string(&container->error_message, msg);
+	raviX_buffer_add_string(&container->error_message, msg);
 	longjmp(container->env, 1);
 }
 
@@ -1519,53 +1519,53 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		const struct constant *constant = pseudo->constant;
 		const char *tc = "";
 		if (constant->type == RAVI_TNUMFLT) {
-			membuff_add_fstring(mb, "%.12f", constant->n);
+			raviX_buffer_add_fstring(mb, "%.12f", constant->n);
 			tc = "flt";
 		} else if (constant->type == RAVI_TNUMINT) {
-			membuff_add_fstring(mb, "%ld", constant->i);
+			raviX_buffer_add_fstring(mb, "%ld", constant->i);
 			tc = "int";
 		} else {
-			membuff_add_fstring(mb, "'%s'", constant->s->str);
+			raviX_buffer_add_fstring(mb, "'%s'", constant->s->str);
 			tc = "s";
 		}
-		membuff_add_fstring(mb, " K%s(%d)", tc, pseudo->regnum);
+		raviX_buffer_add_fstring(mb, " K%s(%d)", tc, pseudo->regnum);
 	} break;
 	case PSEUDO_TEMP_INT:
-		membuff_add_fstring(mb, "Tint(%d)", pseudo->regnum);
+		raviX_buffer_add_fstring(mb, "Tint(%d)", pseudo->regnum);
 		break;
 	case PSEUDO_TEMP_FLT:
-		membuff_add_fstring(mb, "Tflt(%d)", pseudo->regnum);
+		raviX_buffer_add_fstring(mb, "Tflt(%d)", pseudo->regnum);
 		break;
 	case PSEUDO_TEMP_ANY:
-		membuff_add_fstring(mb, "T(%d)", pseudo->regnum);
+		raviX_buffer_add_fstring(mb, "T(%d)", pseudo->regnum);
 		break;
 	case PSEUDO_RANGE_SELECT:
-		membuff_add_fstring(mb, "T(%d[%d..])", pseudo->regnum, pseudo->range_pseudo->regnum);
+		raviX_buffer_add_fstring(mb, "T(%d[%d..])", pseudo->regnum, pseudo->range_pseudo->regnum);
 		break;
 	case PSEUDO_PROC:
-		membuff_add_fstring(mb, "Proc(%p)", pseudo->proc);
+		raviX_buffer_add_fstring(mb, "Proc(%p)", pseudo->proc);
 		break;
 	case PSEUDO_NIL:
-		membuff_add_string(mb, "nil");
+		raviX_buffer_add_string(mb, "nil");
 		break;
 	case PSEUDO_FALSE:
-		membuff_add_string(mb, "false");
+		raviX_buffer_add_string(mb, "false");
 		break;
 	case PSEUDO_TRUE:
-		membuff_add_string(mb, "true");
+		raviX_buffer_add_string(mb, "true");
 		break;
 	case PSEUDO_SYMBOL:
 		switch (pseudo->symbol->symbol_type) {
 		case SYM_LOCAL: {
-			membuff_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name, pseudo->regnum);
+			raviX_buffer_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name, pseudo->regnum);
 			break;
 		}
 		case SYM_UPVALUE: {
-			membuff_add_fstring(mb, "Upval(%u)", pseudo->regnum);
+			raviX_buffer_add_fstring(mb, "Upval(%u)", pseudo->regnum);
 			break;
 		}
 		case SYM_GLOBAL: {
-			membuff_add_string(mb, pseudo->symbol->var.var_name);
+			raviX_buffer_add_string(mb, pseudo->symbol->var.var_name);
 			break;
 		}
 		default:
@@ -1574,11 +1574,11 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		}
 		break;
 	case PSEUDO_BLOCK: {
-		membuff_add_fstring(mb, "L%d", pseudo->block->index);
+		raviX_buffer_add_fstring(mb, "L%d", pseudo->block->index);
 		break;
 	}
 	case PSEUDO_RANGE: {
-		membuff_add_fstring(mb, "T(%d..)", pseudo->regnum);
+		raviX_buffer_add_fstring(mb, "T(%d..)", pseudo->regnum);
 		break;
 	}
 	}
@@ -1599,29 +1599,29 @@ static const char *op_codenames[] = {
 static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {
 	struct pseudo *pseudo;
-	membuff_add_string(mb, " {");
+	raviX_buffer_add_string(mb, " {");
 	int i = 0;
 	FOR_EACH_PTR(list, pseudo)
 	{
 		if (i > 0)
-			membuff_add_string(mb, ", ");
+			raviX_buffer_add_string(mb, ", ");
 		output_pseudo(pseudo, mb);
 		i++;
 	}
 	END_FOR_EACH_PTR(pseudo);
-	membuff_add_string(mb, "}");
+	raviX_buffer_add_string(mb, "}");
 }
 
 static void output_instruction(struct instruction *insn, membuff_t *mb)
 {
-	membuff_add_fstring(mb, "\t%s", op_codenames[insn->opcode]);
+	raviX_buffer_add_fstring(mb, "\t%s", op_codenames[insn->opcode]);
 	if (insn->operands) {
 		output_pseudo_list(insn->operands, mb);
 	}
 	if (insn->targets) {
 		output_pseudo_list(insn->targets, mb);
 	}
-	membuff_add_string(mb, "\n");
+	raviX_buffer_add_string(mb, "\n");
 }
 
 static void output_instructions(struct instruction_list *list, membuff_t *mb)
@@ -1633,13 +1633,13 @@ static void output_instructions(struct instruction_list *list, membuff_t *mb)
 
 static void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
 {
-	membuff_add_fstring(mb, "L%d", bb->index);
+	raviX_buffer_add_fstring(mb, "L%d", bb->index);
 	if (bb2n(bb) == proc->entry) {
-		membuff_add_string(mb, " (entry)\n");
+		raviX_buffer_add_string(mb, " (entry)\n");
 	} else if (bb2n(bb) == proc->exit) {
-		membuff_add_string(mb, " (exit)\n");
+		raviX_buffer_add_string(mb, " (exit)\n");
 	} else {
-		membuff_add_string(mb, "\n");
+		raviX_buffer_add_string(mb, "\n");
 	}
 	output_instructions(bb->insns, mb);
 }
@@ -1681,7 +1681,7 @@ void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb)
 void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp)
 {
 	membuff_t mb;
-	membuff_init(&mb, 4096);
+	raviX_buffer_init(&mb, 4096);
 	raviX_show_linearizer(linearizer, &mb);
 	fputs(mb.buf, fp);
 }

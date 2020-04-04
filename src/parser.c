@@ -1543,12 +1543,9 @@ int raviX_parse(struct compiler_state *container, const char *buffer, size_t buf
 	return rc;
 }
 
-/* Converts the AST to a string representation */
-// static void ast_container_to_string(struct compiler_state *container, membuff_t *mbuf)
-//{
-//	raviX_print_ast_node(mbuf, container->main_function, 0);
-//}
-
+/*
+Return true if two strings are equal, false otherwise.
+*/
 static int string_equal(const void *a, const void *b)
 {
 	const struct string_object *c1 = (const struct string_object *)a;
@@ -1578,7 +1575,7 @@ struct compiler_state *raviX_init_compiler()
 	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), 1024);
 	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(struct string_object),
 			     sizeof(double), sizeof(struct string_object) * 64);
-	luaZ_initbuffer(&container->buff);
+	raviX_buffer_init(&container->buff, 1024);
 	container->strings = set_create(string_hash, string_equal);
 	container->main_function = NULL;
 	container->killed = false;
@@ -1605,7 +1602,7 @@ void raviX_destroy_compiler(struct compiler_state *container)
 			free(container->linearizer);
 		}
 		set_destroy(container->strings, NULL);
-		luaZ_freebuffer(&container->buff);
+		raviX_buffer_free(&container->buff);
 		raviX_allocator_destroy(&container->symbol_allocator);
 		raviX_allocator_destroy(&container->block_scope_allocator);
 		raviX_allocator_destroy(&container->ast_node_allocator);

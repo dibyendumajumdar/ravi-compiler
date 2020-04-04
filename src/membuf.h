@@ -1,6 +1,7 @@
 #ifndef ravicomp_MEMBUF_H
 #define ravicomp_MEMBUF_H
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,50 +13,39 @@ typedef struct {
 	size_t pos;
 } membuff_t;
 
-extern void membuff_init(membuff_t *mb, size_t initial_size);
-extern void membuff_rewindpos(membuff_t *mb);
-extern void membuff_resize(membuff_t *mb, size_t new_size);
-extern void membuff_free(membuff_t *mb);
-extern void membuff_add_string(membuff_t *mb, const char *str);
-extern void membuff_add_fstring(membuff_t *mb, const char *str, ...);
-extern void membuff_add_vfstring(membuff_t *mb, const char *fmt, va_list args);
-extern void membuff_add_bool(membuff_t *mb, bool value);
-extern void membuff_add_int(membuff_t *mb, int value);
-extern void membuff_add_longlong(membuff_t *mb, int64_t value);
-extern void membuff_add_char(membuff_t *mb, char c);
+extern void raviX_buffer_init(membuff_t *mb, size_t initial_size);
+extern void raviX_buffer_rewindpos(membuff_t *mb);
+extern void raviX_buffer_resize(membuff_t *mb, size_t new_size);
+extern void raviX_buffer_free(membuff_t *mb);
+static inline char* raviX_buffer_buffer(membuff_t* mb) { return mb->buf; }
+static inline size_t raviX_buffer_size(membuff_t* mb) { return mb->allocated_size; }
+static inline size_t raviX_buffer_len(membuff_t* mb) { return mb->pos; }
+static inline void raviX_buffer_reset(membuff_t* mb) { mb->pos = 0; }
 
-/* strncpy() with guaranteed 0 termination */
-extern void ravi_string_copy(char *buf, const char *src, size_t buflen);
+/* following convert input to string before adding */
+extern void raviX_buffer_add_string(membuff_t *mb, const char *str);
+extern void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...);
+extern void raviX_buffer_add_vfstring(membuff_t *mb, const char *fmt, va_list args);
+extern void raviX_buffer_add_bool(membuff_t *mb, bool value);
+extern void raviX_buffer_add_int(membuff_t *mb, int value);
+extern void raviX_buffer_add_longlong(membuff_t *mb, int64_t value);
+extern void raviX_buffer_add_char(membuff_t *mb, char c);
 
-typedef struct Mbuffer {
-	char *buffer;
-	size_t n;
-	size_t buffsize;
-} Mbuffer;
+/* Following add and remove raw bytes */
 
-static inline void luaZ_initbuffer(Mbuffer *buff)
+/* Unchecked - user must first resize */
+static inline void raviX_buffer_addc(membuff_t *mb, int c)
 {
-	buff->buffer = NULL;
-	buff->buffsize = 0;
-	buff->n = 0;
+	mb->buf[mb->pos++] = (char)c;
+	assert(mb->pos < mb->allocated_size);
+}
+static inline void raviX_buffer_remove(membuff_t *mb, int i)
+{
+	mb->pos -= i;
+	assert(mb->pos >= 0);
 }
 
-static inline char *luaZ_buffer(Mbuffer *buff) { return buff->buffer; }
-static inline size_t luaZ_sizebuffer(Mbuffer *buff) { return buff->buffsize; }
-static inline size_t luaZ_bufflen(Mbuffer *buff) { return buff->n; }
-static inline void luaZ_addc(Mbuffer *buff, int c) { buff->buffer[buff->n++] = (char)c; }
-static inline void luaZ_buffremove(Mbuffer *buff, int i) { buff->n -= i; }
-static inline void luaZ_resetbuffer(Mbuffer *buff) { buff->n = 0; }
-static inline void luaZ_resizebuffer(Mbuffer *buff, size_t size)
-{
-	if (size == 0) {
-		free(buff->buffer);
-		luaZ_initbuffer(buff);
-	} else {
-		buff->buffer = realloc(buff->buffer, size);
-		buff->buffsize = size;
-	}
-}
-static inline void luaZ_freebuffer(Mbuffer *buff) { luaZ_resizebuffer(buff, 0); }
+/* strncpy() replacement with guaranteed 0 termination */
+extern void raviX_string_copy(char *buf, const char *src, size_t buflen);
 
 #endif

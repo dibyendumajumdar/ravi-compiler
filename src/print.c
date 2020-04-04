@@ -45,49 +45,49 @@ static void printf_buf(membuff_t *buf, const char *format, ...)
 		if (cp[0] == '%' && cp[1] == 'p') { /* padding */
 			int level = va_arg(ap, int);
 			snprintf(tbuf, sizeof tbuf, "%.*s", level, PADDING);
-			membuff_add_string(buf, tbuf);
+			raviX_buffer_add_string(buf, tbuf);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 't') { /* string_object */
 			const struct string_object *s = va_arg(ap, const struct string_object *);
-			membuff_add_string(buf, s->str);
+			raviX_buffer_add_string(buf, s->str);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'T') { /* struct var_type */
 			const struct var_type *type;
 			type = va_arg(ap, const struct var_type *);
 			if (type->type_code == RAVI_TUSERDATA) {
 				const char *s = type->type_name;
-				membuff_add_string(buf, s);
+				raviX_buffer_add_string(buf, s);
 			} else {
-				membuff_add_string(buf, type_name(type->type_code));
+				raviX_buffer_add_string(buf, type_name(type->type_code));
 			}
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 's') { /* const char * */
 			const char *s;
 			s = va_arg(ap, const char *);
-			membuff_add_string(buf, s);
+			raviX_buffer_add_string(buf, s);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'c') { /* comment */
 			const char *s;
 			s = va_arg(ap, const char *);
-			membuff_add_fstring(buf, "--%s", s);
+			raviX_buffer_add_fstring(buf, "--%s", s);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'i') { /* integer */
 			lua_Integer i;
 			i = va_arg(ap, lua_Integer);
-			membuff_add_longlong(buf, i);
+			raviX_buffer_add_longlong(buf, i);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'f') { /* float */
 			double d;
 			d = va_arg(ap, double);
-			membuff_add_fstring(buf, "%.16f", d);
+			raviX_buffer_add_fstring(buf, "%.16f", d);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'b') { /* boolean */
 			lua_Integer i;
 			i = va_arg(ap, lua_Integer);
-			membuff_add_bool(buf, i != 0);
+			raviX_buffer_add_bool(buf, i != 0);
 			cp++;
 		} else {
-			membuff_add_char(buf, *cp);
+			raviX_buffer_add_char(buf, *cp);
 		}
 	}
 	va_end(ap);
@@ -522,8 +522,8 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 void raviX_output_ast(struct compiler_state *container, FILE *fp)
 {
 	membuff_t mbuf;
-	membuff_init(&mbuf, 1024);
+	raviX_buffer_init(&mbuf, 1024);
 	raviX_print_ast_node(&mbuf, container->main_function, 0);
 	fputs(mbuf.buf, fp);
-	membuff_free(&mbuf);
+	raviX_buffer_free(&mbuf);
 }

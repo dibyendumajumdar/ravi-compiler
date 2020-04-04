@@ -19,6 +19,7 @@ b) Perform type checking (Ravi enhancement)
 #include "set.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -56,7 +57,7 @@ struct compiler_state {
 	struct ast_node *main_function;
 	struct linearizer_state *linearizer;
 	int (*error_handler)(const char *fmt, ...);
-	Mbuffer buff;		 /* temp storage for literals */
+	membuff_t buff;		 /* temp storage for literals */
 	jmp_buf env;		 /* For error handling */
 	membuff_t error_message; /* For error handling */
 	bool killed;		 /* flag to check if this is already destroyed */
@@ -78,7 +79,7 @@ struct lexer_state {
 	size_t bufsize;
 	size_t n;
 	const char *p;
-	Mbuffer *buff;	    /* buffer for tokens */
+	membuff_t *buff;	    /* buffer for tokens */
 	const char *source; /* current source name */
 	const char *envn;   /* environment variable name */
 };
