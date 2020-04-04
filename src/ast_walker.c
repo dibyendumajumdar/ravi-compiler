@@ -31,11 +31,46 @@ enum event_type {
 	EV_FORNUM_STATEMENT_END,
 	EV_FORNUM_SYMBOLS_START,
 	EV_FORNUM_SYMBOLS_END,
-	EV_FORNUM_EXPRESSIONS_START,
-	EV_FORNUM_EXPRESSIONS_END,
+	EV_FORNUM_EXPRESSION_START,
+	EV_FORNUM_EXPRESSION_END,
 	EV_FORNUM_BODY_START,
 	EV_FORNUM_BODY_END,
-
+	EV_FUNCTION_CALL_START,
+	EV_FUNCTION_CALL_END,
+	EV_FUNCTION_METHOD_NAME,
+	EV_FUNCTION_ARG_START,
+	EV_FUNCTION_ARG_END,
+	EV_LITERAL,
+	EV_STATEMENT_START,
+	EV_STATEMENT_END,
+	EV_FORIN_STATEMENT_START,
+	EV_FORIN_STATEMENT_END,
+	EV_FORIN_SYMBOLS_START,
+	EV_FORIN_SYMBOLS_END,
+	EV_FORIN_EXPRESSION_START,
+	EV_FORIN_EXPRESSION_END,
+	EV_FORIN_BODY_START,
+	EV_FORIN_BODY_END,
+	EV_EXPR_STATEMENT_START,
+	EV_EXPR_STATEMENT_END,
+	EV_EXPR_LHS_EXPR_START,
+	EV_EXPR_LHS_EXPR_END,
+	EV_EXPR_RHS_EXPR_START,
+	EV_EXPR_RHS_EXPR_END,
+	EV_RETURN_STATEMENT_START,
+	EV_RETURN_STATEMENT_END,
+	EV_RETURN_EXPR_START,
+	EV_RETURN_EXPR_END,
+	EV_LOCAL_STATEMENT_START,
+	EV_LOCAL_STATEMENT_END,
+	EV_LOCAL_SYMBOL_START,
+	EV_LOCAL_SYMBOL_END,
+	EV_LOCAL_RHS_EXPR_START,
+	EV_LOCAL_RHS_EXPR_END,
+	EV_FUNCTION_STATEMENT_START,
+	EV_FUNCTION_STATEMENT_END,
+	EV_FUNCTION_SELECTOR_START,
+	EV_FUNCTION_SELECTOR_END
 };
 
 struct event {
@@ -44,6 +79,7 @@ struct event {
 };
 
 struct literal_event {
+	enum event_type event_type;
 	ravitype_t type_code;
 	SemInfo info;
 };
@@ -58,16 +94,26 @@ struct visitor {
 
 void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor);
 
-static void walk_ast_node_list(struct ast_node_list *list, struct visitor *visitor)
+static bool is_expression_node(const struct ast_node* node) {
+	return node->type >= AST_LITERAL_EXPR;
+}
+
+static void walk_ast_node_list(struct ast_node_list *list, struct visitor *visitor, enum event_type event)
 {
 	struct ast_node *node;
-	FOR_EACH_PTR(list, node) { raviX_walk_ast_node(node, visitor); }
+	FOR_EACH_PTR(list, node)
+	{
+		struct var_type* typeinfo = is_expression_node(node) ? &node->common_expr.type : NULL;
+		visitor->handle_event((struct event){.event_type = event, .var_type = typeinfo});
+		raviX_walk_ast_node(node, visitor);
+		visitor->handle_event((struct event){.event_type = event + 1}); // End event must be 1+start event
+	}
 	END_FOR_EACH_PTR(node);
 }
 
 static void walk_statement_list(struct ast_node_list *statement_list, struct visitor *visitor)
 {
-	walk_ast_node_list(statement_list, visitor);
+	walk_ast_node_list(statement_list, visitor, EV_STATEMENT_START);
 }
 
 static void walk_symbol(struct lua_symbol *sym, struct visitor *visitor)
@@ -154,7 +200,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		break;
 	case AST_RETURN_STMT: {
 		// printf_buf(buf, "%preturn\n", level);
-		walk_ast_node_list(node->return_stmt.expr_list, visitor);
+		walk_ast_node_list(node->return_stmt.expr_list, visitor, EV_RETURN_EXPR_START);
 		break;
 	}
 	case AST_LOCAL_STMT: {
@@ -163,7 +209,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		walk_symbol_list(node->local_stmt.var_list, visitor);
 		if (node->local_stmt.expr_list) {
 			// printf_buf(buf, "%p%c\n", level, "[expressions]");
-			walk_ast_node_list(node->local_stmt.expr_list, visitor);
+			walk_ast_node_list(node->local_stmt.expr_list, visitor, EV_LOCAL_RHS_EXPR_START);
 		}
 		break;
 	}
@@ -171,7 +217,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		raviX_walk_ast_node(node->function_stmt.name, visitor);
 		if (node->function_stmt.selectors) {
 			// printf_buf(buf, "%p%c\n", level + 1, "[selectors]");
-			walk_ast_node_list(node->function_stmt.selectors, visitor);
+			walk_ast_node_list(node->function_stmt.selectors, visitor, EV_FUNCTION_SELECTOR_START);
 		}
 		if (node->function_stmt.method_name) {
 			// printf_buf(buf, "%p%c\n", level + 1, "[method name]");
@@ -191,7 +237,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 	}
 	case AST_DO_STMT: {
 		// printf_buf(buf, "%pdo\n", level);
-		walk_ast_node_list(node->do_stmt.do_statement_list, visitor);
+		walk_ast_node_list(node->do_stmt.do_statement_list, visitor, EV_STATEMENT_START);
 		// printf_buf(buf, "%pend\n", level);
 		break;
 	}
@@ -199,11 +245,11 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		// printf_buf(buf, "%p%c\n", level, "[expression statement start]");
 		if (node->expression_stmt.var_expr_list) {
 			// printf_buf(buf, "%p%c\n", level + 1, "[var list start]");
-			walk_ast_node_list(node->expression_stmt.var_expr_list, visitor);
+			walk_ast_node_list(node->expression_stmt.var_expr_list, visitor, EV_EXPR_LHS_EXPR_START);
 			// printf_buf(buf, "%p= %c\n", level + 1, "[var list end]");
 		}
 		// printf_buf(buf, "%p%c\n", level + 1, "[expression list start]");
-		walk_ast_node_list(node->expression_stmt.expr_list, visitor);
+		walk_ast_node_list(node->expression_stmt.expr_list, visitor, EV_EXPR_RHS_EXPR_START);
 		// printf_buf(buf, "%p%c\n", level + 1, "[expression list end]");
 		// printf_buf(buf, "%p%c\n", level, "[expression statement end]");
 		break;
@@ -221,12 +267,12 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 			//	printf_buf(buf, "%pelseif\n", level);
 			raviX_walk_ast_node(test_then_block->test_then_block.condition, visitor);
 			// printf_buf(buf, "%pthen\n", level);
-			walk_ast_node_list(test_then_block->test_then_block.test_then_statement_list, visitor);
+			walk_ast_node_list(test_then_block->test_then_block.test_then_statement_list, visitor, EV_STATEMENT_START);
 		}
 		END_FOR_EACH_PTR(node);
 		if (node->if_stmt.else_block) {
 			// printf_buf(buf, "%pelse\n", level);
-			walk_ast_node_list(node->if_stmt.else_statement_list, visitor);
+			walk_ast_node_list(node->if_stmt.else_statement_list, visitor, EV_STATEMENT_START);
 		}
 		// printf_buf(buf, "%pend\n", level);
 		break;
@@ -235,13 +281,13 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		// printf_buf(buf, "%pwhile\n", level);
 		raviX_walk_ast_node(node->while_or_repeat_stmt.condition, visitor);
 		// printf_buf(buf, "%pdo\n", level);
-		walk_ast_node_list(node->while_or_repeat_stmt.loop_statement_list, visitor);
+		walk_ast_node_list(node->while_or_repeat_stmt.loop_statement_list, visitor, EV_STATEMENT_START);
 		// printf_buf(buf, "%pend\n", level);
 		break;
 	}
 	case AST_REPEAT_STMT: {
 		// printf_buf(buf, "%prepeat\n", level);
-		walk_ast_node_list(node->while_or_repeat_stmt.loop_statement_list, visitor);
+		walk_ast_node_list(node->while_or_repeat_stmt.loop_statement_list, visitor, EV_STATEMENT_START);
 		// printf_buf(buf, "%puntil\n", level);
 		raviX_walk_ast_node(node->while_or_repeat_stmt.condition, visitor);
 		// printf_buf(buf, "%p%c\n", level, "[repeat end]");
@@ -251,7 +297,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		// printf_buf(buf, "%pfor\n", level);
 		walk_symbol_list(node->for_stmt.symbols, visitor);
 		// printf_buf(buf, "%pin\n", level);
-		walk_ast_node_list(node->for_stmt.expr_list, visitor);
+		walk_ast_node_list(node->for_stmt.expr_list, visitor, EV_FORIN_EXPRESSION_START);
 		// printf_buf(buf, "%pdo\n", level);
 		walk_statement_list(node->for_stmt.for_statement_list, visitor);
 		// printf_buf(buf, "%pend\n", level);
@@ -261,7 +307,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		// printf_buf(buf, "%pfor\n", level);
 		walk_symbol_list(node->for_stmt.symbols, visitor);
 		// printf_buf(buf, "%p=\n", level);
-		walk_ast_node_list(node->for_stmt.expr_list, visitor);
+		walk_ast_node_list(node->for_stmt.expr_list, visitor, EV_FORNUM_EXPRESSION_START);
 		// printf_buf(buf, "%pdo\n", level);
 		walk_statement_list(node->for_stmt.for_statement_list, visitor);
 		// printf_buf(buf, "%pend\n", level);
@@ -275,23 +321,20 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		raviX_walk_ast_node(node->suffixed_expr.primary_expr, visitor);
 		visitor->handle_event((struct event){.event_type = EV_PRIMARY_EXPRESSION_END});
 		if (node->suffixed_expr.suffix_list) {
-			visitor->handle_event((struct event){.event_type = EV_SUFFIX_LIST_START});
-			walk_ast_node_list(node->suffixed_expr.suffix_list, visitor);
-			visitor->handle_event((struct event){.event_type = EV_SUFFIX_LIST_END});
+			walk_ast_node_list(node->suffixed_expr.suffix_list, visitor, EV_SUFFIX_LIST_START);
 		}
 		visitor->handle_event((struct event){.event_type = EV_SUFFIXED_EXPRESSION_END});
 		break;
 	}
 	case AST_FUNCTION_CALL_EXPR: {
-		// printf_buf(buf, "%p%c %T\n", level, "[function call start]", &node->function_call_expr.type);
+		visitor->handle_event(
+		    (struct event){.event_type = EV_FUNCTION_CALL_START, .var_type = &node->function_call_expr.type});
 		if (node->function_call_expr.method_name) {
-			// printf_buf(buf, "%p: %t (\n", level + 1, node->function_call_expr.method_name);
-		} else {
-			// printf_buf(buf, "%p(\n", level + 1);
+			visitor->handle_literal((struct literal_event){
+			    .event_type = EV_FUNCTION_METHOD_NAME, .info.ts = node->function_call_expr.method_name});
 		}
-		walk_ast_node_list(node->function_call_expr.arg_list, visitor);
-		// printf_buf(buf, "%p)\n", level + 1);
-		// printf_buf(buf, "%p%c\n", level, "[function call end]");
+		walk_ast_node_list(node->function_call_expr.arg_list, visitor, EV_FUNCTION_ARG_START);
+		visitor->handle_event((struct event){.event_type = EV_FUNCTION_CALL_END});
 		break;
 	}
 	case AST_SYMBOL_EXPR: {
@@ -320,22 +363,27 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 	case AST_LITERAL_EXPR: {
 		switch (node->literal_expr.type.type_code) {
 		case RAVI_TNIL:
-			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code});
+			visitor->handle_literal((struct literal_event){.event_type = EV_LITERAL,
+								       .type_code = node->literal_expr.type.type_code});
 			break;
 		case RAVI_TBOOLEAN:
-			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+			visitor->handle_literal((struct literal_event){.event_type = EV_LITERAL,
+								       .type_code = node->literal_expr.type.type_code,
 								       .info.i = node->literal_expr.u.i});
 			break;
 		case RAVI_TNUMINT:
-			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+			visitor->handle_literal((struct literal_event){.event_type = EV_LITERAL,
+								       .type_code = node->literal_expr.type.type_code,
 								       .info.i = node->literal_expr.u.i});
 			break;
 		case RAVI_TNUMFLT:
-			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+			visitor->handle_literal((struct literal_event){.event_type = EV_LITERAL,
+								       .type_code = node->literal_expr.type.type_code,
 								       .info.r = node->literal_expr.u.n});
 			break;
 		case RAVI_TSTRING:
-			visitor->handle_literal((struct literal_event){.type_code = node->literal_expr.type.type_code,
+			visitor->handle_literal((struct literal_event){.event_type = EV_LITERAL,
+								       .type_code = node->literal_expr.type.type_code,
 								       .info.ts = node->literal_expr.u.s});
 			break;
 		default:
@@ -373,11 +421,7 @@ void raviX_walk_ast_node(struct ast_node *node, struct visitor *visitor)
 		break;
 	}
 	case AST_TABLE_EXPR: {
-		visitor->handle_event(
-		    (struct event){.event_type = EV_START_TABLE_CONSTRUCTOR, .var_type = &node->table_expr.type});
-		walk_ast_node_list(node->table_expr.expr_list, visitor);
-		visitor->handle_event(
-		    (struct event){.event_type = EV_END_TABLE_CONSTRUCTOR, .var_type = &node->table_expr.type});
+		walk_ast_node_list(node->table_expr.expr_list, visitor, EV_START_TABLE_CONSTRUCTOR);
 		break;
 	}
 	default:
