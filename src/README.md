@@ -3,9 +3,9 @@
 * `lexer.c` - derived from Lua 5.3 lexer but modified to work as a standalone lexer
 * `parser.c` - responsible for generating abstract syntax tree (AST) - consumes lexer output.
 * `print.c` - responsible for printing out the AST
-* `ast_walker.c` - will provide support for walking the AST
+* `ast_walker.c` (WIP) - will provide support for walking the AST
 * `typechecker.c` - responsible for performing typechecking and assigning types to various things. Runs on the AST.
-* `linearizer.c` - responsible for generating linear intermediate code (IR) - builds basic blocks and also responsible for contructing control flow graph (CFG).
+* `linearizer.c` (WIP) - responsible for generating linear intermediate code (IR) - builds basic blocks and also responsible for contructing control flow graph (CFG).
 
 ## Utilities
 
