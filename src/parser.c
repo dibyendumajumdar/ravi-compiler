@@ -838,49 +838,49 @@ static BinOpr get_binary_opr(int op)
 {
 	switch (op) {
 	case '+':
-		return OPR_ADD;
+		return BINOPR_ADD;
 	case '-':
-		return OPR_SUB;
+		return BINOPR_SUB;
 	case '*':
-		return OPR_MUL;
+		return BINOPR_MUL;
 	case '%':
-		return OPR_MOD;
+		return BINOPR_MOD;
 	case '^':
-		return OPR_POW;
+		return BINOPR_POW;
 	case '/':
-		return OPR_DIV;
+		return BINOPR_DIV;
 	case TK_IDIV:
-		return OPR_IDIV;
+		return BINOPR_IDIV;
 	case '&':
-		return OPR_BAND;
+		return BINOPR_BAND;
 	case '|':
-		return OPR_BOR;
+		return BINOPR_BOR;
 	case '~':
-		return OPR_BXOR;
+		return BINOPR_BXOR;
 	case TK_SHL:
-		return OPR_SHL;
+		return BINOPR_SHL;
 	case TK_SHR:
-		return OPR_SHR;
+		return BINOPR_SHR;
 	case TK_CONCAT:
-		return OPR_CONCAT;
+		return BINOPR_CONCAT;
 	case TK_NE:
-		return OPR_NE;
+		return BINOPR_NE;
 	case TK_EQ:
-		return OPR_EQ;
+		return BINOPR_EQ;
 	case '<':
-		return OPR_LT;
+		return BINOPR_LT;
 	case TK_LE:
-		return OPR_LE;
+		return BINOPR_LE;
 	case '>':
-		return OPR_GT;
+		return BINOPR_GT;
 	case TK_GE:
-		return OPR_GE;
+		return BINOPR_GE;
 	case TK_AND:
-		return OPR_AND;
+		return BINOPR_AND;
 	case TK_OR:
-		return OPR_OR;
+		return BINOPR_OR;
 	default:
-		return OPR_NOBINOPR;
+		return BINOPR_NOBINOPR;
 	}
 }
 
@@ -937,7 +937,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 	}
 	/* expand while operators have priorities higher than 'limit' */
 	op = get_binary_opr(ls->t.token);
-	while (op != OPR_NOBINOPR && priority[op].left > limit) {
+	while (op != BINOPR_NOBINOPR && priority[op].left > limit) {
 		BinOpr nextop;
 		raviX_next(ls);
 		/* read sub-expression with higher priority */

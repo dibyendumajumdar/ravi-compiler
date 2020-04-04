@@ -412,15 +412,6 @@ static inline void add_instruction_target(struct proc *proc, struct instruction 
 	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
-// static inline struct pseudo *convert_pseudo_to_range(struct proc *proc, struct pseudo *pseudo)
-//{
-//	if (pseudo->type == PSEUDO_RANGE)
-//		return pseudo;
-//	assert(pseudo->type == PSEUDO_TEMP_ANY);
-//	pseudo->type = PSEUDO_RANGE;
-//	return pseudo;
-//}
-
 static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 {
 	assert(pseudo->type == PSEUDO_RANGE);
@@ -593,9 +584,9 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 {
 	BinOpr op = node->binary_expr.binary_op;
 
-	if (op == OPR_AND) {
+	if (op == BINOPR_AND) {
 		return linearize_bool(proc, node, true);
-	} else if (op == OPR_OR) {
+	} else if (op == BINOPR_OR) {
 		return linearize_bool(proc, node, false);
 	}
 
@@ -606,52 +597,52 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 
 	enum opcode targetop;
 	switch (op) {
-	case OPR_ADD:
+	case BINOPR_ADD:
 		targetop = op_add;
 		break;
-	case OPR_SUB:
+	case BINOPR_SUB:
 		targetop = op_sub;
 		break;
-	case OPR_MUL:
+	case BINOPR_MUL:
 		targetop = op_mul;
 		break;
-	case OPR_DIV:
+	case BINOPR_DIV:
 		targetop = op_div;
 		break;
-	case OPR_IDIV:
+	case BINOPR_IDIV:
 		targetop = op_idiv;
 		break;
-	case OPR_BAND:
+	case BINOPR_BAND:
 		targetop = op_band;
 		break;
-	case OPR_BOR:
+	case BINOPR_BOR:
 		targetop = op_bor;
 		break;
-	case OPR_BXOR:
+	case BINOPR_BXOR:
 		targetop = op_bxor;
 		break;
-	case OPR_SHL:
+	case BINOPR_SHL:
 		targetop = op_shl;
 		break;
-	case OPR_SHR:
+	case BINOPR_SHR:
 		targetop = op_shr;
 		break;
-	case OPR_EQ:
-	case OPR_NE:
+	case BINOPR_EQ:
+	case BINOPR_NE:
 		targetop = op_eq;
 		break;
-	case OPR_LT:
-	case OPR_GT:
+	case BINOPR_LT:
+	case BINOPR_GT:
 		targetop = op_lt;
 		break;
-	case OPR_LE:
-	case OPR_GE:
+	case BINOPR_LE:
+	case BINOPR_GE:
 		targetop = op_le;
 		break;
-	case OPR_MOD:
+	case BINOPR_MOD:
 		targetop = op_mod;
 		break;
-	case OPR_POW:
+	case BINOPR_POW:
 		targetop = op_pow;
 		break;
 	default:
@@ -672,7 +663,7 @@ static struct pseudo *linearize_binaryop(struct proc *proc, struct ast_node *nod
 	case op_eq:
 	case op_lt:
 	case op_le:
-		swap = op == OPR_NE || op == OPR_GT || op == OPR_GE;
+		swap = op == BINOPR_NE || op == BINOPR_GT || op == BINOPR_GE;
 		break;
 	default:
 		break;

@@ -221,47 +221,47 @@ static const char *get_unary_opr_str(UnOpr op)
 static const char *get_binary_opr_str(BinOpr op)
 {
 	switch (op) {
-	case OPR_ADD:
+	case BINOPR_ADD:
 		return "+";
-	case OPR_SUB:
+	case BINOPR_SUB:
 		return "-";
-	case OPR_MUL:
+	case BINOPR_MUL:
 		return "*";
-	case OPR_MOD:
+	case BINOPR_MOD:
 		return "%";
-	case OPR_POW:
+	case BINOPR_POW:
 		return "^";
-	case OPR_DIV:
+	case BINOPR_DIV:
 		return "/";
-	case OPR_IDIV:
+	case BINOPR_IDIV:
 		return "//";
-	case OPR_BAND:
+	case BINOPR_BAND:
 		return "&";
-	case OPR_BOR:
+	case BINOPR_BOR:
 		return "|";
-	case OPR_BXOR:
+	case BINOPR_BXOR:
 		return "~";
-	case OPR_SHL:
+	case BINOPR_SHL:
 		return "<<";
-	case OPR_SHR:
+	case BINOPR_SHR:
 		return ">>";
-	case OPR_CONCAT:
+	case BINOPR_CONCAT:
 		return "..";
-	case OPR_NE:
+	case BINOPR_NE:
 		return "~=";
-	case OPR_EQ:
+	case BINOPR_EQ:
 		return "==";
-	case OPR_LT:
+	case BINOPR_LT:
 		return "<";
-	case OPR_LE:
+	case BINOPR_LE:
 		return "<=";
-	case OPR_GT:
+	case BINOPR_GT:
 		return ">";
-	case OPR_GE:
+	case BINOPR_GE:
 		return ">=";
-	case OPR_AND:
+	case BINOPR_AND:
 		return "and";
-	case OPR_OR:
+	case BINOPR_OR:
 		return "or";
 	default:
 		return "";

@@ -91,10 +91,10 @@ static void typecheck_binary_operator(struct compiler_state *container, struct a
 	typecheck_ast_node(container, function, e1);
 	typecheck_ast_node(container, function, e2);
 	switch (op) {
-	case OPR_ADD:
-	case OPR_SUB:
-	case OPR_MUL:
-	case OPR_DIV:
+	case BINOPR_ADD:
+	case BINOPR_SUB:
+	case BINOPR_MUL:
+	case BINOPR_DIV:
 		if (e1->common_expr.type.type_code == RAVI_TNUMFLT && e2->common_expr.type.type_code == RAVI_TNUMFLT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		else if (e1->common_expr.type.type_code == RAVI_TNUMFLT &&
@@ -103,34 +103,34 @@ static void typecheck_binary_operator(struct compiler_state *container, struct a
 		else if (e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMFLT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
-		else if (op != OPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
+		else if (op != BINOPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMINT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
-		else if (op == OPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
+		else if (op == BINOPR_DIV && e1->common_expr.type.type_code == RAVI_TNUMINT &&
 			 e2->common_expr.type.type_code == RAVI_TNUMINT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		break;
-	case OPR_IDIV:
+	case BINOPR_IDIV:
 		if (e1->common_expr.type.type_code == RAVI_TNUMINT && e2->common_expr.type.type_code == RAVI_TNUMINT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		// FIXME missing cases
 		break;
-	case OPR_BAND:
-	case OPR_BOR:
-	case OPR_BXOR:
-	case OPR_SHL:
-	case OPR_SHR:
+	case BINOPR_BAND:
+	case BINOPR_BOR:
+	case BINOPR_BXOR:
+	case BINOPR_SHL:
+	case BINOPR_SHR:
 		if ((e1->common_expr.type.type_code == RAVI_TNUMFLT ||
 		     e1->common_expr.type.type_code == RAVI_TNUMINT) &&
 		    (e2->common_expr.type.type_code == RAVI_TNUMFLT || e2->common_expr.type.type_code == RAVI_TNUMINT))
 			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		break;
-	case OPR_EQ:
-	case OPR_NE:
-	case OPR_GE:
-	case OPR_GT:
-	case OPR_LE:
-	case OPR_LT:
+	case BINOPR_EQ:
+	case BINOPR_NE:
+	case BINOPR_GE:
+	case BINOPR_GT:
+	case BINOPR_LE:
+	case BINOPR_LT:
 		/* This case is not handled in default parser - why? */
 		if ((e1->common_expr.type.type_code == RAVI_TNUMINT || e1->common_expr.type.type_code == RAVI_TNUMFLT ||
 		     e1->common_expr.type.type_code == RAVI_TBOOLEAN) &&
@@ -138,13 +138,13 @@ static void typecheck_binary_operator(struct compiler_state *container, struct a
 		     e2->common_expr.type.type_code == RAVI_TBOOLEAN))
 			set_typecode(&node->binary_expr.type, RAVI_TBOOLEAN);
 		break;
-	case OPR_POW:
+	case BINOPR_POW:
 		if ((e1->common_expr.type.type_code == RAVI_TNUMFLT ||
 		     e1->common_expr.type.type_code == RAVI_TNUMINT) &&
 		    (e2->common_expr.type.type_code == RAVI_TNUMFLT || e2->common_expr.type.type_code == RAVI_TNUMINT))
 			set_typecode(&node->binary_expr.type, RAVI_TNUMFLT);
 		break;
-	case OPR_MOD:
+	case BINOPR_MOD:
 		if (e1->common_expr.type.type_code == RAVI_TNUMINT && e2->common_expr.type.type_code == RAVI_TNUMINT)
 			set_typecode(&node->binary_expr.type, RAVI_TNUMINT);
 		else if ((e1->common_expr.type.type_code == RAVI_TNUMINT &&
