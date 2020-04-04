@@ -2776,7 +2776,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(00000286D5F89AF0)} {T(0)}
+	CLOSURE {Proc(000001DD70B09AF0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5779,7 +5779,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(00000205E50AAFA0)} {T(0)}
+	CLOSURE {Proc(00000251F3F1BFC0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5787,6 +5787,51 @@ L0 (entry)
 	TOINT {T(0)}
 	MOV {T(0)} {local(i, 1)}
 L1 (exit)
+
+C:\work\github\ravi-compiler\tests\input>tparse "::L1:: a = 1; goto L1; return" 
+::L1:: a = 1; goto L1; return
+function()
+  ::L1::
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto L1
+  return
+end
+function()
+  ::L1::
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto L1
+  return
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	STOREGLOBAL {a, 1 Kint(0)}
+	BR {L2}
+L3
+	RET {L1}
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t001.lua 
 return function()
@@ -5933,27 +5978,27 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001E1CEF9AFC0)} {T(0)}
+	CLOSURE {Proc(0000023A5A56AFA0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
-	CLOSURE {Proc(000001E1CEF9B438)} {T(0)}
+	CLOSURE {Proc(0000023A5A56B418)} {T(0)}
 	MOV {T(0)} {local(y, 1)}
 	MOV {5 Kint(1)} {local(a, 2)}
-	CLOSURE {Proc(000001E1CEF9BD28)} {T(0)}
+	CLOSURE {Proc(0000023A5A56BD08)} {T(0)}
 	MOV {T(0)} {local(z, 3)}
 	RET {local(y, 1), local(z, 3)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001E1CEF9B8B0)} {T(0)}
+	CLOSURE {Proc(0000023A5A56B890)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	RET {Upval(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001E1CEF9C1A0)} {T(0)}
+	CLOSURE {Proc(0000023A5A56C180)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -6149,6 +6194,58 @@ function()
       ::l4::
     end
 end
+L0 (entry)
+	CLOSURE {Proc(000001F9870ED8F0)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	EQ {local(a, 0), local(b, 1)} {T(0)}
+	CBR {T(0)} {L5, L3}
+L3
+	EQ {local(a, 0), local(c, 2)} {T(1)}
+	CBR {T(1)} {L6, L4}
+L4
+	EQ {local(a, 0), local(d, 3)} {T(2)}
+	CBR {T(2)} {L7, L8}
+L5
+	BR {L19}
+L6
+	BR {L20}
+L7
+	BR {L20}
+L8
+	BR {L13}
+L9
+	BR {L19}
+L10
+	BR {L9}
+L11
+	BR {L9}
+L12
+	BR {L9}
+L13
+	EQ {local(a, 0), local(e, 4)} {T(3)}
+	CBR {T(3)} {L14, L15}
+L14
+	BR {L21}
+L15
+	BR {L21}
+L16
+	BR {L9}
+L17
+	BR {L16}
+L18
+	BR {L16}
+L19
+	BR {L20}
+L20
+	BR {L21}
+L21
+	BR {L22}
+L22
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t003.lua 
 return function (a) while a < 10 do a = a + 1 end end
@@ -6338,6 +6435,30 @@ function()
       ::L1::
     end
 end
+L0 (entry)
+	CLOSURE {Proc(0000022DBE12B110)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	BR {L3}
+L3
+	LT {local(a, 0), 10 Kint(0)} {T(0)}
+	NOT {T(0)} {T(1)}
+	CBR {T(1)} {L4, L5}
+L4
+	BR {L8}
+L5
+	ADD {local(a, 0), 1 Kint(1)} {T(2)}
+	MOV {T(2)} {local(a, 0)}
+	BR {L2}
+L6
+	BR {L5}
+L7
+	BR {L8}
+L8
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t005.lua 
 return function ()
@@ -6420,11 +6541,11 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000002465E7EAEC0)} {T(0)}
+	CLOSURE {Proc(000001EE3E01AC10)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000002465E7EB338)} {T(0)}
+	CLOSURE {Proc(000001EE3E01B088)} {T(0)}
 	NEWTABLE {T(1)}
 	LOADGLOBAL {f} {T(2)}
 	CALL {T(2)} {T(2..)}

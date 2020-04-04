@@ -125,6 +125,8 @@ tparse "local t: integer[] if (t[1] == 5) then return true end return false"
 tparse "local t: table local len: integer = #t return len"
 tparse "return function(t: table, i: integer) i = #t end"
 
+tparse "::L1:: a = 1; goto L1; return"
+
 tparse -f t001.lua
 tparse -f t002.lua
 tparse -f t003.lua

@@ -86,7 +86,8 @@ int main(int argc, const char *argv[])
 	// const char *code = "if 1 == 1 then return 1 elseif 1 > 2 then return 2 else return 2 end";
 	// const char* code = "local i: integer; return t[i/5]";
 	// const char* code = "local i return function(a) i = a; return i end";
-	const char *code = "return -0//1";
+	// const char *code = "return -0//1";
+	const char* code = "::L1:: a = 1; goto L1; return";
 	if (args.code) {
 		code = args.code;
 	} else if (args.filename) {

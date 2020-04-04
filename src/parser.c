@@ -1011,7 +1011,8 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 	struct ast_node *goto_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	goto_stmt->type = AST_GOTO_STMT;
 	goto_stmt->goto_stmt.name = label;
-	goto_stmt->goto_stmt.label_stmt = NULL; // unresolved
+	//goto_stmt->goto_stmt.label_stmt = NULL; // unresolved
+	goto_stmt->goto_stmt.goto_scope = parser->current_scope;
 	return goto_stmt;
 }
 

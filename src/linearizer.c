@@ -25,7 +25,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node);
 static void linearize_statement_list(struct proc *proc, struct ast_node_list *list);
 static void start_scope(struct linearizer_state *linearizer, struct proc *proc, struct block_scope *scope);
 static void end_scope(struct linearizer_state *linearizer, struct proc *proc);
-static void instruct_br(struct proc *proc, struct basic_block *target_block);
+static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
 static void linearize_function(struct linearizer_state *linearizer);
@@ -539,12 +539,12 @@ static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, stru
 	add_instruction(proc, insn);
 }
 
-static void instruct_br(struct proc *proc, struct basic_block *target_block)
+static void instruct_br(struct proc *proc, struct pseudo* pseudo)
 {
+	assert(pseudo->type == PSEUDO_BLOCK);
 	if (is_block_terminated(proc->current_bb)) {
 		start_block(proc, create_block(proc));
 	}
-	struct pseudo *pseudo = allocate_block_pseudo(proc, target_block);
 	struct instruction *insn = allocate_instruction(proc, op_br);
 	add_instruction_target(proc, insn, pseudo);
 	add_instruction(proc, insn);
@@ -571,7 +571,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 	struct pseudo *operand2 = linearize_expression(proc, e2);
 	instruct_move(proc, result, operand2);
 	free_temp_pseudo(proc, operand2);
-	instruct_br(proc, end_block);
+	instruct_br(proc, allocate_block_pseudo(proc, end_block));
 
 	start_block(proc, end_block);
 
@@ -1256,7 +1256,7 @@ static void linearize_test_then(struct proc *proc, struct ast_node *node, struct
 	linearize_statement_list(proc, node->test_then_block.test_then_statement_list);
 	end_scope(proc->linearizer, proc);
 	if (!is_block_terminated(proc->current_bb))
-		instruct_br(proc, false_block);
+		instruct_br(proc, allocate_block_pseudo(proc, false_block));
 }
 
 static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
@@ -1334,10 +1334,68 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 		linearize_statement_list(proc, else_stmts);
 		end_scope(proc->linearizer, proc);
 		if (!is_block_terminated(proc->current_bb))
-			instruct_br(proc, end_block);
+			instruct_br(proc, allocate_block_pseudo(proc, end_block));
 	}
 
 	start_block(proc, end_block);
+}
+
+/*
+handle label statement.
+We start a new block which will get associated with the label.
+We have to handle the situation where the label pseudo was already created when we
+encountered a goto statement but we did not know the block then.
+*/
+static void linearize_label_statement(struct proc* proc, struct ast_node* node) {
+	struct basic_block* block = create_block(proc);
+	start_block(proc, block);
+	if (node->label_stmt.symbol->label.pseudo != NULL) {
+		/* label pseudo was created by a goto statement */
+		assert(node->label_stmt.symbol->label.pseudo->block == NULL);
+		node->label_stmt.symbol->label.pseudo->block = block;
+	}
+	else {
+		node->label_stmt.symbol->label.pseudo = allocate_block_pseudo(proc, block);
+	}
+}
+
+/* TODO move this logic to parser? */
+/* Search for a label going up scopes starting from the scope where the goto statement appeared. */
+static struct lua_symbol* find_label(struct proc* proc, struct block_scope* block, const struct string_object* label_name) {
+	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
+	while (block != NULL && block->function == function) {
+		struct lua_symbol* symbol;
+		FOR_EACH_PTR_REVERSE(block->symbol_list, symbol) {
+			if (symbol->symbol_type == SYM_LABEL && symbol->label.label_name == label_name) {
+				return symbol;
+			}
+		} 
+		END_FOR_EACH_PTR_REVERSE(symbol);
+		block = block->parent;
+	}
+	return NULL;
+}
+
+/*
+When linearizing the goto statement we create a pesudo for the label if it hasn't been already created.
+But at this point we would not know the target basic block which we expect to be filled when the label is
+encountered. Of course if the label was linearized before we got to the goto statement then the target block
+would already be populated.
+*/
+static void linearize_goto_statement(struct proc* proc, const struct ast_node* node) {
+	if (node->goto_stmt.goto_scope) {
+		struct lua_symbol* symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name);
+		if (symbol) {
+			if (symbol->label.pseudo == NULL) {
+				/* No pseudo? create with NULL target block, must be filled by a label statement */
+				symbol->label.pseudo = allocate_block_pseudo(proc, NULL);
+			}
+			instruct_br(proc, symbol->label.pseudo);
+			start_block(proc, create_block(proc));
+			return;
+		}
+	}
+	handle_error(proc->linearizer->ast_container, "goto label not found");
 }
 
 static void linearize_statement(struct proc *proc, struct ast_node *node)
@@ -1360,11 +1418,11 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_LABEL_STMT: {
-		handle_error(proc->linearizer->ast_container, "AST_LABEL_STMT not yet implemented");
+		linearize_label_statement(proc, node);
 		break;
 	}
 	case AST_GOTO_STMT: {
-		handle_error(proc->linearizer->ast_container, "AST_GOTO_STMT not yet implemented");
+		linearize_goto_statement(proc, node);
 		break;
 	}
 	case AST_DO_STMT: {
@@ -1432,7 +1490,7 @@ static void start_block(struct proc *proc, struct basic_block *bb)
 {
 	// printf("Starting block %d\n", bb->index);
 	if (proc->current_bb && !is_block_terminated(proc->current_bb)) {
-		instruct_br(proc, bb);
+		instruct_br(proc, allocate_block_pseudo(proc, bb));
 	}
 	proc->current_bb = bb;
 }
@@ -1565,7 +1623,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		}
 		break;
 	case PSEUDO_BLOCK: {
-		raviX_buffer_add_fstring(mb, "L%d", pseudo->block->index);
+		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? pseudo->block->index: -1);
 		break;
 	}
 	case PSEUDO_RANGE: {

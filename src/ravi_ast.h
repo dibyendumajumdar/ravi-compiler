@@ -145,6 +145,7 @@ struct lua_symbol {
 		struct {
 			const struct string_object *label_name;
 			struct block_scope *block;
+			struct pseudo* pseudo;     /* backend data for the symbol */
 		} label;
 		struct {
 			struct lua_symbol *var;	   /* variable reference */
@@ -203,7 +204,8 @@ struct ast_node {
 		} label_stmt; /* AST_LABEL_STMT */
 		struct {
 			const struct string_object *name; /* target label, used to resolve the goto destination */
-			struct ast_node *label_stmt;	  /* Initially this will be NULL; set by a separate pass */
+			// struct ast_node *label_stmt;	  /* Initially this will be NULL; set by a separate pass */
+			struct block_scope* goto_scope;   /* The scope of the goto statement */
 		} goto_stmt;				  /* AST_GOTO_STMT */
 		struct {
 			struct lua_symbol_list *var_list;
