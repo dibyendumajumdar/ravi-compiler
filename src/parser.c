@@ -806,31 +806,31 @@ static UnOpr get_unary_opr(int op)
 {
 	switch (op) {
 	case TK_NOT:
-		return OPR_NOT;
+		return UNOPR_NOT;
 	case '-':
-		return OPR_MINUS;
+		return UNOPR_MINUS;
 	case '~':
-		return OPR_BNOT;
+		return UNOPR_BNOT;
 	case '#':
-		return OPR_LEN;
+		return UNOPR_LEN;
 	case TK_TO_INTEGER:
-		return OPR_TO_INTEGER;
+		return UNOPR_TO_INTEGER;
 	case TK_TO_NUMBER:
-		return OPR_TO_NUMBER;
+		return UNOPR_TO_NUMBER;
 	case TK_TO_INTARRAY:
-		return OPR_TO_INTARRAY;
+		return UNOPR_TO_INTARRAY;
 	case TK_TO_NUMARRAY:
-		return OPR_TO_NUMARRAY;
+		return UNOPR_TO_NUMARRAY;
 	case TK_TO_TABLE:
-		return OPR_TO_TABLE;
+		return UNOPR_TO_TABLE;
 	case TK_TO_STRING:
-		return OPR_TO_STRING;
+		return UNOPR_TO_STRING;
 	case TK_TO_CLOSURE:
-		return OPR_TO_CLOSURE;
+		return UNOPR_TO_CLOSURE;
 	case '@':
-		return OPR_TO_TYPE;
+		return UNOPR_TO_TYPE;
 	default:
-		return OPR_NOUNOPR;
+		return UNOPR_NOUNOPR;
 	}
 }
 
@@ -914,10 +914,10 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 	UnOpr uop;
 	struct ast_node *expr = NULL;
 	uop = get_unary_opr(ls->t.token);
-	if (uop != OPR_NOUNOPR) {
+	if (uop != UNOPR_NOUNOPR) {
 		// RAVI change - get usertype if @<name>
 		const struct string_object *usertype = NULL;
-		if (uop == OPR_TO_TYPE) {
+		if (uop == UNOPR_TO_TYPE) {
 			usertype = ls->t.seminfo.ts;
 			raviX_next(ls);
 			// Check and expand to extended name if necessary

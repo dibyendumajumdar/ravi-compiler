@@ -189,29 +189,29 @@ static void print_symbol_names(membuff_t *buf, struct lua_symbol_list *list)
 static const char *get_unary_opr_str(UnOpr op)
 {
 	switch (op) {
-	case OPR_NOT:
+	case UNOPR_NOT:
 		return "not";
-	case OPR_MINUS:
+	case UNOPR_MINUS:
 		return "-";
-	case OPR_BNOT:
+	case UNOPR_BNOT:
 		return "~";
-	case OPR_LEN:
+	case UNOPR_LEN:
 		return "#";
-	case OPR_TO_INTEGER:
+	case UNOPR_TO_INTEGER:
 		return "@integer";
-	case OPR_TO_NUMBER:
+	case UNOPR_TO_NUMBER:
 		return "@number";
-	case OPR_TO_INTARRAY:
+	case UNOPR_TO_INTARRAY:
 		return "@integer[]";
-	case OPR_TO_NUMARRAY:
+	case UNOPR_TO_NUMARRAY:
 		return "@number[]";
-	case OPR_TO_TABLE:
+	case UNOPR_TO_TABLE:
 		return "@table";
-	case OPR_TO_CLOSURE:
+	case UNOPR_TO_CLOSURE:
 		return "@closure";
-	case OPR_TO_STRING:
+	case UNOPR_TO_STRING:
 		return "@string";
-	case OPR_TO_TYPE:
+	case UNOPR_TO_TYPE:
 		return "@<usertype>";
 	default:
 		return "";

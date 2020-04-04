@@ -2,11 +2,13 @@
 A compiler for Ravi and Lua 5.3. This is work in progress.
 Once ready it will be used to create a new byte code generator for Ravi.
 
+This header file defines the public api
+
 Copyright 2018-2020 Dibyendu Majumdar
 */
 
-#ifndef _RAVI_COMPILER_H
-#define _RAVI_COMPILER_H
+#ifndef ravicomp_COMPILER_H
+#define ravicomp_COMPILER_H
 
 #include "ravicomp_export.h"
 
@@ -79,13 +81,20 @@ enum RESERVED {
 	TK_TO_CLOSURE
 };
 
+/*
+ * Lua strings can have embedded 0 bytes therefore we
+ * need a string type that has a length associated with it.
+ */
 struct string_object {
-	uint32_t len;
+	uint32_t len; /* length of the string */
 	int32_t reserved; /* if is this a keyword then token id else -1 */
-	uint32_t hash;
-	const char *str;
+	uint32_t hash; /* hash value of the string */
+	const char *str; /* string data */
 };
 
+/*
+ * Lua literals
+ */
 typedef union {
 	lua_Number r;
 	lua_Integer i;
@@ -97,13 +106,23 @@ typedef struct Token {
 	SemInfo seminfo;
 } Token;
 
+/*
+ * Everything below should be treated as readonly
+ */
 typedef struct {
-	int current;	 /* current character (charint) */
+	int current;	 /* current character (char as int) */
 	int linenumber;	 /* input line counter */
 	int lastline;	 /* line of last token 'consumed' */
 	Token t;	 /* current token */
 	Token lookahead; /* look ahead token */
 } LexState;
+
+/* all strings are interned and stored in a hash set, strings may have embedded
+ * 0 bytes therefore explicit length is necessary
+ */
+RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
+								uint32_t len);
+
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name*/
 RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
@@ -118,9 +137,6 @@ RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
 /* Release all data structures used by the lexer */
 RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
 
-/* parser and ast builder */
-RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
-								uint32_t len);
 RAVICOMP_EXPORT int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name);
 RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *container, FILE *fp);
 RAVICOMP_EXPORT int
@@ -165,19 +181,19 @@ typedef enum BinOpr {
 
 /** RAVI change */
 typedef enum UnOpr {
-	OPR_MINUS,
-	OPR_BNOT,
-	OPR_NOT,
-	OPR_LEN,
-	OPR_TO_INTEGER,
-	OPR_TO_NUMBER,
-	OPR_TO_INTARRAY,
-	OPR_TO_NUMARRAY,
-	OPR_TO_TABLE,
-	OPR_TO_STRING,
-	OPR_TO_CLOSURE,
-	OPR_TO_TYPE,
-	OPR_NOUNOPR
+	UNOPR_MINUS,
+	UNOPR_BNOT,
+	UNOPR_NOT,
+	UNOPR_LEN,
+	UNOPR_TO_INTEGER,
+	UNOPR_TO_NUMBER,
+	UNOPR_TO_INTARRAY,
+	UNOPR_TO_NUMARRAY,
+	UNOPR_TO_TABLE,
+	UNOPR_TO_STRING,
+	UNOPR_TO_CLOSURE,
+	UNOPR_TO_TYPE,
+	UNOPR_NOUNOPR
 } UnOpr;
 
 #endif

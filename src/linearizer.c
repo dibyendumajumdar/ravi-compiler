@@ -459,7 +459,7 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 	ravitype_t subexpr_type = node->unary_expr.expr->common_expr.type.type_code;
 	enum opcode targetop = op_nop;
 	switch (op) {
-	case OPR_MINUS:
+	case UNOPR_MINUS:
 		if (subexpr_type == RAVI_TNUMINT)
 			targetop = op_unmi;
 		else if (subexpr_type == RAVI_TNUMFLT)
@@ -467,40 +467,40 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 		else
 			targetop = op_unm;
 		break;
-	case OPR_LEN:
+	case UNOPR_LEN:
 		if (subexpr_type == RAVI_TARRAYINT || subexpr_type == RAVI_TARRAYFLT)
 			targetop = op_leni;
 		else
 			targetop = op_len;
 		break;
-	case OPR_TO_INTEGER:
+	case UNOPR_TO_INTEGER:
 		targetop = subexpr_type != RAVI_TNUMINT ? op_toint : op_nop;
 		break;
-	case OPR_TO_NUMBER:
+	case UNOPR_TO_NUMBER:
 		targetop = subexpr_type != RAVI_TNUMFLT ? op_toflt : op_nop;
 		break;
-	case OPR_TO_CLOSURE:
+	case UNOPR_TO_CLOSURE:
 		targetop = subexpr_type != RAVI_TFUNCTION ? op_toclosure : op_nop;
 		break;
-	case OPR_TO_STRING:
+	case UNOPR_TO_STRING:
 		targetop = subexpr_type != RAVI_TSTRING ? op_tostring : op_nop;
 		break;
-	case OPR_TO_INTARRAY:
+	case UNOPR_TO_INTARRAY:
 		targetop = subexpr_type != RAVI_TARRAYINT ? op_toiarray : op_nop;
 		break;
-	case OPR_TO_NUMARRAY:
+	case UNOPR_TO_NUMARRAY:
 		targetop = subexpr_type != RAVI_TARRAYFLT ? op_tofarray : op_nop;
 		break;
-	case OPR_TO_TABLE:
+	case UNOPR_TO_TABLE:
 		targetop = subexpr_type != RAVI_TTABLE ? op_totable : op_nop;
 		break;
-	case OPR_TO_TYPE:
+	case UNOPR_TO_TYPE:
 		targetop = op_totype;
 		break;
-	case OPR_NOT:
+	case UNOPR_NOT:
 		targetop = op_not;
 		break;
-	case OPR_BNOT:
+	case UNOPR_BNOT:
 		targetop = op_bnot;
 		break;
 	default:
@@ -512,14 +512,14 @@ static struct pseudo *linearize_unaryop(struct proc *proc, struct ast_node *node
 	}
 	struct instruction *insn = allocate_instruction(proc, targetop);
 	struct pseudo *target = subexpr;
-	if (op == OPR_TO_TYPE) {
+	if (op == UNOPR_TO_TYPE) {
 		const struct constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
 		struct pseudo *tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
 		add_instruction_operand(proc, insn, tname_pseudo);
-	} else if (op == OPR_NOT || op == OPR_BNOT) {
+	} else if (op == UNOPR_NOT || op == UNOPR_BNOT) {
 		add_instruction_operand(proc, insn, target);
 		target = allocate_temp_pseudo(proc, RAVI_TANY);
-	} else if (op == OPR_MINUS || op == OPR_LEN) {
+	} else if (op == UNOPR_MINUS || op == UNOPR_LEN) {
 		add_instruction_operand(proc, insn, target);
 		target = allocate_temp_pseudo(proc, subexpr_type);
 	}

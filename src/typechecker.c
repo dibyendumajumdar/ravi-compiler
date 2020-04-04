@@ -28,52 +28,52 @@ static void typecheck_ast_list(struct compiler_state *container, struct ast_node
 }
 
 /* Type checker - WIP  */
-static void typecheck_unaryop(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_unary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
 {
 	UnOpr op = node->unary_expr.unary_op;
 	typecheck_ast_node(container, function, node->unary_expr.expr);
 	ravitype_t subexpr_type = node->unary_expr.expr->common_expr.type.type_code;
 	switch (op) {
-	case OPR_MINUS:
+	case UNOPR_MINUS:
 		if (subexpr_type == RAVI_TNUMINT) {
 			set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		} else if (subexpr_type == RAVI_TNUMFLT) {
 			set_type(&node->unary_expr.type, RAVI_TNUMFLT);
 		}
 		break;
-	case OPR_LEN:
+	case UNOPR_LEN:
 		if (subexpr_type == RAVI_TARRAYINT || subexpr_type == RAVI_TARRAYFLT) {
 			set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		}
 		break;
-	case OPR_TO_INTEGER:
+	case UNOPR_TO_INTEGER:
 		set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		break;
-	case OPR_TO_NUMBER:
+	case UNOPR_TO_NUMBER:
 		set_type(&node->unary_expr.type, RAVI_TNUMFLT);
 		break;
-	case OPR_TO_CLOSURE:
+	case UNOPR_TO_CLOSURE:
 		set_type(&node->unary_expr.type, RAVI_TFUNCTION);
 		break;
-	case OPR_TO_STRING:
+	case UNOPR_TO_STRING:
 		set_type(&node->unary_expr.type, RAVI_TSTRING);
 		break;
-	case OPR_TO_INTARRAY:
+	case UNOPR_TO_INTARRAY:
 		set_type(&node->unary_expr.type, RAVI_TARRAYINT);
 		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYINT);
 		}
 		break;
-	case OPR_TO_NUMARRAY:
+	case UNOPR_TO_NUMARRAY:
 		set_type(&node->unary_expr.type, RAVI_TARRAYFLT);
 		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYFLT);
 		}
 		break;
-	case OPR_TO_TABLE:
+	case UNOPR_TO_TABLE:
 		set_type(&node->unary_expr.type, RAVI_TTABLE);
 		break;
-	case OPR_TO_TYPE:
+	case UNOPR_TO_TYPE:
 		assert(node->unary_expr.type.type_name != NULL); // Should already be set by the parser
 		set_typecode(&node->unary_expr.type, RAVI_TUSERDATA);
 		break;
@@ -83,7 +83,7 @@ static void typecheck_unaryop(struct compiler_state *container, struct ast_node 
 }
 
 /* Type checker - WIP  */
-static void typecheck_binaryop(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_binary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
 {
 	BinOpr op = node->binary_expr.binary_op;
 	struct ast_node *e1 = node->binary_expr.expr_left;
@@ -232,8 +232,8 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	if (var_type->type_code == RAVI_TNUMINT) {
 		/* if the expr is of type number or # operator then insert @integer operator */
 		if (expr_type->type_code == RAVI_TNUMFLT ||
-		    (expr->type == AST_UNARY_EXPR && expr->unary_expr.unary_op == OPR_LEN)) {
-			insert_cast(container, expr, OPR_TO_INTEGER, RAVI_TNUMINT);
+		    (expr->type == AST_UNARY_EXPR && expr->unary_expr.unary_op == UNOPR_LEN)) {
+			insert_cast(container, expr, UNOPR_TO_INTEGER, RAVI_TNUMINT);
 		} else if (expr_type->type_code != RAVI_TNUMINT) {
 			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
 		}
@@ -242,7 +242,7 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	if (var_type->type_code == RAVI_TNUMFLT) {
 		if (expr_type->type_code == RAVI_TNUMINT) {
 			/* cast to number */
-			insert_cast(container, expr, OPR_TO_NUMBER, RAVI_TNUMFLT);
+			insert_cast(container, expr, UNOPR_TO_NUMBER, RAVI_TNUMFLT);
 		} else if (expr_type->type_code != RAVI_TNUMFLT) {
 			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", var_name);
 		}
@@ -455,11 +455,11 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 		break;
 	}
 	case AST_BINARY_EXPR: {
-		typecheck_binaryop(container, function, node);
+		typecheck_binary_operator(container, function, node);
 		break;
 	}
 	case AST_UNARY_EXPR: {
-		typecheck_unaryop(container, function, node);
+		typecheck_unary_operator(container, function, node);
 		break;
 	}
 	case AST_LITERAL_EXPR: {

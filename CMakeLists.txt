@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 
-option(LUA_BINDING "Controls whether Lua/Ravi bindings will be generated, default is OFF" OFF)
-
 set(HEADERS
         include/ravi_compiler.h
         src/allocate.h
@@ -33,7 +31,7 @@ message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
 
 if ($ENV{CLION_IDE})
     # CLion seems unable to handle include paths set on sources
-    include_directories("${RaviCompiler_SOURCE_DIR}/dmr_c/src")
+    include_directories("${RaviCompiler_SOURCE_DIR}/include")
 endif ()
 
 if (WIN32)
