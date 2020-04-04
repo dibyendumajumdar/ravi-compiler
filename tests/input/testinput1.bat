@@ -126,6 +126,8 @@ tparse "local t: table local len: integer = #t return len"
 tparse "return function(t: table, i: integer) i = #t end"
 
 tparse "::L1:: a = 1; goto L1; return"
+tparse "::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1"
+tparse "goto l1; do ::l1:: end"
 
 tparse -f t001.lua
 tparse -f t002.lua

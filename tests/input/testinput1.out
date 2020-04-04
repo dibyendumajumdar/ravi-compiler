@@ -2776,7 +2776,7 @@ function()
     --[unary expr end]
 end
 L0 (entry)
-	CLOSURE {Proc(000001DD70B09AF0)} {T(0)}
+	CLOSURE {Proc(0000021CE451A170)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5779,7 +5779,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(00000251F3F1BFC0)} {T(0)}
+	CLOSURE {Proc(0000027448DEBFC0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -5832,6 +5832,125 @@ L2
 	BR {L2}
 L3
 	RET {L1}
+
+C:\work\github\ravi-compiler\tests\input>tparse "::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1" 
+::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1
+function()
+  ::l1::
+  do
+    goto l1
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       1
+     --[expression list end]
+    --[expression statement end]
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       2
+     --[expression list end]
+    --[expression statement end]
+  end
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto l1
+end
+function()
+  ::l1::
+  do
+    goto l1
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       1
+     --[expression list end]
+    --[expression statement end]
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       2
+     --[expression list end]
+    --[expression statement end]
+  end
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto l1
+end
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	BR {L4}
+L3
+	STOREGLOBAL {x, 1 Kint(0)}
+	BR {L4}
+L4
+	STOREGLOBAL {z, 2 Kint(1)}
+	STOREGLOBAL {y, 1 Kint(0)}
+	BR {L2}
+L5
+
+C:\work\github\ravi-compiler\tests\input>tparse "goto l1; do ::l1:: end" 
+goto l1; do ::l1:: end
+function()
+  goto l1
+  do
+    ::l1::
+  end
+end
+function()
+  goto l1
+  do
+    ::l1::
+  end
+end
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t001.lua 
 return function()
@@ -5978,27 +6097,27 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(0000023A5A56AFA0)} {T(0)}
+	CLOSURE {Proc(000002659928CB40)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
-	CLOSURE {Proc(0000023A5A56B418)} {T(0)}
+	CLOSURE {Proc(000002659928CFB8)} {T(0)}
 	MOV {T(0)} {local(y, 1)}
 	MOV {5 Kint(1)} {local(a, 2)}
-	CLOSURE {Proc(0000023A5A56BD08)} {T(0)}
+	CLOSURE {Proc(000002659928D8A8)} {T(0)}
 	MOV {T(0)} {local(z, 3)}
 	RET {local(y, 1), local(z, 3)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(0000023A5A56B890)} {T(0)}
+	CLOSURE {Proc(000002659928D430)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
 	RET {Upval(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(0000023A5A56C180)} {T(0)}
+	CLOSURE {Proc(000002659928DD20)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -6195,7 +6314,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001F9870ED8F0)} {T(0)}
+	CLOSURE {Proc(000001B3FE24C9F0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -6436,7 +6555,7 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(0000022DBE12B110)} {T(0)}
+	CLOSURE {Proc(0000021A36F5CCD0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
@@ -6541,11 +6660,11 @@ function()
     end
 end
 L0 (entry)
-	CLOSURE {Proc(000001EE3E01AC10)} {T(0)}
+	CLOSURE {Proc(000001C283E7CAD0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 L0 (entry)
-	CLOSURE {Proc(000001EE3E01B088)} {T(0)}
+	CLOSURE {Proc(000001C283E7CF48)} {T(0)}
 	NEWTABLE {T(1)}
 	LOADGLOBAL {f} {T(2)}
 	CALL {T(2)} {T(2..)}
@@ -8082,80 +8201,194 @@ L0 (entry)
 L1 (exit)
 
 C:\work\github\ravi-compiler\tests\input>tparse -f t012.lua 
-return -3%5 == 2 and -3+5 == 2
-
+local x
+do
+  local y = 12
+  goto l1
+  ::l2:: x = x + 1; goto l3
+  ::l1:: x = y; goto l2
+end
+::l3:: ::l3_1:: assert(x == 13)
 function()
-  return
-    --[binary expr start] any
-     --[binary expr start] any
-      --[binary expr start] any
-       --[unary expr start] any
-       -
-        3
-       --[unary expr end]
-      %
-       5
-      --[binary expr end]
-     ==
-      2
-     --[binary expr end]
-    and
-     --[binary expr start] any
-      --[binary expr start] any
-       --[unary expr start] any
-       -
-        3
-       --[unary expr end]
-      +
-       5
-      --[binary expr end]
-     ==
-      2
-     --[binary expr end]
-    --[binary expr end]
+--locals  x, y
+  local
+  --[symbols]
+    x --local symbol any 
+  do
+    local
+    --[symbols]
+      y --local symbol any 
+    --[expressions]
+      12
+    goto l1
+    ::l2::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           x --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       +
+        1
+       --[binary expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l3
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          y --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l2
+  end
+  ::l3::
+  ::l3_1::
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               x --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ==
+            13
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
 end
 function()
-  return
-    --[binary expr start] any
-     --[binary expr start] boolean
-      --[binary expr start] integer
-       --[unary expr start] integer
-       -
-        3
-       --[unary expr end]
-      %
-       5
-      --[binary expr end]
-     ==
-      2
-     --[binary expr end]
-    and
-     --[binary expr start] boolean
-      --[binary expr start] integer
-       --[unary expr start] integer
-       -
-        3
-       --[unary expr end]
-      +
-       5
-      --[binary expr end]
-     ==
-      2
-     --[binary expr end]
-    --[binary expr end]
+--locals  x, y
+  local
+  --[symbols]
+    x --local symbol any 
+  do
+    local
+    --[symbols]
+      y --local symbol any 
+    --[expressions]
+      12
+    goto l1
+    ::l2::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           x --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       +
+        1
+       --[binary expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l3
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          y --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l2
+  end
+  ::l3::
+  ::l3_1::
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               x --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ==
+            13
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
 end
 L0 (entry)
-	UNMi {3 Kint(0)} {Tint(0)}
-	MOD {Tint(0), 5 Kint(1)} {Tint(1)}
-	EQii {Tint(1), 2 Kint(2)} {T(1)}
-	MOV {T(1)} {T(0)}
-	CBR {T(0)} {L2, L3}
+	MOV {12 Kint(0)} {local(y, 1)}
+	BR {L5}
 L1 (exit)
 L2
-	UNMi {3 Kint(0)} {Tint(1)}
-	ADDii {Tint(1), 5 Kint(1)} {Tint(0)}
-	EQii {Tint(0), 2 Kint(2)} {T(1)}
-	MOV {T(1)} {T(0)}
 	BR {L3}
 L3
-	RET {T(0)} {L1}
+	ADD {local(x, 0), 1 Kint(1)} {T(0)}
+	MOV {T(0)} {local(x, 0)}
+	BR {L7}
+L4
+	BR {L5}
+L5
+	MOV {local(y, 1)} {local(x, 0)}
+	BR {L3}
+L6
+	BR {L7}
+L7
+	BR {L8}
+L8
+	LOADGLOBAL {assert} {T(0)}
+	EQ {local(x, 0), 13 Kint(2)} {T(1)}
+	CALL {T(0), T(1)} {T(0..)}

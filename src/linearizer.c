@@ -1402,6 +1402,13 @@ static void linearize_goto_statement(struct proc* proc, const struct ast_node* n
 	handle_error(proc->linearizer->ast_container, "goto label not found");
 }
 
+static void linearize_do_statement(struct proc* proc, struct ast_node* node) {
+	assert(node->type == AST_DO_STMT);
+	start_scope(proc->linearizer, proc, node->do_stmt.scope);
+	linearize_statement_list(proc, node->do_stmt.do_statement_list);
+	end_scope(proc->linearizer, proc);
+}
+
 static void linearize_statement(struct proc *proc, struct ast_node *node)
 {
 	switch (node->type) {
@@ -1430,7 +1437,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_DO_STMT: {
-		handle_error(proc->linearizer->ast_container, "AST_DO_STMT not yet implemented");
+		linearize_do_statement(proc, node);
 		break;
 	}
 	case AST_EXPR_STMT: {
