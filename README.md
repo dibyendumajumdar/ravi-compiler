@@ -4,10 +4,10 @@ Experimental compiler for Ravi and Lua 5.3
 The goal of this project is to create a standalone parser and compiler for Lua / Ravi 5.3. The output of the compiler will be bytecodes.
 The compiler library will consist of distinct modules:
 
-* lexer - responsible for tokenizing an input buffer
-* parser - responsible for generating abstract syntax tree (AST).
-* typechecker - responsible for assigning types to variables when possible.
-* linearizer (WIP) - responsible for constructing a linear IR representation of the AST.
+* lexer (Done) - responsible for tokenizing an input buffer
+* parser (Done) - responsible for generating abstract syntax tree (AST).
+* typechecker (Done) - responsible for assigning types to variables when possible.
+* linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
 * optimizer (TODO) - responsible for improving the code
 * codegenerator (TODO) - responsible for generate bytecodes
 
@@ -23,7 +23,7 @@ This project is written in C for maximum portability like Lua. I considered usin
 
 ## Building 
 
-You will need CMake installation. The build steps are fairly simple on Linux:
+You will need CMake 3.12 or greater. The build steps are fairly simple on Linux:
 
 ```
 mkdir build
