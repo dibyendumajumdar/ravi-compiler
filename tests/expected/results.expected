@@ -6738,6 +6738,58 @@ function()
         --[suffixed expr end]
     end
 end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(0)}
+	MOV {500 Kint(1)} {Tint(1)}
+	MOV {1 Kint(0)} {Tint(2)}
+	LIii {0 Kint(2), Tint(2)} {Tint(3)}
+	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	CBR {Tint(3)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(j, 1)}
+	MOV {0 Kint(2)} {local(sum, 0)}
+	MOV {1 Kint(0)} {Tint(5)}
+	MOV {10000 Kint(3)} {Tint(6)}
+	MOV {1 Kint(0)} {Tint(7)}
+	LIii {0 Kint(2), Tint(7)} {Tint(8)}
+	SUBii {Tint(5), Tint(7)} {Tint(5)}
+	BR {L7}
+L6
+	RET {local(sum, 0)} {L1}
+L7
+	ADDii {Tint(5), Tint(7)} {Tint(5)}
+	CBR {Tint(8)} {L8, L9}
+L8
+	LEii {Tint(6), Tint(5)} {Tint(9)}
+	CBR {Tint(9)} {L11, L10}
+L9
+	LIii {Tint(5), Tint(6)} {Tint(9)}
+	CBR {Tint(9)} {L11, L10}
+L10
+	MOV {Tint(5)} {local(k, 2)}
+	MULii {local(k, 2), local(k, 2)} {Tint(10)}
+	DIVfi {1 Kint(0), Tint(10)} {Tflt(0)}
+	ADD {local(sum, 0), Tflt(0)} {T(0)}
+	MOV {T(0)} {local(sum, 0)}
+	BR {L7}
+L11
+	BR {L2}
 function matmul(a: table, b: table)
   	assert(@integer(#a[1]) == #b);
   	local m: integer, n: integer, p: integer, x: table = #a, #a[1], #b[1], {};
