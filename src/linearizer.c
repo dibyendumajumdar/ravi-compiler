@@ -1165,7 +1165,36 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 }
 
 /*
-The handling of local and expression statements can be partially combined
+Expression or assignment statement is of the form:
+
+<LHS exp list...> = <RHS exp list...>
+
+Lua requires some special handling of this statement. Firstly
+the LHS expressions are evaluated left to right. 
+
+The RHS is processed right to left. If there is a corresponding LHS expr
+then we need to assign the value of the RHS expr to the LHS expr.
+Excess RHS expression results are discarded.
+Excess LHS expressions have to be set to the default value.
+
+So for example if we had:
+
+expr1, expr2 = expr3, expr4, expr5
+
+Then following needs to be generated
+
+result1 = eval(expr1)
+result2 = eval(expr2)
+
+eval(expr5)
+*result2 = eval(expr4)
+*result1 = eval(expr3)
+
+Our code generation has an issue:
+We initially generate load instructions for LHS expressions.
+Subsequently we convert these to store instructions  (marked above with asterisk)
+
+The handling of 'local' and expression statements can be partially combined
 because the main difference is the LHS side of it. The rest of the processing has to be
 the same.
 */
