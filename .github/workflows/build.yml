@@ -41,6 +41,7 @@ jobs:
       run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
+      if: runner.os != 'Windows'
       shell: bash
       run: cd tests && sh runtests.sh ${{runner.workspace}}/build/tparse
 
