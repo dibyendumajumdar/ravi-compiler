@@ -1,3 +1,5 @@
+![build](https://github.com/dibyendumajumdar/ravi-compiler/workflows/build/badge.svg)
+
 # ravi-compiler
 Experimental compiler for Ravi and Lua 5.3
 
