@@ -22,17 +22,30 @@ extern "C" {
 
 
 /*
+* The ptrlist data structure is copied from the Linux Sparse project.
+* It is essentially a dynamic array of pointers but the array is split up 
+* into nodes that are linked together. Each node contains a small number of array entries.
+*
 * The ptr list data structure is like a train - with cars linked to each other.
 * Just as in a train each car has many seats, so in ptr list each "node" has
 * several entries. Unlike a train however, the ptr list is arranged as a ring,
 * i.e. the the front and back nodes are linked to each other. Hence there is no
 * such thing as a 'head' of the list - i.e. any node can be the head!
+*
+* The disadvantage of the ptrlist structure compared to a dynamic array is
+* that it consumes more memory to maintain the linked list data structure.
+*
+* The main advantage is that it is well suited to fixed sized memory 
+* allocators as there is no resizing of memory already allocated, which happens
+* with dynamic arrays. The ptrlist is made up of fixed size nodes.
 */
 
+/* number of array entries per node */
 #ifndef LIST_NODE_NR
 #define LIST_NODE_NR (7)
 #endif
 
+/* structure of a node */
 #define DECLARE_PTR_LIST(listname, type)                                       \
 	struct listname {                                                      \
 		int nr_ : 8;                                                   \
@@ -46,6 +59,7 @@ extern "C" {
 /* Each node in the list */
 DECLARE_PTR_LIST(ptr_list, void);
 
+/* The iterator strucure is used for looping */
 struct ptr_list_iter {
 	struct ptr_list *__head;
 	struct ptr_list *__list;

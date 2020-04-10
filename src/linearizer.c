@@ -337,7 +337,7 @@ static struct proc *allocate_proc(struct linearizer_state *linearizer, struct as
 	assert(function_expr->type == AST_FUNCTION_EXPR);
 	struct proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
 	proc->function_expr = function_expr;
-	proc->id = ptrlist_size((struct ptr_list*)linearizer->all_procs);
+	proc->id = ptrlist_size((struct ptr_list *)linearizer->all_procs);
 	ptrlist_add((struct ptr_list **)&linearizer->all_procs, proc, &linearizer->ptrlist_allocator);
 	if (linearizer->current_proc) {
 		proc->parent = linearizer->current_proc;
@@ -406,6 +406,13 @@ static inline void add_instruction(struct proc *proc, struct instruction *insn)
 static inline void remove_instruction(struct proc *proc, struct instruction *insn)
 {
 	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
+}
+
+static inline struct instruction *last_instruction(struct basic_block *block)
+{
+	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
+		return NULL;
+	return (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
 
 static inline void add_instruction_operand(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
@@ -547,7 +554,7 @@ static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, stru
 	add_instruction(proc, insn);
 }
 
-static void instruct_br(struct proc *proc, struct pseudo* pseudo)
+static void instruct_br(struct proc *proc, struct pseudo *pseudo)
 {
 	assert(pseudo->type == PSEUDO_BLOCK);
 	if (is_block_terminated(proc->current_bb)) {
@@ -777,8 +784,8 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->var.pseudo;
 	} else if (sym->symbol_type == SYM_UPVALUE) {
-		/* upvalue index is the position of upvalue in the function, we treat this as the pseudo register for the
-		 * upvalue */
+		/* upvalue index is the position of upvalue in the function, we treat this as the pseudo register for
+		 * the upvalue */
 		/* TODO maybe the pseudo be pre-created when we start linearizing the funcon and stored in the symbol
 		 * like we do for locals? */
 		return allocate_symbol_pseudo(proc, sym, sym->upvalue.upvalue_index);
@@ -1236,9 +1243,11 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	// FIXME free all temps
 }
 
+/* A block is considered terminated if the last instruction is
+   a return or a branch */
 static bool is_block_terminated(struct basic_block *block)
 {
-	struct instruction *last_insn = (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
+	struct instruction *last_insn = last_instruction(block);
 	if (last_insn == NULL)
 		return false;
 	if (last_insn->opcode == op_ret || last_insn->opcode == op_cbr || last_insn->opcode == op_br)
@@ -1253,17 +1262,70 @@ static void linearize_test_cond(struct proc *proc, struct ast_node *node, struct
 	instruct_cbr(proc, condition_pseudo, true_block, false_block);
 }
 
+/* linearize the 'else if' block */
 static void linearize_test_then(struct proc *proc, struct ast_node *node, struct basic_block *true_block,
-				struct basic_block *false_block)
+				struct basic_block *end_block)
 {
 	start_block(proc, true_block);
 	start_scope(proc->linearizer, proc, node->test_then_block.test_then_scope);
 	linearize_statement_list(proc, node->test_then_block.test_then_statement_list);
 	end_scope(proc->linearizer, proc);
 	if (!is_block_terminated(proc->current_bb))
-		instruct_br(proc, allocate_block_pseudo(proc, false_block));
+		instruct_br(proc, allocate_block_pseudo(proc, end_block));
 }
 
+// clang-format off
+/*
+The Lua if statement has a complex structure as it is somewhat like
+a combination of case and if statement. The if block is followed by
+1 or more elseif blocks. Finally we have an optinal else block.
+The elseif blocks are like case statements.
+
+Given
+
+if cond1 then
+	block for cond1
+elseif cond2 then
+	block for cond2
+else
+	block for else
+end
+
+We linearize the statement as follows.
+
+B0:
+	if cond1 goto Bcond1 else B2;   // Initial if condition
+
+B2:
+	if cond2 goto Bcond2 else B3:   // This is an elseif condition
+
+B3:
+	<if AST has else>
+	goto Belse;
+	<else>
+	goto Bend;
+
+Bcond1:
+	start scope
+	block for cond1
+	end scope
+	goto Bend;
+
+Bcond2:
+	start scope
+	block for cond2
+	end scope
+	goto Bend;
+
+Belse:
+	start scope
+	block for else
+	end scope
+	goto Bend;
+
+Bend:
+*/
+// clang-format on
 static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 {
 	struct basic_block *end_block = NULL;
@@ -1351,30 +1413,33 @@ We start a new block which will get associated with the label.
 We have to handle the situation where the label pseudo was already created when we
 encountered a goto statement but we did not know the block then.
 */
-static void linearize_label_statement(struct proc* proc, struct ast_node* node) {
-	struct basic_block* block = create_block(proc);
+static void linearize_label_statement(struct proc *proc, struct ast_node *node)
+{
+	struct basic_block *block = create_block(proc);
 	start_block(proc, block);
 	if (node->label_stmt.symbol->label.pseudo != NULL) {
 		/* label pseudo was created by a goto statement */
 		assert(node->label_stmt.symbol->label.pseudo->block == NULL);
 		node->label_stmt.symbol->label.pseudo->block = block;
-	}
-	else {
+	} else {
 		node->label_stmt.symbol->label.pseudo = allocate_block_pseudo(proc, block);
 	}
 }
 
 /* TODO move this logic to parser? */
 /* Search for a label going up scopes starting from the scope where the goto statement appeared. */
-static struct lua_symbol* find_label(struct proc* proc, struct block_scope* block, const struct string_object* label_name) {
+static struct lua_symbol *find_label(struct proc *proc, struct block_scope *block,
+				     const struct string_object *label_name)
+{
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
 	while (block != NULL && block->function == function) {
-		struct lua_symbol* symbol;
-		FOR_EACH_PTR_REVERSE(block->symbol_list, symbol) {
+		struct lua_symbol *symbol;
+		FOR_EACH_PTR_REVERSE(block->symbol_list, symbol)
+		{
 			if (symbol->symbol_type == SYM_LABEL && symbol->label.label_name == label_name) {
 				return symbol;
 			}
-		} 
+		}
 		END_FOR_EACH_PTR_REVERSE(symbol);
 		block = block->parent;
 	}
@@ -1382,15 +1447,19 @@ static struct lua_symbol* find_label(struct proc* proc, struct block_scope* bloc
 }
 
 /*
-When linearizing the goto statement we create a pesudo for the label if it hasn't been already created.
-But at this point we would not know the target basic block which we expect to be filled when the label is
+When linearizing the goto statement we create a pseudo for the label if it hasn't been already created.
+But at this point we may not know the target basic block to goto, which we expect to be filled when the label is
 encountered. Of course if the label was linearized before we got to the goto statement then the target block
-would already be populated.
+would already be known and specified in the pseudo.
 */
-static void linearize_goto_statement(struct proc* proc, const struct ast_node* node) {
+static void linearize_goto_statement(struct proc *proc, const struct ast_node *node)
+{
+	/* The AST does not provide link to the label so we have to search for the label in the goto scope 
+	   and above */
 	if (node->goto_stmt.goto_scope) {
-		struct lua_symbol* symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name);
+		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name);
 		if (symbol) {
+			/* label found */
 			if (symbol->label.pseudo == NULL) {
 				/* No pseudo? create with NULL target block, must be filled by a label statement */
 				symbol->label.pseudo = allocate_block_pseudo(proc, NULL);
@@ -1403,7 +1472,8 @@ static void linearize_goto_statement(struct proc* proc, const struct ast_node* n
 	handle_error(proc->linearizer->ast_container, "goto label not found");
 }
 
-static void linearize_do_statement(struct proc* proc, struct ast_node* node) {
+static void linearize_do_statement(struct proc *proc, struct ast_node *node)
+{
 	assert(node->type == AST_DO_STMT);
 	start_scope(proc->linearizer, proc, node->do_stmt.scope);
 	linearize_statement_list(proc, node->do_stmt.do_statement_list);
@@ -1496,15 +1566,19 @@ static struct basic_block *create_block(struct proc *proc)
 
 /**
  * Takes a basic block as an argument and makes it the current block.
- * All future instructions will be added to the end of this block
+ *
+ * If the old current block is unterminated then this will terminate that
+ * block by adding an unconditional branch to the new current block.
+ *
+ * All future instructions will be added to the end of the new current block
  */
-static void start_block(struct proc *proc, struct basic_block *bb)
+static void start_block(struct proc *proc, struct basic_block *bb_to_start)
 {
-	// printf("Starting block %d\n", bb->index);
+	// printf("Starting block %d\n", bb_to_start->index);
 	if (proc->current_bb && !is_block_terminated(proc->current_bb)) {
-		instruct_br(proc, allocate_block_pseudo(proc, bb));
+		instruct_br(proc, allocate_block_pseudo(proc, bb_to_start));
 	}
-	proc->current_bb = bb;
+	proc->current_bb = bb_to_start;
 }
 
 /**
@@ -1635,7 +1709,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		}
 		break;
 	case PSEUDO_BLOCK: {
-		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? pseudo->block->index: -1);
+		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? pseudo->block->index : -1);
 		break;
 	}
 	case PSEUDO_RANGE: {
