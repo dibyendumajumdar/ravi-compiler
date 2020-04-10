@@ -40,5 +40,7 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
-    #- name: Test
-    #  run: cd lua-tests && sh run_tests.sh ../build/ravi
+    - name: Test
+      shell: bash
+      run: cd tests && sh runtests.sh ${{runner.workspace}}/build/tparse
+
