@@ -3,15 +3,14 @@
 # ravi-compiler
 Experimental compiler for Ravi and Lua 5.3
 
-The goal of this project is to create a standalone parser and compiler for Lua / Ravi 5.3. The output of the compiler will be bytecodes.
-The compiler library will consist of distinct modules:
+The goal of this project is to create a standalone parser and compiler for Lua / Ravi 5.3. The output of the compiler will be C code suitable for JITing. The compiler library will consist of distinct modules:
 
 * lexer (Done) - responsible for tokenizing an input buffer
-* parser (Done) - responsible for generating abstract syntax tree (AST).
-* typechecker (Done) - responsible for assigning types to variables when possible.
+* parser (Mostly Done) - responsible for generating abstract syntax tree (AST).
+* typechecker (Mostly Done) - responsible for assigning types to variables when possible.
 * linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
 * optimizer (TODO) - responsible for improving the code
-* codegenerator (TODO) - responsible for generate bytecodes
+* codegenerator (TODO) - responsible for generate C code
 
 ## Why
 
@@ -37,3 +36,11 @@ make
 ## Testing
 
 At the moment we have a simple test driver program named `tparse`. It takes a string input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking and also any linear IR output if supported. Example of the output can be fund in the `tests` folder.
+
+Suppose `tparse` was built in `build` folder then you can run the tests as follows:
+
+```
+cd tests && sh runtests.sh ../build/tparse
+```
+
+The test script compares the output to the expected output. Any difference will cause the test script to fail.
