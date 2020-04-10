@@ -90,7 +90,8 @@ int main(int argc, const char *argv[])
 	//const char* code = "::L1:: a = 1; goto L1; return";
 	//const char* code = "goto l1; do ::l1:: end";
 	//const char* code = "do ::l1:: end goto l1;";
-	const char* code = "::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1";
+	//const char* code = "::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1";
+	const char* code = "for i=1,10 do print(i) end";
 	if (args.code) {
 		code = args.code;
 	} else if (args.filename) {

@@ -241,6 +241,7 @@ struct ast_node {
 			struct ast_node_list *loop_statement_list; /* statements in this block */
 		} while_or_repeat_stmt;
 		struct {
+			struct block_scope* for_scope; /* encapsulates the entire for statement */
 			struct lua_symbol_list *symbols;
 			struct ast_node_list *expr_list;
 			struct block_scope *for_body;

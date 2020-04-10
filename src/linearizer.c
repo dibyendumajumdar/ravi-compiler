@@ -458,6 +458,7 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 
 static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_node *node)
 {
+	// TODO if any expr is range we need to convert to temp?
 	UnaryOperatorType op = node->unary_expr.unary_op;
 	struct pseudo *subexpr = linearize_expression(proc, node->unary_expr.expr);
 	ravitype_t subexpr_type = node->unary_expr.expr->common_expr.type.type_code;
@@ -624,8 +625,20 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 	return result;
 }
 
+/* Utility to create a binary instruction where operands and target pseudo is known */
+static void create_binary_instruction(struct proc* proc, enum opcode targetop, struct pseudo* operand1,
+	struct pseudo* operand2, struct pseudo* target) {
+	struct instruction* insn = allocate_instruction(proc, targetop);
+	add_instruction_operand(proc, insn, operand1);
+	add_instruction_operand(proc, insn, operand2);
+	add_instruction_target(proc, insn, target);
+	add_instruction(proc, insn);
+}
+
 static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_node *node)
 {
+	// TODO if any expr is range we need to convert to temp?
+
 	BinaryOperatorType op = node->binary_expr.binary_op;
 
 	if (op == BINOPR_AND) {
@@ -769,11 +782,7 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 
 	ravitype_t target_type = node->binary_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
-	struct instruction *insn = allocate_instruction(proc, targetop);
-	add_instruction_operand(proc, insn, operand1);
-	add_instruction_operand(proc, insn, operand2);
-	add_instruction_target(proc, insn, target);
-	add_instruction(proc, insn);
+	create_binary_instruction(proc, targetop, operand1, operand2, target);
 	free_temp_pseudo(proc, operand1);
 	free_temp_pseudo(proc, operand2);
 
@@ -1540,6 +1549,149 @@ static void linearize_do_statement(struct proc *proc, struct ast_node *node)
 	end_scope(proc->linearizer, proc);
 }
 
+//clang-format off
+/*
+Lua manual states:
+
+	 for v = e1, e2, e3 do block end
+
+is equivalent to the code:
+
+	 do
+	   local var, limit, step = tonumber(e1), tonumber(e2), tonumber(e3)
+	   if not (var and limit and step) then error() end
+	   var = var - step
+	   while true do
+		 var = var + step
+		 if (step >= 0 and var > limit) or (step < 0 and var < limit) then
+		   break
+		 end
+		 local v = var
+		 block
+	   end
+	 end
+
+We do not need local vars to hold var, limit, step as these can be
+temporaries.
+
+	step_positive = 0 < step
+	var = var - step
+	goto L1
+L1:
+	var = var + step;
+	if step_positive goto L2;
+		else goto L3;
+L2:
+	stop = var > limit
+	if stop goto Lend
+		else goto Lbody
+L3:
+	stop = var < limit
+	if stop goto Lend
+		else goto Lbody
+Lbody:
+	set local symbol in for loop to var
+	do body
+	goto L1;
+
+Lend:
+
+
+*/
+//clang-format on
+static void linearize_for_num_statement(struct proc* proc, struct ast_node* node)
+{
+	assert(node->type == AST_FORNUM_STMT);
+	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
+	
+	/* For now we only allow integer expressions */
+	struct ast_node* expr;
+	FOR_EACH_PTR(node->for_stmt.expr_list, expr) {
+		if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
+			handle_error(proc->linearizer->ast_container, "Only for loops with integer expressions currently supported");
+		}
+	} END_FOR_EACH_PTR(expr);
+
+	struct ast_node* index_var_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 0);
+	struct ast_node* limit_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 1);
+	struct ast_node* step_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 2);
+	struct lua_symbol* var_sym = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.symbols, 0);
+
+	if (index_var_expr == NULL || limit_expr == NULL) {
+		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
+	}
+
+	struct pseudo* t = linearize_expression(proc, index_var_expr);
+	if (t->type == PSEUDO_RANGE) {
+		convert_range_to_temp(t); // Only accept one result 
+	}
+	struct pseudo* index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, index_var_pseudo, t);
+
+	t = linearize_expression(proc, limit_expr);
+	if (t->type == PSEUDO_RANGE) {
+		convert_range_to_temp(t); // Only accept one result 
+	}
+	struct pseudo* limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, limit_pseudo, t);
+
+	if (step_expr == NULL)
+		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
+	else {
+		t = linearize_expression(proc, step_expr);
+		if (t->type == PSEUDO_RANGE) {
+			convert_range_to_temp(t); // Only accept one result 
+		}
+	}
+	struct pseudo* step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, step_pseudo, t);
+
+	struct pseudo* step_positive = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)), 
+			step_pseudo, step_positive);
+
+	struct pseudo* stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
+
+	struct basic_block *L1 = create_block(proc);
+	struct basic_block* L2 = create_block(proc);
+	struct basic_block* L3 = create_block(proc);
+	struct basic_block* Lbody = create_block(proc);
+	struct basic_block* Lend = create_block(proc);
+	
+	start_block(proc, L1);
+	create_binary_instruction(proc, op_addii, index_var_pseudo, step_pseudo, index_var_pseudo);
+	instruct_cbr(proc, step_positive, L2, L3);
+
+	start_block(proc, L2);
+	create_binary_instruction(proc, op_leii, limit_pseudo, index_var_pseudo, stop_pseudo);
+	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
+
+	start_block(proc, L3);
+	create_binary_instruction(proc, op_ltii, index_var_pseudo, limit_pseudo, stop_pseudo);
+	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
+
+	start_block(proc, Lbody);
+	instruct_move(proc, var_sym->var.pseudo, index_var_pseudo);
+
+	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
+	linearize_statement_list(proc, node->for_stmt.for_statement_list);
+	end_scope(proc->linearizer, proc);
+
+	instruct_br(proc, allocate_block_pseudo(proc, L1));
+
+	end_scope(proc->linearizer, proc);
+
+	free_temp_pseudo(proc, stop_pseudo);
+	free_temp_pseudo(proc, step_positive);
+	free_temp_pseudo(proc, step_pseudo);
+	free_temp_pseudo(proc, limit_pseudo);
+	free_temp_pseudo(proc, index_var_pseudo);
+
+	start_block(proc, Lend);
+}
+
+
 static void linearize_statement(struct proc *proc, struct ast_node *node)
 {
 	switch (node->type) {
@@ -1591,8 +1743,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case AST_FORNUM_STMT: {
-		// typecheck_for_num_statment(container, function, node);
-		handle_error(proc->linearizer->ast_container, "AST_FORNUM_STMT not yet implemented");
+		linearize_for_num_statement(proc, node);
 		break;
 	}
 	default:

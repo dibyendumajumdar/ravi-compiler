@@ -1145,7 +1145,7 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 	stmt->for_stmt.expr_list = NULL;
 	stmt->for_stmt.for_body = NULL;
 	stmt->for_stmt.for_statement_list = NULL;
-	new_scope(parser);		   // For the loop variables
+	stmt->for_stmt.for_scope = new_scope(parser);	// For the loop variables
 	raviX_next(ls);			   /* skip 'for' */
 	varname = check_name_and_next(ls); /* first variable name */
 	switch (ls->t.token) {
