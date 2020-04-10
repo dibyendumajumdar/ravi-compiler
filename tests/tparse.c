@@ -112,7 +112,7 @@ int main(int argc, const char *argv[])
 	raviX_output_ast(container, stdout);
 	rc = raviX_ast_typecheck(container);
 	if (rc != 0) {
-		fprintf(stderr, raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_exit;
 	}
 	raviX_output_ast(container, stdout);
@@ -121,7 +121,7 @@ int main(int argc, const char *argv[])
 
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
-		fprintf(stderr, raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_linend;
 	}
 	raviX_output_linearizer(linearizer, stdout);
