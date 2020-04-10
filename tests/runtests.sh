@@ -3,5 +3,4 @@ set -e
 
 sh ./runtparse.sh $command > results.out
 diff expected/results.expected results.out
-cat results.out
 rm results.out
