@@ -14,7 +14,6 @@ typedef struct {
 } membuff_t;
 
 extern void raviX_buffer_init(membuff_t *mb, size_t initial_size);
-extern void raviX_buffer_rewindpos(membuff_t *mb);
 extern void raviX_buffer_resize(membuff_t *mb, size_t new_size);
 extern void raviX_buffer_free(membuff_t *mb);
 static inline char *raviX_buffer_buffer(membuff_t *mb) { return mb->buf; }

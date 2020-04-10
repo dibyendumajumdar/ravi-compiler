@@ -34,7 +34,6 @@ void raviX_buffer_init(membuff_t *mb, size_t initial_size)
 	mb->pos = 0;
 	mb->allocated_size = initial_size;
 }
-void raviX_buffer_rewindpos(membuff_t *mb) { mb->pos = 0; }
 void raviX_buffer_resize(membuff_t *mb, size_t new_size)
 {
 	if (new_size <= mb->allocated_size)

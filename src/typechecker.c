@@ -503,7 +503,7 @@ static void typecheck_function(struct compiler_state *container, struct ast_node
 int raviX_ast_typecheck(struct compiler_state *container)
 {
 	struct ast_node *main_function = container->main_function;
-	raviX_buffer_rewindpos(&container->error_message);
+	raviX_buffer_reset(&container->error_message);
 	int rc = setjmp(container->env);
 	if (rc == 0) {
 		typecheck_function(container, main_function);
