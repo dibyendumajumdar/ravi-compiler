@@ -565,6 +565,37 @@ static void instruct_br(struct proc *proc, struct pseudo *pseudo)
 	add_instruction(proc, insn);
 }
 
+// clang-format off
+/*
+Lua and/or operators are processed so that with 'and' the result is the final 
+true value, and with 'or' it is the first true value.
+
+and IR
+
+	result = eval(expr_left);
+	if (result)
+		goto Lnext:
+	else
+		goto Ldone;
+Lnext:
+	result = eval(expr_right);
+	goto Ldone;
+Ldone:
+
+or IR
+
+	result = eval(expr_left);
+	if (result)
+		goto Ldone:
+	else
+		goto Lnext;
+Lnext:
+	result = eval(expr_right);
+	goto Ldone;
+Ldone:
+
+*/
+// clang-format on
 static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, bool is_and)
 {
 	struct ast_node *e1 = node->binary_expr.expr_left;
