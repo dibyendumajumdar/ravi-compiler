@@ -143,3 +143,6 @@ $command -f input/t009.lua
 $command -f input/t010.lua
 $command -f input/t011.lua
 $command -f input/t012.lua
+
+$command "for i=1,10 do print(i) end"
+$command "for i=10,1,-1 do print(i) end"

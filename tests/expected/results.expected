@@ -8324,3 +8324,188 @@ L8
 	LOADGLOBAL {assert} {T(0)}
 	EQ {local(x, 0), 13 Kint(2)} {T(1)}
 	CALL {T(0), T(1)} {T(0..)}
+for i=1,10 do print(i) end
+function()
+--locals  i
+  for
+    i --local symbol any 
+  =
+    1
+   ,
+    10
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+function()
+--locals  i
+  for
+    i --local symbol integer 
+  =
+    1
+   ,
+    10
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] integer
+               --[primary start] integer
+                 i --local symbol integer 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+define Proc(0)
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(0)}
+	MOV {10 Kint(1)} {Tint(1)}
+	MOV {1 Kint(0)} {Tint(2)}
+	LIii {0 Kint(2), Tint(2)} {Tint(3)}
+	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	CBR {Tint(3)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(i, 0)}
+	LOADGLOBAL {print} {T(0)}
+	CALL {T(0), local(i, 0)} {T(0..)}
+	BR {L2}
+L6
+for i=10,1,-1 do print(i) end
+function()
+--locals  i
+  for
+    i --local symbol any 
+  =
+    10
+   ,
+    1
+   ,
+    --[unary expr start] any
+    -
+     1
+    --[unary expr end]
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+function()
+--locals  i
+  for
+    i --local symbol integer 
+  =
+    10
+   ,
+    1
+   ,
+    --[unary expr start] integer
+    -
+     1
+    --[unary expr end]
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] integer
+               --[primary start] integer
+                 i --local symbol integer 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+define Proc(0)
+L0 (entry)
+	MOV {10 Kint(0)} {Tint(0)}
+	MOV {1 Kint(1)} {Tint(1)}
+	UNMi {1 Kint(1)} {Tint(2)}
+	MOV {Tint(2)} {Tint(3)}
+	LIii {0 Kint(2), Tint(3)} {Tint(4)}
+	SUBii {Tint(0), Tint(3)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(3)} {Tint(0)}
+	CBR {Tint(4)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(5)}
+	CBR {Tint(5)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(5)}
+	CBR {Tint(5)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(i, 0)}
+	LOADGLOBAL {print} {T(0)}
+	CALL {T(0), local(i, 0)} {T(0..)}
+	BR {L2}
+L6
