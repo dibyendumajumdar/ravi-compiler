@@ -326,7 +326,7 @@ static inline void set_type(struct var_type *vt, ravitype_t t)
 	vt->type_code = t;
 	vt->type_name = NULL;
 }
-static void inline set_typename(struct var_type *vt, ravitype_t t, const struct string_object *name)
+static inline void set_typename(struct var_type *vt, ravitype_t t, const struct string_object *name)
 {
 	vt->type_code = t;
 	vt->type_name = name;

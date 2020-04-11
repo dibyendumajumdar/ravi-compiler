@@ -140,6 +140,7 @@ static void txtToken(struct lexer_state *ls, int token)
 	case TK_INT:
 		save(ls, '\0');
 		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_buffer(ls->buff));
+		break;
 	default:
 		luaX_token2str(ls, token);
 	}

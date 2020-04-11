@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "port.h"
+
 typedef struct {
 	char *buf;
 	size_t allocated_size;
@@ -23,7 +25,7 @@ static inline void raviX_buffer_reset(membuff_t *mb) { mb->pos = 0; }
 
 /* following convert input to string before adding */
 extern void raviX_buffer_add_string(membuff_t *mb, const char *str);
-extern void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...);
+extern void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...) FORMAT_ATTR(2);
 extern void raviX_buffer_add_vfstring(membuff_t *mb, const char *fmt, va_list args);
 extern void raviX_buffer_add_bool(membuff_t *mb, bool value);
 extern void raviX_buffer_add_int(membuff_t *mb, int value);
@@ -41,7 +43,6 @@ static inline void raviX_buffer_addc(membuff_t *mb, int c)
 static inline void raviX_buffer_remove(membuff_t *mb, int i)
 {
 	mb->pos -= i;
-	assert(mb->pos >= 0);
 }
 
 /* strncpy() replacement with guaranteed 0 termination */

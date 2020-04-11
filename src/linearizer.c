@@ -211,7 +211,7 @@ struct pseudo *allocate_constant_pseudo(struct proc *proc, const struct constant
 	return pseudo;
 }
 
-struct pseudo *allocate_closure_pseudo(struct linearizer_state *linearizer, struct proc *proc)
+struct pseudo *allocate_closure_pseudo(struct proc *proc)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_PROC;
@@ -800,7 +800,7 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	set_current_proc(proc->linearizer, curproc); // restore the proc
 	ravitype_t target_type = expr->function_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
-	struct pseudo *operand = allocate_closure_pseudo(proc->linearizer, newproc);
+	struct pseudo *operand = allocate_closure_pseudo(newproc);
 	struct instruction *insn = allocate_instruction(proc, op_closure);
 	add_instruction_operand(proc, insn, operand);
 	add_instruction_target(proc, insn, target);
@@ -1867,7 +1867,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			raviX_buffer_add_fstring(mb, "%.12f", constant->n);
 			tc = "flt";
 		} else if (constant->type == RAVI_TNUMINT) {
-			raviX_buffer_add_fstring(mb, "%ld", constant->i);
+			raviX_buffer_add_fstring(mb, "%lld", (long long)constant->i);
 			tc = "int";
 		} else {
 			raviX_buffer_add_fstring(mb, "'%s'", constant->s->str);
@@ -1920,7 +1920,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		}
 		break;
 	case PSEUDO_BLOCK: {
-		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? pseudo->block->index : -1);
+		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? (int) pseudo->block->index : -1);
 		break;
 	}
 	case PSEUDO_RANGE: {
