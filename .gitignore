@@ -7,3 +7,5 @@ CTestTestfile.cmake
 build
 .idea
 cmake-build-debug
+.vscode
+tests/results.out

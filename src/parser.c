@@ -1001,17 +1001,19 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	const struct string_object *label;
+	int is_break = 0;
 	if (testnext(ls, TK_GOTO))
 		label = check_name_and_next(ls);
 	else {
 		raviX_next(ls); /* skip break */
 		label = raviX_create_string(ls->container, "break", sizeof "break");
+		is_break = 1;
 	}
 	// Resolve labels in the end?
 	struct ast_node *goto_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	goto_stmt->type = AST_GOTO_STMT;
 	goto_stmt->goto_stmt.name = label;
-	//goto_stmt->goto_stmt.label_stmt = NULL; // unresolved
+	goto_stmt->goto_stmt.is_break = is_break;
 	goto_stmt->goto_stmt.goto_scope = parser->current_scope;
 	return goto_stmt;
 }

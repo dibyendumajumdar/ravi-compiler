@@ -8640,3 +8640,149 @@ L3
 	LOADGLOBAL {brek} {T(1)}
 	BR {L2}
 L4
+repeat print('forever') break until true return
+function()
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto break
+  until
+   true
+  --[repeat end]
+  return
+end
+function()
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto break
+  until
+   true
+  --[repeat end]
+  return
+end
+define Proc(0)
+L0 (entry)
+	BR {L3}
+L1 (exit)
+L2
+	CBR {true} {L3, L4}
+L3
+	LOADGLOBAL {print} {T(0)}
+	CALL {T(0), 'forever' Ks(0)} {T(0..)}
+	BR {L4}
+L4
+	RET {L1}
+L5
+	BR {L2}
+for i =1,10 do if i == 2 then break end end return
+function()
+--locals  i
+  for
+    i --local symbol any 
+  =
+    1
+   ,
+    10
+  do
+     if
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+          i --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      ==
+       2
+      --[binary expr end]
+     then
+       goto break
+     end
+  end
+  return
+end
+function()
+--locals  i
+  for
+    i --local symbol integer 
+  =
+    1
+   ,
+    10
+  do
+     if
+      --[binary expr start] boolean
+       --[suffixed expr start] integer
+        --[primary start] integer
+          i --local symbol integer 
+        --[primary end]
+       --[suffixed expr end]
+      ==
+       2
+      --[binary expr end]
+     then
+       goto break
+     end
+  end
+  return
+end
+define Proc(0)
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(0)}
+	MOV {10 Kint(1)} {Tint(1)}
+	MOV {1 Kint(0)} {Tint(2)}
+	LIii {0 Kint(2), Tint(2)} {Tint(3)}
+	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	CBR {Tint(3)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(i, 0)}
+	BR {L7}
+L6
+	RET {L1}
+L7
+	EQii {local(i, 0), 2 Kint(3)} {T(0)}
+	CBR {T(0)} {L8, L9}
+L8
+	BR {L6}
+L9
+	BR {L2}
+L10
+	BR {L9}

@@ -1524,6 +1524,14 @@ would already be known and specified in the pseudo.
 */
 static void linearize_goto_statement(struct proc *proc, const struct ast_node *node)
 {
+	if (node->goto_stmt.is_break) {
+		if (proc->current_break_target == NULL) {
+			handle_error(proc->linearizer->ast_container, "no current break target");
+		}
+		instruct_br(proc, allocate_block_pseudo(proc, proc->current_break_target));
+		start_block(proc, create_block(proc));
+		return;
+	}
 	/* The AST does not provide link to the label so we have to search for the label in the goto scope
 	   and above */
 	if (node->goto_stmt.goto_scope) {
@@ -1662,6 +1670,8 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	struct basic_block *L3 = create_block(proc);
 	struct basic_block *Lbody = create_block(proc);
 	struct basic_block *Lend = create_block(proc);
+	struct basic_block *previous_break_target = proc->current_break_target;
+	proc->current_break_target = Lend;
 
 	start_block(proc, L1);
 	create_binary_instruction(proc, op_addii, index_var_pseudo, step_pseudo, index_var_pseudo);
@@ -1693,6 +1703,8 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	free_temp_pseudo(proc, index_var_pseudo);
 
 	start_block(proc, Lend);
+
+	proc->current_break_target = previous_break_target;
 }
 
 static void linearize_while_statment(struct proc *proc, struct ast_node *node)
@@ -1700,6 +1712,8 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	struct basic_block *test_block = create_block(proc);
 	struct basic_block *body_block = create_block(proc);
 	struct basic_block *end_block = create_block(proc);
+	struct basic_block *previous_break_target = proc->current_break_target;
+	proc->current_break_target = end_block;
 
 	if (node->type == AST_REPEAT_STMT) {
 		instruct_br(proc, allocate_block_pseudo(proc, body_block));
@@ -1717,6 +1731,8 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	instruct_br(proc, allocate_block_pseudo(proc, test_block));
 
 	start_block(proc, end_block);
+
+	proc->current_break_target = previous_break_target;
 }
 
 static void linearize_statement(struct proc *proc, struct ast_node *node)
