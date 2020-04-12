@@ -146,3 +146,6 @@ $command -f input/t012.lua
 
 $command "for i=1,10 do print(i) end"
 $command "for i=10,1,-1 do print(i) end"
+
+$command "while true do print('forever') end"
+$command "repeat print('forever') brek until true"

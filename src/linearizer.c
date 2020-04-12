@@ -626,9 +626,10 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 }
 
 /* Utility to create a binary instruction where operands and target pseudo is known */
-static void create_binary_instruction(struct proc* proc, enum opcode targetop, struct pseudo* operand1,
-	struct pseudo* operand2, struct pseudo* target) {
-	struct instruction* insn = allocate_instruction(proc, targetop);
+static void create_binary_instruction(struct proc *proc, enum opcode targetop, struct pseudo *operand1,
+				      struct pseudo *operand2, struct pseudo *target)
+{
+	struct instruction *insn = allocate_instruction(proc, targetop);
 	add_instruction_operand(proc, insn, operand1);
 	add_instruction_operand(proc, insn, operand2);
 	add_instruction_target(proc, insn, target);
@@ -1179,7 +1180,7 @@ Expression or assignment statement is of the form:
 <LHS exp list...> = <RHS exp list...>
 
 Lua requires some special handling of this statement. Firstly
-the LHS expressions are evaluated left to right. 
+the LHS expressions are evaluated left to right.
 
 The RHS is processed right to left. If there is a corresponding LHS expr
 then we need to assign the value of the RHS expr to the LHS expr.
@@ -1523,7 +1524,7 @@ would already be known and specified in the pseudo.
 */
 static void linearize_goto_statement(struct proc *proc, const struct ast_node *node)
 {
-	/* The AST does not provide link to the label so we have to search for the label in the goto scope 
+	/* The AST does not provide link to the label so we have to search for the label in the goto scope
 	   and above */
 	if (node->goto_stmt.goto_scope) {
 		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name);
@@ -1599,40 +1600,43 @@ Lend:
 
 */
 //clang-format on
-static void linearize_for_num_statement(struct proc* proc, struct ast_node* node)
+static void linearize_for_num_statement(struct proc *proc, struct ast_node *node)
 {
 	assert(node->type == AST_FORNUM_STMT);
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
-	
-	/* For now we only allow integer expressions */
-	struct ast_node* expr;
-	FOR_EACH_PTR(node->for_stmt.expr_list, expr) {
-		if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
-			handle_error(proc->linearizer->ast_container, "Only for loops with integer expressions currently supported");
-		}
-	} END_FOR_EACH_PTR(expr);
 
-	struct ast_node* index_var_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 0);
-	struct ast_node* limit_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 1);
-	struct ast_node* step_expr = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.expr_list, 2);
-	struct lua_symbol* var_sym = ptrlist_nth_entry((struct ptr_list*)node->for_stmt.symbols, 0);
+	/* For now we only allow integer expressions */
+	struct ast_node *expr;
+	FOR_EACH_PTR(node->for_stmt.expr_list, expr)
+	{
+		if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
+			handle_error(proc->linearizer->ast_container,
+				     "Only for loops with integer expressions currently supported");
+		}
+	}
+	END_FOR_EACH_PTR(expr);
+
+	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
+	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	struct lua_symbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
 		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
 	}
 
-	struct pseudo* t = linearize_expression(proc, index_var_expr);
+	struct pseudo *t = linearize_expression(proc, index_var_expr);
 	if (t->type == PSEUDO_RANGE) {
-		convert_range_to_temp(t); // Only accept one result 
+		convert_range_to_temp(t); // Only accept one result
 	}
-	struct pseudo* index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	instruct_move(proc, index_var_pseudo, t);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
-		convert_range_to_temp(t); // Only accept one result 
+		convert_range_to_temp(t); // Only accept one result
 	}
-	struct pseudo* limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	instruct_move(proc, limit_pseudo, t);
 
 	if (step_expr == NULL)
@@ -1640,25 +1644,25 @@ static void linearize_for_num_statement(struct proc* proc, struct ast_node* node
 	else {
 		t = linearize_expression(proc, step_expr);
 		if (t->type == PSEUDO_RANGE) {
-			convert_range_to_temp(t); // Only accept one result 
+			convert_range_to_temp(t); // Only accept one result
 		}
 	}
-	struct pseudo* step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	instruct_move(proc, step_pseudo, t);
 
-	struct pseudo* step_positive = allocate_temp_pseudo(proc, RAVI_TNUMINT);
-	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)), 
-			step_pseudo, step_positive);
+	struct pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
+				  step_pseudo, step_positive);
 
-	struct pseudo* stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
 
 	struct basic_block *L1 = create_block(proc);
-	struct basic_block* L2 = create_block(proc);
-	struct basic_block* L3 = create_block(proc);
-	struct basic_block* Lbody = create_block(proc);
-	struct basic_block* Lend = create_block(proc);
-	
+	struct basic_block *L2 = create_block(proc);
+	struct basic_block *L3 = create_block(proc);
+	struct basic_block *Lbody = create_block(proc);
+	struct basic_block *Lend = create_block(proc);
+
 	start_block(proc, L1);
 	create_binary_instruction(proc, op_addii, index_var_pseudo, step_pseudo, index_var_pseudo);
 	instruct_cbr(proc, step_positive, L2, L3);
@@ -1691,6 +1695,29 @@ static void linearize_for_num_statement(struct proc* proc, struct ast_node* node
 	start_block(proc, Lend);
 }
 
+static void linearize_while_statment(struct proc *proc, struct ast_node *node)
+{
+	struct basic_block *test_block = create_block(proc);
+	struct basic_block *body_block = create_block(proc);
+	struct basic_block *end_block = create_block(proc);
+
+	if (node->type == AST_REPEAT_STMT) {
+		instruct_br(proc, allocate_block_pseudo(proc, body_block));
+	}
+
+	start_block(proc, test_block);
+	struct pseudo *condition_pseudo = linearize_expression(proc, node->while_or_repeat_stmt.condition);
+	instruct_cbr(proc, condition_pseudo, body_block, end_block);
+	free_temp_pseudo(proc, condition_pseudo);
+
+	start_block(proc, body_block);
+	start_scope(proc->linearizer, proc, node->while_or_repeat_stmt.loop_scope);
+	linearize_statement_list(proc, node->while_or_repeat_stmt.loop_statement_list);
+	end_scope(proc->linearizer, proc);
+	instruct_br(proc, allocate_block_pseudo(proc, test_block));
+
+	start_block(proc, end_block);
+}
 
 static void linearize_statement(struct proc *proc, struct ast_node *node)
 {
@@ -1733,8 +1760,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	}
 	case AST_WHILE_STMT:
 	case AST_REPEAT_STMT: {
-		// typecheck_while_or_repeat_statement(container, function, node);
-		handle_error(proc->linearizer->ast_container, "AST_WHILE_STMT/AST_REPEAT_STMT not yet implemented");
+		linearize_while_statment(proc, node);
 		break;
 	}
 	case AST_FORIN_STMT: {
@@ -1920,7 +1946,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		}
 		break;
 	case PSEUDO_BLOCK: {
-		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? (int) pseudo->block->index : -1);
+		raviX_buffer_add_fstring(mb, "L%d", pseudo->block ? (int)pseudo->block->index : -1);
 		break;
 	}
 	case PSEUDO_RANGE: {
