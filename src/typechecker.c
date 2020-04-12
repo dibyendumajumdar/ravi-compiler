@@ -3,6 +3,21 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 */
 #include <ravi_ast.h>
 
+/*
+The Type checker walks through the AST and annotates nodes with type information.
+It also checks that the operations are valid.
+
+There are following assumptions made about the code generator backend.
+
+a) Function arguments that have type info must be asserted at runtime
+b) Local variable assignments in 'local' or expression statements must be asserted by the backend
+c) We allow assigning integer value to number and vice versa in the AST but the code generator must assert this is valid
+d) Any unassigned local vars that have type info must be set to valid initial values.
+
+None of these operations are explicit in the AST.
+*/
+
+
 static bool is_type_same(const struct var_type *a, const struct var_type *b)
 {
 	// String comparion of type_name relies upon strings being interned
@@ -210,18 +225,6 @@ static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void insert_cast(struct compiler_state *container, struct ast_node *expr, UnaryOperatorType opcode,
-			ravitype_t target_type)
-{
-	/* convert the node to @integer node, the original content of node goes into the subexpr */
-	struct ast_node *copy_expr = raviX_allocator_allocate(&container->ast_node_allocator, 0);
-	*copy_expr = *expr;
-	expr->type = AST_UNARY_EXPR;
-	expr->unary_expr.expr = copy_expr;
-	expr->unary_expr.unary_op = opcode;
-	set_typecode(&expr->unary_expr.type, target_type);
-}
-
 static void typecheck_var_assignment(struct compiler_state *container, struct var_type *var_type, struct ast_node *expr,
 				     const struct string_object *var_name)
 {
@@ -235,7 +238,8 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 		/* if the expr is of type number or # operator then insert @integer operator */
 		if (expr_type->type_code == RAVI_TNUMFLT ||
 		    (expr->type == AST_UNARY_EXPR && expr->unary_expr.unary_op == UNOPR_LEN)) {
-			insert_cast(container, expr, UNOPR_TO_INTEGER, RAVI_TNUMINT);
+			/* Okay, but backend must do appropriate conversion */
+			;
 		} else if (expr_type->type_code != RAVI_TNUMINT) {
 			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
 		}
@@ -243,8 +247,8 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	}
 	if (var_type->type_code == RAVI_TNUMFLT) {
 		if (expr_type->type_code == RAVI_TNUMINT) {
-			/* cast to number */
-			insert_cast(container, expr, UNOPR_TO_NUMBER, RAVI_TNUMFLT);
+			/* Okay, but backend must do appropriate conversion */
+			;
 		} else if (expr_type->type_code != RAVI_TNUMFLT) {
 			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
 		}

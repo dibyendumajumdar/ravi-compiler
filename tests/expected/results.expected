@@ -5579,16 +5579,13 @@ function()
   --[symbols]
     len --local symbol integer 
   --[expressions]
-    --[unary expr start] integer
-    @integer
-     --[unary expr start] any
-     #
-      --[suffixed expr start] table
-       --[primary start] table
-         t --local symbol table 
-       --[primary end]
-      --[suffixed expr end]
-     --[unary expr end]
+    --[unary expr start] any
+    #
+     --[suffixed expr start] table
+      --[primary start] table
+        t --local symbol table 
+      --[primary end]
+     --[suffixed expr end]
     --[unary expr end]
   return
     --[suffixed expr start] integer
@@ -5600,7 +5597,6 @@ end
 define Proc(0)
 L0 (entry)
 	LEN {local(t, 0)} {T(0)}
-	TOINT {T(0)}
 	MOV {T(0)} {local(len, 1)}
 	RET {local(len, 1)} {L1}
 L1 (exit)
@@ -5651,16 +5647,13 @@ function()
          --[suffixed expr end]
        = --[var list end]
        --[expression list start]
-         --[unary expr start] integer
-         @integer
-          --[unary expr start] any
-          #
-           --[suffixed expr start] table
-            --[primary start] table
-              t --local symbol table 
-            --[primary end]
-           --[suffixed expr end]
-          --[unary expr end]
+         --[unary expr start] any
+         #
+          --[suffixed expr start] table
+           --[primary start] table
+             t --local symbol table 
+           --[primary end]
+          --[suffixed expr end]
          --[unary expr end]
        --[expression list end]
       --[expression statement end]
@@ -5674,7 +5667,6 @@ L1 (exit)
 define Proc(1)
 L0 (entry)
 	LEN {local(t, 0)} {T(0)}
-	TOINT {T(0)}
 	MOV {T(0)} {local(i, 1)}
 L1 (exit)
 ::L1:: a = 1; goto L1; return
@@ -7249,54 +7241,45 @@ function()
        ,
         x --local symbol table 
       --[expressions]
-        --[unary expr start] integer
-        @integer
-         --[unary expr start] any
-         #
-          --[suffixed expr start] table
-           --[primary start] table
-             a --local symbol table 
-           --[primary end]
-          --[suffixed expr end]
-         --[unary expr end]
+        --[unary expr start] any
+        #
+         --[suffixed expr start] table
+          --[primary start] table
+            a --local symbol table 
+          --[primary end]
+         --[suffixed expr end]
         --[unary expr end]
        ,
-        --[unary expr start] integer
-        @integer
-         --[unary expr start] any
-         #
-          --[suffixed expr start] any
-           --[primary start] table
-             a --local symbol table 
-           --[primary end]
-           --[suffix list start]
-             --[Y index start] any
-              [
-               1
-              ]
-             --[Y index end]
-           --[suffix list end]
-          --[suffixed expr end]
-         --[unary expr end]
+        --[unary expr start] any
+        #
+         --[suffixed expr start] any
+          --[primary start] table
+            a --local symbol table 
+          --[primary end]
+          --[suffix list start]
+            --[Y index start] any
+             [
+              1
+             ]
+            --[Y index end]
+          --[suffix list end]
+         --[suffixed expr end]
         --[unary expr end]
        ,
-        --[unary expr start] integer
-        @integer
-         --[unary expr start] any
-         #
-          --[suffixed expr start] any
-           --[primary start] table
-             b --local symbol table 
-           --[primary end]
-           --[suffix list start]
-             --[Y index start] any
-              [
-               1
-              ]
-             --[Y index end]
-           --[suffix list end]
-          --[suffixed expr end]
-         --[unary expr end]
+        --[unary expr start] any
+        #
+         --[suffixed expr start] any
+          --[primary start] table
+            b --local symbol table 
+          --[primary end]
+          --[suffix list start]
+            --[Y index start] any
+             [
+              1
+             ]
+            --[Y index end]
+          --[suffix list end]
+         --[suffixed expr end]
         --[unary expr end]
        ,
         { --[table constructor start] table
