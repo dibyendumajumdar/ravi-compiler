@@ -21,7 +21,7 @@ set(SRCS
         src/set.c
         src/lexer.c
         src/parser.c
-        src/print.c
+        src/ast_printer.c
         src/typechecker.c
         src/linearizer.c
         src/membuf.c
