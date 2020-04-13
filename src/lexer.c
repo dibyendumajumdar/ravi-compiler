@@ -34,7 +34,7 @@ static const char *const luaX_tokens[] = {
 /* Says whther the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
 
-/* 
+/*
 Creates a new string object. string objects are interned in a hash set.
 If the string matches a keyword then the reserved attribute will be set to the token id associated
 with the keyword else this attribute will be -1. The hash value of the string is stored the 'hash'
@@ -47,7 +47,7 @@ const struct string_object *raviX_create_string(struct compiler_state *container
 	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
-		return (const struct string_object *)entry->key; 
+		return (const struct string_object *)entry->key;
 	else {
 		struct string_object *newobj = raviX_allocator_allocate(&container->string_object_allocator, 0);
 		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1);
@@ -583,7 +583,7 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 endloop:
 	if (seminfo)
 		seminfo->ts = luaX_newstring(ls, raviX_buffer_data(ls->buff) + (2 + sep),
-                                     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
+					     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
 }
 
 static void esccheck(struct lexer_state *ls, int c, const char *msg)
@@ -701,10 +701,10 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 				c = ls->current;
 				goto read_save;
 			case EOZ:
-				goto no_save;		      /* will raise an error next loop */
-			case 'z': {			      /* zap following span of spaces */
+				goto no_save;			  /* will raise an error next loop */
+			case 'z': {				  /* zap following span of spaces */
 				raviX_buffer_remove(ls->buff, 1); /* remove '\\' */
-				next(ls);		      /* skip the 'z' */
+				next(ls);			  /* skip the 'z' */
 				while (lisspace(ls->current)) {
 					if (currIsNewline(ls))
 						inclinenumber(ls);
@@ -913,7 +913,7 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 					save_and_next(ls);
 				} while (lislalnum(ls->current));
 				ts = raviX_create_string(ls->container, raviX_buffer_data(ls->buff),
-                                         (int32_t)raviX_buffer_len(ls->buff));
+							 (int32_t)raviX_buffer_len(ls->buff));
 				seminfo->ts = ts;
 				int tok = is_reserved(ts);
 				if (tok != -1) /* reserved word? */

@@ -39,10 +39,7 @@ static inline void raviX_buffer_addc(membuff_t *mb, int c)
 	mb->buf[mb->pos++] = (char)c;
 	assert(mb->pos < mb->allocated_size);
 }
-static inline void raviX_buffer_remove(membuff_t *mb, int i)
-{
-	mb->pos -= i;
-}
+static inline void raviX_buffer_remove(membuff_t *mb, int i) { mb->pos -= i; }
 
 /* strncpy() replacement with guaranteed 0 termination */
 extern void raviX_string_copy(char *buf, const char *src, size_t buflen);
