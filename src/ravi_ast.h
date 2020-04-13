@@ -145,7 +145,7 @@ struct lua_symbol {
 		struct {
 			const struct string_object *label_name;
 			struct block_scope *block;
-			struct pseudo* pseudo;     /* backend data for the symbol */
+			struct pseudo *pseudo; /* backend data for the symbol */
 		} label;
 		struct {
 			struct lua_symbol *var;	   /* variable reference */
@@ -203,9 +203,9 @@ struct ast_node {
 			struct lua_symbol *symbol;
 		} label_stmt; /* AST_LABEL_STMT */
 		struct {
-			unsigned is_break : 1; /* is this a break statement */
+			unsigned is_break : 1;		  /* is this a break statement */
 			const struct string_object *name; /* target label, used to resolve the goto destination */
-			struct block_scope* goto_scope;   /* The scope of the goto statement */
+			struct block_scope *goto_scope;	  /* The scope of the goto statement */
 		} goto_stmt;				  /* AST_GOTO_STMT */
 		struct {
 			struct lua_symbol_list *var_list;
@@ -241,7 +241,7 @@ struct ast_node {
 			struct ast_node_list *loop_statement_list; /* statements in this block */
 		} while_or_repeat_stmt;
 		struct {
-			struct block_scope* for_scope; /* encapsulates the entire for statement */
+			struct block_scope *for_scope; /* encapsulates the entire for statement */
 			struct lua_symbol_list *symbols;
 			struct ast_node_list *expr_list;
 			struct block_scope *for_body;
@@ -551,7 +551,8 @@ struct proc {
 	struct ast_node *function_expr; /* function ast that we are compiling */
 	struct block_scope *current_scope;
 	struct basic_block *current_bb;
-	struct basic_block *current_break_target; /* track the current break target, previous target must be saved / restored in stack discipline */
+	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /
+						     restored in stack discipline */
 	struct pseudo_generator local_pseudos;	  /* locals */
 	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
