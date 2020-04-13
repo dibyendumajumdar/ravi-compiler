@@ -31,8 +31,8 @@
 * small bits and pieces of it with no maintenance overhead.
 */
 /*
-* This version is part of the dmr_c project.
-* Copyright (C) 2017 Dibyendu Majumdar
+* This version is part of the Ravi Compiler project.
+* Copyright (C) 2017-2020 Dibyendu Majumdar
 */
 
 #include <allocate.h>
@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void *dmrC_blob_alloc(size_t size) {
+static void *blob_alloc(size_t size) {
   void *ptr;
   ptr = malloc(size);
   if (ptr != NULL)
@@ -50,7 +50,7 @@ void *dmrC_blob_alloc(size_t size) {
   return ptr;
 }
 
-void dmrC_blob_free(void *addr, size_t size) {
+static void blob_free(void *addr, size_t size) {
   (void)size;
   free(addr);
 }
@@ -96,7 +96,7 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra) {
   if (!blob || blob->left < size) {
     size_t offset, chunking = A->chunking_;
     struct allocation_blob *newblob =
-        (struct allocation_blob *)dmrC_blob_alloc(chunking);
+        (struct allocation_blob *)blob_alloc(chunking);
     if (!newblob) {
       fprintf(stderr, "out of memory\n");
       abort();
@@ -137,7 +137,7 @@ void raviX_allocator_drop_all_allocations(struct allocator *A) {
   A->freelist_ = NULL;
   while (blob) {
     struct allocation_blob *next = blob->next;
-    dmrC_blob_free(blob, A->chunking_);
+    blob_free(blob, A->chunking_);
     blob = next;
   }
 }
