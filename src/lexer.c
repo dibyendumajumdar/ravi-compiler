@@ -139,7 +139,7 @@ static void txtToken(struct lexer_state *ls, int token)
 	case TK_FLT:
 	case TK_INT:
 		save(ls, '\0');
-		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_buffer(ls->buff));
+		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_data(ls->buff));
 		break;
 	default:
 		luaX_token2str(ls, token);
@@ -509,7 +509,7 @@ static int read_numeral(struct lexer_state *ls, SemInfo *seminfo)
 			break;
 	}
 	save(ls, '\0');
-	if (luaO_str2num(raviX_buffer_buffer(ls->buff), &obj) == 0) /* format error? */
+	if (luaO_str2num(raviX_buffer_data(ls->buff), &obj) == 0) /* format error? */
 		lexerror(ls, "malformed number", TK_FLT);
 	if (obj.type == 1) {
 		seminfo->i = obj.i;
@@ -582,8 +582,8 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 	}
 endloop:
 	if (seminfo)
-		seminfo->ts = luaX_newstring(ls, raviX_buffer_buffer(ls->buff) + (2 + sep),
-					     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
+		seminfo->ts = luaX_newstring(ls, raviX_buffer_data(ls->buff) + (2 + sep),
+                                     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
 }
 
 static void esccheck(struct lexer_state *ls, int c, const char *msg)
@@ -734,7 +734,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 		}
 	}
 	save_and_next(ls); /* skip delimiter */
-	seminfo->ts = luaX_newstring(ls, raviX_buffer_buffer(ls->buff) + 1, (uint32_t)(raviX_buffer_len(ls->buff) - 2));
+	seminfo->ts = luaX_newstring(ls, raviX_buffer_data(ls->buff) + 1, (uint32_t)(raviX_buffer_len(ls->buff) - 2));
 }
 
 /*
@@ -744,7 +744,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 {
 	size_t n = raviX_buffer_len(ls->buff);
-	const char *s = raviX_buffer_buffer(ls->buff);
+	const char *s = raviX_buffer_data(ls->buff);
 	int tok;
 
 	/* @integer or @integer[] */
@@ -912,8 +912,8 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 				do {
 					save_and_next(ls);
 				} while (lislalnum(ls->current));
-				ts = raviX_create_string(ls->container, raviX_buffer_buffer(ls->buff),
-							 (int32_t)raviX_buffer_len(ls->buff));
+				ts = raviX_create_string(ls->container, raviX_buffer_data(ls->buff),
+                                         (int32_t)raviX_buffer_len(ls->buff));
 				seminfo->ts = ts;
 				int tok = is_reserved(ts);
 				if (tok != -1) /* reserved word? */

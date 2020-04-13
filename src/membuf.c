@@ -40,11 +40,18 @@ void raviX_buffer_resize(membuff_t *mb, size_t new_size)
 		return;
 	char *newmem = (char *)realloc(mb->buf, new_size);
 	if (newmem == NULL) {
-		fprintf(stderr, "out of memory\n");
+		fprintf(stderr, "Out of memory\n");
 		exit(1);
 	}
 	mb->buf = newmem;
 	mb->allocated_size = new_size;
+}
+void raviX_buffer_reserve(membuff_t *mb, size_t n) {
+    if (mb->allocated_size < mb->pos + n) {
+        size_t new_size = (((mb->pos + n) * 3 + 30) / 2) & ~15;
+        raviX_buffer_resize(mb, new_size);
+        assert(mb->allocated_size > mb->pos + n);
+    }
 }
 void raviX_buffer_free(membuff_t *mb) { free(mb->buf); }
 void raviX_buffer_add_string(membuff_t *mb, const char *str)
@@ -56,30 +63,32 @@ void raviX_buffer_add_string(membuff_t *mb, const char *str)
 	raviX_string_copy(&mb->buf[mb->pos], str, mb->allocated_size - mb->pos);
 	mb->pos += len;
 }
+
 void raviX_buffer_add_fstring(membuff_t *mb, const char *fmt, ...)
 {
 	va_list args;
-	char buffer[1024];
+    int estimated_size = 128;
 
-	va_start(args, fmt);
-	int n = vsnprintf(buffer, sizeof buffer, fmt, args);
-	va_end(args);
-	if (n < 0) {
-		fprintf(stderr, "Buffer overflow as input string is too large\n");
-		abort();
+	for (int i = 0; i < 2; i++) {
+	    raviX_buffer_reserve(mb, estimated_size); // ensure we have at least estimated_size free space
+    	va_start(args, fmt);
+	    int n = vsnprintf(mb->buf + mb->pos, estimated_size, fmt, args);
+    	va_end(args);
+	    if (n > estimated_size) {
+            estimated_size = n+1; // allow for 0 byte
+	    }
+	    else if (n < 0) {
+            fprintf(stderr, "Buffer conversion error\n");
+            assert(false);
+            break;
+	    }
+	    else {
+	        mb->pos += n;
+	        break;
+	    }
 	}
-	raviX_buffer_add_string(mb, buffer);
 }
-void raviX_buffer_add_vfstring(membuff_t *mb, const char *fmt, va_list args)
-{
-	char buffer[1024];
-	int n = vsnprintf(buffer, sizeof buffer, fmt, args);
-	if (n < 0) {
-		fprintf(stderr, "Buffer overflow as input string is too large\n");
-		abort();
-	}
-	raviX_buffer_add_string(mb, buffer);
-}
+
 void raviX_buffer_add_bool(membuff_t *mb, bool value)
 {
 	if (value)
