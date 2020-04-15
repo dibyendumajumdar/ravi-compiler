@@ -194,4 +194,71 @@ typedef enum UnaryOperatorType {
 	UNOPR_NOUNOPR
 } UnaryOperatorType;
 
+enum ast_node_type {
+	AST_NONE, /* Used when the node doesn't represent an AST such as test_then_block. */
+	AST_RETURN_STMT,
+	AST_GOTO_STMT,
+	AST_LABEL_STMT,
+	AST_DO_STMT,
+	AST_LOCAL_STMT,
+	AST_FUNCTION_STMT,
+	AST_IF_STMT,
+	AST_WHILE_STMT,
+	AST_FORIN_STMT,
+	AST_FORNUM_STMT,
+	AST_REPEAT_STMT,
+	AST_EXPR_STMT, /* Also used for assignment statements */
+	AST_LITERAL_EXPR,
+	AST_SYMBOL_EXPR,
+	AST_Y_INDEX_EXPR,	 /* [] operator */
+	AST_FIELD_SELECTOR_EXPR, /* table field access - '.' or ':' operator */
+	AST_INDEXED_ASSIGN_EXPR, /* table value assign in table constructor */
+	AST_SUFFIXED_EXPR,
+	AST_UNARY_EXPR,
+	AST_BINARY_EXPR,
+	AST_FUNCTION_EXPR, /* function literal */
+	AST_TABLE_EXPR,	   /* table constructor */
+	AST_FUNCTION_CALL_EXPR
+};
+
+struct ast_node;
+
+struct return_statement;
+struct label_statement;
+struct goto_statement;
+struct local_statement;
+struct expression_statement;
+struct function_statement;
+struct do_statement;
+struct test_then_statement;
+struct if_statement;
+struct while_or_repeat_statement;
+struct for_statement;
+
+struct literal_expression;
+struct symbol_expression;
+struct index_expression;
+struct unary_expression;
+struct binary_expression;
+struct function_expression;
+struct table_element_assignment_expression;
+struct table_literal_expression;
+struct suffixed_expression;
+struct function_call_expression;
+
+struct block_scope;
+
+/* Types of symbols */
+enum symbol_type {
+	SYM_LOCAL,
+	SYM_UPVALUE,
+	SYM_GLOBAL, /* Global symbols are never added to a scope so they are always looked up */
+	SYM_LABEL
+};
+struct lua_symbol;
+
+RAVICOMP_EXPORT const struct ast_node* raviX_ast_node_get_root(const struct compiler_state *compiler_state);
+RAVICOMP_EXPORT enum ast_node_type raviX_ast_node_get_type(const struct ast_node *n);
+
+
 #endif
