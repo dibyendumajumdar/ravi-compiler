@@ -144,7 +144,6 @@ struct lua_symbol {
 		} upvalue;
 	};
 };
-
 struct block_scope {
 	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	struct block_scope *parent;	     /* parent block, may belong to parent function */
@@ -282,6 +281,16 @@ struct function_call_expression {
 	struct var_type type;
 	const struct string_object *method_name; /* Optional method_name */
 	struct ast_node_list *arg_list;		 /* Call arguments */
+};
+
+/* Common statement type */
+struct statement {
+	enum ast_node_type type;
+};
+/* Common expression type */
+struct expression {
+	enum ast_node_type type;
+	struct base_expression common_expr;
 };
 
 /* The parse tree is made up of ast_node objects. Some of the ast_nodes reference the appropriate block
@@ -578,5 +587,6 @@ struct linearizer_state {
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
 void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
 void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
+void luaX_token2str(struct lexer_state *ls, int token);
 
 #endif

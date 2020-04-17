@@ -87,10 +87,10 @@ enum TokenType {
  * need a string type that has a length associated with it.
  */
 struct string_object {
-	uint32_t len; /* length of the string */
+	uint32_t len;	  /* length of the string */
 	int32_t reserved; /* if is this a keyword then token id else -1 */
-	uint32_t hash; /* hash value of the string */
-	const char *str; /* string data */
+	uint32_t hash;	  /* hash value of the string */
+	const char *str;  /* string data */
 };
 
 /*
@@ -123,7 +123,6 @@ typedef struct {
  */
 RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
 								uint32_t len);
-
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name*/
 RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
@@ -222,8 +221,7 @@ enum ast_node_type {
 	AST_FUNCTION_CALL_EXPR
 };
 
-struct ast_node;
-
+struct statement;
 struct return_statement;
 struct label_statement;
 struct goto_statement;
@@ -236,6 +234,7 @@ struct if_statement;
 struct while_or_repeat_statement;
 struct for_statement;
 
+struct expression;
 struct literal_expression;
 struct symbol_expression;
 struct index_expression;
@@ -257,17 +256,37 @@ enum symbol_type {
 	SYM_LABEL
 };
 struct lua_symbol;
+struct lua_upvalue_symbol;
+struct lua_local_symbol;
+struct lua_label_symbol;
 
-RAVICOMP_EXPORT const struct function_expression* raviX_ast_node_get_main(const struct compiler_state *compiler_state);
+RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
 
-RAVICOMP_EXPORT const struct var_type* raviX_function_expression_type(const struct function_expression *function_expression);
+RAVICOMP_EXPORT const struct function_expression *
+raviX_ast_get_main_function(const struct compiler_state *compiler_state);
+
+RAVICOMP_EXPORT const struct var_type *
+raviX_function_expression_type(const struct function_expression *function_expression);
 RAVICOMP_EXPORT bool raviX_function_expression_is_vararg(const struct function_expression *function_expression);
 RAVICOMP_EXPORT bool raviX_function_expression_is_method(const struct function_expression *function_expression);
-RAVICOMP_EXPORT const struct function_expression* raviX_function_get_parent(const struct function_expression *function_expression);
-RAVICOMP_EXPORT void raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata, void (*callback)(void *userdata, const struct function_expression *function_expression));
+RAVICOMP_EXPORT const struct function_expression *
+raviX_function_get_parent(const struct function_expression *function_expression);
+RAVICOMP_EXPORT void
+raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata,
+			     void (*callback)(void *userdata, const struct function_expression *function_expression));
+RAVICOMP_EXPORT struct block_scope *raviX_function_get_scope(const struct function_expression *function_expression);
+RAVICOMP_EXPORT void
+raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
+				 void (*callback)(void *userdata, const struct statement *statement));
+RAVICOMP_EXPORT void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
+						     void (*callback)(void *userdata, const struct lua_local_symbol *symbol));
+RAVICOMP_EXPORT void raviX_function_foreach_local(const struct function_expression *function_expression, void *userdata,
+				  void (*callback)(void *userdata, const struct lua_local_symbol *lua_local_symbol));
+RAVICOMP_EXPORT void raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
+				    void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol));
 
-
-RAVICOMP_EXPORT enum ast_node_type raviX_ast_node_get_type(const struct ast_node *n);
-
+RAVICOMP_EXPORT const struct string_object *raviX_local_symbol_name(const struct lua_local_symbol *lua_local_symbol);
+RAVICOMP_EXPORT const struct var_type *raviX_local_symbol_type(const struct lua_local_symbol *lua_local_symbol);
+RAVICOMP_EXPORT const struct block_scope *raviX_local_symbol_scope(const struct lua_local_symbol *lua_local_symbol);
 
 #endif

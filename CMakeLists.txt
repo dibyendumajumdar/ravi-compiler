@@ -65,3 +65,9 @@ target_include_directories(tparse
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
 
+
+add_executable(tastwalk tests/tastwalk.c)
+target_link_libraries(tastwalk ravicomp)
+target_include_directories(tastwalk
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
