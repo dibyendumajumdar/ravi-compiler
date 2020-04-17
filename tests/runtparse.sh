@@ -78,7 +78,7 @@ $command "return @number[] {[1] = 4, [2] = 5.4}"
 $command "if 1 == 1 then return true else return false end"
 $command "if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end"
 $command "if 1 == 1 then return 'hi' end"
-$command "if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end"
+$command "if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end end"
 $command "if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end"
 
 $command "return 1 and 2"
