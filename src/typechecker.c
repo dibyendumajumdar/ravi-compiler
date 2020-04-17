@@ -481,11 +481,11 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 		break;
 	}
 	case AST_INDEXED_ASSIGN_EXPR: {
-		if (node->indexed_assign_expr.key_expr) {
-			typecheck_ast_node(container, function, node->indexed_assign_expr.key_expr);
+		if (node->table_elem_assign_expr.key_expr) {
+			typecheck_ast_node(container, function, node->table_elem_assign_expr.key_expr);
 		}
-		typecheck_ast_node(container, function, node->indexed_assign_expr.value_expr);
-		copy_type(&node->indexed_assign_expr.type, &node->indexed_assign_expr.value_expr->common_expr.type);
+		typecheck_ast_node(container, function, node->table_elem_assign_expr.value_expr);
+		copy_type(&node->table_elem_assign_expr.type, &node->table_elem_assign_expr.value_expr->common_expr.type);
 		break;
 	}
 	case AST_TABLE_EXPR: {

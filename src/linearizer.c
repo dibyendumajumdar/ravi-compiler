@@ -171,9 +171,9 @@ static const struct constant *allocate_constant(struct proc *proc, struct ast_no
 	if (c.type == RAVI_TNUMINT)
 		c.i = node->literal_expr.u.i;
 	else if (c.type == RAVI_TNUMFLT)
-		c.n = node->literal_expr.u.n;
+		c.n = node->literal_expr.u.r;
 	else
-		c.s = node->literal_expr.u.s;
+		c.s = node->literal_expr.u.ts;
 	return add_constant(proc, &c);
 }
 
@@ -1063,17 +1063,17 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 {
 	struct pseudo *index_pseudo;
 	ravitype_t index_type;
-	if (expr->indexed_assign_expr.key_expr) {
-		index_pseudo = linearize_expression(proc, expr->indexed_assign_expr.key_expr);
-		index_type = expr->indexed_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
+	if (expr->table_elem_assign_expr.key_expr) {
+		index_pseudo = linearize_expression(proc, expr->table_elem_assign_expr.key_expr);
+		index_type = expr->table_elem_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
 		// TODO check valid index
 	} else {
 		const struct constant *constant = allocate_integer_constant(proc, next++);
 		index_pseudo = allocate_constant_pseudo(proc, constant);
 		index_type = RAVI_TNUMINT;
 	}
-	struct pseudo *value_pseudo = linearize_expression(proc, expr->indexed_assign_expr.value_expr);
-	ravitype_t value_type = expr->indexed_assign_expr.value_expr->common_expr.type.type_code;
+	struct pseudo *value_pseudo = linearize_expression(proc, expr->table_elem_assign_expr.value_expr);
+	ravitype_t value_type = expr->table_elem_assign_expr.value_expr->common_expr.type.type_code;
 	instruct_indexed_store(proc, table_type, table, index_pseudo, index_type, value_pseudo, value_type);
 	free_temp_pseudo(proc, index_pseudo);
 	free_temp_pseudo(proc, value_pseudo);

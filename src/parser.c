@@ -39,7 +39,9 @@ static void add_ast_node(struct compiler_state *container, struct ast_node_list 
 
 static void error_expected(struct lexer_state *ls, int token)
 {
-	// luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token)));
+	luaX_token2str(ls, token);
+	raviX_buffer_add_string(&ls->container->error_message, " expected");
+	longjmp(ls->container->env, 1);
 }
 
 static int testnext(struct lexer_state *ls, int c)
@@ -337,7 +339,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const st
 	struct ast_node *node = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = AST_LITERAL_EXPR;
 	set_type(&node->literal_expr.type, RAVI_TSTRING);
-	node->literal_expr.u.s = ts;
+	node->literal_expr.u.ts = ts;
 	return node;
 }
 
@@ -391,9 +393,9 @@ static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, str
 {
 	struct ast_node *set = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	set->type = AST_INDEXED_ASSIGN_EXPR;
-	set->indexed_assign_expr.key_expr = key_expr;
-	set->indexed_assign_expr.value_expr = value_expr;
-	set->indexed_assign_expr.type =
+	set->table_elem_assign_expr.key_expr = key_expr;
+	set->table_elem_assign_expr.value_expr = value_expr;
+	set->table_elem_assign_expr.type =
 	    value_expr->common_expr.type; /* type of indexed assignment is same as the value*/
 	return set;
 }
@@ -645,7 +647,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 	}
 	case TK_STRING: { /* funcargs -> STRING */
 		struct ast_node *string_expr = new_literal_expression(parser, RAVI_TSTRING);
-		string_expr->literal_expr.u.s = ls->t.seminfo.ts;
+		string_expr->literal_expr.u.ts = ls->t.seminfo.ts;
 		add_ast_node(parser->container, &call_expr->function_call_expr.arg_list, string_expr);
 		raviX_next(ls);
 		break;
@@ -753,7 +755,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	switch (ls->t.token) {
 	case TK_FLT: {
 		expr = new_literal_expression(parser, RAVI_TNUMFLT);
-		expr->literal_expr.u.n = ls->t.seminfo.r;
+		expr->literal_expr.u.r = ls->t.seminfo.r;
 		break;
 	}
 	case TK_INT: {
@@ -763,7 +765,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	}
 	case TK_STRING: {
 		expr = new_literal_expression(parser, RAVI_TSTRING);
-		expr->literal_expr.u.s = ls->t.seminfo.ts;
+		expr->literal_expr.u.ts = ls->t.seminfo.ts;
 		break;
 	}
 	case TK_NIL: {
@@ -783,6 +785,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	}
 	case TK_DOTS: { /* vararg */
 		// Not handled yet
+		raviX_syntaxerror(parser->ls, "Var args not supported");
 		expr = NULL;
 		break;
 	}
@@ -1617,3 +1620,4 @@ void raviX_destroy_compiler(struct compiler_state *container)
 		container->killed = true;
 	}
 }
+

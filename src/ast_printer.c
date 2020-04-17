@@ -468,10 +468,10 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 			printf_buf(buf, "%i", node->literal_expr.u.i);
 			break;
 		case RAVI_TNUMFLT:
-			printf_buf(buf, "%f", node->literal_expr.u.n);
+			printf_buf(buf, "%f", node->literal_expr.u.r);
 			break;
 		case RAVI_TSTRING:
-			printf_buf(buf, "'%t'", node->literal_expr.u.s);
+			printf_buf(buf, "'%t'", node->literal_expr.u.ts);
 			break;
 		default:
 			assert(0);
@@ -495,14 +495,14 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		break;
 	}
 	case AST_INDEXED_ASSIGN_EXPR: {
-		printf_buf(buf, "%p%c %T\n", level, "[indexed assign start]", &node->indexed_assign_expr.type);
-		if (node->indexed_assign_expr.key_expr) {
+		printf_buf(buf, "%p%c %T\n", level, "[indexed assign start]", &node->table_elem_assign_expr.type);
+		if (node->table_elem_assign_expr.key_expr) {
 			printf_buf(buf, "%p%c\n", level, "[index start]");
-			raviX_print_ast_node(buf, node->indexed_assign_expr.key_expr, level + 1);
+			raviX_print_ast_node(buf, node->table_elem_assign_expr.key_expr, level + 1);
 			printf_buf(buf, "%p%c\n", level, "[index end]");
 		}
 		printf_buf(buf, "%p%c\n", level, "[value start]");
-		raviX_print_ast_node(buf, node->indexed_assign_expr.value_expr, level + 1);
+		raviX_print_ast_node(buf, node->table_elem_assign_expr.value_expr, level + 1);
 		printf_buf(buf, "%p%c\n", level, "[value end]");
 		printf_buf(buf, "%p%c\n", level, "[indexed assign end]");
 		break;

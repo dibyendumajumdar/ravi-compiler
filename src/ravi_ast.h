@@ -119,18 +119,7 @@ struct var_type {
 };
 
 struct pseudo;
-struct lua_symbol;
 DECLARE_PTR_LIST(lua_symbol_list, struct lua_symbol);
-
-struct block_scope;
-
-/* Types of symbols */
-enum symbol_type {
-	SYM_LOCAL,
-	SYM_UPVALUE,
-	SYM_GLOBAL, /* Global symbols are never added to a scope so they are always looked up */
-	SYM_LABEL
-};
 
 /* A symbol is a name recognised in Ravi/Lua code*/
 struct lua_symbol {
@@ -145,7 +134,7 @@ struct lua_symbol {
 		struct {
 			const struct string_object *label_name;
 			struct block_scope *block;
-			struct pseudo *pseudo; /* backend data for the symbol */
+			struct pseudo* pseudo;     /* backend data for the symbol */
 		} label;
 		struct {
 			struct lua_symbol *var;	   /* variable reference */
@@ -155,38 +144,153 @@ struct lua_symbol {
 		} upvalue;
 	};
 };
-
 struct block_scope {
 	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	struct block_scope *parent;	     /* parent block, may belong to parent function */
 	struct lua_symbol_list *symbol_list; /* symbols defined in this block */
 };
 
-enum ast_node_type {
-	AST_NONE, /* Used when the node doesn't represent an AST such as test_then_block. */
-	AST_RETURN_STMT,
-	AST_GOTO_STMT,
-	AST_LABEL_STMT,
-	AST_DO_STMT,
-	AST_LOCAL_STMT,
-	AST_FUNCTION_STMT,
-	AST_IF_STMT,
-	AST_WHILE_STMT,
-	AST_FORIN_STMT,
-	AST_FORNUM_STMT,
-	AST_REPEAT_STMT,
-	AST_EXPR_STMT, /* Also used for assignment statements */
-	AST_LITERAL_EXPR,
-	AST_SYMBOL_EXPR,
-	AST_Y_INDEX_EXPR,	 /* [] operator */
-	AST_FIELD_SELECTOR_EXPR, /* table field access - '.' or ':' operator */
-	AST_INDEXED_ASSIGN_EXPR, /* table value assign in table constructor */
-	AST_SUFFIXED_EXPR,
-	AST_UNARY_EXPR,
-	AST_BINARY_EXPR,
-	AST_FUNCTION_EXPR, /* function literal */
-	AST_TABLE_EXPR,	   /* table constructor */
-	AST_FUNCTION_CALL_EXPR
+/*AST_RETURN_STMT */
+struct return_statement {
+	struct ast_node_list *expr_list;
+};
+/* AST_LABEL_STMT */
+struct label_statement {
+	struct lua_symbol *symbol;
+};
+/* AST_GOTO_STMT */
+struct goto_statement {
+	unsigned is_break : 1; /* is this a break statement */
+	const struct string_object *name; /* target label, used to resolve the goto destination */
+	struct block_scope* goto_scope;   /* The scope of the goto statement */
+};
+/* AST_LOCAL_STMT local variable declarations */
+struct local_statement {
+	struct lua_symbol_list *var_list;
+	struct ast_node_list *expr_list;
+};
+/* AST_EXPR_STMT: Also covers assignments */
+struct expression_statement {
+	struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
+	struct ast_node_list *expr_list;     /* Comma separated expressions */
+};
+struct function_statement {
+	struct ast_node *name;		 /* base symbol to be looked up */
+	struct ast_node_list *selectors; /* Optional */
+	struct ast_node *method_name;	 /* Optional */
+	struct ast_node *function_expr;	 /* Function's AST */
+};
+struct do_statement {
+	struct block_scope *scope;		 /* The do statement only creates a new scope */
+	struct ast_node_list *do_statement_list; /* statements in this block */
+};
+/* Used internally in if_stmt, not an independent AST node */
+struct test_then_statement {
+	struct ast_node *condition;
+	struct block_scope *test_then_scope;
+	struct ast_node_list *test_then_statement_list; /* statements in this block */
+};
+struct if_statement {
+	struct ast_node_list *if_condition_list; /* Actually a list of test_then_blocks */
+	struct block_scope *else_block;
+	struct ast_node_list *else_statement_list; /* statements in this block */
+};
+struct while_or_repeat_statement {
+	struct ast_node *condition;
+	struct block_scope *loop_scope;
+	struct ast_node_list *loop_statement_list; /* statements in this block */
+};
+/* Used for both generic and numeric for loops */
+struct for_statement {
+	struct block_scope* for_scope; /* encapsulates the entire for statement */
+	struct lua_symbol_list *symbols;
+	struct ast_node_list *expr_list;
+	struct block_scope *for_body;
+	struct ast_node_list *for_statement_list; /* statements in this block */
+};
+/* To access the type field common to all expr objects */
+/* all expr types must be compatible with base_expression */
+struct base_expression {
+	struct var_type type;
+};
+struct literal_expression {
+	struct var_type type;
+	SemInfo u;
+};
+/* primaryexp -> NAME | '(' expr ')', NAME is parsed as AST_SYMBOL_EXPR */
+struct symbol_expression {
+	struct var_type type;
+	struct lua_symbol *var;
+};
+/* AST_Y_INDEX_EXPR or AST_FIELD_SELECTOR_EXPR */
+struct index_expression {
+	struct var_type type;
+	struct ast_node *expr; /* '[' expr ']' */
+};
+/* AST_UNARY_EXPR */
+struct unary_expression {
+	struct var_type type;
+	UnaryOperatorType unary_op;
+	struct ast_node *expr;
+};
+struct binary_expression {
+	struct var_type type;
+	BinaryOperatorType binary_op;
+	struct ast_node *expr_left;
+	struct ast_node *expr_right;
+};
+struct function_expression {
+	struct var_type type;
+	unsigned int is_vararg : 1;
+	unsigned int is_method : 1;
+	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
+	struct block_scope *main_block;		       /* the function's main block */
+	struct ast_node_list *function_statement_list; /* statements in this block */
+	struct lua_symbol_list
+	    *args; /* arguments, also must be part of the function block's symbol list */
+	struct ast_node_list *child_functions; /* child functions declared in this function */
+	struct lua_symbol_list *upvalues;      /* List of upvalues */
+	struct lua_symbol_list *locals;	       /* List of locals */
+};
+/* Assign values in table constructor */
+/* AST_INDEXED_ASSIGN_EXPR - used in table constructor */
+struct table_element_assignment_expression {
+	struct var_type type;
+	struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
+							else specifies index expression */
+	struct ast_node *value_expr;
+};
+/* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
+/* table constructor expression AST_TABLE_EXPR occurs in function call and simple expr */
+struct table_literal_expression {
+	struct var_type type;
+	struct ast_node_list *expr_list;
+};
+/* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
+/* suffix_list may have AST_FIELD_SELECTOR_EXPR, AST_Y_INDEX_EXPR, AST_FUNCTION_CALL_EXPR */
+struct suffixed_expression {
+	struct var_type type;
+	struct ast_node *primary_expr;
+	struct ast_node_list *suffix_list;
+};
+struct function_call_expression {
+	/* Note that in Ravi the results from a function call must be type asserted during assignment to
+	 * variables. This is not explicit in the AST but is required to ensure that function return
+	 * values do not overwrite the type of the variables in an inconsistent way.
+	 */
+	struct var_type type;
+	const struct string_object *method_name; /* Optional method_name */
+	struct ast_node_list *arg_list;		 /* Call arguments */
+};
+
+/* Common statement type */
+struct statement {
+	enum ast_node_type type;
+};
+/* Common expression type */
+struct expression {
+	enum ast_node_type type;
+	struct base_expression common_expr;
 };
 
 /* The parse tree is made up of ast_node objects. Some of the ast_nodes reference the appropriate block
@@ -196,127 +300,28 @@ we can have a transformation step to convert to a tree that is more like the cod
 struct ast_node {
 	enum ast_node_type type;
 	union {
-		struct {
-			struct ast_node_list *expr_list;
-		} return_stmt; /*AST_RETURN_STMT */
-		struct {
-			struct lua_symbol *symbol;
-		} label_stmt; /* AST_LABEL_STMT */
-		struct {
-			unsigned is_break : 1;		  /* is this a break statement */
-			const struct string_object *name; /* target label, used to resolve the goto destination */
-			struct block_scope *goto_scope;	  /* The scope of the goto statement */
-		} goto_stmt;				  /* AST_GOTO_STMT */
-		struct {
-			struct lua_symbol_list *var_list;
-			struct ast_node_list *expr_list;
-		} local_stmt; /* AST_LOCAL_STMT local variable declarations */
-		struct {
-			struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
-			struct ast_node_list *expr_list;     /* Comma separated expressions */
-		} expression_stmt;			     /* AST_EXPR_STMT: Also covers assignments */
-		struct {
-			struct ast_node *name;		 /* base symbol to be looked up */
-			struct ast_node_list *selectors; /* Optional */
-			struct ast_node *method_name;	 /* Optional */
-			struct ast_node *function_expr;	 /* Function's AST */
-		} function_stmt;
-		struct {
-			struct block_scope *scope;		 /* The do statement only creates a new scope */
-			struct ast_node_list *do_statement_list; /* statements in this block */
-		} do_stmt;
-		struct {
-			struct ast_node *condition;
-			struct block_scope *test_then_scope;
-			struct ast_node_list *test_then_statement_list; /* statements in this block */
-		} test_then_block; /* Used internally in if_stmt, not an independent AST node */
-		struct {
-			struct ast_node_list *if_condition_list; /* Actually a list of test_then_blocks */
-			struct block_scope *else_block;
-			struct ast_node_list *else_statement_list; /* statements in this block */
-		} if_stmt;
-		struct {
-			struct ast_node *condition;
-			struct block_scope *loop_scope;
-			struct ast_node_list *loop_statement_list; /* statements in this block */
-		} while_or_repeat_stmt;
-		struct {
-			struct block_scope *for_scope; /* encapsulates the entire for statement */
-			struct lua_symbol_list *symbols;
-			struct ast_node_list *expr_list;
-			struct block_scope *for_body;
-			struct ast_node_list *for_statement_list; /* statements in this block */
-		} for_stmt;					  /* Used for both generic and numeric for loops */
-		struct {
-			struct var_type type;
-		} common_expr; /* To access the type field common to all expr objects */
-		/* all expr types must be compatible with common_expr */
-		struct {
-			struct var_type type;
-			union {
-				lua_Integer i;
-				lua_Number n;
-				const struct string_object *s;
-			} u;
-		} literal_expr;
-		struct { /* primaryexp -> NAME | '(' expr ')', NAME is parsed as AST_SYMBOL_EXPR */
-			struct var_type type;
-			struct lua_symbol *var;
-		} symbol_expr;
-		struct { /* AST_Y_INDEX_EXPR or AST_FIELD_SELECTOR_EXPR */
-			struct var_type type;
-			struct ast_node *expr; /* '[' expr ']' */
-		} index_expr;
-		struct { /* AST_UNARY_EXPR */
-			struct var_type type;
-			UnaryOperatorType unary_op;
-			struct ast_node *expr;
-		} unary_expr;
-		struct {
-			struct var_type type;
-			BinaryOperatorType binary_op;
-			struct ast_node *expr_left;
-			struct ast_node *expr_right;
-		} binary_expr;
-		struct {
-			struct var_type type;
-			unsigned int is_vararg : 1;
-			unsigned int is_method : 1;
-			struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
-			struct block_scope *main_block;		       /* the function's main block */
-			struct ast_node_list *function_statement_list; /* statements in this block */
-			struct lua_symbol_list
-			    *args; /* arguments, also must be part of the function block's symbol list */
-			struct ast_node_list *child_functions; /* child functions declared in this function */
-			struct lua_symbol_list *upvalues;      /* List of upvalues */
-			struct lua_symbol_list *locals;	       /* List of locals */
-		} function_expr; /* a literal expression whose result is a value of type function */
-		struct {	 /* AST_INDEXED_ASSIGN_EXPR - used in table constructor */
-			struct var_type type;
-			struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
-							else specifies index expression */
-			struct ast_node *value_expr;
-		} indexed_assign_expr; /* Assign values in table constructor */
-		struct {	       /* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
-			struct var_type type;
-			struct ast_node_list *expr_list;
-		} table_expr; /* table constructor expression AST_TABLE_EXPR occurs in function call and simple expr */
-		struct {
-			/* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
-			/* suffix_list may have AST_FIELD_SELECTOR_EXPR, AST_Y_INDEX_EXPR, AST_FUNCTION_CALL_EXPR */
-			struct var_type type;
-			struct ast_node *primary_expr;
-			struct ast_node_list *suffix_list;
-		} suffixed_expr;
-		struct {
-			/* Note that in Ravi the results from a function call must be type asserted during assignment to
-			 * variables. This is not explicit in the AST but is required to ensure that function return
-			 * values do not overwrite the type of the variables in an inconsistent way.
-			 */
-			struct var_type type;
-			const struct string_object *method_name; /* Optional method_name */
-			struct ast_node_list *arg_list;		 /* Call arguments */
-		} function_call_expr;
+		struct return_statement return_stmt; /*AST_RETURN_STMT */
+		struct label_statement label_stmt; /* AST_LABEL_STMT */
+		struct goto_statement goto_stmt; /* AST_GOTO_STMT */
+		struct local_statement local_stmt; /* AST_LOCAL_STMT local variable declarations */
+		struct expression_statement expression_stmt;
+		struct function_statement function_stmt;
+		struct do_statement do_stmt;
+		struct test_then_statement test_then_block;
+		struct if_statement if_stmt;
+		struct while_or_repeat_statement while_or_repeat_stmt;
+		struct for_statement for_stmt;
+		struct base_expression common_expr;
+		struct literal_expression literal_expr;
+		struct symbol_expression symbol_expr;
+		struct index_expression index_expr;
+		struct unary_expression unary_expr;
+		struct binary_expression binary_expr;
+		struct function_expression function_expr; /* a literal expression whose result is a value of type function */
+		struct table_element_assignment_expression table_elem_assign_expr;
+		struct table_literal_expression table_expr;
+		struct suffixed_expression suffixed_expr;
+		struct function_call_expression function_call_expr;
 	};
 };
 
@@ -551,8 +556,7 @@ struct proc {
 	struct ast_node *function_expr; /* function ast that we are compiling */
 	struct block_scope *current_scope;
 	struct basic_block *current_bb;
-	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /
-						     restored in stack discipline */
+	struct basic_block *current_break_target; /* track the current break target, previous target must be saved / restored in stack discipline */
 	struct pseudo_generator local_pseudos;	  /* locals */
 	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
@@ -583,5 +587,6 @@ struct linearizer_state {
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
 void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
 void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
+void luaX_token2str(struct lexer_state *ls, int token);
 
 #endif
