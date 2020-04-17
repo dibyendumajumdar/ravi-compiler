@@ -39,7 +39,9 @@ static void add_ast_node(struct compiler_state *container, struct ast_node_list 
 
 static void error_expected(struct lexer_state *ls, int token)
 {
-	// luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected", luaX_token2str(ls, token)));
+	luaX_token2str(ls, token);
+	raviX_buffer_add_string(&ls->container->error_message, " expected");
+	longjmp(ls->container->env, 1);
 }
 
 static int testnext(struct lexer_state *ls, int c)
@@ -783,6 +785,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	}
 	case TK_DOTS: { /* vararg */
 		// Not handled yet
+		raviX_syntaxerror(parser->ls, "Var args not supported");
 		expr = NULL;
 		break;
 	}
