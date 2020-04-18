@@ -11,6 +11,7 @@ Copyright 2018-2020 Dibyendu Majumdar
 #define ravicomp_COMPILER_H
 
 #include "ravicomp_export.h"
+#include "port.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -118,6 +119,29 @@ typedef struct {
 	Token lookahead; /* look ahead token */
 } LexState;
 
+typedef struct {
+	char *buf;
+	size_t allocated_size;
+	size_t pos;
+} membuff_t;
+
+RAVICOMP_EXPORT void raviX_buffer_init(membuff_t *mb, size_t initial_size);
+RAVICOMP_EXPORT void raviX_buffer_resize(membuff_t *mb, size_t new_size);
+RAVICOMP_EXPORT void raviX_buffer_reserve(membuff_t *mb, size_t n);
+RAVICOMP_EXPORT void raviX_buffer_free(membuff_t *mb);
+static inline char *raviX_buffer_data(membuff_t *mb) { return mb->buf; }
+static inline size_t raviX_buffer_size(membuff_t *mb) { return mb->allocated_size; }
+static inline size_t raviX_buffer_len(membuff_t *mb) { return mb->pos; }
+static inline void raviX_buffer_reset(membuff_t *mb) { mb->pos = 0; }
+
+/* following convert input to string before adding */
+RAVICOMP_EXPORT void raviX_buffer_add_string(membuff_t *mb, const char *str);
+RAVICOMP_EXPORT void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...) FORMAT_ATTR(2);
+
+/* strncpy() replacement with guaranteed 0 termination */
+RAVICOMP_EXPORT void raviX_string_copy(char *buf, const char *src, size_t buflen);
+
+
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
@@ -134,6 +158,8 @@ RAVICOMP_EXPORT LexState *raviX_get_lexer_info(struct lexer_state *ls);
 RAVICOMP_EXPORT void raviX_next(struct lexer_state *ls);
 /* Retrieves the next token and sets it as the lookahead. This means that a next call will get the lookahead */
 RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
+/* Convert a token to text format */
+RAVICOMP_EXPORT void raviX_token2str(int token, membuff_t *mb);
 /* Release all data structures used by the lexer */
 RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
 

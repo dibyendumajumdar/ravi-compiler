@@ -8786,3 +8786,219 @@ L9
 	BR {L2}
 L10
 	BR {L9}
+local msgs = {}
+function Message (m)
+  if not _nomsg then
+    print(m)
+    msgs[#msgs+1] = string.sub(m, 3, -3)
+  end
+end
+
+function()
+--locals  msgs
+  local
+  --[symbols]
+    msgs --local symbol any 
+  --[expressions]
+    { --[table constructor start] table
+    } --[table constructor end]
+   Message --global symbol any 
+   =
+    function(
+      m --local symbol any 
+    )
+    --locals  m
+    --upvalues  msgs
+      if
+       --[unary expr start] any
+       not
+        --[suffixed expr start] any
+         --[primary start] any
+           _nomsg --global symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[unary expr end]
+      then
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              print --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    m --local symbol any 
+                  --[primary end]
+                 --[suffixed expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              msgs --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[Y index start] any
+               [
+                --[binary expr start] any
+                 --[unary expr start] any
+                 #
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     msgs --upvalue any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 --[unary expr end]
+                +
+                 1
+                --[binary expr end]
+               ]
+              --[Y index end]
+            --[suffix list end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              string --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[field selector start] any
+               .
+                'sub'
+              --[field selector end]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    m --local symbol any 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 3
+                ,
+                 --[unary expr start] any
+                 -
+                  3
+                 --[unary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    end
+end
+function()
+--locals  msgs
+  local
+  --[symbols]
+    msgs --local symbol any 
+  --[expressions]
+    { --[table constructor start] table
+    } --[table constructor end]
+   Message --global symbol any 
+   =
+    function(
+      m --local symbol any 
+    )
+    --locals  m
+    --upvalues  msgs
+      if
+       --[unary expr start] any
+       not
+        --[suffixed expr start] any
+         --[primary start] any
+           _nomsg --global symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[unary expr end]
+      then
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              print --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    m --local symbol any 
+                  --[primary end]
+                 --[suffixed expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              msgs --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[Y index start] any
+               [
+                --[binary expr start] any
+                 --[unary expr start] any
+                 #
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     msgs --upvalue any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 --[unary expr end]
+                +
+                 1
+                --[binary expr end]
+               ]
+              --[Y index end]
+            --[suffix list end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              string --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[field selector start] any
+               .
+                'sub'
+              --[field selector end]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    m --local symbol any 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 3
+                ,
+                 --[unary expr start] integer
+                 -
+                  3
+                 --[unary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    end
+end

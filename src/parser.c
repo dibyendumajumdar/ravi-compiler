@@ -39,7 +39,7 @@ static void add_ast_node(struct compiler_state *container, struct ast_node_list 
 
 static void error_expected(struct lexer_state *ls, int token)
 {
-	luaX_token2str(ls, token);
+	raviX_token2str(token, &ls->container->error_message);
 	raviX_buffer_add_string(&ls->container->error_message, " expected");
 	longjmp(ls->container->env, 1);
 }
@@ -95,9 +95,16 @@ static void check_match(struct lexer_state *ls, int what, int who, int where)
 		if (where == ls->linenumber)
 			error_expected(ls, what);
 		else {
-			//      luaX_syntaxerror(ls, luaO_pushfstring(ls->L, "%s expected (to close %s at line %d)",
-			//      luaX_token2str(ls, what),
-			//                                            luaX_token2str(ls, who), where));
+			membuff_t mb;
+			raviX_buffer_init(&mb, 256);
+			raviX_token2str(what, &mb);
+			raviX_buffer_add_string(&mb, " expected (to close ");
+			raviX_token2str(who, &mb);
+			raviX_buffer_add_fstring(&mb, " at line %d)", where);
+			char message[1024];
+			raviX_string_copy(message, raviX_buffer_data(&mb), sizeof message);
+			raviX_buffer_free(&mb);
+			raviX_syntaxerror(ls, message);
 		}
 	}
 }
@@ -209,6 +216,7 @@ static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, 
  */
 static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node *function, struct lua_symbol *sym)
 {
+	assert(sym->symbol_type == SYM_LOCAL);
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
 	{
@@ -294,8 +302,10 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 	bool is_local = false;
 	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local);
 	if (symbol) {
+		// TODO we had a bug here - see t013.lua
+		// Need more test cases for this
 		// we found a local or upvalue
-		if (!is_local) {
+		if (!is_local && symbol->symbol_type == SYM_LOCAL) {
 			// If the local symbol occurred in a parent function then we
 			// need to construct an upvalue. Lua requires that the upvalue be
 			// added to all functions in the tree up to the function where the local

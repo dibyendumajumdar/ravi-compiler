@@ -117,17 +117,17 @@ static inline int ltolower(int c) { return ((c) | ('A' ^ 'a')); }
 #define lua_str2number(s, p) ((lua_Number)strtod((s), (p)))
 static void save(struct lexer_state *ls, int c);
 
-void luaX_token2str(struct lexer_state *ls, int token)
+void raviX_token2str(int token, membuff_t *mb)
 {
 	if (token < FIRST_RESERVED) { /* single-byte symbols? */
 		assert(token == cast_uchar(token));
-		raviX_buffer_add_fstring(&ls->container->error_message, "'%c'", token);
+		raviX_buffer_add_fstring(mb, "'%c'", token);
 	} else {
 		const char *s = luaX_tokens[token - FIRST_RESERVED];
 		if (token < TK_EOS) /* fixed format (symbols and reserved words)? */
-			raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", s);
+			raviX_buffer_add_fstring(mb, "'%s'", s);
 		else /* names, strings, and numerals */
-			raviX_buffer_add_string(&ls->container->error_message, s);
+			raviX_buffer_add_string(mb, s);
 	}
 }
 
@@ -142,7 +142,7 @@ static void txtToken(struct lexer_state *ls, int token)
 		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_data(ls->buff));
 		break;
 	default:
-		luaX_token2str(ls, token);
+		raviX_token2str(token, &ls->container->error_message);
 	}
 }
 static void lexerror(struct lexer_state *ls, const char *msg, int token)

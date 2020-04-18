@@ -191,12 +191,12 @@ static const struct constant *allocate_string_constant(struct proc *proc, const 
 
 static struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym, unsigned reg)
 {
-	assert(sym->var.pseudo == NULL);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_SYMBOL;
 	pseudo->symbol = sym;
 	pseudo->regnum = reg;
 	if (sym->symbol_type == SYM_LOCAL) {
+		assert(sym->var.pseudo == NULL);
 		sym->var.pseudo = pseudo;
 	}
 	return pseudo;

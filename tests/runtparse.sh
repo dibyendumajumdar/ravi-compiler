@@ -151,3 +151,7 @@ $command "while true do print('forever') end"
 $command "repeat print('forever') brek until true"
 $command "repeat print('forever') break until true return"
 $command "for i =1,10 do if i == 2 then break end end return"
+
+$command -f input/t013.lua
+
+exit 0
