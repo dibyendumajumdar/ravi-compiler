@@ -88,3 +88,50 @@ const struct block_scope *raviX_local_symbol_scope(const struct lua_local_symbol
 	assert(symbol->symbol_type == SYM_LOCAL);
 	return symbol->var.block;
 }
+
+#define n(v) ((struct ast_node *)v)
+const struct return_statement * raviX_return_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_RETURN_STMT);
+	return &n(stmt)->return_stmt;
+}
+const struct label_statement * raviX_label_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_LABEL_STMT);
+	return &n(stmt)->label_stmt;
+}
+const struct goto_statement * raviX_goto_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_GOTO_STMT);
+	return &n(stmt)->goto_stmt;
+}
+const struct local_statement * raviX_local_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_LOCAL_STMT);
+	return &n(stmt)->local_stmt;
+}
+const struct expression_statement * raviX_expression_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_EXPR_STMT);
+	return &n(stmt)->expression_stmt;
+}
+const struct function_statement * raviX_function_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_FUNCTION_STMT);
+	return &n(stmt)->function_stmt;
+}
+const struct do_statement * raviX_do_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_DO_STMT);
+	return &n(stmt)->do_stmt;
+}
+const struct test_then_statement * raviX_test_then_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_TEST_THEN_STMT);
+	return &n(stmt)->test_then_block;
+}
+const struct if_statement * raviX_if_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_IF_STMT);
+	return &n(stmt)->if_stmt;
+}
+const struct while_or_repeat_statement * raviX_while_or_repeat_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_WHILE_STMT || stmt->type == AST_REPEAT_STMT);
+	return &n(stmt)->while_or_repeat_stmt;
+}
+const struct for_statement * raviX_for_statement(const struct statement *stmt) {
+	assert(stmt->type == AST_FORIN_STMT || stmt->type == AST_FORNUM_STMT);
+	return &n(stmt)->for_stmt;
+}
+#undef n

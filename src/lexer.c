@@ -22,7 +22,7 @@ static inline bool currIsNewline(struct lexer_state *ls) { return ls->current ==
 
 #define lua_getlocaledecpoint() (localeconv()->decimal_point[0])
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+#define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 /* ORDER TokenType */
 static const char *const luaX_tokens[] = {
     "and",    "break",	  "do",	      "else",	 "elseif",     "end",	    "false",  "for",	  "function",
@@ -180,19 +180,10 @@ static inline void save_and_next(struct lexer_state *ls)
 	next(ls);
 }
 
-void luaX_init(struct lexer_state *ls)
-{
-	int i;
-	raviX_create_string(ls->container, LUA_ENV, (uint32_t)strlen(LUA_ENV)); /* create env name */
-	for (i = 0; i < NUM_RESERVED; i++) {
-		raviX_create_string(ls->container, luaX_tokens[i], (uint32_t)strlen(luaX_tokens[i]));
-	}
-}
-
 /*
 ** creates a new interned string.
 */
-const struct string_object *luaX_newstring(struct lexer_state *ls, const char *str, uint32_t l)
+static const struct string_object *luaX_newstring(struct lexer_state *ls, const char *str, uint32_t l)
 {
 	return raviX_create_string(ls->container, str, l);
 }
@@ -229,6 +220,9 @@ struct lexer_state *raviX_init_lexer(struct compiler_state *container, const cha
 	ls->source = source;
 	ls->envn = raviX_create_string(ls->container, LUA_ENV, (uint32_t)strlen(LUA_ENV))->str; /* get env name */
 	ls->buff = &container->buff;
+	for (int i = 0; i < NUM_RESERVED; i++) {
+		raviX_create_string(ls->container, luaX_tokens[i], (uint32_t)strlen(luaX_tokens[i]));
+	}
 	return ls;
 }
 
@@ -279,7 +273,7 @@ static int check_next2(struct lexer_state *ls, const char *set)
 		return 0;
 }
 
-int luaO_hexavalue(int c)
+static int luaO_hexavalue(int c)
 {
 	if (lisdigit(c))
 		return c - '0';
@@ -468,7 +462,7 @@ struct konst {
 	};
 };
 
-size_t luaO_str2num(const char *s, struct konst *o)
+static size_t luaO_str2num(const char *s, struct konst *o)
 {
 	lua_Integer i;
 	lua_Number n;

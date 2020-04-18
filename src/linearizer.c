@@ -189,7 +189,7 @@ static const struct constant *allocate_string_constant(struct proc *proc, const 
 	return add_constant(proc, &c);
 }
 
-struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym, unsigned reg)
+static struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym, unsigned reg)
 {
 	assert(sym->var.pseudo == NULL);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
@@ -202,7 +202,7 @@ struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym,
 	return pseudo;
 }
 
-struct pseudo *allocate_constant_pseudo(struct proc *proc, const struct constant *constant)
+static struct pseudo *allocate_constant_pseudo(struct proc *proc, const struct constant *constant)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_CONSTANT;
@@ -211,7 +211,7 @@ struct pseudo *allocate_constant_pseudo(struct proc *proc, const struct constant
 	return pseudo;
 }
 
-struct pseudo *allocate_closure_pseudo(struct proc *proc)
+static struct pseudo *allocate_closure_pseudo(struct proc *proc)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_PROC;
@@ -219,7 +219,7 @@ struct pseudo *allocate_closure_pseudo(struct proc *proc)
 	return pseudo;
 }
 
-struct pseudo *allocate_nil_pseudo(struct proc *proc)
+static struct pseudo *allocate_nil_pseudo(struct proc *proc)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_NIL;
@@ -227,7 +227,7 @@ struct pseudo *allocate_nil_pseudo(struct proc *proc)
 	return pseudo;
 }
 
-struct pseudo *allocate_boolean_pseudo(struct proc *proc, bool is_true)
+static struct pseudo *allocate_boolean_pseudo(struct proc *proc, bool is_true)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = is_true ? PSEUDO_TRUE : PSEUDO_FALSE;
@@ -235,7 +235,7 @@ struct pseudo *allocate_boolean_pseudo(struct proc *proc, bool is_true)
 	return pseudo;
 }
 
-struct pseudo *allocate_block_pseudo(struct proc *proc, struct basic_block *block)
+static struct pseudo *allocate_block_pseudo(struct proc *proc, struct basic_block *block)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_BLOCK;
@@ -254,7 +254,7 @@ be used to represent var arg. Most of the time these get converted
 back to normal temp pseudo, but in some cases we need to reference
 a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
 */
-struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
+static struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 {
 	struct pseudo_generator *gen;
 	enum pseudo_type pseudo_type;
@@ -280,7 +280,7 @@ struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	return pseudo;
 }
 
-struct pseudo *allocate_range_pseudo(struct proc *proc, struct pseudo *orig_pseudo)
+static struct pseudo *allocate_range_pseudo(struct proc *proc, struct pseudo *orig_pseudo)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_RANGE;
@@ -295,7 +295,7 @@ struct pseudo *allocate_range_pseudo(struct proc *proc, struct pseudo *orig_pseu
 A PSEUDO_RANGE_SELECT picks or selects a particular offset in the range
 specified by a PSEUDO_RANGE.
 */
-struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *range_pseudo, int pick)
+static struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *range_pseudo, int pick)
 {
 	assert(range_pseudo->type == PSEUDO_RANGE);
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
@@ -305,7 +305,7 @@ struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *ra
 	return pseudo;
 }
 
-void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
+static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
 {
 	if (pseudo->freed)
 		return;

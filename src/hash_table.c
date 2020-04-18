@@ -37,7 +37,7 @@
 
 #include <hash_table.h>
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+#define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 
 /*
  * From Knuth -- a good choice for hash/rehash values is p, p-2 where
@@ -387,6 +387,7 @@ raviX_hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
 	return NULL;
 }
 
+#if 0
 #ifndef _WIN32
 /**
  * Returns a random entry from the hash table.
@@ -422,4 +423,5 @@ hash_table_random_entry(struct hash_table *ht,
 
 	return NULL;
 }
+#endif
 #endif

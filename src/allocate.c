@@ -167,6 +167,8 @@ void raviX_allocator_transfer(struct allocator *A, struct allocator *transfer_to
   A->freelist_ = NULL;
 }
 
+#if 0
+
 struct foo {
   int a, b;
 };
@@ -213,3 +215,5 @@ int raviX_test_allocator() {
   printf("allocator tests okay\n");
   return 0;
 }
+
+#endif

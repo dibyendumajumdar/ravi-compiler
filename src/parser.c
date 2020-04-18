@@ -1178,7 +1178,7 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
 	struct ast_node *test_then_block = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	test_then_block->type = AST_NONE;				       // This is not an AST node on its own
+	test_then_block->type = AST_TEST_THEN_STMT;				       // This is not an AST node on its own
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;

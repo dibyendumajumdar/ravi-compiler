@@ -90,8 +90,6 @@ extern void raviX_allocator_destroy(struct allocator *A);
 extern void raviX_allocator_transfer(struct allocator *A,
 			       struct allocator *transfer_to);
 
-extern int raviX_test_allocator();
-
 #ifdef __cplusplus
 }
 #endif

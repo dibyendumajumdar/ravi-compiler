@@ -642,6 +642,8 @@ void ptrlist_sort(struct ptr_list **plist, void *userdata, int (*cmp)(void *, co
 	}
 }
 
+#if 0
+
 static int int_cmp(void *ud, const void *_a, const void *_b)
 {
 	(void)ud;
@@ -911,7 +913,7 @@ static int test_ptrlist_basics()
 	END_FOR_EACH_PTR(p);
 	if (i != 4)
 		return 1;
-	for (int i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		if (serial3_expected[i] != serial3_got[i])
 			return 1;
 	}
@@ -927,7 +929,7 @@ static int test_ptrlist_basics()
 	FINISH_PTR_LIST(p);
 	if (i != 4)
 		return 1;
-	for (int i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		if (serial3_expected[i] != serial3_got[i])
 			return 1;
 	}
@@ -981,3 +983,5 @@ int test_ptrlist()
 		printf("ptrlist test okay\n");
 	return failure_count;
 }
+
+#endif

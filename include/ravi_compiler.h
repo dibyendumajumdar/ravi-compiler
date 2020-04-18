@@ -24,7 +24,7 @@ typedef long long lua_Integer;
 typedef double lua_Number;
 
 /* Initialize the compiler state */
-RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler();
+RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler(void);
 /* Destroy the compiler state */
 RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
@@ -203,6 +203,7 @@ enum ast_node_type {
 	AST_LOCAL_STMT,
 	AST_FUNCTION_STMT,
 	AST_IF_STMT,
+	AST_TEST_THEN_STMT,
 	AST_WHILE_STMT,
 	AST_FORIN_STMT,
 	AST_FORNUM_STMT,
@@ -287,5 +288,18 @@ RAVICOMP_EXPORT void raviX_function_foreach_upvalue(const struct function_expres
 RAVICOMP_EXPORT const struct string_object *raviX_local_symbol_name(const struct lua_local_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct var_type *raviX_local_symbol_type(const struct lua_local_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct block_scope *raviX_local_symbol_scope(const struct lua_local_symbol *lua_local_symbol);
+
+RAVICOMP_EXPORT const struct return_statement * raviX_return_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct label_statement * raviX_label_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct goto_statement * raviX_goto_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct local_statement * raviX_local_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct expression_statement * raviX_expression_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct function_statement * raviX_function_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct do_statement * raviX_do_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct test_then_statement * raviX_test_then_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct if_statement * raviX_if_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct while_or_repeat_statement * raviX_while_or_repeat_statement(const struct statement *stmt);
+RAVICOMP_EXPORT const struct for_statement * raviX_for_statement(const struct statement *stmt);
+
 
 #endif

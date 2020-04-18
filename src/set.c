@@ -38,7 +38,7 @@
 #include <stdlib.h>
 
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+#define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 
 /*
  * From Knuth -- a good choice for hash/rehash values is p, p-2 where

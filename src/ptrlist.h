@@ -141,8 +141,6 @@ static inline void **ptrlist_iter_this_address(struct ptr_list_iter *self) {
 	ptrlist_iter_mark_deleted(&var##iter__)
 
 
-extern int test_ptrlist();
-
 #ifdef __cplusplus
 }
 #endif
