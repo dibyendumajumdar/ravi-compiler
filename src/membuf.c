@@ -5,7 +5,6 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include "membuf.h"
 
 #include <assert.h>
-#include <ctype.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include <stdbool.h>

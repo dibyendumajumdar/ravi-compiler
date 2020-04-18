@@ -93,7 +93,7 @@ void raviX_destroy_linearizer(struct linearizer_state *linearizer)
 		if (proc->constants)
 			set_destroy(proc->constants, NULL);
 	}
-	END_FOR_EACH_PTR(proc);
+	END_FOR_EACH_PTR(proc)
 	raviX_allocator_destroy(&linearizer->edge_allocator);
 	raviX_allocator_destroy(&linearizer->instruction_allocator);
 	raviX_allocator_destroy(&linearizer->ptrlist_allocator);
@@ -372,14 +372,14 @@ static void linearize_function_args(struct linearizer_state *linearizer)
 		/* TODO we need to add type assertion operators for typed args */
 		// handle_error(linearizer->ast_container, "feature not yet implemented");
 	}
-	END_FOR_EACH_PTR(sym);
+	END_FOR_EACH_PTR(sym)
 }
 
 static void linearize_statement_list(struct proc *proc, struct ast_node_list *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { linearize_statement(proc, node); }
-	END_FOR_EACH_PTR(node);
+	END_FOR_EACH_PTR(node)
 }
 
 static struct instruction *allocate_instruction(struct proc *proc, enum opcode op)
@@ -393,7 +393,7 @@ static void free_instruction_operand_pseudos(struct proc *proc, struct instructi
 {
 	struct pseudo *operand;
 	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
-	END_FOR_EACH_PTR_REVERSE(operand);
+	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
 static inline void add_instruction(struct proc *proc, struct instruction *insn)
@@ -1006,7 +1006,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		}
 		add_instruction_operand(proc, insn, arg_pseudo);
 	}
-	END_FOR_EACH_PTR(arg);
+	END_FOR_EACH_PTR(arg)
 
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo); /* Base reg for function call - where return values will be placed */
@@ -1054,7 +1054,7 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 		prev_node = this_node;
 		prev_pseudo = next;
 	}
-	END_FOR_EACH_PTR(node);
+	END_FOR_EACH_PTR(node)
 	return prev_pseudo;
 }
 
@@ -1100,7 +1100,7 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	{
 		i = linearize_indexed_assign(proc, target, expr->table_expr.type.type_code, ia, i);
 	}
-	END_FOR_EACH_PTR(ia);
+	END_FOR_EACH_PTR(ia)
 
 	return target;
 }
@@ -1143,7 +1143,7 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 			convert_range_to_temp(val_pseudo);
 		}
 	}
-	END_FOR_EACH_PTR(expr);
+	END_FOR_EACH_PTR(expr)
 
 	/* TODO do we need to insert type assertions in some cases such as function return values ? */
 
@@ -1222,7 +1222,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
-	END_FOR_EACH_PTR(var);
+	END_FOR_EACH_PTR(var)
 
 	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv);
 }
@@ -1243,7 +1243,7 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
-	END_FOR_EACH_PTR(var);
+	END_FOR_EACH_PTR(var)
 
 	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv);
 }
@@ -1298,7 +1298,7 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 		}
 		ptrlist_add((struct ptr_list **)pseudo_list, pseudo, &proc->linearizer->ptrlist_allocator);
 	}
-	END_FOR_EACH_PTR(expr);
+	END_FOR_EACH_PTR(expr)
 }
 
 static void linearize_return(struct proc *proc, struct ast_node *node)
@@ -1412,14 +1412,14 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 		struct basic_block *block = create_block(proc);
 		ptrlist_add((struct ptr_list **)&if_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
-	END_FOR_EACH_PTR(this_node);
+	END_FOR_EACH_PTR(this_node)
 
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
 		struct basic_block *block = create_block(proc);
 		ptrlist_add((struct ptr_list **)&if_true_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
-	END_FOR_EACH_PTR(this_node);
+	END_FOR_EACH_PTR(this_node)
 
 	if (ifnode->if_stmt.else_statement_list) {
 		else_block = create_block(proc);
@@ -1450,7 +1450,7 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 			linearize_test_cond(proc, this_node, true_block, false_block);
 			NEXT_PTR_LIST(true_block);
 		}
-		END_FOR_EACH_PTR(node);
+		END_FOR_EACH_PTR(node)
 		FINISH_PTR_LIST(block);
 		FINISH_PTR_LIST(true_block);
 	}
@@ -1461,7 +1461,7 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 			linearize_test_then(proc, this_node, true_block, end_block);
 			NEXT_PTR_LIST(true_block);
 		}
-		END_FOR_EACH_PTR(node);
+		END_FOR_EACH_PTR(node)
 		FINISH_PTR_LIST(true_block);
 	}
 
@@ -1510,7 +1510,7 @@ static struct lua_symbol *find_label(struct proc *proc, struct block_scope *bloc
 				return symbol;
 			}
 		}
-		END_FOR_EACH_PTR_REVERSE(symbol);
+		END_FOR_EACH_PTR_REVERSE(symbol)
 		block = block->parent;
 	}
 	return NULL;
@@ -1622,7 +1622,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 				     "Only for loops with integer expressions currently supported");
 		}
 	}
-	END_FOR_EACH_PTR(expr);
+	END_FOR_EACH_PTR(expr)
 
 	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
 	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
@@ -1861,7 +1861,7 @@ static void start_scope(struct linearizer_state *linearizer, struct proc *proc, 
 			// printf("Assigning register %d to local %s\n", (int)reg, getstr(sym->var.var_name));
 		}
 	}
-	END_FOR_EACH_PTR(sym);
+	END_FOR_EACH_PTR(sym)
 }
 
 /**
@@ -1882,7 +1882,7 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 			free_register(proc, &proc->local_pseudos, pseudo->regnum);
 		}
 	}
-	END_FOR_EACH_PTR_REVERSE(sym);
+	END_FOR_EACH_PTR_REVERSE(sym)
 	proc->current_scope = scope->parent;
 }
 
@@ -1996,7 +1996,7 @@ static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 		output_pseudo(pseudo, mb);
 		i++;
 	}
-	END_FOR_EACH_PTR(pseudo);
+	END_FOR_EACH_PTR(pseudo)
 	raviX_buffer_add_string(mb, "}");
 }
 
@@ -2016,7 +2016,7 @@ static void output_instructions(struct instruction_list *list, membuff_t *mb)
 {
 	struct instruction *insn;
 	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb); }
-	END_FOR_EACH_PTR(insn);
+	END_FOR_EACH_PTR(insn)
 }
 
 static void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
@@ -2064,7 +2064,7 @@ void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb)
 			continue;
 		output_proc(proc, mb);
 	}
-	END_FOR_EACH_PTR(proc);
+	END_FOR_EACH_PTR(proc)
 }
 
 void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp)
