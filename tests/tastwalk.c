@@ -36,7 +36,7 @@ static const char *read_file(const char *filename)
 
 static void walk_function(void *data, const struct function_expression *function) {
 	printf("function\n");
-	if (raviX_function_expression_is_vararg(function)) {
+	if (raviX_function_is_vararg(function)) {
 		printf(" vararg: true\n");
 	}
 	printf(" end function\n");

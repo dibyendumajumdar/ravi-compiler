@@ -265,16 +265,15 @@ RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statem
 RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const struct compiler_state *compiler_state);
 
-RAVICOMP_EXPORT const struct var_type *
-raviX_function_expression_type(const struct function_expression *function_expression);
-RAVICOMP_EXPORT bool raviX_function_expression_is_vararg(const struct function_expression *function_expression);
-RAVICOMP_EXPORT bool raviX_function_expression_is_method(const struct function_expression *function_expression);
+RAVICOMP_EXPORT const struct var_type *raviX_function_type(const struct function_expression *function_expression);
+RAVICOMP_EXPORT bool raviX_function_is_vararg(const struct function_expression *function_expression);
+RAVICOMP_EXPORT bool raviX_function_is_method(const struct function_expression *function_expression);
 RAVICOMP_EXPORT const struct function_expression *
-raviX_function_get_parent(const struct function_expression *function_expression);
+raviX_function_parent(const struct function_expression *function_expression);
 RAVICOMP_EXPORT void
 raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata,
 			     void (*callback)(void *userdata, const struct function_expression *function_expression));
-RAVICOMP_EXPORT struct block_scope *raviX_function_get_scope(const struct function_expression *function_expression);
+RAVICOMP_EXPORT struct block_scope *raviX_function_scope(const struct function_expression *function_expression);
 RAVICOMP_EXPORT void
 raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
 				 void (*callback)(void *userdata, const struct statement *statement));

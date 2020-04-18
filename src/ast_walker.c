@@ -6,19 +6,19 @@ const struct function_expression *raviX_ast_get_main_function(const struct compi
 {
 	return &compiler_state->main_function->function_expr;
 }
-const struct var_type *raviX_function_expression_type(const struct function_expression *function_expression)
+const struct var_type *raviX_function_type(const struct function_expression *function_expression)
 {
 	return &function_expression->type;
 }
-bool raviX_function_expression_is_vararg(const struct function_expression *function_expression)
+bool raviX_function_is_vararg(const struct function_expression *function_expression)
 {
 	return function_expression->is_vararg;
 }
-bool raviX_function_expression_is_method(const struct function_expression *function_expression)
+bool raviX_function_is_method(const struct function_expression *function_expression)
 {
 	return function_expression->is_method;
 }
-const struct function_expression *raviX_function_get_parent(const struct function_expression *function_expression)
+const struct function_expression *raviX_function_parent(const struct function_expression *function_expression)
 {
 	if (function_expression->parent_function == NULL)
 		return NULL;
@@ -33,7 +33,7 @@ void raviX_function_foreach_child(const struct function_expression *function_exp
 	FOR_EACH_PTR(function_expression->child_functions, node) { callback(userdata, &node->function_expr); }
 	END_FOR_EACH_PTR(node)
 }
-struct block_scope *raviX_function_get_scope(const struct function_expression *function_expression)
+struct block_scope *raviX_function_scope(const struct function_expression *function_expression)
 {
 	return function_expression->main_block;
 }
