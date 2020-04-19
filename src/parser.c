@@ -1469,7 +1469,6 @@ to previous scope which may be of parent function.
 */
 static struct ast_node *new_function(struct parser_state *parser)
 {
-	struct compiler_state *container = parser->container;
 	struct ast_node *node = allocate_ast_node(parser, AST_FUNCTION_EXPR);
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;

@@ -46,9 +46,8 @@ else()
         -Wredundant-decls -Wdisabled-optimization -Wdouble-promotion \
     	-Wlogical-op -Wno-aggressive-loop-optimizations \
         -Wmissing-prototypes -Wnested-externs \
-        -Wstrict-prototypes ") # -Wc++-compat
+        -Wstrict-prototypes -Werror=return-type -Wall -Wno-unused-parameter") # -Wc++-compat
 endif()
-
 
 include(GNUInstallDirs)
 
