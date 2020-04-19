@@ -9002,3 +9002,153 @@ function()
       end
     end
 end
+_soft = rawget(_G, "_soft") or false
+Z[1][2] = false or true
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        _soft --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+         rawget --global symbol any 
+       --[primary end]
+       --[suffix list start]
+         --[function call start] any
+          (
+            --[suffixed expr start] any
+             --[primary start] any
+               _G --global symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ,
+            '_soft'
+          )
+         --[function call end]
+       --[suffix list end]
+      --[suffixed expr end]
+     or
+      false
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        Z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      false
+     or
+      true
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        _soft --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      --[suffixed expr start] any
+       --[primary start] any
+         rawget --global symbol any 
+       --[primary end]
+       --[suffix list start]
+         --[function call start] any
+          (
+            --[suffixed expr start] any
+             --[primary start] any
+               _G --global symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ,
+            '_soft'
+          )
+         --[function call end]
+       --[suffix list end]
+      --[suffixed expr end]
+     or
+      false
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        Z --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[Y index start] any
+         [
+          1
+         ]
+        --[Y index end]
+        --[Y index start] any
+         [
+          2
+         ]
+        --[Y index end]
+      --[suffix list end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      false
+     or
+      true
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+define Proc(0)
+L0 (entry)
+	LOADGLOBAL {rawget} {T(2)}
+	LOADGLOBAL {_G} {T(3)}
+	CALL {T(2), T(3), '_soft' Ks(0)} {T(2..)}
+	MOV {T(2..)} {T(1)}
+	CBR {T(1)} {L3, L2}
+L1 (exit)
+L2
+	MOV {false} {T(1)}
+	BR {L3}
+L3
+	STOREGLOBAL {_soft, T(1)}
+	LOADGLOBAL {Z} {T(1)}
+	GETik {T(1), 1 Kint(1)} {T(0)}
+	MOV {false} {T(3)}
+	CBR {T(3)} {L5, L4}
+L4
+	MOV {true} {T(3)}
+	BR {L5}
+L5
+	PUTik {T(0), 2 Kint(2), T(3)}

@@ -403,9 +403,10 @@ static inline void add_instruction(struct proc *proc, struct instruction *insn)
 	insn->block = proc->current_bb;
 }
 
-static inline void remove_instruction(struct proc *proc, struct instruction *insn)
+static inline void remove_instruction(struct basic_block *block, struct instruction *insn)
 {
-	ptrlist_remove((struct ptr_list **)&proc->current_bb->insns, insn, 1);
+	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
+	insn->block = NULL;
 }
 
 static inline struct instruction *last_instruction(struct basic_block *block)
@@ -916,8 +917,7 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 static void convert_loadglobal_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					ravitype_t value_type)
 {
-	assert(proc->current_bb == insn->block);
-	remove_instruction(proc, insn);
+	remove_instruction(insn->block, insn);
 	insn->opcode = op_storeglobal;
 	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
@@ -928,7 +928,6 @@ static void convert_loadglobal_to_store(struct proc *proc, struct instruction *i
 static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					  ravitype_t value_type)
 {
-	assert(proc->current_bb == insn->block);
 	enum opcode putop;
 	switch (insn->opcode) {
 	case op_iaget:
@@ -960,7 +959,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	default:
 		return;
 	}
-	remove_instruction(proc, insn);
+	remove_instruction(insn->block, insn);
 	insn->opcode = putop;
 	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
@@ -2050,6 +2049,10 @@ int raviX_ast_linearize(struct linearizer_state *linearizer)
 	int rc = setjmp(linearizer->ast_container->env);
 	if (rc == 0) {
 		linearize_function(linearizer);
+	}
+	else {
+		// dump it
+		//raviX_output_linearizer(linearizer, stderr);
 	}
 	return rc;
 }
