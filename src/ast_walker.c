@@ -134,4 +134,44 @@ const struct for_statement * raviX_for_statement(const struct statement *stmt) {
 	assert(stmt->type == AST_FORIN_STMT || stmt->type == AST_FORNUM_STMT);
 	return &n(stmt)->for_stmt;
 }
+const struct literal_expression * raviX_literal_expression(const struct expression *expr) {
+	assert(expr->type == AST_LITERAL_EXPR);
+	return &n(expr)->literal_expr;
+}
+const struct symbol_expression * raviX_symbol_expression(const struct expression *expr) {
+	assert(expr->type == AST_SYMBOL_EXPR);
+	return &n(expr)->symbol_expr;
+}
+const struct index_expression * raviX_index_expression(const struct expression *expr) {
+	assert(expr->type == AST_Y_INDEX_EXPR || expr->type == AST_FIELD_SELECTOR_EXPR);
+	return &n(expr)->index_expr;
+}
+const struct unary_expression * raviX_unary_expression(const struct expression *expr) {
+	assert(expr->type == AST_UNARY_EXPR);
+	return &n(expr)->unary_expr;
+}
+const struct binary_expression * raviX_binary_expression(const struct expression *expr) {
+	assert(expr->type == AST_BINARY_EXPR);
+	return &n(expr)->binary_expr;
+}
+const struct function_expression * raviX_function_expression(const struct expression *expr) {
+	assert(expr->type == AST_FUNCTION_EXPR);
+	return &n(expr)->function_expr;
+}
+const struct table_element_assignment_expression * raviX_table_element_assignment_expression(const struct expression *expr) {
+	assert(expr->type == AST_INDEXED_ASSIGN_EXPR);
+	return &n(expr)->table_elem_assign_expr;
+}
+const struct table_literal_expression * raviX_table_literal_expression(const struct expression *expr) {
+	assert(expr->type == AST_TABLE_EXPR);
+	return &n(expr)->table_expr;
+}
+const struct suffixed_expression * raviX_suffixed_expression(const struct expression *expr) {
+	assert(expr->type == AST_SUFFIXED_EXPR);
+	return &n(expr)->suffixed_expr;
+}
+const struct function_call_expression * raviX_function_call_expression(const struct expression *expr) {
+	assert(expr->type == AST_FUNCTION_CALL_EXPR);
+	return &n(expr)->function_call_expr;
+}
 #undef n

@@ -39,9 +39,7 @@ if (WIN32)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
-if(MSVC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
-else()
+if (NOT MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wshadow -Wsign-compare -Wundef -Wwrite-strings \
         -Wredundant-decls -Wdisabled-optimization -Wdouble-promotion \
     	-Wlogical-op -Wno-aggressive-loop-optimizations \
