@@ -221,3 +221,13 @@ const struct block_scope *raviX_label_statement_label_scope(const struct label_s
 {
 	return statement->symbol->label.block;
 }
+
+const struct string_object *raviX_goto_statement_label_name(const struct goto_statement *statement)
+{
+	return statement->name;
+}
+const struct block_scope *raviX_goto_statement_scope(const struct goto_statement *statement)
+{
+	return statement->goto_scope;
+}
+bool raviX_goto_statement_is_break(const struct goto_statement *statement) { return statement->is_break; }
