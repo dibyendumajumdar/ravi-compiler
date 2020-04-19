@@ -76,15 +76,9 @@ const struct string_object *raviX_local_symbol_name(const struct lua_variable_sy
 	return symbol->var_name;
 }
 
-const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *symbol)
-{
-	return &symbol->value_type;
-}
+const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *symbol) { return &symbol->value_type; }
 
-const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *symbol)
-{
-	return symbol->block;
-}
+const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *symbol) { return symbol->block; }
 
 #define n(v) ((struct ast_node *)v)
 const struct return_statement *raviX_return_statement(const struct statement *stmt)
@@ -225,3 +219,26 @@ const struct block_scope *raviX_goto_statement_scope(const struct goto_statement
 	return statement->goto_scope;
 }
 bool raviX_goto_statement_is_break(const struct goto_statement *statement) { return statement->is_break; }
+
+void raviX_local_statement_foreach_expression(const struct local_statement *statement, void *userdata,
+					      void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->expr_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+void raviX_local_statement_foreach_symbol(const struct local_statement *statement, void *userdata,
+					  void (*callback)(void *, const struct lua_variable_symbol *expr))
+{
+	struct lua_symbol *symbol;
+	FOR_EACH_PTR(statement->var_list, symbol)
+	{
+		assert(symbol->symbol_type == SYM_LOCAL);
+		callback(userdata, &symbol->variable);
+	}
+	END_FOR_EACH_PTR(node)
+}
