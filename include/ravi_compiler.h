@@ -314,6 +314,10 @@ RAVICOMP_EXPORT void raviX_function_foreach_upvalue(const struct function_expres
 RAVICOMP_EXPORT const struct string_object *raviX_local_symbol_name(const struct lua_local_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct var_type *raviX_local_symbol_type(const struct lua_local_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct block_scope *raviX_local_symbol_scope(const struct lua_local_symbol *lua_local_symbol);
+RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const struct return_statement *statement, void *userdata,
+							      void (*callback)(void *, const struct expression *expr));
+RAVICOMP_EXPORT const struct string_object *raviX_label_statement_label_name(const struct label_statement *statement);
+RAVICOMP_EXPORT const struct block_scope *raviX_label_statement_label_scope(const struct label_statement *statement);
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT const struct return_statement * raviX_return_statement(const struct statement *stmt);
