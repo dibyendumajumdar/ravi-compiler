@@ -37,6 +37,12 @@ static void add_ast_node(struct compiler_state *container, struct ast_node_list 
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
 
+static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_node_type type) {
+	struct ast_node *node = (struct ast_node *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
+	node->type = type;
+	node->line_number = parser->ls->lastline;
+}
+
 static void error_expected(struct lexer_state *ls, int token)
 {
 	raviX_token2str(token, &ls->container->error_message);
@@ -333,8 +339,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 		// always looked up
 		symbol = global;
 	}
-	struct ast_node *symbol_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	symbol_expr->type = AST_SYMBOL_EXPR;
+	struct ast_node *symbol_expr = allocate_ast_node(parser, AST_SYMBOL_EXPR);
 	symbol_expr->symbol_expr.type = symbol->value_type;
 	symbol_expr->symbol_expr.var = symbol;
 	return symbol_expr;
@@ -346,8 +351,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 
 static struct ast_node *new_string_literal(struct parser_state *parser, const struct string_object *ts)
 {
-	struct ast_node *node = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	node->type = AST_LITERAL_EXPR;
+	struct ast_node *node = allocate_ast_node(parser, AST_LITERAL_EXPR);
 	set_type(&node->literal_expr.type, RAVI_TSTRING);
 	node->literal_expr.u.ts = ts;
 	return node;
@@ -355,8 +359,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const st
 
 static struct ast_node *new_field_selector(struct parser_state *parser, const struct string_object *ts)
 {
-	struct ast_node *index = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	index->type = AST_FIELD_SELECTOR_EXPR;
+	struct ast_node *index = allocate_ast_node(parser, AST_FIELD_SELECTOR_EXPR);
 	index->index_expr.expr = new_string_literal(parser, ts);
 	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
@@ -385,8 +388,7 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 	struct ast_node *expr = parse_expression(parser);
 	checknext(ls, ']');
 
-	struct ast_node *index = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	index->type = AST_Y_INDEX_EXPR;
+	struct ast_node *index = allocate_ast_node(parser, AST_Y_INDEX_EXPR);
 	index->index_expr.expr = expr;
 	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
@@ -401,8 +403,7 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, struct ast_node *key_expr,
 						struct ast_node *value_expr)
 {
-	struct ast_node *set = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	set->type = AST_INDEXED_ASSIGN_EXPR;
+	struct ast_node *set = allocate_ast_node(parser, AST_INDEXED_ASSIGN_EXPR);
 	set->table_elem_assign_expr.key_expr = key_expr;
 	set->table_elem_assign_expr.value_expr = value_expr;
 	set->table_elem_assign_expr.type =
@@ -463,10 +464,9 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
 	sep -> ',' | ';' */
 	int line = ls->linenumber;
 	checknext(ls, '{');
-	struct ast_node *table_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
+	struct ast_node *table_expr = allocate_ast_node(parser, AST_TABLE_EXPR);
 	set_type(&table_expr->table_expr.type, RAVI_TTABLE);
 	table_expr->table_expr.expr_list = NULL;
-	table_expr->type = AST_TABLE_EXPR;
 	do {
 		if (ls->t.token == '}')
 			break;
@@ -634,8 +634,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 					    int line)
 {
 	struct lexer_state *ls = parser->ls;
-	struct ast_node *call_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	call_expr->type = AST_FUNCTION_CALL_EXPR;
+	struct ast_node *call_expr = allocate_ast_node(parser, AST_FUNCTION_CALL_EXPR);
 	call_expr->function_call_expr.method_name = methodname;
 	call_expr->function_call_expr.arg_list = NULL;
 	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
@@ -708,9 +707,8 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 	/* suffixedexp ->
 	primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	int line = ls->linenumber;
-	struct ast_node *suffixed_expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
+	struct ast_node *suffixed_expr = allocate_ast_node(parser, AST_SUFFIXED_EXPR);
 	suffixed_expr->suffixed_expr.primary_expr = parse_primary_expression(parser);
-	suffixed_expr->type = AST_SUFFIXED_EXPR;
 	suffixed_expr->suffixed_expr.type = suffixed_expr->suffixed_expr.primary_expr->common_expr.type;
 	suffixed_expr->suffixed_expr.suffix_list = NULL;
 	for (;;) {
@@ -749,8 +747,7 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type)
 {
-	struct ast_node *expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	expr->type = AST_LITERAL_EXPR;
+	struct ast_node *expr = allocate_ast_node(parser, AST_LITERAL_EXPR);
 	set_type(&expr->literal_expr.type, type);
 	expr->literal_expr.u.i = 0; /* initialize */
 	return expr;
@@ -942,8 +939,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		}
 		BinaryOperatorType ignored;
 		struct ast_node *subexpr = parse_sub_expression(parser, UNARY_PRIORITY, &ignored);
-		expr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-		expr->type = AST_UNARY_EXPR;
+		expr = allocate_ast_node(parser, AST_UNARY_EXPR);
 		expr->unary_expr.expr = subexpr;
 		expr->unary_expr.unary_op = uop;
 		expr->unary_expr.type.type_name = usertype;
@@ -958,8 +954,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		/* read sub-expression with higher priority */
 		struct ast_node *exprright = parse_sub_expression(parser, priority[op].right, &nextop);
 
-		struct ast_node *binexpr = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-		binexpr->type = AST_BINARY_EXPR;
+		struct ast_node *binexpr = allocate_ast_node(parser, AST_BINARY_EXPR);
 		binexpr->binary_expr.expr_left = expr;
 		binexpr->binary_expr.expr_right = exprright;
 		binexpr->binary_expr.binary_op = op;
@@ -1023,8 +1018,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 		is_break = 1;
 	}
 	// Resolve labels in the end?
-	struct ast_node *goto_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	goto_stmt->type = AST_GOTO_STMT;
+	struct ast_node *goto_stmt = allocate_ast_node(parser, AST_GOTO_STMT);
 	goto_stmt->goto_stmt.name = label;
 	goto_stmt->goto_stmt.is_break = is_break;
 	goto_stmt->goto_stmt.goto_scope = parser->current_scope;
@@ -1042,8 +1036,7 @@ static void skip_noop_statements(struct parser_state *parser)
 static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label)
 {
 	struct lua_symbol *symbol = new_label(parser, label);
-	struct ast_node *label_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	label_stmt->type = AST_LABEL_STMT;
+	struct ast_node *label_stmt = allocate_ast_node(parser, AST_LABEL_STMT);
 	label_stmt->label_stmt.symbol = symbol;
 	return label_stmt;
 }
@@ -1065,8 +1058,7 @@ static struct ast_node *parse_while_statement(struct parser_state *parser, int l
 	struct lexer_state *ls = parser->ls;
 	/* whilestat -> WHILE cond DO block END */
 	raviX_next(ls); /* skip WHILE */
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_WHILE_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_WHILE_STMT);
 	stmt->while_or_repeat_stmt.loop_scope = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.condition = parse_condition(parser);
@@ -1081,8 +1073,7 @@ static struct ast_node *parse_repeat_statement(struct parser_state *parser, int 
 	struct lexer_state *ls = parser->ls;
 	/* repeatstat -> REPEAT block UNTIL cond */
 	raviX_next(ls); /* skip REPEAT */
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_REPEAT_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_REPEAT_STMT);
 	stmt->while_or_repeat_stmt.condition = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.loop_scope = new_scope(parser); /* scope block */
@@ -1154,8 +1145,7 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 	struct lexer_state *ls = parser->ls;
 	/* forstat -> FOR (fornum | forlist) END */
 	const struct string_object *varname;
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_NONE;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_NONE);
 	stmt->for_stmt.symbols = NULL;
 	stmt->for_stmt.expr_list = NULL;
 	stmt->for_stmt.for_body = NULL;
@@ -1187,8 +1177,7 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
-	struct ast_node *test_then_block = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	test_then_block->type = AST_TEST_THEN_STMT;				       // This is not an AST node on its own
+	struct ast_node *test_then_block = allocate_ast_node(parser, AST_TEST_THEN_STMT);				       // This is not an AST node on its own
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;
@@ -1216,8 +1205,7 @@ static struct ast_node *parse_if_statement(struct parser_state *parser, int line
 {
 	struct lexer_state *ls = parser->ls;
 	/* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_IF_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_IF_STMT);
 	stmt->if_stmt.if_condition_list = NULL;
 	stmt->if_stmt.else_block = NULL;
 	stmt->if_stmt.else_statement_list = NULL;
@@ -1243,8 +1231,7 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
 	struct ast_node *function_ast = new_function(parser);
 	parse_function_body(parser, function_ast, 0, ls->linenumber); /* function created in next register */
 	end_function(parser);
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_LOCAL_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_LOCAL_STMT);
 	stmt->local_stmt.var_list = NULL;
 	stmt->local_stmt.expr_list = NULL;
 	add_symbol(parser->container, &stmt->local_stmt.var_list, symbol);
@@ -1256,8 +1243,7 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* stat -> LOCAL NAME {',' NAME} ['=' explist] */
-	struct ast_node *node = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	node->type = AST_LOCAL_STMT;
+	struct ast_node *node = allocate_ast_node(parser, AST_LOCAL_STMT);
 	node->local_stmt.var_list = NULL;
 	node->local_stmt.expr_list = NULL;
 	int nvars = 0;
@@ -1288,8 +1274,7 @@ static struct ast_node *parse_function_name(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* funcname -> NAME {fieldsel} [':' NAME] */
-	struct ast_node *function_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	function_stmt->type = AST_FUNCTION_STMT;
+	struct ast_node *function_stmt = allocate_ast_node(parser, AST_FUNCTION_STMT);
 	function_stmt->function_stmt.function_expr = NULL;
 	function_stmt->function_stmt.method_name = NULL;
 	function_stmt->function_stmt.selectors = NULL;
@@ -1320,8 +1305,7 @@ static struct ast_node *parse_function_statement(struct parser_state *parser, in
 /* parse function call with no returns or assignment statement */
 static struct ast_node *parse_expression_statement(struct parser_state *parser)
 {
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_EXPR_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_EXPR_STMT);
 	stmt->expression_stmt.var_expr_list = NULL;
 	stmt->expression_stmt.expr_list = NULL;
 	struct lexer_state *ls = parser->ls;
@@ -1347,8 +1331,7 @@ static struct ast_node *parse_return_statement(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* stat -> RETURN [explist] [';'] */
-	struct ast_node *return_stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	return_stmt->type = AST_RETURN_STMT;
+	struct ast_node *return_stmt = allocate_ast_node(parser, AST_RETURN_STMT);
 	return_stmt->return_stmt.expr_list = NULL;
 	if (block_follow(ls, 1) || ls->t.token == ';')
 		/* nret = 0*/; /* return no values */
@@ -1363,8 +1346,7 @@ static struct ast_node *parse_return_statement(struct parser_state *parser)
 static struct ast_node *parse_do_statement(struct parser_state *parser, int line)
 {
 	raviX_next(parser->ls); /* skip DO */
-	struct ast_node *stmt = raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
-	stmt->type = AST_DO_STMT;
+	struct ast_node *stmt = allocate_ast_node(parser, AST_DO_STMT);
 	stmt->do_stmt.do_statement_list = NULL;
 	stmt->do_stmt.scope = parse_block(parser, &stmt->do_stmt.do_statement_list);
 	check_match(parser->ls, TK_END, TK_DO, line);
@@ -1487,8 +1469,7 @@ to previous scope which may be of parent function.
 static struct ast_node *new_function(struct parser_state *parser)
 {
 	struct compiler_state *container = parser->container;
-	struct ast_node *node = raviX_allocator_allocate(&container->ast_node_allocator, 0);
-	node->type = AST_FUNCTION_EXPR;
+	struct ast_node *node = allocate_ast_node(parser, AST_FUNCTION_EXPR);
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;
 	node->function_expr.is_vararg = false;

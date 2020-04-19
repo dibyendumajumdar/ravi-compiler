@@ -286,10 +286,12 @@ struct function_call_expression {
 /* Common statement type */
 struct statement {
 	enum ast_node_type type;
+	int line_number;
 };
 /* Common expression type */
 struct expression {
 	enum ast_node_type type;
+	int line_number;
 	struct base_expression common_expr;
 };
 
@@ -299,6 +301,7 @@ while, repeat, and for are captured in the way user uses them and not the way Lu
 we can have a transformation step to convert to a tree that is more like the code generation */
 struct ast_node {
 	enum ast_node_type type;
+	int line_number; /* Source line number */
 	union {
 		struct return_statement return_stmt; /*AST_RETURN_STMT */
 		struct label_statement label_stmt; /* AST_LABEL_STMT */
