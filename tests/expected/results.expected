@@ -9004,7 +9004,10 @@ function()
 end
 _soft = rawget(_G, "_soft") or false
 Z[1][2] = false or true
+local _g
+r()[a].name = _g and 'Dibyendu' or 'majumdar'
 function()
+--locals  _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9063,11 +9066,58 @@ function()
       false
      or
       true
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+  local
+  --[symbols]
+    _g --local symbol any 
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        r --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+        --[Y index start] any
+         [
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         ]
+        --[Y index end]
+        --[field selector start] any
+         .
+          'name'
+        --[field selector end]
+      --[suffix list end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+          _g --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      and
+       'Dibyendu'
+      --[binary expr end]
+     or
+      'majumdar'
      --[binary expr end]
    --[expression list end]
   --[expression statement end]
 end
 function()
+--locals  _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9126,6 +9176,52 @@ function()
       false
      or
       true
+     --[binary expr end]
+   --[expression list end]
+  --[expression statement end]
+  local
+  --[symbols]
+    _g --local symbol any 
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        r --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+         )
+        --[function call end]
+        --[Y index start] any
+         [
+          --[suffixed expr start] any
+           --[primary start] any
+             a --global symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         ]
+        --[Y index end]
+        --[field selector start] any
+         .
+          'name'
+        --[field selector end]
+      --[suffix list end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     --[binary expr start] any
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+          _g --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      and
+       'Dibyendu'
+      --[binary expr end]
+     or
+      'majumdar'
      --[binary expr end]
    --[expression list end]
   --[expression statement end]
@@ -9152,3 +9248,20 @@ L4
 	BR {L5}
 L5
 	PUTik {T(0), 2 Kint(2), T(3)}
+	LOADGLOBAL {r} {T(3)}
+	CALL {T(3)} {T(3)}
+	LOADGLOBAL {a} {T(2)}
+	GET {T(3), T(2)} {T(4)}
+	MOV {local(_g, 0)} {T(7)}
+	CBR {T(7)} {L8, L9}
+L6
+	MOV {'majumdar' Ks(5)} {T(6)}
+	BR {L7}
+L7
+	PUTsk {T(4), 'name' Ks(3), T(6)}
+L8
+	MOV {'Dibyendu' Ks(4)} {T(7)}
+	BR {L9}
+L9
+	MOV {T(7)} {T(6)}
+	CBR {T(6)} {L7, L6}
