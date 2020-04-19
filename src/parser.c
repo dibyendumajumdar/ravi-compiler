@@ -41,6 +41,7 @@ static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_
 	struct ast_node *node = (struct ast_node *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = type;
 	node->line_number = parser->ls->lastline;
+	return node;
 }
 
 static void error_expected(struct lexer_state *ls, int token)
