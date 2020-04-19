@@ -133,11 +133,11 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const st
 {
 	struct block_scope *scope = parser->current_scope;
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-	set_typename(&symbol->value_type, tt, usertype);
+	set_typename(&symbol->variable.value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
-	symbol->var.block = scope;
-	symbol->var.var_name = name;
-	symbol->var.pseudo = NULL;
+	symbol->variable.block = scope;
+	symbol->variable.var_name = name;
+	symbol->variable.pseudo = NULL;
 	return symbol;
 }
 
@@ -147,7 +147,6 @@ static struct lua_symbol *new_label(struct parser_state *parser, const struct st
 	struct block_scope *scope = parser->current_scope;
 	assert(scope);
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-	set_type(&symbol->value_type, RAVI_TANY);
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
 	symbol->label.label_name = name;
@@ -182,7 +181,7 @@ static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope
 	{
 		switch (symbol->symbol_type) {
 		case SYM_LOCAL: {
-			if (varname == symbol->var.var_name) {
+			if (varname == symbol->variable.var_name) {
 				return symbol;
 			}
 			break;
@@ -204,8 +203,8 @@ static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, 
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.var->symbol_type == SYM_LOCAL);
-			if (name == symbol->upvalue.var->var.var_name) {
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL);
+			if (name == symbol->upvalue.target_variable->variable.var_name) {
 				return symbol;
 			}
 			break;
@@ -229,8 +228,8 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.var->symbol_type == SYM_LOCAL);
-			if (sym == symbol->upvalue.var) {
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL);
+			if (sym == symbol->upvalue.target_variable) {
 				return false;
 			}
 			break;
@@ -242,11 +241,11 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	END_FOR_EACH_PTR(symbol);
 	struct lua_symbol *upvalue = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	upvalue->symbol_type = SYM_UPVALUE;
-	upvalue->upvalue.var = sym;
-	upvalue->upvalue.function = function;
+	upvalue->upvalue.target_variable = sym;
+	upvalue->upvalue.target_function = function;
 	upvalue->upvalue.upvalue_index = ptrlist_size(
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
-	copy_type(&upvalue->value_type, &sym->value_type);
+	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
 	return true;
 }
@@ -317,15 +316,15 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 			// need to construct an upvalue. Lua requires that the upvalue be
 			// added to all functions in the tree up to the function where the local
 			// is defined.
-			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->var.block->function,
+			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->variable.block->function,
 						   symbol);
 			// TODO Following search could be avoided if above returned the symbol
 			symbol = search_upvalue_in_function(parser->current_function, varname);
-		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.function != parser->current_function) {
+		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
 			// We found an upvalue but it is not at the same level
 			// Ensure all levels have the upvalue
-			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.function,
-						   symbol->upvalue.var);
+			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.target_function,
+						   symbol->upvalue.target_variable);
 			// TODO Following search could be avoided if above returned the symbol
 			symbol = search_upvalue_in_function(parser->current_function, varname);
 		}
@@ -333,15 +332,15 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 		// Return global symbol
 		struct lua_symbol *global = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 		global->symbol_type = SYM_GLOBAL;
-		global->var.var_name = varname;
-		global->var.block = NULL;
-		set_type(&global->value_type, RAVI_TANY); // Globals are always ANY type
+		global->variable.var_name = varname;
+		global->variable.block = NULL;
+		set_type(&global->variable.value_type, RAVI_TANY); // Globals are always ANY type
 		// We don't add globals to any scope so that they are
 		// always looked up
 		symbol = global;
 	}
 	struct ast_node *symbol_expr = allocate_ast_node(parser, AST_SYMBOL_EXPR);
-	symbol_expr->symbol_expr.type = symbol->value_type;
+	symbol_expr->symbol_expr.type = symbol->variable.value_type;
 	symbol_expr->symbol_expr.var = symbol;
 	return symbol_expr;
 }

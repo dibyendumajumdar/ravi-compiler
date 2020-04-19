@@ -121,27 +121,31 @@ struct var_type {
 struct pseudo;
 DECLARE_PTR_LIST(lua_symbol_list, struct lua_symbol);
 
+struct lua_variable_symbol {
+	struct var_type value_type;
+	const struct string_object *var_name; /* name of the variable */
+	struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
+	struct pseudo *pseudo;	   /* backend data for the symbol */
+};
+struct lua_label_symbol {
+	const struct string_object *label_name;
+	struct block_scope *block;
+	struct pseudo* pseudo;     /* backend data for the symbol */
+};
+struct lua_upvalue_symbol {
+	struct var_type value_type;
+	struct lua_symbol *target_variable;	   /* variable reference */
+	struct ast_node *target_function; /* Where the upvalue lives */
+	uint32_t upvalue_index;	   /* index of the upvalue in function */
+	/*TODO add pseudo ?*/
+};
 /* A symbol is a name recognised in Ravi/Lua code*/
 struct lua_symbol {
 	enum symbol_type symbol_type;
-	struct var_type value_type;
 	union {
-		struct {
-			const struct string_object *var_name; /* name of the variable */
-			struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
-			struct pseudo *pseudo;	   /* backend data for the symbol */
-		} var;
-		struct {
-			const struct string_object *label_name;
-			struct block_scope *block;
-			struct pseudo* pseudo;     /* backend data for the symbol */
-		} label;
-		struct {
-			struct lua_symbol *var;	   /* variable reference */
-			struct ast_node *function; /* Where the upvalue lives */
-			uint32_t upvalue_index;	   /* index of the upvalue in function */
-						   /*TODO add pseudo ?*/
-		} upvalue;
+		struct lua_variable_symbol variable;
+		struct lua_label_symbol label;
+		struct lua_upvalue_symbol upvalue;
 	};
 };
 struct block_scope {

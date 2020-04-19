@@ -119,19 +119,19 @@ static void print_symbol(membuff_t *buf, struct lua_symbol *sym, int level)
 {
 	switch (sym->symbol_type) {
 	case SYM_GLOBAL: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->var.var_name, "global symbol",
-			   type_name(sym->value_type.type_code), get_as_str(sym->value_type.type_name));
+		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "global symbol",
+			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
 		break;
 	}
 	case SYM_LOCAL: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->var.var_name, "local symbol",
-			   type_name(sym->value_type.type_code), get_as_str(sym->value_type.type_name));
+		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "local symbol",
+			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
 		break;
 	}
 	case SYM_UPVALUE: {
-		printf_buf(buf, "%p%t %c %s %s\n", level, sym->upvalue.var->var.var_name, "upvalue",
-			   type_name(sym->upvalue.var->value_type.type_code),
-			   get_as_str(sym->upvalue.var->value_type.type_name));
+		printf_buf(buf, "%p%t %c %s %s\n", level, sym->upvalue.target_variable->variable.var_name, "upvalue",
+			   type_name(sym->upvalue.target_variable->variable.value_type.type_code),
+			   get_as_str(sym->upvalue.target_variable->variable.value_type.type_name));
 		break;
 	}
 	default:
@@ -144,11 +144,11 @@ static void print_symbol_name(membuff_t *buf, struct lua_symbol *sym)
 	switch (sym->symbol_type) {
 	case SYM_LOCAL:
 	case SYM_GLOBAL: {
-		printf_buf(buf, "%t", sym->var.var_name);
+		printf_buf(buf, "%t", sym->variable.var_name);
 		break;
 	}
 	case SYM_UPVALUE: {
-		printf_buf(buf, "%t", sym->upvalue.var->var.var_name);
+		printf_buf(buf, "%t", sym->upvalue.target_variable->variable.var_name);
 		break;
 	}
 	default:

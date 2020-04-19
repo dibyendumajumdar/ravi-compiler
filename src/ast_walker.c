@@ -50,46 +50,40 @@ void raviX_function_foreach_statement(const struct function_expression *function
 }
 enum ast_node_type raviX_statement_type(struct statement *statement) { return statement->type; }
 void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
-				     void (*callback)(void *userdata, const struct lua_local_symbol *symbol))
+				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
 	struct lua_symbol *symbol;
-	FOR_EACH_PTR(function_expression->args, symbol) { callback(userdata, (struct lua_local_symbol *)symbol); }
+	FOR_EACH_PTR(function_expression->args, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
 void raviX_function_foreach_local(const struct function_expression *function_expression, void *userdata,
-				  void (*callback)(void *userdata, const struct lua_local_symbol *lua_local_symbol))
+				  void (*callback)(void *userdata, const struct lua_variable_symbol *lua_local_symbol))
 {
 	struct lua_symbol *symbol;
-	FOR_EACH_PTR(function_expression->locals, symbol) { callback(userdata, (struct lua_local_symbol *)symbol); }
+	FOR_EACH_PTR(function_expression->locals, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
 void raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
 				    void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol))
 {
 	struct lua_symbol *symbol;
-	FOR_EACH_PTR(function_expression->upvalues, symbol) { callback(userdata, (struct lua_upvalue_symbol *)symbol); }
+	FOR_EACH_PTR(function_expression->upvalues, symbol) { callback(userdata, &symbol->upvalue); }
 	END_FOR_EACH_PTR(symbol)
 }
 
-const struct string_object *raviX_local_symbol_name(const struct lua_local_symbol *lua_local_symbol)
+const struct string_object *raviX_local_symbol_name(const struct lua_variable_symbol *symbol)
 {
-	const struct lua_symbol *symbol = (const struct lua_symbol *)lua_local_symbol;
-	assert(symbol->symbol_type == SYM_LOCAL);
-	return symbol->var.var_name;
+	return symbol->var_name;
 }
 
-const struct var_type *raviX_local_symbol_type(const struct lua_local_symbol *lua_local_symbol)
+const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *symbol)
 {
-	const struct lua_symbol *symbol = (const struct lua_symbol *)lua_local_symbol;
-	assert(symbol->symbol_type == SYM_LOCAL);
 	return &symbol->value_type;
 }
 
-const struct block_scope *raviX_local_symbol_scope(const struct lua_local_symbol *lua_local_symbol)
+const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *symbol)
 {
-	const struct lua_symbol *symbol = (const struct lua_symbol *)lua_local_symbol;
-	assert(symbol->symbol_type == SYM_LOCAL);
-	return symbol->var.block;
+	return symbol->block;
 }
 
 #define n(v) ((struct ast_node *)v)

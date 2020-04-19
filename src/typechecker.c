@@ -279,8 +279,8 @@ static void typecheck_local_statement(struct compiler_state *container, struct a
 		if (!var || !expr)
 			break;
 
-		struct var_type *var_type = &var->value_type;
-		const struct string_object *var_name = var->var.var_name;
+		struct var_type *var_type = &var->variable.value_type;
+		const struct string_object *var_name = var->variable.var_name;
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
 
@@ -357,7 +357,7 @@ static void typecheck_for_num_statment(struct compiler_state *container, struct 
 		FOR_EACH_PTR(symbols, sym)
 		{
 			if (sym->symbol_type == SYM_LOCAL) {
-				set_typecode(&sym->value_type, symbol_type);
+				set_typecode(&sym->variable.value_type, symbol_type);
 			} else {
 				assert(0); /* cannot happen */
 			}
@@ -457,7 +457,13 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 	}
 	case AST_SYMBOL_EXPR: {
 		/* symbol type should have been set when symbol was created */
-		copy_type(&node->symbol_expr.type, &node->symbol_expr.var->value_type);
+		if (node->symbol_expr.var->symbol_type != SYM_LABEL) {
+			copy_type(&node->symbol_expr.type, &node->symbol_expr.var->variable.value_type);
+		}
+		else {
+			// TODO can this happen?
+			node->symbol_expr.type.type_code = RAVI_TANY;
+		}
 		break;
 	}
 	case AST_BINARY_EXPR: {

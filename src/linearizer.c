@@ -196,8 +196,8 @@ static struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbo
 	pseudo->symbol = sym;
 	pseudo->regnum = reg;
 	if (sym->symbol_type == SYM_LOCAL) {
-		assert(sym->var.pseudo == NULL);
-		sym->var.pseudo = pseudo;
+		assert(sym->variable.pseudo == NULL);
+		sym->variable.pseudo = pseudo;
 	}
 	return pseudo;
 }
@@ -824,7 +824,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 		add_instruction(proc, insn);
 		return target;
 	} else if (sym->symbol_type == SYM_LOCAL) {
-		return sym->var.pseudo;
+		return sym->variable.pseudo;
 	} else if (sym->symbol_type == SYM_UPVALUE) {
 		/* upvalue index is the position of upvalue in the function, we treat this as the pseudo register for
 		 * the upvalue */
@@ -1236,9 +1236,9 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 
 	FOR_EACH_PTR(stmt->local_stmt.var_list, sym)
 	{
-		struct pseudo *var_pseudo = sym->var.pseudo;
+		struct pseudo *var_pseudo = sym->variable.pseudo;
 		assert(var_pseudo);
-		varinfo[i].type_code = sym->value_type.type_code;
+		varinfo[i].type_code = sym->variable.value_type.type_code;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
@@ -1685,7 +1685,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
 
 	start_block(proc, Lbody);
-	instruct_move(proc, var_sym->var.pseudo, index_var_pseudo);
+	instruct_move(proc, var_sym->variable.pseudo, index_var_pseudo);
 
 	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
@@ -1875,7 +1875,7 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 	FOR_EACH_PTR_REVERSE(scope->symbol_list, sym)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
-			struct pseudo *pseudo = sym->var.pseudo;
+			struct pseudo *pseudo = sym->variable.pseudo;
 			assert(pseudo && pseudo->type == PSEUDO_SYMBOL && pseudo->symbol == sym);
 			// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
 			free_register(proc, &proc->local_pseudos, pseudo->regnum);
@@ -1943,7 +1943,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 	case PSEUDO_SYMBOL:
 		switch (pseudo->symbol->symbol_type) {
 		case SYM_LOCAL: {
-			raviX_buffer_add_fstring(mb, "local(%s, %d)", pseudo->symbol->var.var_name->str,
+			raviX_buffer_add_fstring(mb, "local(%s, %d)", pseudo->symbol->variable.var_name->str,
 						 pseudo->regnum);
 			break;
 		}
@@ -1952,7 +1952,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			break;
 		}
 		case SYM_GLOBAL: {
-			raviX_buffer_add_string(mb, pseudo->symbol->var.var_name->str);
+			raviX_buffer_add_string(mb, pseudo->symbol->variable.var_name->str);
 			break;
 		}
 		default:
