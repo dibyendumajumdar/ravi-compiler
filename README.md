@@ -12,6 +12,16 @@ The goal of this project is to create a standalone parser and compiler for Lua /
 * optimizer (TODO) - responsible for improving the code
 * codegenerator (TODO) - responsible for generate C code
 
+Our goal is to provide a re-usable Lua/Ravi parser/code generator that can be used by all kinds of tools and utilities.
+
+## Documentation
+
+Documentation is coming soon.
+
+For now you can look at following:
+* [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h)
+* [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests/expected/results.expected)
+
 ## Why
 
 Lua's inbuilt parser and code generator is a work of art, very compact and low overhead but extremely fast. It uses minimal memory and produces bytecodes as it parses the source code (single pass compiler). This is great for Lua and Ravi given the use cases of these languages, but makes the parser and code generator hard to understand, play with, or reuse in tools such as IDEs. It also makes it harder to perform any advanced type checking or performance optimizations. 
@@ -35,7 +45,7 @@ make
 
 ## Testing
 
-At the moment we have a simple test driver program named `tparse`. It takes a string input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking and also any linear IR output if supported. Example of the output can be fund in the `tests` folder.
+At the moment we have a simple test driver program named `tparse`. It takes a string input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking and also any linear IR output if supported. Example of the output can be found in the `tests/expected` folder.
 
 Suppose `tparse` was built in `build` folder then you can run the tests as follows:
 
