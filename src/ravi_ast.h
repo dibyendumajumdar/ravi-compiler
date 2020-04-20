@@ -179,10 +179,10 @@ struct expression_statement {
 	struct ast_node_list *expr_list;     /* Comma separated expressions */
 };
 struct function_statement {
-	struct ast_node *name;		 /* base symbol to be looked up */
-	struct ast_node_list *selectors; /* Optional */
-	struct ast_node *method_name;	 /* Optional */
-	struct ast_node *function_expr;	 /* Function's AST */
+	struct ast_node *name;		 /* base symbol to be looked up - symbol_expression */
+	struct ast_node_list *selectors; /* Optional list of index_expression(s) */
+	struct ast_node *method_name;	 /* Optional - index_expression */
+	struct ast_node *function_expr;	 /* Function's AST - function_expression */
 };
 struct do_statement {
 	struct block_scope *scope;		 /* The do statement only creates a new scope */

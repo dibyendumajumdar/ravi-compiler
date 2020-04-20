@@ -264,3 +264,37 @@ void raviX_expression_statement_foreach_rhs_expression(const struct expression_s
 	}
 	END_FOR_EACH_PTR(node)
 }
+const struct symbol_expression *raviX_function_statement_name(const struct function_statement *statement)
+{
+	assert(statement->name->type == AST_SYMBOL_EXPR);
+	return &statement->name->symbol_expr;
+}
+bool raviX_function_statement_is_method(const struct function_statement *statement)
+{
+	return statement->method_name != NULL;
+}
+const struct index_expression *raviX_function_statement_method_name(const struct function_statement *statement)
+{
+	assert(statement->method_name->type == AST_Y_INDEX_EXPR || statement->method_name->type == AST_FIELD_SELECTOR_EXPR);
+	return &statement->method_name->index_expr;
+}
+bool raviX_function_statement_has_selectors(const struct function_statement *statement)
+{
+	return statement->selectors != NULL;
+}
+void raviX_function_statement_foreach_selector(const struct function_statement *statement, void *userdata,
+					       void (*callback)(void *, const struct index_expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->selectors, node)
+	{
+		assert(node->type == AST_Y_INDEX_EXPR || node->type == AST_FIELD_SELECTOR_EXPR);
+		callback(userdata, &node->index_expr);
+	}
+	END_FOR_EACH_PTR(node)
+}
+const struct function_expression *raviX_function_ast(const struct function_statement *statement)
+{
+	assert(statement->function_expr->type == AST_FUNCTION_EXPR);
+	return &statement->function_expr->function_expr;
+}

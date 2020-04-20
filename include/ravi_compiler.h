@@ -277,17 +277,15 @@ struct block_scope;
 
 /* Types of symbols */
 enum symbol_type {
-	SYM_LOCAL,
-	SYM_UPVALUE,
-	SYM_GLOBAL, /* Global symbols are never added to a scope so they are always looked up */
-	SYM_LABEL
+	SYM_LOCAL, /* lua_variable_symbol */
+	SYM_UPVALUE, /* lua_upvalue_symbol */
+	SYM_GLOBAL, /* lua_variable_symbol, Global symbols are never added to a scope so they are always looked up */
+	SYM_LABEL /* lua_label_symbol */
 };
 struct lua_symbol;
 struct lua_upvalue_symbol;
 struct lua_variable_symbol;
 struct lua_label_symbol;
-
-RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
 
 RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const struct compiler_state *compiler_state);
@@ -335,8 +333,16 @@ RAVICOMP_EXPORT void raviX_expression_statement_foreach_lhs_expression(const str
 RAVICOMP_EXPORT void raviX_expression_statement_foreach_rhs_expression(const struct expression_statement *statement, void *userdata,
 								       void (*callback)(void *, const struct expression *expr));
 
+RAVICOMP_EXPORT const struct symbol_expression * raviX_function_statement_name(const struct function_statement *statement);
+RAVICOMP_EXPORT bool raviX_function_statement_is_method(const struct function_statement *statement);
+RAVICOMP_EXPORT const struct index_expression * raviX_function_statement_method_name(const struct function_statement *statement);
+RAVICOMP_EXPORT bool raviX_function_statement_has_selectors(const struct function_statement *statement);
+RAVICOMP_EXPORT void raviX_function_statement_foreach_selector(const struct function_statement *statement, void *userdata,
+							      void (*callback)(void *, const struct index_expression *expr));
+RAVICOMP_EXPORT const struct function_expression * raviX_function_ast(const struct function_statement *statement);
 
 /* Convert a statement to the correct type */
+RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
 RAVICOMP_EXPORT const struct return_statement * raviX_return_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct label_statement * raviX_label_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct goto_statement * raviX_goto_statement(const struct statement *stmt);
