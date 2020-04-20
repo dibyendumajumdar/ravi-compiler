@@ -330,6 +330,12 @@ RAVICOMP_EXPORT void raviX_local_statement_foreach_expression(const struct local
 RAVICOMP_EXPORT void raviX_local_statement_foreach_symbol(const struct local_statement *statement, void *userdata,
 							      void (*callback)(void *, const struct lua_variable_symbol *expr));
 
+RAVICOMP_EXPORT void raviX_expression_statement_foreach_lhs_expression(const struct expression_statement *statement, void *userdata,
+							      void (*callback)(void *, const struct expression *expr));
+RAVICOMP_EXPORT void raviX_expression_statement_foreach_rhs_expression(const struct expression_statement *statement, void *userdata,
+								       void (*callback)(void *, const struct expression *expr));
+
+
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT const struct return_statement * raviX_return_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct label_statement * raviX_label_statement(const struct statement *stmt);

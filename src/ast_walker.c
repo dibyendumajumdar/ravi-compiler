@@ -242,3 +242,25 @@ void raviX_local_statement_foreach_symbol(const struct local_statement *statemen
 	}
 	END_FOR_EACH_PTR(node)
 }
+void raviX_expression_statement_foreach_lhs_expression(const struct expression_statement *statement, void *userdata,
+						       void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->var_expr_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+void raviX_expression_statement_foreach_rhs_expression(const struct expression_statement *statement, void *userdata,
+						       void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->expr_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
