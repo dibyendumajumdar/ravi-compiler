@@ -465,3 +465,16 @@ const struct expression *raviX_binary_expression_right_expression(const struct b
 BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression) {
 	return expression->binary_op;
 }
+const struct var_type *raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression) {
+	return &expression->type;
+}
+const struct expression *raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression) {
+	if (!expression->key_expr)
+		return NULL;
+	assert(expression->key_expr->type >= AST_LITERAL_EXPR && expression->key_expr->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->key_expr;
+}
+const struct expression *raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression) {
+	assert(expression->value_expr->type >= AST_LITERAL_EXPR && expression->value_expr->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->value_expr;
+}

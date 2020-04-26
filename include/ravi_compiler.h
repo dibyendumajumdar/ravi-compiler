@@ -420,6 +420,11 @@ RAVICOMP_EXPORT void
 raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
 			       void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol));
 
+/* table element assignment expression */
+RAVICOMP_EXPORT const struct var_type *raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression);
+
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
