@@ -331,3 +331,29 @@ const struct expression *raviX_test_then_statement_condition(const struct test_t
 	assert(statement->condition->type >= AST_LITERAL_EXPR && statement->condition->type <= AST_FUNCTION_CALL_EXPR);
 	return (struct expression *)statement->condition;
 }
+void raviX_if_statement_foreach_test_then_statement(const struct if_statement *statement, void *userdata,
+						    void (*callback)(void *, const struct test_then_statement *stmt))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->if_condition_list, node)
+	{
+		assert(node->type == AST_TEST_THEN_STMT);
+		callback(userdata, &node->test_then_block);
+	}
+	END_FOR_EACH_PTR(node)
+}
+const struct block_scope *raviX_if_then_statement_else_scope(const struct if_statement *statement)
+{
+	return statement->else_block;
+}
+void raviX_if_statement_foreach_else_statement(const struct if_statement *statement, void *userdata,
+					       void (*callback)(void *userdata, const struct statement *statement))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->else_statement_list, node)
+	{
+		assert(node->type <= AST_EXPR_STMT);
+		callback(userdata, (struct statement *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
