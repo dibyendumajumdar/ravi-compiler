@@ -426,3 +426,11 @@ const struct var_type *raviX_literal_expression_type(const struct literal_expres
 	return &expression->type;
 }
 const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression) { return &expression->u; }
+const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression)
+{
+	return &expression->type;
+}
+const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expression *expression)
+{
+	return expression->var;
+}
