@@ -501,14 +501,36 @@ const struct var_type *raviX_table_literal_expression_type(const struct table_li
 	return &expression->type;
 }
 void raviX_table_literal_expression_foreach_element(
-    const struct table_literal_expression *statement, void *userdata,
+    const struct table_literal_expression *expression, void *userdata,
     void (*callback)(void *, const struct table_element_assignment_expression *expr))
 {
 	struct ast_node *node;
-	FOR_EACH_PTR(statement->expr_list, node)
+	FOR_EACH_PTR(expression->expr_list, node)
 	{
 		assert(node->type == AST_INDEXED_ASSIGN_EXPR);
 		callback(userdata, (struct table_element_assignment_expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+
+const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expression *expression)
+{
+	return &expression->type;
+}
+const struct expression *raviX_suffixed_expression_primary(const struct suffixed_expression *expression)
+{
+	assert(expression->primary_expr->type >= AST_LITERAL_EXPR &&
+	       expression->primary_expr->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->primary_expr;
+}
+void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
+					      void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(expression->suffix_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }

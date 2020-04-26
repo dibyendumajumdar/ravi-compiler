@@ -427,8 +427,15 @@ RAVICOMP_EXPORT const struct expression *raviX_table_element_assignment_expressi
 
 /* table_literal_expression */
 RAVICOMP_EXPORT const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression);
-RAVICOMP_EXPORT void raviX_table_literal_expression_foreach_element(const struct table_literal_expression *statement, void *userdata,
+RAVICOMP_EXPORT void raviX_table_literal_expression_foreach_element(const struct table_literal_expression *expression, void *userdata,
 						  void (*callback)(void *, const struct table_element_assignment_expression *expr));
+
+/* suffixed_expression */
+RAVICOMP_EXPORT const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_suffixed_expression_primary(const struct suffixed_expression *expression);
+RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
+								    void (*callback)(void *, const struct expression *expr));
+
 
 
 /* Convert a statement to the correct type */
