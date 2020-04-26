@@ -33,7 +33,7 @@ void raviX_function_foreach_child(const struct function_expression *function_exp
 	FOR_EACH_PTR(function_expression->child_functions, node) { callback(userdata, &node->function_expr); }
 	END_FOR_EACH_PTR(node)
 }
-struct block_scope *raviX_function_scope(const struct function_expression *function_expression)
+const struct block_scope *raviX_function_scope(const struct function_expression *function_expression)
 {
 	return function_expression->main_block;
 }
@@ -508,7 +508,7 @@ void raviX_table_literal_expression_foreach_element(
 	FOR_EACH_PTR(expression->expr_list, node)
 	{
 		assert(node->type == AST_INDEXED_ASSIGN_EXPR);
-		callback(userdata, (struct table_element_assignment_expression *)node);
+		callback(userdata, &node->table_elem_assign_expr);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -555,4 +555,36 @@ void raviX_function_call_expression_foreach_argument(const struct function_call_
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
+}
+const struct function_expression *raviX_scope_owning_function(const struct block_scope *scope)
+{
+	assert(scope->function->type == AST_FUNCTION_EXPR);
+	return &scope->function->function_expr;
+}
+RAVICOMP_EXPORT const struct block_scope *raviX_scope_parent_scope(const struct block_scope *scope)
+{
+	return scope->parent;
+}
+RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const struct block_scope *scope, void *userdata,
+						void (*callback)(void *userdata, const struct lua_symbol *symbol))
+{
+	struct lua_symbol *symbol;
+	FOR_EACH_PTR(scope->symbol_list, symbol) { callback(userdata, symbol); }
+	END_FOR_EACH_PTR(node)
+}
+enum symbol_type raviX_symbol_type(const struct lua_symbol *symbol) { return symbol->symbol_type; }
+const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol)
+{
+	assert(symbol->symbol_type == SYM_GLOBAL || symbol->symbol_type == SYM_LOCAL);
+	return &symbol->variable;
+}
+const struct lua_upvalue_symbol *raviX_symbol_upvalue(const struct lua_symbol *symbol)
+{
+	assert(symbol->symbol_type == SYM_UPVALUE);
+	return &symbol->upvalue;
+}
+const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbol)
+{
+	assert(symbol->symbol_type == SYM_LABEL);
+	return &symbol->label;
 }
