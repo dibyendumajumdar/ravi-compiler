@@ -289,28 +289,6 @@ struct lua_label_symbol;
 RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const struct compiler_state *compiler_state);
 
-RAVICOMP_EXPORT const struct var_type *raviX_function_type(const struct function_expression *function_expression);
-RAVICOMP_EXPORT bool raviX_function_is_vararg(const struct function_expression *function_expression);
-RAVICOMP_EXPORT bool raviX_function_is_method(const struct function_expression *function_expression);
-RAVICOMP_EXPORT const struct function_expression *
-raviX_function_parent(const struct function_expression *function_expression);
-RAVICOMP_EXPORT void
-raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata,
-			     void (*callback)(void *userdata, const struct function_expression *function_expression));
-RAVICOMP_EXPORT struct block_scope *raviX_function_scope(const struct function_expression *function_expression);
-RAVICOMP_EXPORT void
-raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
-				 void (*callback)(void *userdata, const struct statement *statement));
-RAVICOMP_EXPORT void
-raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
-				void (*callback)(void *userdata, const struct lua_variable_symbol *symbol));
-RAVICOMP_EXPORT void raviX_function_foreach_local(const struct function_expression *function_expression, void *userdata,
-						  void (*callback)(void *userdata,
-								   const struct lua_variable_symbol *lua_local_symbol));
-RAVICOMP_EXPORT void
-raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
-			       void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol));
-
 RAVICOMP_EXPORT const struct string_object *raviX_local_symbol_name(const struct lua_variable_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
@@ -418,6 +396,29 @@ RAVICOMP_EXPORT const struct var_type *raviX_binary_expression_type(const struct
 RAVICOMP_EXPORT const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression);
 RAVICOMP_EXPORT const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression);
 RAVICOMP_EXPORT BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression);
+
+/* function expression */
+RAVICOMP_EXPORT const struct var_type *raviX_function_type(const struct function_expression *function_expression);
+RAVICOMP_EXPORT bool raviX_function_is_vararg(const struct function_expression *function_expression);
+RAVICOMP_EXPORT bool raviX_function_is_method(const struct function_expression *function_expression);
+RAVICOMP_EXPORT const struct function_expression *
+raviX_function_parent(const struct function_expression *function_expression);
+RAVICOMP_EXPORT void
+raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata,
+			     void (*callback)(void *userdata, const struct function_expression *function_expression));
+RAVICOMP_EXPORT struct block_scope *raviX_function_scope(const struct function_expression *function_expression);
+RAVICOMP_EXPORT void
+raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
+				 void (*callback)(void *userdata, const struct statement *statement));
+RAVICOMP_EXPORT void
+raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
+				void (*callback)(void *userdata, const struct lua_variable_symbol *symbol));
+RAVICOMP_EXPORT void raviX_function_foreach_local(const struct function_expression *function_expression, void *userdata,
+						  void (*callback)(void *userdata,
+								   const struct lua_variable_symbol *lua_local_symbol));
+RAVICOMP_EXPORT void
+raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
+			       void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol));
 
 
 /* Convert a statement to the correct type */
