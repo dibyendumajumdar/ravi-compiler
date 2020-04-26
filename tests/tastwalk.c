@@ -83,6 +83,17 @@ struct ast_state {
 	int dummy;
 };
 
+static void walk_variable_symbol(void *data, const struct lua_variable_symbol *symbol)
+{
+	const struct string_object *name = raviX_variable_symbol_name(symbol);
+	assert(name != NULL);
+	const struct block_scope *scope = raviX_variable_symbol_scope(symbol);
+	// If global scope will be NULL
+	(void)scope;
+	const struct var_type *type = raviX_variable_symbol_type(symbol);
+	assert(type != NULL);
+}
+
 static void walk_symbol(void *data, const struct lua_symbol *symbol)
 {
 	enum symbol_type type = raviX_symbol_type(symbol);
@@ -95,7 +106,7 @@ static void walk_symbol(void *data, const struct lua_symbol *symbol)
 	case SYM_GLOBAL:
 	case SYM_LOCAL: {
 		const struct lua_variable_symbol *variable = raviX_symbol_variable(symbol);
-		(void)variable;
+		walk_variable_symbol(data, variable);
 		break;
 	}
 	case SYM_UPVALUE: {

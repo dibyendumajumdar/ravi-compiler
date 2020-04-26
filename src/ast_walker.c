@@ -76,9 +76,15 @@ const struct string_object *raviX_variable_symbol_name(const struct lua_variable
 	return lua_local_symbol->var_name;
 }
 
-const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol) { return &lua_local_symbol->value_type; }
+const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol)
+{
+	return &lua_local_symbol->value_type;
+}
 
-const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol) { return lua_local_symbol->block; }
+const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol)
+{
+	return lua_local_symbol->block;
+}
 
 #define n(v) ((struct ast_node *)v)
 const struct return_statement *raviX_return_statement(const struct statement *stmt)
@@ -588,9 +594,20 @@ const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbo
 	assert(symbol->symbol_type == SYM_LABEL);
 	return &symbol->label;
 }
-const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol) {
-	return symbol->label_name;
+const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
+const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
+const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol)
+{
+	return &symbol->value_type;
 }
-const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol) {
-	return symbol->block;
+const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol)
+{
+	assert(symbol->target_variable->symbol_type == SYM_LOCAL);
+	return &symbol->target_variable->variable;
 }
+const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
+{
+	assert(symbol->target_function->type == AST_FUNCTION_EXPR);
+	return &symbol->target_function->function_expr;
+}
+unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol) { return symbol->upvalue_index; }

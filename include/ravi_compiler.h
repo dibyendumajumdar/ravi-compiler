@@ -501,4 +501,11 @@ raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol);
 RAVICOMP_EXPORT const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol);
 
+/* upvalue symbol */
+RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol);
+
+
 #endif
