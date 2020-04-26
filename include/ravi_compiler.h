@@ -289,10 +289,6 @@ struct lua_label_symbol;
 RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const struct compiler_state *compiler_state);
 
-RAVICOMP_EXPORT const struct string_object *raviX_local_symbol_name(const struct lua_variable_symbol *lua_local_symbol);
-RAVICOMP_EXPORT const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *lua_local_symbol);
-RAVICOMP_EXPORT const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
-
 /* return statement walking */
 RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const struct return_statement *statement, void *userdata,
 							       void (*callback)(void *, const struct expression *expr));
@@ -492,5 +488,13 @@ RAVICOMP_EXPORT enum symbol_type raviX_symbol_type(const struct lua_symbol *symb
 RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol);
 RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const struct lua_symbol *symbol);
 RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbol);
+
+/* variable symbol - local and global variables */
+RAVICOMP_EXPORT const struct string_object *
+raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol);
+RAVICOMP_EXPORT const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol);
+// NULL if global
+RAVICOMP_EXPORT const struct block_scope *
+raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
 
 #endif

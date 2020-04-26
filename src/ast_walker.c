@@ -71,14 +71,14 @@ void raviX_function_foreach_upvalue(const struct function_expression *function_e
 	END_FOR_EACH_PTR(symbol)
 }
 
-const struct string_object *raviX_local_symbol_name(const struct lua_variable_symbol *symbol)
+const struct string_object *raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol)
 {
-	return symbol->var_name;
+	return lua_local_symbol->var_name;
 }
 
-const struct var_type *raviX_local_symbol_type(const struct lua_variable_symbol *symbol) { return &symbol->value_type; }
+const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol) { return &lua_local_symbol->value_type; }
 
-const struct block_scope *raviX_local_symbol_scope(const struct lua_variable_symbol *symbol) { return symbol->block; }
+const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol) { return lua_local_symbol->block; }
 
 #define n(v) ((struct ast_node *)v)
 const struct return_statement *raviX_return_statement(const struct statement *stmt)
