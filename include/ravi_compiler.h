@@ -396,6 +396,10 @@ RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const struct for
 								void (*callback)(void *userdata,
 										 const struct statement *statement));
 
+/* literal expression */
+RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression);
+RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression);
+
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
 RAVICOMP_EXPORT const struct return_statement *raviX_return_statement(const struct statement *stmt);

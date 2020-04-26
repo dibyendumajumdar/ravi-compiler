@@ -421,3 +421,8 @@ void raviX_for_statement_body_foreach_statement(const struct for_statement *stat
 	}
 	END_FOR_EACH_PTR(node)
 }
+const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression)
+{
+	return &expression->type;
+}
+const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression) { return &expression->u; }
