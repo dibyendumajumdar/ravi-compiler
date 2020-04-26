@@ -341,6 +341,11 @@ RAVICOMP_EXPORT void raviX_function_statement_foreach_selector(const struct func
 							      void (*callback)(void *, const struct index_expression *expr));
 RAVICOMP_EXPORT const struct function_expression * raviX_function_ast(const struct function_statement *statement);
 
+RAVICOMP_EXPORT const struct block_scope *raviX_do_statement_scope(const struct do_statement *statement);
+RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const struct do_statement *statement, void *userdata,
+							  void (*callback)(void *userdata,
+									   const struct statement *statement));
+
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
 RAVICOMP_EXPORT const struct return_statement * raviX_return_statement(const struct statement *stmt);
