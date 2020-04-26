@@ -534,3 +534,25 @@ void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *
 	}
 	END_FOR_EACH_PTR(node)
 }
+
+const struct var_type *raviX_function_call_expression_type(const struct function_call_expression *expression)
+{
+	return &expression->type;
+}
+// Can return NULL
+const struct string_object *
+raviX_function_call_expression_method_name(const struct function_call_expression *expression)
+{
+	return expression->method_name;
+}
+void raviX_function_call_expression_foreach_argument(const struct function_call_expression *expression, void *userdata,
+						     void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(expression->arg_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}

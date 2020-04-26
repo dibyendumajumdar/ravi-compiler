@@ -436,6 +436,12 @@ RAVICOMP_EXPORT const struct expression *raviX_suffixed_expression_primary(const
 RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
 								    void (*callback)(void *, const struct expression *expr));
 
+/* function call expression */
+RAVICOMP_EXPORT const struct var_type *raviX_function_call_expression_type(const struct function_call_expression *expression);
+// can return NULL
+RAVICOMP_EXPORT const struct string_object *raviX_function_call_expression_method_name(const struct function_call_expression *expression);
+RAVICOMP_EXPORT void raviX_function_call_expression_foreach_argument(const struct function_call_expression *expression, void *userdata,
+							      void (*callback)(void *, const struct expression *expr));
 
 
 /* Convert a statement to the correct type */
