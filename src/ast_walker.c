@@ -451,3 +451,17 @@ const struct expression *raviX_unary_expression_expression(const struct unary_ex
 UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression) {
 	return expression->unary_op;
 }
+const struct var_type *raviX_binary_expression_type(const struct binary_expression *expression) {
+	return &expression->type;
+}
+const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression) {
+	assert(expression->expr_left->type >= AST_LITERAL_EXPR && expression->expr_left->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->expr_left;
+}
+const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression) {
+	assert(expression->expr_right->type >= AST_LITERAL_EXPR && expression->expr_right->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->expr_right;
+}
+BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression) {
+	return expression->binary_op;
+}

@@ -413,6 +413,12 @@ RAVICOMP_EXPORT const struct var_type *raviX_unary_expression_type(const struct 
 RAVICOMP_EXPORT const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression);
 RAVICOMP_EXPORT UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression);
 
+/* binary expression */
+RAVICOMP_EXPORT const struct var_type *raviX_binary_expression_type(const struct binary_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression);
+RAVICOMP_EXPORT BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression);
+
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
