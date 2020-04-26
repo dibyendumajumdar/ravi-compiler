@@ -497,4 +497,8 @@ RAVICOMP_EXPORT const struct var_type *raviX_variable_symbol_type(const struct l
 RAVICOMP_EXPORT const struct block_scope *
 raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
 
+/* label symbol */
+RAVICOMP_EXPORT const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol);
+RAVICOMP_EXPORT const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol);
+
 #endif

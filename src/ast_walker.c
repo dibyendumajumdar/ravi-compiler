@@ -588,3 +588,9 @@ const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbo
 	assert(symbol->symbol_type == SYM_LABEL);
 	return &symbol->label;
 }
+const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol) {
+	return symbol->label_name;
+}
+const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol) {
+	return symbol->block;
+}
