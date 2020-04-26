@@ -434,3 +434,10 @@ const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expr
 {
 	return expression->var;
 }
+const struct var_type *raviX_index_expression_type(const struct index_expression *expression) {
+	return &expression->type;
+}
+const struct expression *raviX_index_expression_symbol(const struct index_expression *expression) {
+	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->expr;
+}

@@ -306,7 +306,10 @@ struct expression {
 /* The parse tree is made up of ast_node objects. Some of the ast_nodes reference the appropriate block
 scopes but not all scopes may be referenced. The tree captures Lua syntax tree - i.e. statements such as
 while, repeat, and for are captured in the way user uses them and not the way Lua generates code. Potentially
-we can have a transformation step to convert to a tree that is more like the code generation */
+we can have a transformation step to convert to a tree that is more like the code generation
+
+The ast_node must be aligned with struct expression for expressions, and with struct statement for statements.
+*/
 struct ast_node {
 	enum ast_node_type type;
 	int line_number; /* Source line number */

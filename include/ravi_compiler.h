@@ -404,6 +404,10 @@ RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const struct lit
 RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression);
 RAVICOMP_EXPORT const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expression *expression);
 
+/* index expression */
+RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const struct index_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_index_expression_symbol(const struct index_expression *expression);
+
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
