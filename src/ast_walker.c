@@ -380,3 +380,44 @@ void raviX_while_or_repeat_statement_foreach_statement(const struct while_or_rep
 	}
 	END_FOR_EACH_PTR(node)
 }
+const struct block_scope *raviX_for_statement_scope(const struct for_statement *statement)
+{
+	return statement->for_scope;
+}
+void raviX_for_statement_foreach_symbol(const struct for_statement *statement, void *userdata,
+					void (*callback)(void *, const struct lua_variable_symbol *expr))
+{
+	struct lua_symbol *symbol;
+	FOR_EACH_PTR(statement->symbols, symbol)
+	{
+		assert(symbol->symbol_type == SYM_LOCAL);
+		callback(userdata, &symbol->variable);
+	}
+	END_FOR_EACH_PTR(node)
+}
+void raviX_for_statement_foreach_expression(const struct for_statement *statement, void *userdata,
+					    void (*callback)(void *, const struct expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->expr_list, node)
+	{
+		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		callback(userdata, (struct expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+const struct block_scope *raviX_for_statement_body_scope(const struct for_statement *statement)
+{
+	return statement->for_body;
+}
+void raviX_for_statement_body_foreach_statement(const struct for_statement *statement, void *userdata,
+						void (*callback)(void *userdata, const struct statement *statement))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->for_statement_list, node)
+	{
+		assert(node->type <= AST_EXPR_STMT);
+		callback(userdata, (struct statement *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
