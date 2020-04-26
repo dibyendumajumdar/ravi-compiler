@@ -311,3 +311,23 @@ void raviX_do_statement_foreach_statement(const struct do_statement *statement, 
 	}
 	END_FOR_EACH_PTR(node)
 }
+const struct block_scope *raviX_test_then_statement_scope(const struct test_then_statement *statement)
+{
+	return statement->test_then_scope;
+}
+void raviX_test_the_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
+						void (*callback)(void *userdata, const struct statement *statement))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->test_then_statement_list, node)
+	{
+		assert(node->type <= AST_EXPR_STMT);
+		callback(userdata, (struct statement *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+const struct expression *raviX_test_then_statement_condition(const struct test_then_statement *statement)
+{
+	assert(statement->condition->type >= AST_LITERAL_EXPR && statement->condition->type <= AST_FUNCTION_CALL_EXPR);
+	return (struct expression *)statement->condition;
+}

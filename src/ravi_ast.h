@@ -287,12 +287,16 @@ struct function_call_expression {
 	struct ast_node_list *arg_list;		 /* Call arguments */
 };
 
-/* Common statement type */
+/* Common statement type. All statement types must have the fields in this
+ * struct at the beginning of the struct.
+ */
 struct statement {
 	enum ast_node_type type;
 	int line_number;
 };
-/* Common expression type */
+/* Common expression type. All expression types must have the fields in this
+   type at the beginning of the struct
+*/
 struct expression {
 	enum ast_node_type type;
 	int line_number;
