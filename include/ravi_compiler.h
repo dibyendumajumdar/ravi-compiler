@@ -425,6 +425,11 @@ RAVICOMP_EXPORT const struct var_type *raviX_table_element_assignment_expression
 RAVICOMP_EXPORT const struct expression *raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression);
 RAVICOMP_EXPORT const struct expression *raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression);
 
+/* table_literal_expression */
+RAVICOMP_EXPORT const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression);
+RAVICOMP_EXPORT void raviX_table_literal_expression_foreach_element(const struct table_literal_expression *statement, void *userdata,
+						  void (*callback)(void *, const struct table_element_assignment_expression *expr));
+
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);

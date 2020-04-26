@@ -434,47 +434,81 @@ const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expr
 {
 	return expression->var;
 }
-const struct var_type *raviX_index_expression_type(const struct index_expression *expression) {
+const struct var_type *raviX_index_expression_type(const struct index_expression *expression)
+{
 	return &expression->type;
 }
-const struct expression *raviX_index_expression_expression(const struct index_expression *expression) {
+const struct expression *raviX_index_expression_expression(const struct index_expression *expression)
+{
 	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->expr;
 }
-const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression) {
+const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression)
+{
 	return &expression->type;
 }
-const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression) {
+const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression)
+{
 	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->expr;
 }
-UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression) {
+UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression)
+{
 	return expression->unary_op;
 }
-const struct var_type *raviX_binary_expression_type(const struct binary_expression *expression) {
+const struct var_type *raviX_binary_expression_type(const struct binary_expression *expression)
+{
 	return &expression->type;
 }
-const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression) {
-	assert(expression->expr_left->type >= AST_LITERAL_EXPR && expression->expr_left->type <= AST_FUNCTION_CALL_EXPR);
+const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression)
+{
+	assert(expression->expr_left->type >= AST_LITERAL_EXPR &&
+	       expression->expr_left->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->expr_left;
 }
-const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression) {
-	assert(expression->expr_right->type >= AST_LITERAL_EXPR && expression->expr_right->type <= AST_FUNCTION_CALL_EXPR);
+const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression)
+{
+	assert(expression->expr_right->type >= AST_LITERAL_EXPR &&
+	       expression->expr_right->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->expr_right;
 }
-BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression) {
+BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression)
+{
 	return expression->binary_op;
 }
-const struct var_type *raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression) {
+const struct var_type *
+raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression)
+{
 	return &expression->type;
 }
-const struct expression *raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression) {
+const struct expression *
+raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression)
+{
 	if (!expression->key_expr)
 		return NULL;
 	assert(expression->key_expr->type >= AST_LITERAL_EXPR && expression->key_expr->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->key_expr;
 }
-const struct expression *raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression) {
-	assert(expression->value_expr->type >= AST_LITERAL_EXPR && expression->value_expr->type <= AST_FUNCTION_CALL_EXPR);
+const struct expression *
+raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression)
+{
+	assert(expression->value_expr->type >= AST_LITERAL_EXPR &&
+	       expression->value_expr->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->value_expr;
+}
+const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression)
+{
+	return &expression->type;
+}
+void raviX_table_literal_expression_foreach_element(
+    const struct table_literal_expression *statement, void *userdata,
+    void (*callback)(void *, const struct table_element_assignment_expression *expr))
+{
+	struct ast_node *node;
+	FOR_EACH_PTR(statement->expr_list, node)
+	{
+		assert(node->type == AST_INDEXED_ASSIGN_EXPR);
+		callback(userdata, (struct table_element_assignment_expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
 }
