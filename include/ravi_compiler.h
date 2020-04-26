@@ -406,7 +406,12 @@ RAVICOMP_EXPORT const struct lua_symbol *raviX_symbol_expression_symbol(const st
 
 /* index expression */
 RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const struct index_expression *expression);
-RAVICOMP_EXPORT const struct expression *raviX_index_expression_symbol(const struct index_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_index_expression_expression(const struct index_expression *expression);
+
+/* unary expression */
+RAVICOMP_EXPORT const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression);
+RAVICOMP_EXPORT UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression);
 
 
 /* Convert a statement to the correct type */

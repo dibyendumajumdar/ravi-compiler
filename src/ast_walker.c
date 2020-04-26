@@ -437,7 +437,17 @@ const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expr
 const struct var_type *raviX_index_expression_type(const struct index_expression *expression) {
 	return &expression->type;
 }
-const struct expression *raviX_index_expression_symbol(const struct index_expression *expression) {
+const struct expression *raviX_index_expression_expression(const struct index_expression *expression) {
 	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
 	return (const struct expression *)expression->expr;
+}
+const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression) {
+	return &expression->type;
+}
+const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression) {
+	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
+	return (const struct expression *)expression->expr;
+}
+UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression) {
+	return expression->unary_op;
 }
