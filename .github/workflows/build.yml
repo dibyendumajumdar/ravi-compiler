@@ -42,6 +42,6 @@ jobs:
       if: runner.os != 'Windows'
       shell: bash
       run: |
-         cd tests && sh runtests.sh ${{runner.workspace}}/build/tparse
-         cd tests && sh runtests.sh ${{runner.workspace}}/build/taskwalk
+         cd tests && sh runtests.sh ${{runner.workspace}}/build/tparse && cd ..
+         cd tests && sh runtests.sh ${{runner.workspace}}/build/taskwalk && cd ..
 
