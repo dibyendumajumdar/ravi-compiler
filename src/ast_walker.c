@@ -145,53 +145,53 @@ const struct for_statement *raviX_for_statement(const struct statement *stmt)
 enum ast_node_type raviX_expression_type(const struct expression *expression) { return expression->type; }
 const struct literal_expression *raviX_literal_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_LITERAL_EXPR);
+	assert(expr->type == EXPR_LITERAL);
 	return &n(expr)->literal_expr;
 }
 const struct symbol_expression *raviX_symbol_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_SYMBOL_EXPR);
+	assert(expr->type == EXPR_SYMBOL);
 	return &n(expr)->symbol_expr;
 }
 const struct index_expression *raviX_index_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_Y_INDEX_EXPR || expr->type == AST_FIELD_SELECTOR_EXPR);
+	assert(expr->type == EXPR_Y_INDEX || expr->type == EXPR_FIELD_SELECTOR);
 	return &n(expr)->index_expr;
 }
 const struct unary_expression *raviX_unary_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_UNARY_EXPR);
+	assert(expr->type == EXPR_UNARY);
 	return &n(expr)->unary_expr;
 }
 const struct binary_expression *raviX_binary_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_BINARY_EXPR);
+	assert(expr->type == EXPR_BINARY);
 	return &n(expr)->binary_expr;
 }
 const struct function_expression *raviX_function_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_FUNCTION_EXPR);
+	assert(expr->type == EXPR_FUNCTION);
 	return &n(expr)->function_expr;
 }
 const struct table_element_assignment_expression *
 raviX_table_element_assignment_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_INDEXED_ASSIGN_EXPR);
+	assert(expr->type == EXPR_TABLE_ELEMENT_ASSIGN);
 	return &n(expr)->table_elem_assign_expr;
 }
 const struct table_literal_expression *raviX_table_literal_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_TABLE_EXPR);
+	assert(expr->type == EXPR_TABLE_LITERAL);
 	return &n(expr)->table_expr;
 }
 const struct suffixed_expression *raviX_suffixed_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_SUFFIXED_EXPR);
+	assert(expr->type == EXPR_SUFFIXED);
 	return &n(expr)->suffixed_expr;
 }
 const struct function_call_expression *raviX_function_call_expression(const struct expression *expr)
 {
-	assert(expr->type == AST_FUNCTION_CALL_EXPR);
+	assert(expr->type == EXPR_FUNCTION_CALL);
 	return &n(expr)->function_call_expr;
 }
 #undef n
@@ -202,7 +202,7 @@ void raviX_return_statement_foreach_expression(const struct return_statement *st
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
@@ -233,7 +233,7 @@ void raviX_local_statement_foreach_expression(const struct local_statement *stat
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
@@ -255,7 +255,7 @@ void raviX_expression_statement_foreach_lhs_expression(const struct expression_s
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->var_expr_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
@@ -266,14 +266,14 @@ void raviX_expression_statement_foreach_rhs_expression(const struct expression_s
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
 const struct symbol_expression *raviX_function_statement_name(const struct function_statement *statement)
 {
-	assert(statement->name->type == AST_SYMBOL_EXPR);
+	assert(statement->name->type == EXPR_SYMBOL);
 	return &statement->name->symbol_expr;
 }
 bool raviX_function_statement_is_method(const struct function_statement *statement)
@@ -282,8 +282,8 @@ bool raviX_function_statement_is_method(const struct function_statement *stateme
 }
 const struct index_expression *raviX_function_statement_method_name(const struct function_statement *statement)
 {
-	assert(statement->method_name->type == AST_Y_INDEX_EXPR ||
-	       statement->method_name->type == AST_FIELD_SELECTOR_EXPR);
+	assert(statement->method_name->type == EXPR_Y_INDEX ||
+	       statement->method_name->type == EXPR_FIELD_SELECTOR);
 	return &statement->method_name->index_expr;
 }
 bool raviX_function_statement_has_selectors(const struct function_statement *statement)
@@ -296,14 +296,14 @@ void raviX_function_statement_foreach_selector(const struct function_statement *
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->selectors, node)
 	{
-		assert(node->type == AST_Y_INDEX_EXPR || node->type == AST_FIELD_SELECTOR_EXPR);
+		assert(node->type == EXPR_Y_INDEX || node->type == EXPR_FIELD_SELECTOR);
 		callback(userdata, &node->index_expr);
 	}
 	END_FOR_EACH_PTR(node)
 }
 const struct function_expression *raviX_function_ast(const struct function_statement *statement)
 {
-	assert(statement->function_expr->type == AST_FUNCTION_EXPR);
+	assert(statement->function_expr->type == EXPR_FUNCTION);
 	return &statement->function_expr->function_expr;
 }
 const struct block_scope *raviX_do_statement_scope(const struct do_statement *statement) { return statement->scope; }
@@ -335,7 +335,7 @@ void raviX_test_then_statement_foreach_statement(const struct test_then_statemen
 }
 const struct expression *raviX_test_then_statement_condition(const struct test_then_statement *statement)
 {
-	assert(statement->condition->type >= AST_LITERAL_EXPR && statement->condition->type <= AST_FUNCTION_CALL_EXPR);
+	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
 	return (struct expression *)statement->condition;
 }
 void raviX_if_statement_foreach_test_then_statement(const struct if_statement *statement, void *userdata,
@@ -367,7 +367,7 @@ void raviX_if_statement_foreach_else_statement(const struct if_statement *statem
 
 const struct expression *raviX_while_or_repeat_statement_condition(const struct while_or_repeat_statement *statement)
 {
-	assert(statement->condition->type >= AST_LITERAL_EXPR && statement->condition->type <= AST_FUNCTION_CALL_EXPR);
+	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
 	return (struct expression *)statement->condition;
 }
 const struct block_scope *raviX_while_or_repeat_statement_scope(const struct while_or_repeat_statement *statement)
@@ -408,7 +408,7 @@ void raviX_for_statement_foreach_expression(const struct for_statement *statemen
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
@@ -447,7 +447,7 @@ const struct var_type *raviX_index_expression_type(const struct index_expression
 }
 const struct expression *raviX_index_expression_expression(const struct index_expression *expression)
 {
-	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr;
 }
 const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression)
@@ -456,7 +456,7 @@ const struct var_type *raviX_unary_expression_type(const struct unary_expression
 }
 const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression)
 {
-	assert(expression->expr->type >= AST_LITERAL_EXPR && expression->expr->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr;
 }
 UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression)
@@ -469,14 +469,14 @@ const struct var_type *raviX_binary_expression_type(const struct binary_expressi
 }
 const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression)
 {
-	assert(expression->expr_left->type >= AST_LITERAL_EXPR &&
-	       expression->expr_left->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->expr_left->type >= EXPR_LITERAL &&
+	       expression->expr_left->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_left;
 }
 const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression)
 {
-	assert(expression->expr_right->type >= AST_LITERAL_EXPR &&
-	       expression->expr_right->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->expr_right->type >= EXPR_LITERAL &&
+	       expression->expr_right->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_right;
 }
 BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression)
@@ -493,14 +493,14 @@ raviX_table_element_assignment_expression_key(const struct table_element_assignm
 {
 	if (!expression->key_expr)
 		return NULL;
-	assert(expression->key_expr->type >= AST_LITERAL_EXPR && expression->key_expr->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->key_expr->type >= EXPR_LITERAL && expression->key_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->key_expr;
 }
 const struct expression *
 raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression)
 {
-	assert(expression->value_expr->type >= AST_LITERAL_EXPR &&
-	       expression->value_expr->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->value_expr->type >= EXPR_LITERAL &&
+	       expression->value_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->value_expr;
 }
 const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression)
@@ -514,7 +514,7 @@ void raviX_table_literal_expression_foreach_element(
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->expr_list, node)
 	{
-		assert(node->type == AST_INDEXED_ASSIGN_EXPR);
+		assert(node->type == EXPR_TABLE_ELEMENT_ASSIGN);
 		callback(userdata, &node->table_elem_assign_expr);
 	}
 	END_FOR_EACH_PTR(node)
@@ -526,8 +526,8 @@ const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expr
 }
 const struct expression *raviX_suffixed_expression_primary(const struct suffixed_expression *expression)
 {
-	assert(expression->primary_expr->type >= AST_LITERAL_EXPR &&
-	       expression->primary_expr->type <= AST_FUNCTION_CALL_EXPR);
+	assert(expression->primary_expr->type >= EXPR_LITERAL &&
+	       expression->primary_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->primary_expr;
 }
 void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
@@ -536,7 +536,7 @@ void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->suffix_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
@@ -558,14 +558,14 @@ void raviX_function_call_expression_foreach_argument(const struct function_call_
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->arg_list, node)
 	{
-		assert(node->type >= AST_LITERAL_EXPR && node->type <= AST_FUNCTION_CALL_EXPR);
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
 		callback(userdata, (struct expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
 const struct function_expression *raviX_scope_owning_function(const struct block_scope *scope)
 {
-	assert(scope->function->type == AST_FUNCTION_EXPR);
+	assert(scope->function->type == EXPR_FUNCTION);
 	return &scope->function->function_expr;
 }
 RAVICOMP_EXPORT const struct block_scope *raviX_scope_parent_scope(const struct block_scope *scope)
@@ -608,7 +608,7 @@ const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua
 }
 const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
 {
-	assert(symbol->target_function->type == AST_FUNCTION_EXPR);
+	assert(symbol->target_function->type == EXPR_FUNCTION);
 	return &symbol->target_function->function_expr;
 }
 unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol) { return symbol->upvalue_index; }

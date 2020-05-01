@@ -271,7 +271,7 @@ static const char *get_binary_opr_str(BinaryOperatorType op)
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 {
 	switch (node->type) {
-	case AST_FUNCTION_EXPR: {
+	case EXPR_FUNCTION: {
 		if (node->function_expr.args) {
 			printf_buf(buf, "%pfunction(\n", level);
 			print_symbol_list(buf, node->function_expr.args, level + 1, ",");
@@ -410,7 +410,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
-	case AST_SUFFIXED_EXPR: {
+	case EXPR_SUFFIXED: {
 		printf_buf(buf, "%p%c %T\n", level, "[suffixed expr start]", &node->suffixed_expr.type);
 		printf_buf(buf, "%p%c %T\n", level + 1, "[primary start]",
 			   &node->suffixed_expr.primary_expr->common_expr.type);
@@ -424,7 +424,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[suffixed expr end]");
 		break;
 	}
-	case AST_FUNCTION_CALL_EXPR: {
+	case EXPR_FUNCTION_CALL: {
 		printf_buf(buf, "%p%c %T\n", level, "[function call start]", &node->function_call_expr.type);
 		if (node->function_call_expr.method_name) {
 			printf_buf(buf, "%p: %t (\n", level + 1, node->function_call_expr.method_name);
@@ -436,11 +436,11 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[function call end]");
 		break;
 	}
-	case AST_SYMBOL_EXPR: {
+	case EXPR_SYMBOL: {
 		print_symbol(buf, node->symbol_expr.var, level + 1);
 		break;
 	}
-	case AST_BINARY_EXPR: {
+	case EXPR_BINARY: {
 		printf_buf(buf, "%p%c %T\n", level, "[binary expr start]", &node->binary_expr.type);
 		raviX_print_ast_node(buf, node->binary_expr.expr_left, level + 1);
 		printf_buf(buf, "%p%s\n", level, get_binary_opr_str(node->binary_expr.binary_op));
@@ -448,14 +448,14 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[binary expr end]");
 		break;
 	}
-	case AST_UNARY_EXPR: {
+	case EXPR_UNARY: {
 		printf_buf(buf, "%p%c %T\n", level, "[unary expr start]", &node->unary_expr.type);
 		printf_buf(buf, "%p%s\n", level, get_unary_opr_str(node->unary_expr.unary_op));
 		raviX_print_ast_node(buf, node->unary_expr.expr, level + 1);
 		printf_buf(buf, "%p%c\n", level, "[unary expr end]");
 		break;
 	}
-	case AST_LITERAL_EXPR: {
+	case EXPR_LITERAL: {
 		printf_buf(buf, "%p", level);
 		switch (node->literal_expr.type.type_code) {
 		case RAVI_TNIL:
@@ -479,14 +479,14 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "\n");
 		break;
 	}
-	case AST_FIELD_SELECTOR_EXPR: {
+	case EXPR_FIELD_SELECTOR: {
 		printf_buf(buf, "%p%c %T\n", level, "[field selector start]", &node->index_expr.type);
 		printf_buf(buf, "%p.\n", level + 1);
 		raviX_print_ast_node(buf, node->index_expr.expr, level + 2);
 		printf_buf(buf, "%p%c\n", level, "[field selector end]");
 		break;
 	}
-	case AST_Y_INDEX_EXPR: {
+	case EXPR_Y_INDEX: {
 		printf_buf(buf, "%p%c %T\n", level, "[Y index start]", &node->index_expr.type);
 		printf_buf(buf, "%p[\n", level + 1);
 		raviX_print_ast_node(buf, node->index_expr.expr, level + 2);
@@ -494,7 +494,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[Y index end]");
 		break;
 	}
-	case AST_INDEXED_ASSIGN_EXPR: {
+	case EXPR_TABLE_ELEMENT_ASSIGN: {
 		printf_buf(buf, "%p%c %T\n", level, "[indexed assign start]", &node->table_elem_assign_expr.type);
 		if (node->table_elem_assign_expr.key_expr) {
 			printf_buf(buf, "%p%c\n", level, "[index start]");
@@ -507,7 +507,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[indexed assign end]");
 		break;
 	}
-	case AST_TABLE_EXPR: {
+	case EXPR_TABLE_LITERAL: {
 		printf_buf(buf, "%p{ %c %T\n", level, "[table constructor start]", &node->table_expr.type);
 		print_ast_node_list(buf, node->table_expr.expr_list, level + 1, ",");
 		printf_buf(buf, "%p} %c\n", level, "[table constructor end]");

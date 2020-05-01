@@ -75,13 +75,13 @@ static void typecheck_unary_operator(struct compiler_state *container, struct as
 		break;
 	case UNOPR_TO_INTARRAY:
 		set_type(&node->unary_expr.type, RAVI_TARRAYINT);
-		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
+		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYINT);
 		}
 		break;
 	case UNOPR_TO_NUMARRAY:
 		set_type(&node->unary_expr.type, RAVI_TARRAYFLT);
-		if (node->unary_expr.expr->type == AST_TABLE_EXPR) {
+		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYFLT);
 		}
 		break;
@@ -202,7 +202,7 @@ static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_
 	FOR_EACH_PTR(node->suffixed_expr.suffix_list, this_node)
 	{
 		typecheck_ast_node(container, function, this_node);
-		if (this_node->type == AST_Y_INDEX_EXPR) {
+		if (this_node->type == EXPR_Y_INDEX) {
 			if (prev_node->common_expr.type.type_code == RAVI_TARRAYFLT) {
 				if (this_node->index_expr.expr->common_expr.type.type_code == RAVI_TNUMINT) {
 					set_typecode(&this_node->index_expr.type, RAVI_TNUMFLT);
@@ -237,7 +237,7 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	if (var_type->type_code == RAVI_TNUMINT) {
 		/* if the expr is of type number or # operator then insert @integer operator */
 		if (expr_type->type_code == RAVI_TNUMFLT ||
-		    (expr->type == AST_UNARY_EXPR && expr->unary_expr.unary_op == UNOPR_LEN)) {
+		    (expr->type == EXPR_UNARY && expr->unary_expr.unary_op == UNOPR_LEN)) {
 			/* Okay, but backend must do appropriate conversion */
 			;
 		} else if (expr_type->type_code != RAVI_TNUMINT) {
@@ -394,7 +394,7 @@ static void typecheck_while_or_repeat_statement(struct compiler_state *container
 static void typecheck_ast_node(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
 {
 	switch (node->type) {
-	case AST_FUNCTION_EXPR: {
+	case EXPR_FUNCTION: {
 		/* args need type assertions but those have no ast - i.e. code gen should do it */
 		typecheck_ast_list(container, function, node->function_expr.function_statement_list);
 		break;
@@ -444,18 +444,18 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 		typecheck_for_num_statment(container, function, node);
 		break;
 	}
-	case AST_SUFFIXED_EXPR: {
+	case EXPR_SUFFIXED: {
 		typecheck_suffixedexpr(container, function, node);
 		break;
 	}
-	case AST_FUNCTION_CALL_EXPR: {
+	case EXPR_FUNCTION_CALL: {
 		if (node->function_call_expr.method_name) {
 		} else {
 		}
 		typecheck_ast_list(container, function, node->function_call_expr.arg_list);
 		break;
 	}
-	case AST_SYMBOL_EXPR: {
+	case EXPR_SYMBOL: {
 		/* symbol type should have been set when symbol was created */
 		if (node->symbol_expr.var->symbol_type != SYM_LABEL) {
 			copy_type(&node->symbol_expr.type, &node->symbol_expr.var->variable.value_type);
@@ -466,27 +466,27 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 		}
 		break;
 	}
-	case AST_BINARY_EXPR: {
+	case EXPR_BINARY: {
 		typecheck_binary_operator(container, function, node);
 		break;
 	}
-	case AST_UNARY_EXPR: {
+	case EXPR_UNARY: {
 		typecheck_unary_operator(container, function, node);
 		break;
 	}
-	case AST_LITERAL_EXPR: {
+	case EXPR_LITERAL: {
 		/* type set during parsing */
 		break;
 	}
-	case AST_FIELD_SELECTOR_EXPR: {
+	case EXPR_FIELD_SELECTOR: {
 		typecheck_ast_node(container, function, node->index_expr.expr);
 		break;
 	}
-	case AST_Y_INDEX_EXPR: {
+	case EXPR_Y_INDEX: {
 		typecheck_ast_node(container, function, node->index_expr.expr);
 		break;
 	}
-	case AST_INDEXED_ASSIGN_EXPR: {
+	case EXPR_TABLE_ELEMENT_ASSIGN: {
 		if (node->table_elem_assign_expr.key_expr) {
 			typecheck_ast_node(container, function, node->table_elem_assign_expr.key_expr);
 		}
@@ -494,7 +494,7 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 		copy_type(&node->table_elem_assign_expr.type, &node->table_elem_assign_expr.value_expr->common_expr.type);
 		break;
 	}
-	case AST_TABLE_EXPR: {
+	case EXPR_TABLE_LITERAL: {
 		typecheck_ast_list(container, function, node->table_expr.expr_list);
 		break;
 	}

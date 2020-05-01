@@ -234,17 +234,17 @@ enum ast_node_type {
 	STMT_FOR_NUM,
 	STMT_REPEAT,
 	STMT_EXPR, /* Also used for assignment statements */
-	AST_LITERAL_EXPR,
-	AST_SYMBOL_EXPR,
-	AST_Y_INDEX_EXPR,	 /* [] operator */
-	AST_FIELD_SELECTOR_EXPR, /* table field access - '.' or ':' operator */
-	AST_INDEXED_ASSIGN_EXPR, /* table value assign in table constructor */
-	AST_SUFFIXED_EXPR,
-	AST_UNARY_EXPR,
-	AST_BINARY_EXPR,
-	AST_FUNCTION_EXPR, /* function literal */
-	AST_TABLE_EXPR,	   /* table constructor */
-	AST_FUNCTION_CALL_EXPR
+	EXPR_LITERAL,
+	EXPR_SYMBOL,
+	EXPR_Y_INDEX,	 /* [] operator */
+	EXPR_FIELD_SELECTOR, /* table field access - '.' or ':' operator */
+	EXPR_TABLE_ELEMENT_ASSIGN, /* table value assign in table constructor */
+	EXPR_SUFFIXED,
+	EXPR_UNARY,
+	EXPR_BINARY,
+	EXPR_FUNCTION, /* function literal */
+	EXPR_TABLE_LITERAL,	   /* table constructor */
+	EXPR_FUNCTION_CALL
 };
 
 struct statement;

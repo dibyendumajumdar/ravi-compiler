@@ -164,10 +164,10 @@ walk_table_assignment_expression(void *data,
 static void walk_expression(void *data, const struct expression *expression)
 {
 	switch (raviX_expression_type(expression)) {
-	case AST_SYMBOL_EXPR:
+	case EXPR_SYMBOL:
 		walk_symbol_expression(data, raviX_symbol_expression(expression));
 		break;
-	case AST_FUNCTION_CALL_EXPR: {
+	case EXPR_FUNCTION_CALL: {
 		const struct function_call_expression *function_call_expression =
 		    raviX_function_call_expression(expression);
 		const struct var_type *type = raviX_function_call_expression_type(function_call_expression);
@@ -178,7 +178,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		raviX_function_call_expression_foreach_argument(function_call_expression, data, walk_expression);
 		break;
 	}
-	case AST_SUFFIXED_EXPR: {
+	case EXPR_SUFFIXED: {
 		const struct suffixed_expression *suffixed_expression = raviX_suffixed_expression(expression);
 		const struct var_type *type = raviX_suffixed_expression_type(suffixed_expression);
 		(void)type;
@@ -186,7 +186,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		raviX_suffixed_expression_foreach_suffix(suffixed_expression, data, walk_expression);
 		break;
 	}
-	case AST_TABLE_EXPR: {
+	case EXPR_TABLE_LITERAL: {
 		const struct table_literal_expression *table_literal_expression =
 		    raviX_table_literal_expression(expression);
 		const struct var_type *type = raviX_table_literal_expression_type(table_literal_expression);
@@ -195,15 +195,15 @@ static void walk_expression(void *data, const struct expression *expression)
 							       walk_table_assignment_expression);
 		break;
 	}
-	case AST_INDEXED_ASSIGN_EXPR: {
+	case EXPR_TABLE_ELEMENT_ASSIGN: {
 		walk_table_assignment_expression(data, raviX_table_element_assignment_expression(expression));
 		break;
 	}
-	case AST_FUNCTION_EXPR: {
+	case EXPR_FUNCTION: {
 		walk_function(data, raviX_function_expression(expression));
 		break;
 	}
-	case AST_BINARY_EXPR: {
+	case EXPR_BINARY: {
 		const struct binary_expression *binary_expression = raviX_binary_expression(expression);
 		const struct var_type *type = raviX_binary_expression_type(binary_expression);
 		(void)type;
@@ -213,7 +213,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		walk_expression(data, raviX_binary_expression_right_expression(binary_expression));
 		break;
 	}
-	case AST_UNARY_EXPR: {
+	case EXPR_UNARY: {
 		const struct unary_expression *unary_expression = raviX_unary_expression(expression);
 		const struct var_type *type = raviX_unary_expression_type(unary_expression);
 		(void)type;
@@ -222,7 +222,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		walk_expression(data, raviX_unary_expression_expression(unary_expression));
 		break;
 	}
-	case AST_LITERAL_EXPR: {
+	case EXPR_LITERAL: {
 		const struct literal_expression *literal_expression = raviX_literal_expression(expression);
 		const struct var_type *type = raviX_literal_expression_type(literal_expression);
 		(void)type;
@@ -230,7 +230,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		(void)sem_info;
 		break;
 	}
-	case AST_FIELD_SELECTOR_EXPR: {
+	case EXPR_FIELD_SELECTOR: {
 		walk_index_expression(data, raviX_index_expression(expression));
 		break;
 	}

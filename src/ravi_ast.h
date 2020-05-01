@@ -221,17 +221,17 @@ struct literal_expression {
 	struct var_type type;
 	SemInfo u;
 };
-/* primaryexp -> NAME | '(' expr ')', NAME is parsed as AST_SYMBOL_EXPR */
+/* primaryexp -> NAME | '(' expr ')', NAME is parsed as EXPR_SYMBOL */
 struct symbol_expression {
 	struct var_type type;
 	struct lua_symbol *var;
 };
-/* AST_Y_INDEX_EXPR or AST_FIELD_SELECTOR_EXPR */
+/* EXPR_Y_INDEX or EXPR_FIELD_SELECTOR */
 struct index_expression {
 	struct var_type type;
 	struct ast_node *expr; /* '[' expr ']' */
 };
-/* AST_UNARY_EXPR */
+/* EXPR_UNARY */
 struct unary_expression {
 	struct var_type type;
 	UnaryOperatorType unary_op;
@@ -257,7 +257,7 @@ struct function_expression {
 	struct lua_symbol_list *locals;	       /* List of locals */
 };
 /* Assign values in table constructor */
-/* AST_INDEXED_ASSIGN_EXPR - used in table constructor */
+/* EXPR_TABLE_ELEMENT_ASSIGN - used in table constructor */
 struct table_element_assignment_expression {
 	struct var_type type;
 	struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
@@ -265,13 +265,13 @@ struct table_element_assignment_expression {
 	struct ast_node *value_expr;
 };
 /* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
-/* table constructor expression AST_TABLE_EXPR occurs in function call and simple expr */
+/* table constructor expression EXPR_TABLE_LITERAL occurs in function call and simple expr */
 struct table_literal_expression {
 	struct var_type type;
 	struct ast_node_list *expr_list;
 };
 /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
-/* suffix_list may have AST_FIELD_SELECTOR_EXPR, AST_Y_INDEX_EXPR, AST_FUNCTION_CALL_EXPR */
+/* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
 struct suffixed_expression {
 	struct var_type type;
 	struct ast_node *primary_expr;

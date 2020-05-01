@@ -162,11 +162,11 @@ static const struct constant *add_constant(struct proc *proc, const struct const
 
 /**
  * Allocates and adds a constant to the Proc's constants table.
- * Input is expected to be AST_LITERAL_EXPR
+ * Input is expected to be EXPR_LITERAL
  */
 static const struct constant *allocate_constant(struct proc *proc, struct ast_node *node)
 {
-	assert(node->type == AST_LITERAL_EXPR);
+	assert(node->type == EXPR_LITERAL);
 	struct constant c = {.type = node->literal_expr.type.type_code};
 	if (c.type == RAVI_TNUMINT)
 		c.i = node->literal_expr.u.i;
@@ -334,7 +334,7 @@ static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
  */
 static struct proc *allocate_proc(struct linearizer_state *linearizer, struct ast_node *function_expr)
 {
-	assert(function_expr->type == AST_FUNCTION_EXPR);
+	assert(function_expr->type == EXPR_FUNCTION);
 	struct proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
 	proc->function_expr = function_expr;
 	proc->id = ptrlist_size((struct ptr_list *)linearizer->all_procs);
@@ -435,7 +435,7 @@ static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 
 static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr)
 {
-	assert(expr->type == AST_LITERAL_EXPR);
+	assert(expr->type == EXPR_LITERAL);
 	ravitype_t type = expr->literal_expr.type.type_code;
 	struct pseudo *pseudo = NULL;
 	switch (type) {
@@ -1039,12 +1039,12 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 		struct pseudo *next;
 		if (prev_pseudo->type == PSEUDO_RANGE)
 			convert_range_to_temp(prev_pseudo);
-		if (this_node->type == AST_Y_INDEX_EXPR || this_node->type == AST_FIELD_SELECTOR_EXPR) {
+		if (this_node->type == EXPR_Y_INDEX || this_node->type == EXPR_FIELD_SELECTOR) {
 			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
 			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
 						     key_pseudo, this_node->common_expr.type.type_code);
-		} else if (this_node->type == AST_FUNCTION_CALL_EXPR) {
+		} else if (this_node->type == EXPR_FUNCTION_CALL) {
 			next = linearize_function_call_expression(proc, this_node, prev_node, prev_pseudo);
 		} else {
 			next = NULL;
@@ -1250,29 +1250,29 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
 {
 	switch (expr->type) {
-	case AST_LITERAL_EXPR: {
+	case EXPR_LITERAL: {
 		return linearize_literal(proc, expr);
 	} break;
-	case AST_BINARY_EXPR: {
+	case EXPR_BINARY: {
 		return linearize_binary_operator(proc, expr);
 	} break;
-	case AST_FUNCTION_EXPR: {
+	case EXPR_FUNCTION: {
 		return linearize_function_expr(proc, expr);
 	} break;
-	case AST_UNARY_EXPR: {
+	case EXPR_UNARY: {
 		return linearize_unary_operator(proc, expr);
 	} break;
-	case AST_SUFFIXED_EXPR: {
+	case EXPR_SUFFIXED: {
 		return linearize_suffixedexpr(proc, expr);
 	} break;
-	case AST_SYMBOL_EXPR: {
+	case EXPR_SYMBOL: {
 		return linearize_symbol_expression(proc, expr);
 	} break;
-	case AST_TABLE_EXPR: {
+	case EXPR_TABLE_LITERAL: {
 		return linearize_table_constructor(proc, expr);
 	} break;
-	case AST_Y_INDEX_EXPR:
-	case AST_FIELD_SELECTOR_EXPR: {
+	case EXPR_Y_INDEX:
+	case EXPR_FIELD_SELECTOR: {
 		return linearize_expression(proc, expr->index_expr.expr);
 	} break;
 	default:
@@ -1890,7 +1890,7 @@ static void linearize_function(struct linearizer_state *linearizer)
 	struct proc *proc = linearizer->current_proc;
 	assert(proc != NULL);
 	struct ast_node *func_expr = proc->function_expr;
-	assert(func_expr->type == AST_FUNCTION_EXPR);
+	assert(func_expr->type == EXPR_FUNCTION);
 	initialize_graph(proc);
 	start_scope(linearizer, proc, func_expr->function_expr.main_block);
 	linearize_function_args(linearizer);
