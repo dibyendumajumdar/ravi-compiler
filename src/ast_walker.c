@@ -48,7 +48,7 @@ void raviX_function_foreach_statement(const struct function_expression *function
 	}
 	END_FOR_EACH_PTR(node)
 }
-enum ast_node_type raviX_statement_type(struct statement *statement) { return statement->type; }
+enum ast_node_type raviX_statement_type(const struct statement *statement) { return statement->type; }
 void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
 				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
@@ -321,7 +321,7 @@ const struct block_scope *raviX_test_then_statement_scope(const struct test_then
 {
 	return statement->test_then_scope;
 }
-void raviX_test_the_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
+void raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
 						void (*callback)(void *userdata, const struct statement *statement))
 {
 	struct ast_node *node;

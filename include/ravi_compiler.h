@@ -344,7 +344,7 @@ RAVICOMP_EXPORT void raviX_if_statement_foreach_else_statement(const struct if_s
 										const struct statement *statement));
 RAVICOMP_EXPORT const struct block_scope *raviX_test_then_statement_scope(const struct test_then_statement *statement);
 RAVICOMP_EXPORT void
-raviX_test_the_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
+raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
 					   void (*callback)(void *userdata, const struct statement *statement));
 RAVICOMP_EXPORT const struct expression *
 raviX_test_then_statement_condition(const struct test_then_statement *statement);
@@ -452,7 +452,7 @@ raviX_function_call_expression_foreach_argument(const struct function_call_expre
 						void (*callback)(void *, const struct expression *expr));
 
 /* Convert a statement to the correct type */
-RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(struct statement *statement);
+RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(const struct statement *statement);
 RAVICOMP_EXPORT const struct return_statement *raviX_return_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct label_statement *raviX_label_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct goto_statement *raviX_goto_statement(const struct statement *stmt);

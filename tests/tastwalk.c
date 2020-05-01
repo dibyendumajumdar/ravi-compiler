@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void walk_statement(void *data, const struct statement *statement);
+static void walk_expression(void *data, const struct expression *expression);
+static void walk_function(void *data, const struct function_expression *function);
+
 struct arguments {
 	const char *filename;
 	const char *code;
@@ -119,6 +123,120 @@ static void walk_symbol(void *data, const struct lua_symbol *symbol)
 	}
 }
 
+static void walk_scope(void *data, const struct block_scope *scope)
+{
+	raviX_scope_foreach_symbol(scope, data, walk_symbol);
+}
+
+static void walk_index_expression(void *data, const struct index_expression *index_expression)
+{
+	// TODO
+}
+static void walk_symbol_expression(void *data, const struct symbol_expression *symbol_expression)
+{
+	// TODO
+}
+
+static void walk_expression(void *data, const struct expression *expression)
+{
+	// TODO
+}
+
+static void walk_test_then_statement(void *data, const struct test_then_statement *test_then_statement)
+{
+	walk_expression(data, raviX_test_then_statement_condition(test_then_statement));
+	walk_scope(data, raviX_test_then_statement_scope(test_then_statement));
+	raviX_test_then_statement_foreach_statement(test_then_statement, data, walk_statement);
+}
+
+static void walk_statement(void *data, const struct statement *statement)
+{
+	switch (raviX_statement_type(statement)) {
+	case AST_DO_STMT: {
+		const struct do_statement *do_statement = raviX_do_statement(statement);
+		walk_scope(data, raviX_do_statement_scope(do_statement));
+		raviX_do_statement_foreach_statement(do_statement, data, walk_statement);
+		break;
+	}
+	case AST_EXPR_STMT: {
+		const struct expression_statement *expression_statement = raviX_expression_statement(statement);
+		raviX_expression_statement_foreach_lhs_expression(expression_statement, data, walk_expression);
+		raviX_expression_statement_foreach_rhs_expression(expression_statement, data, walk_expression);
+		break;
+	}
+	case AST_FORNUM_STMT:
+	case AST_FORIN_STMT: {
+		const struct for_statement *for_statement = raviX_for_statement(statement);
+		walk_scope(data, raviX_for_statement_scope(for_statement));
+		raviX_for_statement_foreach_symbol(for_statement, data, walk_variable_symbol);
+		raviX_for_statement_foreach_expression(for_statement, data, walk_expression);
+		walk_scope(data, raviX_for_statement_body_scope(for_statement));
+		raviX_for_statement_body_foreach_statement(for_statement, data, walk_statement);
+		break;
+	}
+	case AST_FUNCTION_STMT: {
+		const struct function_statement *function_statement = raviX_function_statement(statement);
+		const struct symbol_expression *name_expression = raviX_function_statement_name(function_statement);
+		walk_symbol_expression(data, name_expression);
+		if (raviX_function_statement_has_selectors(function_statement)) {
+			raviX_function_statement_foreach_selector(function_statement, data, walk_index_expression);
+		}
+		if (raviX_function_statement_is_method(function_statement)) {
+			walk_index_expression(data, raviX_function_statement_method_name(function_statement));
+		}
+		walk_function(data, raviX_function_ast(function_statement));
+		break;
+	}
+	case AST_GOTO_STMT: {
+		const struct goto_statement *goto_statement = raviX_goto_statement(statement);
+		if (!raviX_goto_statement_is_break(goto_statement)) {
+			const struct string_object *goto_label = raviX_goto_statement_label_name(goto_statement);
+			(void)goto_label;
+		}
+		walk_scope(data, raviX_goto_statement_scope(goto_statement));
+		break;
+	}
+	case AST_IF_STMT: {
+		const struct if_statement *if_statement = raviX_if_statement(statement);
+		raviX_if_statement_foreach_test_then_statement(if_statement, data, walk_test_then_statement);
+		walk_scope(data, raviX_if_then_statement_else_scope(if_statement));
+		raviX_if_statement_foreach_else_statement(if_statement, data, walk_statement);
+		break;
+	}
+	case AST_LABEL_STMT: {
+		const struct label_statement *label_statement = raviX_label_statement(statement);
+		const struct string_object *label_name = raviX_label_statement_label_name(label_statement);
+		(void)label_name;
+		walk_scope(data, raviX_label_statement_label_scope(label_statement));
+		break;
+	}
+	case AST_LOCAL_STMT: {
+		const struct local_statement *local_statement = raviX_local_statement(statement);
+		raviX_local_statement_foreach_symbol(local_statement, data, walk_variable_symbol);
+		raviX_local_statement_foreach_expression(local_statement, data, walk_expression);
+		break;
+	}
+	case AST_REPEAT_STMT:
+	case AST_WHILE_STMT: {
+		const struct while_or_repeat_statement *while_or_repeat_statement =
+		    raviX_while_or_repeat_statement(statement);
+		walk_expression(data, raviX_while_or_repeat_statement_condition(while_or_repeat_statement));
+		walk_scope(data, raviX_while_or_repeat_statement_scope(while_or_repeat_statement));
+		raviX_while_or_repeat_statement_foreach_statement(while_or_repeat_statement, data, walk_statement);
+		break;
+	}
+	case AST_RETURN_STMT: {
+		const struct return_statement *return_statement = raviX_return_statement(statement);
+		raviX_return_statement_foreach_expression(return_statement, data, walk_expression);
+		break;
+	}
+	default: {
+		// Cannot happen
+		assert(false);
+	}
+	}
+}
+
 static void walk_function(void *data, const struct function_expression *function)
 {
 	struct ast_state *state = (struct ast_state *)data;
@@ -130,7 +248,7 @@ static void walk_function(void *data, const struct function_expression *function
 	assert(function == raviX_scope_owning_function(scope));
 	const struct block_scope *parent = raviX_scope_parent_scope(scope);
 	(void)parent;
-	raviX_scope_foreach_symbol(scope, state, walk_symbol);
+	walk_scope(state, scope);
 }
 
 static void walk_ast(struct compiler_state *container)
