@@ -142,6 +142,7 @@ const struct for_statement *raviX_for_statement(const struct statement *stmt)
 	assert(stmt->type == AST_FORIN_STMT || stmt->type == AST_FORNUM_STMT);
 	return &n(stmt)->for_stmt;
 }
+enum ast_node_type raviX_expression_type(const struct expression *expression) { return expression->type; }
 const struct literal_expression *raviX_literal_expression(const struct expression *expr)
 {
 	assert(expr->type == AST_LITERAL_EXPR);
@@ -322,7 +323,7 @@ const struct block_scope *raviX_test_then_statement_scope(const struct test_then
 	return statement->test_then_scope;
 }
 void raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
-						void (*callback)(void *userdata, const struct statement *statement))
+						 void (*callback)(void *userdata, const struct statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->test_then_statement_list, node)

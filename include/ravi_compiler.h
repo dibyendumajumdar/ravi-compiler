@@ -466,6 +466,7 @@ RAVICOMP_EXPORT const struct while_or_repeat_statement *raviX_while_or_repeat_st
 RAVICOMP_EXPORT const struct for_statement *raviX_for_statement(const struct statement *stmt);
 
 /* Convert an expression to the correct type */
+RAVICOMP_EXPORT enum ast_node_type raviX_expression_type(const struct expression *expression);
 RAVICOMP_EXPORT const struct literal_expression *raviX_literal_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct symbol_expression *raviX_symbol_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct index_expression *raviX_index_expression(const struct expression *expr);

@@ -1,6 +1,9 @@
 /**
  * This is a sample AST walker that illustrates how to use the
  * AST api. Note that this sample doesn't actually do anything.
+ *
+ * This is meant to be a starting point for writing a useful AST
+ * walker.
  */
 
 #include "ravi_compiler.h"
@@ -130,16 +133,112 @@ static void walk_scope(void *data, const struct block_scope *scope)
 
 static void walk_index_expression(void *data, const struct index_expression *index_expression)
 {
-	// TODO
+	const struct var_type *type = raviX_index_expression_type(index_expression);
+	(void)type;
+	walk_expression(data, raviX_index_expression_expression(index_expression));
 }
+
 static void walk_symbol_expression(void *data, const struct symbol_expression *symbol_expression)
 {
-	// TODO
+	const struct var_type *type = raviX_symbol_expression_type(symbol_expression);
+	(void)type;
+	walk_symbol(data, raviX_symbol_expression_symbol(symbol_expression));
+}
+
+static void
+walk_table_assignment_expression(void *data,
+				 const struct table_element_assignment_expression *table_element_assignment_expression)
+{
+	const struct var_type *type =
+	    raviX_table_element_assignment_expression_type(table_element_assignment_expression);
+	(void)type;
+	const struct expression *key_expression =
+	    raviX_table_element_assignment_expression_key(table_element_assignment_expression);
+	if (key_expression) {
+		walk_expression(data,
+				raviX_table_element_assignment_expression_key(table_element_assignment_expression));
+	}
+	walk_expression(data, raviX_table_element_assignment_expression_value(table_element_assignment_expression));
 }
 
 static void walk_expression(void *data, const struct expression *expression)
 {
-	// TODO
+	switch (raviX_expression_type(expression)) {
+	case AST_SYMBOL_EXPR:
+		walk_symbol_expression(data, raviX_symbol_expression(expression));
+		break;
+	case AST_FUNCTION_CALL_EXPR: {
+		const struct function_call_expression *function_call_expression =
+		    raviX_function_call_expression(expression);
+		const struct var_type *type = raviX_function_call_expression_type(function_call_expression);
+		(void)type;
+		const struct string_object *method_name =
+		    raviX_function_call_expression_method_name(function_call_expression);
+		(void)method_name;
+		raviX_function_call_expression_foreach_argument(function_call_expression, data, walk_expression);
+		break;
+	}
+	case AST_SUFFIXED_EXPR: {
+		const struct suffixed_expression *suffixed_expression = raviX_suffixed_expression(expression);
+		const struct var_type *type = raviX_suffixed_expression_type(suffixed_expression);
+		(void)type;
+		walk_expression(data, raviX_suffixed_expression_primary(suffixed_expression));
+		raviX_suffixed_expression_foreach_suffix(suffixed_expression, data, walk_expression);
+		break;
+	}
+	case AST_TABLE_EXPR: {
+		const struct table_literal_expression *table_literal_expression =
+		    raviX_table_literal_expression(expression);
+		const struct var_type *type = raviX_table_literal_expression_type(table_literal_expression);
+		(void)type;
+		raviX_table_literal_expression_foreach_element(table_literal_expression, data,
+							       walk_table_assignment_expression);
+		break;
+	}
+	case AST_INDEXED_ASSIGN_EXPR: {
+		walk_table_assignment_expression(data, raviX_table_element_assignment_expression(expression));
+		break;
+	}
+	case AST_FUNCTION_EXPR: {
+		walk_function(data, raviX_function_expression(expression));
+		break;
+	}
+	case AST_BINARY_EXPR: {
+		const struct binary_expression *binary_expression = raviX_binary_expression(expression);
+		const struct var_type *type = raviX_binary_expression_type(binary_expression);
+		(void)type;
+		enum BinaryOperatorType binary_operator = raviX_binary_expression_operator(binary_expression);
+		(void)binary_operator;
+		walk_expression(data, raviX_binary_expression_left_expression(binary_expression));
+		walk_expression(data, raviX_binary_expression_right_expression(binary_expression));
+		break;
+	}
+	case AST_UNARY_EXPR: {
+		const struct unary_expression *unary_expression = raviX_unary_expression(expression);
+		const struct var_type *type = raviX_unary_expression_type(unary_expression);
+		(void)type;
+		enum UnaryOperatorType unary_operator = raviX_unary_expression_operator(unary_expression);
+		(void)unary_operator;
+		walk_expression(data, raviX_unary_expression_expression(unary_expression));
+		break;
+	}
+	case AST_LITERAL_EXPR: {
+		const struct literal_expression *literal_expression = raviX_literal_expression(expression);
+		const struct var_type *type = raviX_literal_expression_type(literal_expression);
+		(void)type;
+		const SemInfo *sem_info = raviX_literal_expression_literal(literal_expression);
+		(void)sem_info;
+		break;
+	}
+	case AST_FIELD_SELECTOR_EXPR: {
+		walk_index_expression(data, raviX_index_expression(expression));
+		break;
+	}
+	default: {
+		// cannot happen
+		assert(false);
+	}
+	}
 }
 
 static void walk_test_then_statement(void *data, const struct test_then_statement *test_then_statement)
