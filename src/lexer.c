@@ -124,7 +124,7 @@ void raviX_token2str(int token, membuff_t *mb)
 		raviX_buffer_add_fstring(mb, "'%c'", token);
 	} else {
 		const char *s = luaX_tokens[token - FIRST_RESERVED];
-		if (token < TK_EOS) /* fixed format (symbols and reserved words)? */
+		if (token < TOK_EOS) /* fixed format (symbols and reserved words)? */
 			raviX_buffer_add_fstring(mb, "'%s'", s);
 		else /* names, strings, and numerals */
 			raviX_buffer_add_string(mb, s);
@@ -134,10 +134,10 @@ void raviX_token2str(int token, membuff_t *mb)
 static void txtToken(struct lexer_state *ls, int token)
 {
 	switch (token) {
-	case TK_NAME:
-	case TK_STRING:
-	case TK_FLT:
-	case TK_INT:
+	case TOK_NAME:
+	case TOK_STRING:
+	case TOK_FLT:
+	case TOK_INT:
 		save(ls, '\0');
 		raviX_buffer_add_fstring(&ls->container->error_message, "'%s'", raviX_buffer_data(ls->buff));
 		break;
@@ -214,7 +214,7 @@ struct lexer_state *raviX_init_lexer(struct compiler_state *container, const cha
 	ls->n = ls->bufsize;
 	ls->p = ls->buf;
 	ls->current = zgetc(ls);
-	ls->lookahead.token = TK_EOS; /* no look-ahead token */
+	ls->lookahead.token = TOK_EOS; /* no look-ahead token */
 	ls->linenumber = 1;
 	ls->lastline = 1;
 	ls->source = source;
@@ -504,14 +504,14 @@ static int read_numeral(struct lexer_state *ls, SemInfo *seminfo)
 	}
 	save(ls, '\0');
 	if (luaO_str2num(raviX_buffer_data(ls->buff), &obj) == 0) /* format error? */
-		lexerror(ls, "malformed number", TK_FLT);
+		lexerror(ls, "malformed number", TOK_FLT);
 	if (obj.type == 1) {
 		seminfo->i = obj.i;
-		return TK_INT;
+		return TOK_INT;
 	} else {
 		assert(obj.type == 2);
 		seminfo->r = obj.n;
-		return TK_FLT;
+		return TOK_FLT;
 	}
 }
 
@@ -548,7 +548,7 @@ static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
 			(void)what;
 			//			    luaO_pushfstring(ls->L, "unfinished long %s (starting at line %d)",
 			// what, line);
-			lexerror(ls, msg, TK_EOS);
+			lexerror(ls, msg, TOK_EOS);
 			break; /* to avoid warnings */
 		}
 		case ']': {
@@ -585,7 +585,7 @@ static void esccheck(struct lexer_state *ls, int c, const char *msg)
 	if (!c) {
 		if (ls->current != EOZ)
 			save_and_next(ls); /* add current to buffer for error message */
-		lexerror(ls, msg, TK_STRING);
+		lexerror(ls, msg, TOK_STRING);
 	}
 }
 
@@ -648,11 +648,11 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 	while (ls->current != del) {
 		switch (ls->current) {
 		case EOZ:
-			lexerror(ls, "unfinished string", TK_EOS);
+			lexerror(ls, "unfinished string", TOK_EOS);
 			break; /* to avoid warnings */
 		case '\n':
 		case '\r':
-			lexerror(ls, "unfinished string", TK_STRING);
+			lexerror(ls, "unfinished string", TOK_STRING);
 			break;		   /* to avoid warnings */
 		case '\\': {		   /* escape sequences */
 			int c;		   /* final character to be saved */
@@ -743,21 +743,21 @@ static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 
 	/* @integer or @integer[] */
 	if (strncmp(s, "@integer", n) == 0)
-		tok = TK_TO_INTEGER;
+		tok = TOK_TO_INTEGER;
 	else if (strncmp(s, "@integer[]", n) == 0)
-		tok = TK_TO_INTARRAY;
+		tok = TOK_TO_INTARRAY;
 	/* @number or @number[] */
 	else if (strncmp(s, "@number", n) == 0)
-		tok = TK_TO_NUMBER;
+		tok = TOK_TO_NUMBER;
 	else if (strncmp(s, "@number[]", n) == 0)
-		tok = TK_TO_NUMARRAY;
+		tok = TOK_TO_NUMARRAY;
 	/* @table */
 	else if (strncmp(s, "@table", n) == 0)
-		tok = TK_TO_TABLE;
+		tok = TOK_TO_TABLE;
 	else if (strncmp(s, "@string", n) == 0)
-		tok = TK_TO_STRING;
+		tok = TOK_TO_STRING;
 	else if (strncmp(s, "@closure", n) == 0)
-		tok = TK_TO_CLOSURE;
+		tok = TOK_TO_CLOSURE;
 	else {
 		seminfo->ts = luaX_newstring(ls, s + 1, (uint32_t)(n - 1)); /* omit @ */
 		tok = '@';
@@ -807,69 +807,69 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 			int sep = skip_sep(ls);
 			if (sep >= 0) {
 				read_long_string(ls, seminfo, sep);
-				return TK_STRING;
+				return TOK_STRING;
 			} else if (sep != -1) /* '[=...' missing second bracket */
-				lexerror(ls, "invalid long string delimiter", TK_STRING);
+				lexerror(ls, "invalid long string delimiter", TOK_STRING);
 			return '[';
 		}
 		case '=': {
 			next(ls);
 			if (check_next1(ls, '='))
-				return TK_EQ;
+				return TOK_EQ;
 			else
 				return '=';
 		}
 		case '<': {
 			next(ls);
 			if (check_next1(ls, '='))
-				return TK_LE;
+				return TOK_LE;
 			else if (check_next1(ls, '<'))
-				return TK_SHL;
+				return TOK_SHL;
 			else
 				return '<';
 		}
 		case '>': {
 			next(ls);
 			if (check_next1(ls, '='))
-				return TK_GE;
+				return TOK_GE;
 			else if (check_next1(ls, '>'))
-				return TK_SHR;
+				return TOK_SHR;
 			else
 				return '>';
 		}
 		case '/': {
 			next(ls);
 			if (check_next1(ls, '/'))
-				return TK_IDIV;
+				return TOK_IDIV;
 			else
 				return '/';
 		}
 		case '~': {
 			next(ls);
 			if (check_next1(ls, '='))
-				return TK_NE;
+				return TOK_NE;
 			else
 				return '~';
 		}
 		case ':': {
 			next(ls);
 			if (check_next1(ls, ':'))
-				return TK_DBCOLON;
+				return TOK_DBCOLON;
 			else
 				return ':';
 		}
 		case '"':
 		case '\'': { /* short literal strings */
 			read_string(ls, ls->current, seminfo);
-			return TK_STRING;
+			return TOK_STRING;
 		}
 		case '.': { /* '.', '..', '...', or number */
 			save_and_next(ls);
 			if (check_next1(ls, '.')) {
 				if (check_next1(ls, '.'))
-					return TK_DOTS; /* '...' */
+					return TOK_DOTS; /* '...' */
 				else
-					return TK_CONCAT; /* '..' */
+					return TOK_CONCAT; /* '..' */
 			} else if (!lisdigit(ls->current))
 				return '.';
 			else
@@ -888,7 +888,7 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 			return read_numeral(ls, seminfo);
 		}
 		case EOZ: {
-			return TK_EOS;
+			return TOK_EOS;
 		}
 		case '@': {
 			/* RAVI change: @ introduces a type assertion operator */
@@ -913,7 +913,7 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 				if (tok != -1) /* reserved word? */
 					return tok + FIRST_RESERVED;
 				else {
-					return TK_NAME;
+					return TOK_NAME;
 				}
 			} else { /* single-char tokens (+ - / ...) */
 				int c = ls->current;
@@ -928,16 +928,16 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 void raviX_next(struct lexer_state *ls)
 {
 	ls->lastline = ls->linenumber;
-	if (ls->lookahead.token != TK_EOS) {  /* is there a look-ahead token? */
+	if (ls->lookahead.token != TOK_EOS) {  /* is there a look-ahead token? */
 		ls->t = ls->lookahead;	      /* use this one */
-		ls->lookahead.token = TK_EOS; /* and discharge it */
+		ls->lookahead.token = TOK_EOS; /* and discharge it */
 	} else
 		ls->t.token = llex(ls, &ls->t.seminfo); /* read next token */
 }
 
 int raviX_lookahead(struct lexer_state *ls)
 {
-	assert(ls->lookahead.token == TK_EOS);
+	assert(ls->lookahead.token == TOK_EOS);
 	ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
 	return ls->lookahead.token;
 }

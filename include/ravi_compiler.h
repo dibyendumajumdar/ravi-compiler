@@ -1,6 +1,6 @@
 /*
 A compiler for Ravi and Lua 5.3. This is work in progress.
-Once ready it will be used to create a new byte code generator for Ravi.
+Once ready it will be used to create a JIT compiler for Ravi.
 
 This header file defines the public api
 
@@ -25,6 +25,7 @@ typedef long long lua_Integer;
 typedef double lua_Number;
 
 /* Initialize the compiler state */
+/* During compilation all data structures are stored in the compiler state */
 RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler(void);
 /* Destroy the compiler state */
 RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
@@ -32,55 +33,55 @@ RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 /* ------------------------ LEXICAL ANALYZER -------------------------------*/
 /* This is derived from PuC Lua implementation                              */
 enum TokenType {
-	/* terminal symbols denoted by reserved words */
+	/* The reserved word tokens start from 257 because code 1 to 256 are used for standard character tokens */
 	FIRST_RESERVED = 257,
-	TK_AND = FIRST_RESERVED,
-	TK_BREAK,
-	TK_DO,
-	TK_ELSE,
-	TK_ELSEIF,
-	TK_END,
-	TK_FALSE,
-	TK_FOR,
-	TK_FUNCTION,
-	TK_GOTO,
-	TK_IF,
-	TK_IN,
-	TK_LOCAL,
-	TK_DEFER,
-	TK_NIL,
-	TK_NOT,
-	TK_OR,
-	TK_REPEAT,
-	TK_RETURN,
-	TK_THEN,
-	TK_TRUE,
-	TK_UNTIL,
-	TK_WHILE,
+	TOK_AND = FIRST_RESERVED,
+	TOK_BREAK,
+	TOK_DO,
+	TOK_ELSE,
+	TOK_ELSEIF,
+	TOK_END,
+	TOK_FALSE,
+	TOK_FOR,
+	TOK_FUNCTION,
+	TOK_GOTO,
+	TOK_IF,
+	TOK_IN,
+	TOK_LOCAL,
+	TOK_DEFER, /* Ravi extension */
+	TOK_NIL,
+	TOK_NOT,
+	TOK_OR,
+	TOK_REPEAT,
+	TOK_RETURN,
+	TOK_THEN,
+	TOK_TRUE,
+	TOK_UNTIL,
+	TOK_WHILE,
 	/* other terminal symbols */
-	TK_IDIV,
-	TK_CONCAT,
-	TK_DOTS,
-	TK_EQ,
-	TK_GE,
-	TK_LE,
-	TK_NE,
-	TK_SHL,
-	TK_SHR,
-	TK_DBCOLON,
-	TK_EOS,
-	TK_FLT,
-	TK_INT,
-	TK_NAME,
-	TK_STRING,
+	TOK_IDIV,
+	TOK_CONCAT,
+	TOK_DOTS,
+	TOK_EQ,
+	TOK_GE,
+	TOK_LE,
+	TOK_NE,
+	TOK_SHL,
+	TOK_SHR,
+	TOK_DBCOLON,
+	TOK_EOS,
+	TOK_FLT,
+	TOK_INT,
+	TOK_NAME,
+	TOK_STRING,
 	/** RAVI extensions */
-	TK_TO_INTEGER,
-	TK_TO_NUMBER,
-	TK_TO_INTARRAY,
-	TK_TO_NUMARRAY,
-	TK_TO_TABLE,
-	TK_TO_STRING,
-	TK_TO_CLOSURE
+	TOK_TO_INTEGER,
+	TOK_TO_NUMBER,
+	TOK_TO_INTARRAY,
+	TOK_TO_NUMARRAY,
+	TOK_TO_TABLE,
+	TOK_TO_STRING,
+	TOK_TO_CLOSURE
 };
 
 /*
@@ -104,8 +105,8 @@ typedef union {
 } SemInfo; /* semantic information */
 
 typedef struct Token {
-	int token; /* Token value or character value */
-	SemInfo seminfo;
+	int token; /* Token value or character value; token values start from FIRST_RESERVED which is 257 */
+	SemInfo seminfo; /* Literal associated with the token */
 } Token;
 
 /*

@@ -64,7 +64,7 @@ struct compiler_state {
 };
 
 /* number of reserved words */
-#define NUM_RESERVED ((int)(TK_WHILE - FIRST_RESERVED + 1))
+#define NUM_RESERVED ((int)(TOK_WHILE - FIRST_RESERVED + 1))
 
 /* state of the lexer plus state of the parser when shared by all
    functions */
