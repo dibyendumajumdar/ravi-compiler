@@ -402,45 +402,45 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 	case AST_NONE: {
 		break;
 	}
-	case AST_RETURN_STMT: {
+	case STMT_RETURN: {
 		typecheck_ast_list(container, function, node->return_stmt.expr_list);
 		break;
 	}
-	case AST_LOCAL_STMT: {
+	case STMT_LOCAL: {
 		typecheck_local_statement(container, function, node);
 		break;
 	}
-	case AST_FUNCTION_STMT: {
+	case STMT_FUNCTION: {
 		typecheck_ast_node(container, function, node->function_stmt.function_expr);
 		break;
 	}
-	case AST_LABEL_STMT: {
+	case STMT_LABEL: {
 		break;
 	}
-	case AST_GOTO_STMT: {
+	case STMT_GOTO: {
 		break;
 	}
-	case AST_DO_STMT: {
+	case STMT_DO: {
 		break;
 	}
-	case AST_EXPR_STMT: {
+	case STMT_EXPR: {
 		typecheck_expr_statement(container, function, node);
 		break;
 	}
-	case AST_IF_STMT: {
+	case STMT_IF: {
 		typecheck_if_statement(container, function, node);
 		break;
 	}
-	case AST_WHILE_STMT:
-	case AST_REPEAT_STMT: {
+	case STMT_WHILE:
+	case STMT_REPEAT: {
 		typecheck_while_or_repeat_statement(container, function, node);
 		break;
 	}
-	case AST_FORIN_STMT: {
+	case STMT_FOR_IN: {
 		typecheck_for_in_statment(container, function, node);
 		break;
 	}
-	case AST_FORNUM_STMT: {
+	case STMT_FOR_NUM: {
 		typecheck_for_num_statment(container, function, node);
 		break;
 	}

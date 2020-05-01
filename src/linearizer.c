@@ -1302,7 +1302,7 @@ static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_li
 
 static void linearize_return(struct proc *proc, struct ast_node *node)
 {
-	assert(node->type == AST_RETURN_STMT);
+	assert(node->type == STMT_RETURN);
 	struct instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
 	add_instruction_target(proc, insn, allocate_block_pseudo(proc, n2bb(proc->exit)));
@@ -1551,7 +1551,7 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 
 static void linearize_do_statement(struct proc *proc, struct ast_node *node)
 {
-	assert(node->type == AST_DO_STMT);
+	assert(node->type == STMT_DO);
 	start_scope(proc->linearizer, proc, node->do_stmt.scope);
 	linearize_statement_list(proc, node->do_stmt.do_statement_list);
 	end_scope(proc->linearizer, proc);
@@ -1609,7 +1609,7 @@ Lend:
 //clang-format on
 static void linearize_for_num_statement(struct proc *proc, struct ast_node *node)
 {
-	assert(node->type == AST_FORNUM_STMT);
+	assert(node->type == STMT_FOR_NUM);
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
 	/* For now we only allow integer expressions */
@@ -1714,7 +1714,7 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	struct basic_block *previous_break_target = proc->current_break_target;
 	proc->current_break_target = end_block;
 
-	if (node->type == AST_REPEAT_STMT) {
+	if (node->type == STMT_REPEAT) {
 		instruct_br(proc, allocate_block_pseudo(proc, body_block));
 	}
 
@@ -1740,50 +1740,50 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 	case AST_NONE: {
 		break;
 	}
-	case AST_RETURN_STMT: {
+	case STMT_RETURN: {
 		linearize_return(proc, node);
 		break;
 	}
-	case AST_LOCAL_STMT: {
+	case STMT_LOCAL: {
 		linearize_local_statement(proc, node);
 		break;
 	}
-	case AST_FUNCTION_STMT: {
+	case STMT_FUNCTION: {
 		// typecheck_ast_node(container, function, node->function_stmt.function_expr);
-		handle_error(proc->linearizer->ast_container, "AST_FUNCTION_STMT not yet implemented");
+		handle_error(proc->linearizer->ast_container, "STMT_FUNCTION not yet implemented");
 		break;
 	}
-	case AST_LABEL_STMT: {
+	case STMT_LABEL: {
 		linearize_label_statement(proc, node);
 		break;
 	}
-	case AST_GOTO_STMT: {
+	case STMT_GOTO: {
 		linearize_goto_statement(proc, node);
 		break;
 	}
-	case AST_DO_STMT: {
+	case STMT_DO: {
 		linearize_do_statement(proc, node);
 		break;
 	}
-	case AST_EXPR_STMT: {
+	case STMT_EXPR: {
 		linearize_expression_statement(proc, node);
 		break;
 	}
-	case AST_IF_STMT: {
+	case STMT_IF: {
 		linearize_if_statement(proc, node);
 		break;
 	}
-	case AST_WHILE_STMT:
-	case AST_REPEAT_STMT: {
+	case STMT_WHILE:
+	case STMT_REPEAT: {
 		linearize_while_statment(proc, node);
 		break;
 	}
-	case AST_FORIN_STMT: {
+	case STMT_FOR_IN: {
 		// typecheck_for_in_statment(container, function, node);
-		handle_error(proc->linearizer->ast_container, "AST_FORIN_STMT not yet implemented");
+		handle_error(proc->linearizer->ast_container, "STMT_FOR_IN not yet implemented");
 		break;
 	}
-	case AST_FORNUM_STMT: {
+	case STMT_FOR_NUM: {
 		linearize_for_num_statement(proc, node);
 		break;
 	}

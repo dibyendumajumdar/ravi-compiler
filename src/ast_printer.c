@@ -295,12 +295,12 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 	}
 	case AST_NONE:
 		break;
-	case AST_RETURN_STMT: {
+	case STMT_RETURN: {
 		printf_buf(buf, "%preturn\n", level);
 		print_ast_node_list(buf, node->return_stmt.expr_list, level + 1, ",");
 		break;
 	}
-	case AST_LOCAL_STMT: {
+	case STMT_LOCAL: {
 		printf_buf(buf, "%plocal\n", level);
 		printf_buf(buf, "%p%c\n", level, "[symbols]");
 		print_symbol_list(buf, node->local_stmt.var_list, level + 1, ",");
@@ -310,7 +310,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		}
 		break;
 	}
-	case AST_FUNCTION_STMT: {
+	case STMT_FUNCTION: {
 		raviX_print_ast_node(buf, node->function_stmt.name, level);
 		if (node->function_stmt.selectors) {
 			printf_buf(buf, "%p%c\n", level + 1, "[selectors]");
@@ -324,21 +324,21 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		raviX_print_ast_node(buf, node->function_stmt.function_expr, level + 2);
 		break;
 	}
-	case AST_LABEL_STMT: {
+	case STMT_LABEL: {
 		printf_buf(buf, "%p::%t::\n", level, node->label_stmt.symbol->label.label_name);
 		break;
 	}
-	case AST_GOTO_STMT: {
+	case STMT_GOTO: {
 		printf_buf(buf, "%pgoto %t\n", level, node->goto_stmt.name);
 		break;
 	}
-	case AST_DO_STMT: {
+	case STMT_DO: {
 		printf_buf(buf, "%pdo\n", level);
 		print_ast_node_list(buf, node->do_stmt.do_statement_list, level + 1, NULL);
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
-	case AST_EXPR_STMT: {
+	case STMT_EXPR: {
 		printf_buf(buf, "%p%c\n", level, "[expression statement start]");
 		if (node->expression_stmt.var_expr_list) {
 			printf_buf(buf, "%p%c\n", level + 1, "[var list start]");
@@ -351,7 +351,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[expression statement end]");
 		break;
 	}
-	case AST_IF_STMT: {
+	case STMT_IF: {
 		struct ast_node *test_then_block;
 		bool is_first = true;
 		FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
@@ -374,7 +374,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
-	case AST_WHILE_STMT: {
+	case STMT_WHILE: {
 		printf_buf(buf, "%pwhile\n", level);
 		raviX_print_ast_node(buf, node->while_or_repeat_stmt.condition, level + 1);
 		printf_buf(buf, "%pdo\n", level);
@@ -382,7 +382,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
-	case AST_REPEAT_STMT: {
+	case STMT_REPEAT: {
 		printf_buf(buf, "%prepeat\n", level);
 		print_ast_node_list(buf, node->while_or_repeat_stmt.loop_statement_list, level + 1, NULL);
 		printf_buf(buf, "%puntil\n", level);
@@ -390,7 +390,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%p%c\n", level, "[repeat end]");
 		break;
 	}
-	case AST_FORIN_STMT: {
+	case STMT_FOR_IN: {
 		printf_buf(buf, "%pfor\n", level);
 		print_symbol_list(buf, node->for_stmt.symbols, level + 1, ",");
 		printf_buf(buf, "%pin\n", level);
@@ -400,7 +400,7 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
-	case AST_FORNUM_STMT: {
+	case STMT_FOR_NUM: {
 		printf_buf(buf, "%pfor\n", level);
 		print_symbol_list(buf, node->for_stmt.symbols, level + 1, NULL);
 		printf_buf(buf, "%p=\n", level);

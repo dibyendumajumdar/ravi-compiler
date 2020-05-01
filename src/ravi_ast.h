@@ -154,26 +154,26 @@ struct block_scope {
 	struct lua_symbol_list *symbol_list; /* symbols defined in this block */
 };
 
-/*AST_RETURN_STMT */
+/*STMT_RETURN */
 struct return_statement {
 	struct ast_node_list *expr_list;
 };
-/* AST_LABEL_STMT */
+/* STMT_LABEL */
 struct label_statement {
 	struct lua_symbol *symbol;
 };
-/* AST_GOTO_STMT */
+/* STMT_GOTO */
 struct goto_statement {
 	unsigned is_break : 1; /* is this a break statement */
 	const struct string_object *name; /* target label, used to resolve the goto destination */
 	struct block_scope* goto_scope;   /* The scope of the goto statement */
 };
-/* AST_LOCAL_STMT local variable declarations */
+/* STMT_LOCAL local variable declarations */
 struct local_statement {
 	struct lua_symbol_list *var_list;
 	struct ast_node_list *expr_list;
 };
-/* AST_EXPR_STMT: Also covers assignments */
+/* STMT_EXPR: Also covers assignments */
 struct expression_statement {
 	struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
 	struct ast_node_list *expr_list;     /* Comma separated expressions */
@@ -314,10 +314,10 @@ struct ast_node {
 	enum ast_node_type type;
 	int line_number; /* Source line number */
 	union {
-		struct return_statement return_stmt; /*AST_RETURN_STMT */
-		struct label_statement label_stmt; /* AST_LABEL_STMT */
-		struct goto_statement goto_stmt; /* AST_GOTO_STMT */
-		struct local_statement local_stmt; /* AST_LOCAL_STMT local variable declarations */
+		struct return_statement return_stmt; /*STMT_RETURN */
+		struct label_statement label_stmt; /* STMT_LABEL */
+		struct goto_statement goto_stmt; /* STMT_GOTO */
+		struct local_statement local_stmt; /* STMT_LOCAL local variable declarations */
 		struct expression_statement expression_stmt;
 		struct function_statement function_stmt;
 		struct do_statement do_stmt;

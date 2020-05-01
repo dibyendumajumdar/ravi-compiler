@@ -1018,7 +1018,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 		is_break = 1;
 	}
 	// Resolve labels in the end?
-	struct ast_node *goto_stmt = allocate_ast_node(parser, AST_GOTO_STMT);
+	struct ast_node *goto_stmt = allocate_ast_node(parser, STMT_GOTO);
 	goto_stmt->goto_stmt.name = label;
 	goto_stmt->goto_stmt.is_break = is_break;
 	goto_stmt->goto_stmt.goto_scope = parser->current_scope;
@@ -1036,7 +1036,7 @@ static void skip_noop_statements(struct parser_state *parser)
 static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label)
 {
 	struct lua_symbol *symbol = new_label(parser, label);
-	struct ast_node *label_stmt = allocate_ast_node(parser, AST_LABEL_STMT);
+	struct ast_node *label_stmt = allocate_ast_node(parser, STMT_LABEL);
 	label_stmt->label_stmt.symbol = symbol;
 	return label_stmt;
 }
@@ -1058,7 +1058,7 @@ static struct ast_node *parse_while_statement(struct parser_state *parser, int l
 	struct lexer_state *ls = parser->ls;
 	/* whilestat -> WHILE cond DO block END */
 	raviX_next(ls); /* skip WHILE */
-	struct ast_node *stmt = allocate_ast_node(parser, AST_WHILE_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_WHILE);
 	stmt->while_or_repeat_stmt.loop_scope = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.condition = parse_condition(parser);
@@ -1073,7 +1073,7 @@ static struct ast_node *parse_repeat_statement(struct parser_state *parser, int 
 	struct lexer_state *ls = parser->ls;
 	/* repeatstat -> REPEAT block UNTIL cond */
 	raviX_next(ls); /* skip REPEAT */
-	struct ast_node *stmt = allocate_ast_node(parser, AST_REPEAT_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_REPEAT);
 	stmt->while_or_repeat_stmt.condition = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.loop_scope = new_scope(parser); /* scope block */
@@ -1155,12 +1155,12 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 	varname = check_name_and_next(ls); /* first variable name */
 	switch (ls->t.token) {
 	case '=':
-		stmt->type = AST_FORNUM_STMT;
+		stmt->type = STMT_FOR_NUM;
 		parse_fornum_statement(parser, stmt, varname, line);
 		break;
 	case ',':
 	case TK_IN:
-		stmt->type = AST_FORIN_STMT;
+		stmt->type = STMT_FOR_IN;
 		parse_for_list(parser, stmt, varname);
 		break;
 	default:
@@ -1177,7 +1177,7 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
-	struct ast_node *test_then_block = allocate_ast_node(parser, AST_TEST_THEN_STMT);				       // This is not an AST node on its own
+	struct ast_node *test_then_block = allocate_ast_node(parser, STMT_TEST_THEN);				       // This is not an AST node on its own
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;
@@ -1205,7 +1205,7 @@ static struct ast_node *parse_if_statement(struct parser_state *parser, int line
 {
 	struct lexer_state *ls = parser->ls;
 	/* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
-	struct ast_node *stmt = allocate_ast_node(parser, AST_IF_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_IF);
 	stmt->if_stmt.if_condition_list = NULL;
 	stmt->if_stmt.else_block = NULL;
 	stmt->if_stmt.else_statement_list = NULL;
@@ -1231,7 +1231,7 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
 	struct ast_node *function_ast = new_function(parser);
 	parse_function_body(parser, function_ast, 0, ls->linenumber); /* function created in next register */
 	end_function(parser);
-	struct ast_node *stmt = allocate_ast_node(parser, AST_LOCAL_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_LOCAL);
 	stmt->local_stmt.var_list = NULL;
 	stmt->local_stmt.expr_list = NULL;
 	add_symbol(parser->container, &stmt->local_stmt.var_list, symbol);
@@ -1243,7 +1243,7 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* stat -> LOCAL NAME {',' NAME} ['=' explist] */
-	struct ast_node *node = allocate_ast_node(parser, AST_LOCAL_STMT);
+	struct ast_node *node = allocate_ast_node(parser, STMT_LOCAL);
 	node->local_stmt.var_list = NULL;
 	node->local_stmt.expr_list = NULL;
 	int nvars = 0;
@@ -1274,7 +1274,7 @@ static struct ast_node *parse_function_name(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* funcname -> NAME {fieldsel} [':' NAME] */
-	struct ast_node *function_stmt = allocate_ast_node(parser, AST_FUNCTION_STMT);
+	struct ast_node *function_stmt = allocate_ast_node(parser, STMT_FUNCTION);
 	function_stmt->function_stmt.function_expr = NULL;
 	function_stmt->function_stmt.method_name = NULL;
 	function_stmt->function_stmt.selectors = NULL;
@@ -1305,7 +1305,7 @@ static struct ast_node *parse_function_statement(struct parser_state *parser, in
 /* parse function call with no returns or assignment statement */
 static struct ast_node *parse_expression_statement(struct parser_state *parser)
 {
-	struct ast_node *stmt = allocate_ast_node(parser, AST_EXPR_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_EXPR);
 	stmt->expression_stmt.var_expr_list = NULL;
 	stmt->expression_stmt.expr_list = NULL;
 	struct lexer_state *ls = parser->ls;
@@ -1331,7 +1331,7 @@ static struct ast_node *parse_return_statement(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
 	/* stat -> RETURN [explist] [';'] */
-	struct ast_node *return_stmt = allocate_ast_node(parser, AST_RETURN_STMT);
+	struct ast_node *return_stmt = allocate_ast_node(parser, STMT_RETURN);
 	return_stmt->return_stmt.expr_list = NULL;
 	if (block_follow(ls, 1) || ls->t.token == ';')
 		/* nret = 0*/; /* return no values */
@@ -1346,7 +1346,7 @@ static struct ast_node *parse_return_statement(struct parser_state *parser)
 static struct ast_node *parse_do_statement(struct parser_state *parser, int line)
 {
 	raviX_next(parser->ls); /* skip DO */
-	struct ast_node *stmt = allocate_ast_node(parser, AST_DO_STMT);
+	struct ast_node *stmt = allocate_ast_node(parser, STMT_DO);
 	stmt->do_stmt.do_statement_list = NULL;
 	stmt->do_stmt.scope = parse_block(parser, &stmt->do_stmt.do_statement_list);
 	check_match(parser->ls, TK_END, TK_DO, line);

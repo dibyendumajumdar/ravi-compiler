@@ -221,19 +221,19 @@ typedef enum UnaryOperatorType {
 
 enum ast_node_type {
 	AST_NONE, /* Used when the node doesn't represent an AST such as test_then_block. */
-	AST_RETURN_STMT,
-	AST_GOTO_STMT,
-	AST_LABEL_STMT,
-	AST_DO_STMT,
-	AST_LOCAL_STMT,
-	AST_FUNCTION_STMT,
-	AST_IF_STMT,
-	AST_TEST_THEN_STMT,
-	AST_WHILE_STMT,
-	AST_FORIN_STMT,
-	AST_FORNUM_STMT,
-	AST_REPEAT_STMT,
-	AST_EXPR_STMT, /* Also used for assignment statements */
+	STMT_RETURN,
+	STMT_GOTO,
+	STMT_LABEL,
+	STMT_DO,
+	STMT_LOCAL,
+	STMT_FUNCTION,
+	STMT_IF,
+	STMT_TEST_THEN,
+	STMT_WHILE,
+	STMT_FOR_IN,
+	STMT_FOR_NUM,
+	STMT_REPEAT,
+	STMT_EXPR, /* Also used for assignment statements */
 	AST_LITERAL_EXPR,
 	AST_SYMBOL_EXPR,
 	AST_Y_INDEX_EXPR,	 /* [] operator */
