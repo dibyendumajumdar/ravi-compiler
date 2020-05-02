@@ -29,7 +29,7 @@ RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler(void);
 /* Destroy the compiler state */
 RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
-/* ------------------------ LEXICAL ANALYZER -------------------------------*/
+/* ------------------------ LEXICAL ANALYZER API -------------------------------*/
 /* This is derived from PuC Lua implementation                              */
 enum TokenType {
 	/* The reserved word tokens start from 257 because code 0 to 256 are used for standard character tokens */
@@ -136,18 +136,19 @@ typedef struct {
 	size_t pos;
 } membuff_t;
 
-
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
 RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
 								uint32_t len);
 
-/* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name*/
+/* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
 RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
 						     size_t buflen, const char *source_name);
-/* Gets the lexer data structure that can be used to access the current token */
-RAVICOMP_EXPORT LexState *raviX_get_lexer_info(struct lexer_state *ls);
+/* Gets the lexer data structure that can be used to access the current token. Note that this is
+ * a readonly data structure
+ */
+RAVICOMP_EXPORT const LexState *raviX_get_lexer_info(struct lexer_state *ls);
 /* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved
  * (and reset to EOS) else the next token is retrieved
  */
@@ -156,24 +157,55 @@ RAVICOMP_EXPORT void raviX_next(struct lexer_state *ls);
  * Returns the token id.
  */
 RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
-/* Convert a token to text format */
+/* Convert a token to text format. The token will be written to current position in mb. */
 RAVICOMP_EXPORT void raviX_token2str(int token, membuff_t *mb);
 /* Release all data structures used by the lexer */
 RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
 
-RAVICOMP_EXPORT int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name);
-RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *container, FILE *fp);
-RAVICOMP_EXPORT int
-raviX_ast_typecheck(struct compiler_state *container); /* Perform type checks and assign types to AST */
+/* ---------------- PARSER API -------------------------- */
 
-/* linear IR generator */
-RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(struct compiler_state *container);
-RAVICOMP_EXPORT void raviX_destroy_linearizer(struct linearizer_state *linearizer);
+/*
+ * Parse a Lua chunk (i.e. script).
+ * The Lua chunk will be wrapped in an anonymous Lua function (the 'main' function), so all the code
+ * in the chunk will be part of that function. Any functions defined in the chunk will become child functions
+ * of the 'main' function.
+ *
+ * Each Lua chunk / script therefore has an anonymous 'main' function. The name 'main' is just to refer
+ * to this function as it has no name in reality.
+ *
+ * Note that at present a new compiler state should be created when processing a Lua chunk.
+ *
+ * Returns 0 on success, non-zero on failure.
+ */
+RAVICOMP_EXPORT int raviX_parse(struct compiler_state *compiler_state, const char *buffer, size_t buflen, const char *name);
+/* Prints out the AST to the file */
+RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *compiler_state, FILE *fp);
+/* Performs type checks on the AST and annotates types of expressions nad variables where possible.
+ * As a result the AST will be modified.
+ *
+ * Returns 0 on success, non-zero on failure.
+ */
+RAVICOMP_EXPORT int
+raviX_ast_typecheck(struct compiler_state *compiler_state); /* Perform type checks and assign types to AST */
+
+/* ---------------------------- LINEARIZER API --------------------------------------- */
+/* linear IR generator.
+ * The goal of this component is to convert the AST to a linear IR.
+ * This is work in progress, therefore the IR is not yet publicly exposed.
+ */
+RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(struct compiler_state *compiler_state);
+/* Attempts to create linear IR for given AST.
+ * Returns 0 on success.
+ */
 RAVICOMP_EXPORT int raviX_ast_linearize(struct linearizer_state *linearizer);
+/* Prints out the content of the linear IR */
 RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp);
+RAVICOMP_EXPORT void raviX_destroy_linearizer(struct linearizer_state *linearizer);
 
 /* utilies */
-RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *container);
+RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *compiler_state);
+
+/* ----------------------- AST WALKING API ------------------------ */
 
 /* Binary operators */
 typedef enum BinaryOperatorType {
@@ -218,8 +250,9 @@ typedef enum UnaryOperatorType {
 	UNOPR_NOUNOPR
 } UnaryOperatorType;
 
+/* Types of AST nodes */
 enum ast_node_type {
-	AST_NONE, /* Used when the node doesn't represent an AST such as test_then_block. */
+	AST_NONE, /* Will never be set on a properly initialized node */
 	STMT_RETURN,
 	STMT_GOTO,
 	STMT_LABEL,
@@ -237,7 +270,7 @@ enum ast_node_type {
 	EXPR_SYMBOL,
 	EXPR_Y_INDEX,	 /* [] operator */
 	EXPR_FIELD_SELECTOR, /* table field access - '.' or ':' operator */
-	EXPR_TABLE_ELEMENT_ASSIGN, /* table value assign in table constructor */
+	EXPR_TABLE_ELEMENT_ASSIGN, /* table element assignment in table constructor */
 	EXPR_SUFFIXED,
 	EXPR_UNARY,
 	EXPR_BINARY,
@@ -285,6 +318,9 @@ struct lua_upvalue_symbol;
 struct lua_variable_symbol;
 struct lua_label_symbol;
 
+/* As described before each parsed Lua script or chunk is wrapped in an anonymous 'main'
+ * function hence the AST root is this function.
+ */
 RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const struct compiler_state *compiler_state);
 
@@ -334,6 +370,11 @@ RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const struct do_statem
 							  void (*callback)(void *userdata,
 									   const struct statement *statement));
 /* if statement walking */
+/* Lua if statements are a mix of select/case and if/else statements in
+ * other languages. The AST represents the initial if condition block and all subsequent
+ * elseif blocks as test_then_statments. The final else block is treated as an optional
+ * else block.
+ */
 RAVICOMP_EXPORT void
 raviX_if_statement_foreach_test_then_statement(const struct if_statement *statement, void *userdata,
 					       void (*callback)(void *, const struct test_then_statement *stmt));

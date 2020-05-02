@@ -237,7 +237,7 @@ void raviX_destroy_lexer(struct lexer_state *ls)
 	free(ls);
 }
 
-LexState *raviX_get_lexer_info(struct lexer_state *ls) { return (LexState *)ls; }
+const LexState *raviX_get_lexer_info(struct lexer_state *ls) { return (LexState *)ls; }
 
 /*
 ** =======================================================
