@@ -87,6 +87,9 @@ enum TokenType {
 /*
  * Lua strings can have embedded 0 bytes therefore we
  * need a string type that has a length associated with it.
+ *
+ * The compiler stores a single copy o each string so that strings
+ * can be compared by equality.
  */
 struct string_object {
 	uint32_t len;	  /* length of the string */
@@ -120,6 +123,13 @@ typedef struct {
 	Token lookahead; /* look ahead token */
 } LexState;
 
+/* Following is a dynamic buffer implementation that is not strictly part of the
+ * compiler api but is relied upon by various compiler parts. We should perhaps avoid
+ * exposing it.
+ *
+ * The reason for exposing this is that we use it for getting the token string in one of the
+ * api calls.
+ */
 typedef struct {
 	char *buf;
 	size_t allocated_size;
