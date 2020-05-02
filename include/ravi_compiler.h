@@ -33,7 +33,7 @@ RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 /* ------------------------ LEXICAL ANALYZER -------------------------------*/
 /* This is derived from PuC Lua implementation                              */
 enum TokenType {
-	/* The reserved word tokens start from 257 because code 1 to 256 are used for standard character tokens */
+	/* The reserved word tokens start from 257 because code 0 to 256 are used for standard character tokens */
 	FIRST_RESERVED = 257,
 	TOK_AND = FIRST_RESERVED,
 	TOK_BREAK,
@@ -70,6 +70,7 @@ enum TokenType {
 	TOK_SHR,
 	TOK_DBCOLON,
 	TOK_EOS,
+	/* Tokens below this populate the seminfo */
 	TOK_FLT,
 	TOK_INT,
 	TOK_NAME,
@@ -88,7 +89,7 @@ enum TokenType {
  * Lua strings can have embedded 0 bytes therefore we
  * need a string type that has a length associated with it.
  *
- * The compiler stores a single copy o each string so that strings
+ * The compiler stores a single copy of each string so that strings
  * can be compared by equality.
  */
 struct string_object {
@@ -109,7 +110,7 @@ typedef union {
 
 typedef struct Token {
 	int token; /* Token value or character value; token values start from FIRST_RESERVED which is 257 */
-	SemInfo seminfo; /* Literal associated with the token */
+	SemInfo seminfo; /* Literal associated with the token, only valid when token is a literal or an identifier, i.e. token is > TOK_EOS */
 } Token;
 
 /*
@@ -119,8 +120,8 @@ typedef struct {
 	int current;	 /* current character (char as int) */
 	int linenumber;	 /* input line counter */
 	int lastline;	 /* line of last token 'consumed' */
-	Token t;	 /* current token */
-	Token lookahead; /* look ahead token */
+	Token t;	 /* current token, set after call to raviX_next() */
+	Token lookahead; /* look ahead token, set after call to raviX_lookahead() */
 } LexState;
 
 /* Following is a dynamic buffer implementation that is not strictly part of the
@@ -163,10 +164,13 @@ RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *comp
 						     size_t buflen, const char *source_name);
 /* Gets the lexer data structure that can be used to access the current token */
 RAVICOMP_EXPORT LexState *raviX_get_lexer_info(struct lexer_state *ls);
-/* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved,
- else the next token is retrieved */
+/* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved
+ * (and reset to EOS) else the next token is retrieved
+ */
 RAVICOMP_EXPORT void raviX_next(struct lexer_state *ls);
-/* Retrieves the next token and sets it as the lookahead. This means that a next call will get the lookahead */
+/* Retrieves the next token and sets it as the lookahead. This means that a next call will get the lookahead.
+ * Returns the token id.
+ */
 RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
 /* Convert a token to text format */
 RAVICOMP_EXPORT void raviX_token2str(int token, membuff_t *mb);

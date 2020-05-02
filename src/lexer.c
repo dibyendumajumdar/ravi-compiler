@@ -31,7 +31,7 @@ static const char *const luaX_tokens[] = {
     ">=",     "<=",	  "~=",	      "<<",	 ">>",	       "::",	    "<eof>",  "<number>", "<integer>",
     "<name>", "<string>", "@integer", "@number", "@integer[]", "@number[]", "@table", "@string",  "@closure"};
 
-/* Says whther the given string represents a Lua/Ravi keyword  i.e. reserved word */
+/* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
 
 /*
@@ -49,23 +49,25 @@ const struct string_object *raviX_create_string(struct compiler_state *container
 		/* found the string */
 		return (const struct string_object *)entry->key;
 	else {
-		struct string_object *newobj = raviX_allocator_allocate(&container->string_object_allocator, 0);
-		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1);
+		struct string_object *new_string = raviX_allocator_allocate(&container->string_object_allocator, 0);
+		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1); /* allow for 0 terminator */
 		memcpy(s, input, len);
 		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
-		newobj->str = s;
-		newobj->len = len;
-		newobj->hash = temp.hash;
-		newobj->reserved = -1;
-		/* Check if this is a keyword */
+		new_string->str = s;
+		new_string->len = len;
+		new_string->hash = temp.hash;
+		new_string->reserved = -1;
+		/* Check if this is a keyword, linear search is okay as we do this only when we first
+		 * encounter a keyword
+		 */
 		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
 			if (strcmp(luaX_tokens[i], s) == 0) {
-				newobj->reserved = i; /* save index of the keyword */
+				new_string->reserved = i; /* save index of the keyword */
 				break;
 			}
 		}
-		set_add_pre_hashed(container->strings, temp.hash, newobj);
-		return newobj;
+		set_add_pre_hashed(container->strings, temp.hash, new_string);
+		return new_string;
 	}
 }
 
@@ -124,7 +126,7 @@ void raviX_token2str(int token, membuff_t *mb)
 		raviX_buffer_add_fstring(mb, "'%c'", token);
 	} else {
 		const char *s = luaX_tokens[token - FIRST_RESERVED];
-		if (token < TOK_EOS) /* fixed format (symbols and reserved words)? */
+		if (token < TOK_EOS || (token >= TOK_TO_INTEGER && token <= TOK_TO_CLOSURE)) /* fixed format - reserved keywords */
 			raviX_buffer_add_fstring(mb, "'%s'", s);
 		else /* names, strings, and numerals */
 			raviX_buffer_add_string(mb, s);
