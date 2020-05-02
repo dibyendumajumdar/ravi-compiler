@@ -4,7 +4,6 @@ project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 set(HEADERS
         include/ravi_compiler.h
         src/allocate.h
-        include/port.h
         src/ptrlist.h
         src/fnv_hash.h
         src/hash_table.h
