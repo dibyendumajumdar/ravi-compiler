@@ -4,7 +4,6 @@
 
 int main(int argc, const char *argv[])
 {
-
 	struct compiler_state *container = raviX_init_compiler();
 	int rc = 0;
 

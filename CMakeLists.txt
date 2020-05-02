@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 
+set(PUBLIC_HEADERS
+    include/ravi_compiler.h)
+
 set(HEADERS
-        include/ravi_compiler.h
+        ${PUBLIC_HEADERS}
         src/allocate.h
         src/ptrlist.h
         src/fnv_hash.h
@@ -66,14 +69,13 @@ target_include_directories(test_stringset
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
 
-add_executable(tparse tests/tparse.c)
+add_executable(tparse tests/tparse.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tparse ravicomp)
 target_include_directories(tparse
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
 
-
-add_executable(tastwalk tests/tastwalk.c)
+add_executable(tastwalk tests/tastwalk.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tastwalk ravicomp)
 target_include_directories(tastwalk
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
