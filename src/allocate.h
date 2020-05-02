@@ -38,8 +38,6 @@
 * Copyright (C) 2017 Dibyendu Majumdar
 */
 
-#include <port.h>
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

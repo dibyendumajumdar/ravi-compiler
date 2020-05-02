@@ -11,6 +11,14 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#include <alloca.h>
+#else
+#include <io.h>
+#include <malloc.h>
+#endif
+
 static void handle_error(struct compiler_state *container, const char *msg)
 {
 	// TODO source and line number
