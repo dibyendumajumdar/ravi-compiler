@@ -69,12 +69,6 @@ enum TokenType {
 	TOK_SHL,
 	TOK_SHR,
 	TOK_DBCOLON,
-	TOK_EOS,
-	/* Tokens below this populate the seminfo */
-	TOK_FLT,
-	TOK_INT,
-	TOK_NAME,
-	TOK_STRING,
 	/** RAVI extensions */
 	TOK_TO_INTEGER,
 	TOK_TO_NUMBER,
@@ -82,7 +76,13 @@ enum TokenType {
 	TOK_TO_NUMARRAY,
 	TOK_TO_TABLE,
 	TOK_TO_STRING,
-	TOK_TO_CLOSURE
+	TOK_TO_CLOSURE,
+	TOK_EOS,
+	/* Tokens below this populate the seminfo */
+	TOK_FLT,
+	TOK_INT,
+	TOK_NAME,
+	TOK_STRING
 };
 
 /*

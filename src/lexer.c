@@ -25,11 +25,11 @@ static inline bool currIsNewline(struct lexer_state *ls) { return ls->current ==
 #define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 /* ORDER TokenType */
 static const char *const luaX_tokens[] = {
-    "and",    "break",	  "do",	      "else",	 "elseif",     "end",	    "false",  "for",	  "function",
-    "goto",   "if",	  "in",	      "local",	 "defer",      "nil",	    "not",    "or",	  "repeat",
-    "return", "then",	  "true",     "until",	 "while",      "//",	    "..",     "...",	  "==",
-    ">=",     "<=",	  "~=",	      "<<",	 ">>",	       "::",	    "<eof>",  "<number>", "<integer>",
-    "<name>", "<string>", "@integer", "@number", "@integer[]", "@number[]", "@table", "@string",  "@closure"};
+    "and",	 "break",  "do",      "else",	  "elseif", "end",	"false",     "for",	"function",
+    "goto",	 "if",	   "in",      "local",	  "defer",  "nil",	"not",	     "or",	"repeat",
+    "return",	 "then",   "true",    "until",	  "while",  "//",	"..",	     "...",	"==",
+    ">=",	 "<=",	   "~=",      "<<",	  ">>",	    "::",	"@integer",  "@number", "@integer[]",
+    "@number[]", "@table", "@string", "@closure", "<eof>",  "<number>", "<integer>", "<name>",	"<string>"};
 
 /* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
@@ -61,6 +61,8 @@ const struct string_object *raviX_create_string(struct compiler_state *container
 		 * encounter a keyword
 		 */
 		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
+			if (luaX_tokens[i][0] == '<')
+				break; // We have gone past reserved keywords
 			if (strcmp(luaX_tokens[i], s) == 0) {
 				new_string->reserved = i; /* save index of the keyword */
 				break;
@@ -126,9 +128,9 @@ void raviX_token2str(int token, membuff_t *mb)
 		raviX_buffer_add_fstring(mb, "'%c'", token);
 	} else {
 		const char *s = luaX_tokens[token - FIRST_RESERVED];
-		if (token < TOK_EOS || (token >= TOK_TO_INTEGER && token <= TOK_TO_CLOSURE)) /* fixed format - reserved keywords */
+		if (token < TOK_EOS) /* fixed format - reserved keywords */
 			raviX_buffer_add_fstring(mb, "'%s'", s);
-		else /* names, strings, and numerals */
+		else /* names, strings, and numerals - note that @<usertype> is covered here */
 			raviX_buffer_add_string(mb, s);
 	}
 }
@@ -735,7 +737,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 
 /*
 ** RAVI extension: generate a token for the cast operators -
-** @number, @number[], @integer, @integer[], @table
+** @number, @number[], @integer, @integer[], @table, @string, @closure
 */
 static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 {
@@ -931,7 +933,7 @@ void raviX_next(struct lexer_state *ls)
 {
 	ls->lastline = ls->linenumber;
 	if (ls->lookahead.token != TOK_EOS) {  /* is there a look-ahead token? */
-		ls->t = ls->lookahead;	      /* use this one */
+		ls->t = ls->lookahead;	       /* use this one */
 		ls->lookahead.token = TOK_EOS; /* and discharge it */
 	} else
 		ls->t.token = llex(ls, &ls->t.seminfo); /* read next token */
