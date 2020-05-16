@@ -821,7 +821,7 @@ static UnaryOperatorType get_unary_opr(int op)
 		return UNOPR_NOT;
 	case '-':
 		return UNOPR_MINUS;
-	case '!':
+	case '~':
 		return UNOPR_BNOT;
 	case '#':
 		return UNOPR_LEN;
