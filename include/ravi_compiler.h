@@ -30,58 +30,35 @@ RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler(void);
 RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
 /* ------------------------ LEXICAL ANALYZER API -------------------------------*/
-/* This is derived from PuC Lua implementation                              */
+/* This is derived from LuaJit implementation                              */
+#define TKDEF(_, __, ___) \
+    _(and) _(break) _(do) _(else) _(elseif) _(end) \
+    _(false) _(for) _(function) _(goto) _(if) _(in) _(local) \
+    _(defer) /* Ravi extension */ \
+    _(nil) _(not) _(or) \
+    _(repeat) _(return) _(then) _(true) _(until) _(while) \
+    /* other terminal symbols */ \
+    ___(IDIV, /) __(CONCAT, ..) __(DOTS, ...) __(EQ, ==) \
+    __(GE, >=) __(LE, <=) __(NE, ~=) __(SHL, <<) \
+    __(SHR, >>) __(DBCOLON, ::) \
+    /** RAVI extensions */ \
+    __(TO_INTEGER, @integer) __(TO_NUMBER, @number) \
+    __(TO_INTARRAY, @integer[]) __(TO_NUMARRAY, @number[]) \
+    __(TO_TABLE, @table) __(TO_STRING, @string) __(TO_CLOSURE, @closure) __(EOS, <eof>) \
+    /* Tokens below this populate the seminfo */ \
+    __(FLT, <number>) __(INT, <integer>) __(NAME, <name>) __(STRING, <string>)
+
 enum TokenType {
-	/* The reserved word tokens start from 257 because code 0 to 256 are used for standard character tokens */
-	FIRST_RESERVED = 257,
-	TOK_AND = FIRST_RESERVED,
-	TOK_BREAK,
-	TOK_DO,
-	TOK_ELSE,
-	TOK_ELSEIF,
-	TOK_END,
-	TOK_FALSE,
-	TOK_FOR,
-	TOK_FUNCTION,
-	TOK_GOTO,
-	TOK_IF,
-	TOK_IN,
-	TOK_LOCAL,
-	TOK_DEFER, /* Ravi extension */
-	TOK_NIL,
-	TOK_NOT,
-	TOK_OR,
-	TOK_REPEAT,
-	TOK_RETURN,
-	TOK_THEN,
-	TOK_TRUE,
-	TOK_UNTIL,
-	TOK_WHILE,
-	/* other terminal symbols */
-	TOK_IDIV,
-	TOK_CONCAT,
-	TOK_DOTS,
-	TOK_EQ,
-	TOK_GE,
-	TOK_LE,
-	TOK_NE,
-	TOK_SHL,
-	TOK_SHR,
-	TOK_DBCOLON,
-	/** RAVI extensions */
-	TOK_TO_INTEGER,
-	TOK_TO_NUMBER,
-	TOK_TO_INTARRAY,
-	TOK_TO_NUMARRAY,
-	TOK_TO_TABLE,
-	TOK_TO_STRING,
-	TOK_TO_CLOSURE,
-	TOK_EOS,
-	/* Tokens below this populate the seminfo */
-	TOK_FLT,
-	TOK_INT,
-	TOK_NAME,
-	TOK_STRING
+  TOK_OFS = 256,
+#define TKENUM1(name)		TOK_##name,
+#define TKENUM2(name, sym)	TOK_##name,
+#define TKENUM3(name, sym)	TOK_##name,
+TKDEF(TKENUM1, TKENUM2, TKENUM3)
+#undef TKENUM1
+#undef TKENUM2
+#undef TKENUM3
+  FIRST_RESERVED = TOK_OFS +1,
+  LAST_RESERVED = TOK_while - TOK_OFS
 };
 
 /*

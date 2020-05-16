@@ -84,12 +84,12 @@ static void checknext(struct lexer_state *ls, int c)
 static int block_follow(struct lexer_state *ls, int withuntil)
 {
 	switch (ls->t.token) {
-	case TOK_ELSE:
-	case TOK_ELSEIF:
-	case TOK_END:
+	case TOK_else:
+	case TOK_elseif:
+	case TOK_end:
 	case TOK_EOS:
 		return 1;
-	case TOK_UNTIL:
+	case TOK_until:
 		return withuntil;
 	default:
 		return 0;
@@ -610,7 +610,7 @@ static void parse_function_body(struct parser_state *parser, struct ast_node *fu
 	func_ast->function_expr.is_method = ismethod;
 	checknext(ls, ')');
 	parse_statement_list(parser, &func_ast->function_expr.function_statement_list);
-	check_match(ls, TOK_END, TOK_FUNCTION, line);
+	check_match(ls, TOK_end, TOK_function, line);
 }
 
 /* parse expression list */
@@ -775,17 +775,17 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 		expr->literal_expr.u.ts = ls->t.seminfo.ts;
 		break;
 	}
-	case TOK_NIL: {
+	case TOK_nil: {
 		expr = new_literal_expression(parser, RAVI_TNIL);
 		expr->literal_expr.u.i = -1;
 		break;
 	}
-	case TOK_TRUE: {
+	case TOK_true: {
 		expr = new_literal_expression(parser, RAVI_TBOOLEAN);
 		expr->literal_expr.u.i = 1;
 		break;
 	}
-	case TOK_FALSE: {
+	case TOK_false: {
 		expr = new_literal_expression(parser, RAVI_TBOOLEAN);
 		expr->literal_expr.u.i = 0;
 		break;
@@ -799,7 +799,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 	case '{': { /* constructor */
 		return parse_table_constructor(parser);
 	}
-	case TOK_FUNCTION: {
+	case TOK_function: {
 		raviX_next(ls);
 		struct ast_node *function_ast = new_function(parser);
 		parse_function_body(parser, function_ast, 0, ls->linenumber);
@@ -817,11 +817,11 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 static UnaryOperatorType get_unary_opr(int op)
 {
 	switch (op) {
-	case TOK_NOT:
+	case TOK_not:
 		return UNOPR_NOT;
 	case '-':
 		return UNOPR_MINUS;
-	case '~':
+	case '!':
 		return UNOPR_BNOT;
 	case '#':
 		return UNOPR_LEN;
@@ -887,9 +887,9 @@ static BinaryOperatorType get_binary_opr(int op)
 		return BINOPR_GT;
 	case TOK_GE:
 		return BINOPR_GE;
-	case TOK_AND:
+	case TOK_and:
 		return BINOPR_AND;
-	case TOK_OR:
+	case TOK_or:
 		return BINOPR_OR;
 	default:
 		return BINOPR_NOBINOPR;
@@ -1010,7 +1010,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	const struct string_object *label;
 	int is_break = 0;
-	if (testnext(ls, TOK_GOTO))
+	if (testnext(ls, TOK_goto))
 		label = check_name_and_next(ls);
 	else {
 		raviX_next(ls); /* skip break */
@@ -1062,9 +1062,9 @@ static struct ast_node *parse_while_statement(struct parser_state *parser, int l
 	stmt->while_or_repeat_stmt.loop_scope = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.condition = parse_condition(parser);
-	checknext(ls, TOK_DO);
+	checknext(ls, TOK_do);
 	stmt->while_or_repeat_stmt.loop_scope = parse_block(parser, &stmt->while_or_repeat_stmt.loop_statement_list);
-	check_match(ls, TOK_END, TOK_WHILE, line);
+	check_match(ls, TOK_end, TOK_while, line);
 	return stmt;
 }
 
@@ -1078,7 +1078,7 @@ static struct ast_node *parse_repeat_statement(struct parser_state *parser, int 
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.loop_scope = new_scope(parser); /* scope block */
 	parse_statement_list(parser, &stmt->while_or_repeat_stmt.loop_statement_list);
-	check_match(ls, TOK_UNTIL, TOK_REPEAT, line);
+	check_match(ls, TOK_until, TOK_repeat, line);
 	stmt->while_or_repeat_stmt.condition = parse_condition(parser); /* read condition (inside scope block) */
 	end_scope(parser);
 	return stmt;
@@ -1092,7 +1092,7 @@ static void parse_forbody(struct parser_state *parser, struct ast_node *stmt, in
 	(void)isnum;
 	struct lexer_state *ls = parser->ls;
 	/* forbody -> DO block */
-	checknext(ls, TOK_DO);
+	checknext(ls, TOK_do);
 	stmt->for_stmt.for_body = parse_block(parser, &stmt->for_stmt.for_statement_list);
 }
 
@@ -1133,7 +1133,7 @@ static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, c
 		add_local_symbol_to_current_scope(parser, local);
 		nvars++;
 	}
-	checknext(ls, TOK_IN);
+	checknext(ls, TOK_in);
 	parse_expression_list(parser, &stmt->for_stmt.expr_list);
 	int line = ls->linenumber;
 	parse_forbody(parser, stmt, line, nvars - 3, 0);
@@ -1159,14 +1159,14 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 		parse_fornum_statement(parser, stmt, varname, line);
 		break;
 	case ',':
-	case TOK_IN:
+	case TOK_in:
 		stmt->type = STMT_FOR_IN;
 		parse_for_list(parser, stmt, varname);
 		break;
 	default:
 		raviX_syntaxerror(ls, "'=' or 'in' expected");
 	}
-	check_match(ls, TOK_END, TOK_FOR, line);
+	check_match(ls, TOK_end, TOK_for, line);
 	end_scope(parser);
 	return stmt;
 }
@@ -1181,8 +1181,8 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;
-	checknext(ls, TOK_THEN);
-	if (ls->t.token == TOK_GOTO || ls->t.token == TOK_BREAK) {
+	checknext(ls, TOK_then);
+	if (ls->t.token == TOK_goto || ls->t.token == TOK_break) {
 		test_then_block->test_then_block.test_then_scope = new_scope(parser);
 		struct ast_node *stmt = parse_goto_statment(parser); /* handle goto/break */
 		add_ast_node(parser->container, &test_then_block->test_then_block.test_then_statement_list, stmt);
@@ -1211,13 +1211,13 @@ static struct ast_node *parse_if_statement(struct parser_state *parser, int line
 	stmt->if_stmt.else_statement_list = NULL;
 	struct ast_node *test_then_block = parse_if_cond_then_block(parser); /* IF cond THEN block */
 	add_ast_node(parser->container, &stmt->if_stmt.if_condition_list, test_then_block);
-	while (ls->t.token == TOK_ELSEIF) {
+	while (ls->t.token == TOK_elseif) {
 		test_then_block = parse_if_cond_then_block(parser); /* ELSEIF cond THEN block */
 		add_ast_node(parser->container, &stmt->if_stmt.if_condition_list, test_then_block);
 	}
-	if (testnext(ls, TOK_ELSE))
+	if (testnext(ls, TOK_else))
 		stmt->if_stmt.else_block = parse_block(parser, &stmt->if_stmt.else_statement_list); /* 'else' part */
-	check_match(ls, TOK_END, TOK_IF, line);
+	check_match(ls, TOK_end, TOK_if, line);
 	return stmt;
 }
 
@@ -1349,7 +1349,7 @@ static struct ast_node *parse_do_statement(struct parser_state *parser, int line
 	struct ast_node *stmt = allocate_ast_node(parser, STMT_DO);
 	stmt->do_stmt.do_statement_list = NULL;
 	stmt->do_stmt.scope = parse_block(parser, &stmt->do_stmt.do_statement_list);
-	check_match(parser->ls, TOK_END, TOK_DO, line);
+	check_match(parser->ls, TOK_end, TOK_do, line);
 	return stmt;
 }
 
@@ -1364,33 +1364,33 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 		raviX_next(ls); /* skip ';' */
 		break;
 	}
-	case TOK_IF: { /* stat -> ifstat */
+	case TOK_if: { /* stat -> ifstat */
 		stmt = parse_if_statement(parser, line);
 		break;
 	}
-	case TOK_WHILE: { /* stat -> whilestat */
+	case TOK_while: { /* stat -> whilestat */
 		stmt = parse_while_statement(parser, line);
 		break;
 	}
-	case TOK_DO: { /* stat -> DO block END */
+	case TOK_do: { /* stat -> DO block END */
 		stmt = parse_do_statement(parser, line);
 		break;
 	}
-	case TOK_FOR: { /* stat -> forstat */
+	case TOK_for: { /* stat -> forstat */
 		stmt = parse_for_statement(parser, line);
 		break;
 	}
-	case TOK_REPEAT: { /* stat -> repeatstat */
+	case TOK_repeat: { /* stat -> repeatstat */
 		stmt = parse_repeat_statement(parser, line);
 		break;
 	}
-	case TOK_FUNCTION: { /* stat -> funcstat */
+	case TOK_function: { /* stat -> funcstat */
 		stmt = parse_function_statement(parser, line);
 		break;
 	}
-	case TOK_LOCAL: {		       /* stat -> localstat */
+	case TOK_local: {		       /* stat -> localstat */
 		raviX_next(ls);		       /* skip LOCAL */
-		if (testnext(ls, TOK_FUNCTION)) /* local function? */
+		if (testnext(ls, TOK_function)) /* local function? */
 			stmt = parse_local_function_statement(parser);
 		else
 			stmt = parse_local_statement(parser);
@@ -1401,13 +1401,13 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 		stmt = parse_label_statement(parser, check_name_and_next(ls), line);
 		break;
 	}
-	case TOK_RETURN: {	/* stat -> retstat */
+	case TOK_return: {	/* stat -> retstat */
 		raviX_next(ls); /* skip RETURN */
 		stmt = parse_return_statement(parser);
 		break;
 	}
-	case TOK_BREAK:	/* stat -> breakstat */
-	case TOK_GOTO: { /* stat -> 'goto' NAME */
+	case TOK_break:	/* stat -> breakstat */
+	case TOK_goto: { /* stat -> 'goto' NAME */
 		stmt = parse_goto_statment(parser);
 		break;
 	}
@@ -1425,7 +1425,7 @@ static void parse_statement_list(struct parser_state *parser, struct ast_node_li
 {
 	struct lexer_state *ls = parser->ls;
 	while (!block_follow(ls, 1)) {
-		bool was_return = ls->t.token == TOK_RETURN;
+		bool was_return = ls->t.token == TOK_return;
 		struct ast_node *stmt = parse_statement(parser);
 		if (stmt)
 			add_ast_node(parser->container, list, stmt);
