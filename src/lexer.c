@@ -25,53 +25,17 @@ static inline bool currIsNewline(struct lexer_state *ls) { return ls->current ==
 #define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 /* ORDER TokenType */
 static const char *const luaX_tokens[] = {
-    "and",	 "break",  "do",      "else",	  "elseif", "end",	"false",     "for",	"function",
-    "goto",	 "if",	   "in",      "local",	  "defer",  "nil",	"not",	     "or",	"repeat",
-    "return",	 "then",   "true",    "until",	  "while",  "//",	"..",	     "...",	"==",
-    ">=",	 "<=",	   "~=",      "<<",	  ">>",	    "::",	"@integer",  "@number", "@integer[]",
-    "@number[]", "@table", "@string", "@closure", "<eof>",  "<number>", "<integer>", "<name>",	"<string>"};
+#define TKSTR1(name)		#name,
+#define TKSTR2(name, sym)	#sym,
+#define TKSTR3(name, sym)	#sym #sym,
+TKDEF(TKSTR1, TKSTR2, TKSTR3)
+#undef TKSTR1
+#undef TKSTR2
+#undef TKSTR3
+};
 
 /* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
-
-/*
-Creates a new string object. string objects are interned in a hash set.
-If the string matches a keyword then the reserved attribute will be set to the token id associated
-with the keyword else this attribute will be -1. The hash value of the string is stored the 'hash'
-attribute. Note that we need to allow strings that have embedded 0 character hence the length
-is explicit. But all tokens and reserved keywords are expected to be standard C strings.
-*/
-const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
-{
-	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
-	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
-	if (entry != NULL)
-		/* found the string */
-		return (const struct string_object *)entry->key;
-	else {
-		struct string_object *new_string = raviX_allocator_allocate(&container->string_object_allocator, 0);
-		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1); /* allow for 0 terminator */
-		memcpy(s, input, len);
-		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
-		new_string->str = s;
-		new_string->len = len;
-		new_string->hash = temp.hash;
-		new_string->reserved = -1;
-		/* Check if this is a keyword, linear search is okay as we do this only when we first
-		 * encounter a keyword
-		 */
-		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
-			if (luaX_tokens[i][0] == '<')
-				break; // We have gone past reserved keywords
-			if (strcmp(luaX_tokens[i], s) == 0) {
-				new_string->reserved = i; /* save index of the keyword */
-				break;
-			}
-		}
-		set_add_pre_hashed(container->strings, temp.hash, new_string);
-		return new_string;
-	}
-}
 
 enum { ALPHABIT = 0, DIGITBIT = 1, PRINTBIT = 2, SPACEBIT = 3, XDIGITBIT = 4 };
 
@@ -117,6 +81,45 @@ static inline bool lisxdigit(int c) { return testprop(c, MASK(XDIGITBIT)); }
 ** this 'ltolower' only works for alphabetic characters
 */
 static inline int ltolower(int c) { return ((c) | ('A' ^ 'a')); }
+
+/*
+Creates a new string object. string objects are interned in a hash set.
+If the string matches a keyword then the reserved attribute will be set to the token id associated
+with the keyword else this attribute will be -1. The hash value of the string is stored the 'hash'
+attribute. Note that we need to allow strings that have embedded 0 character hence the length
+is explicit. But all tokens and reserved keywords are expected to be standard C strings.
+*/
+const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
+{
+	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
+	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
+	if (entry != NULL)
+		/* found the string */
+		return (const struct string_object *)entry->key;
+	else {
+		struct string_object *new_string = raviX_allocator_allocate(&container->string_object_allocator, 0);
+		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1); /* allow for 0 terminator */
+		memcpy(s, input, len);
+		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
+		new_string->str = s;
+		new_string->len = len;
+		new_string->hash = temp.hash;
+		new_string->reserved = -1;
+		/* Check if this is a keyword, linear search is okay as we do this only when we first
+		 * encounter a keyword
+		 */
+		for (int i = 0; i < ARRAY_SIZE(luaX_tokens); i++) {
+			if (lislalpha(luaX_tokens[i][0]) || luaX_tokens[i][0] == '@') {
+                            if (strcmp(luaX_tokens[i], s) == 0) {
+                                    new_string->reserved = i; /* save index of the keyword */
+                                    break;
+                            }
+                        }
+		}
+		set_add_pre_hashed(container->strings, temp.hash, new_string);
+		return new_string;
+	}
+}
 
 #define lua_str2number(s, p) ((lua_Number)strtod((s), (p)))
 static void save(struct lexer_state *ls, int c);
