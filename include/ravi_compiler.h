@@ -31,7 +31,7 @@ RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
 
 /* ------------------------ LEXICAL ANALYZER API -------------------------------*/
 /* This is derived from LuaJit implementation                              */
-#define TKDEF(_, __, ___) \
+#define TKDEF(_, __, ___)                                                                                              \
     _(and) _(break) _(do) _(else) _(elseif) _(end) \
     _(false) _(for) _(function) _(goto) _(if) _(in) _(local) \
     _(defer) /* Ravi extension */ \

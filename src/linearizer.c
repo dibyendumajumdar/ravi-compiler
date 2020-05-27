@@ -1904,6 +1904,9 @@ static void linearize_function(struct linearizer_state *linearizer)
 	linearize_function_args(linearizer);
 	linearize_statement_list(proc, func_expr->function_expr.function_statement_list);
 	end_scope(linearizer, proc);
+	if (!is_block_terminated(proc->current_bb)) {
+		instruct_br(proc, allocate_block_pseudo(proc, n2bb(proc->exit)));
+	}
 }
 
 static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
