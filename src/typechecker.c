@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2018-2020 Dibyendu Majumdar
 */
-#include <ravi_ast.h>
+#include <implementation.h>
 
 /*
 The Type checker walks through the AST and annotates nodes with type information.

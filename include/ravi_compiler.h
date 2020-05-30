@@ -388,6 +388,7 @@ RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const struct for
 										 const struct statement *statement));
 
 /* literal expression */
+/* Note: ... value has type RAVI_TVARARGS and no associated SemInfo. */
 RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression);
 RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression);
 
@@ -536,9 +537,9 @@ RAVICOMP_EXPORT void raviX_buffer_init(membuff_t *mb, size_t initial_size);
 RAVICOMP_EXPORT void raviX_buffer_resize(membuff_t *mb, size_t new_size);
 RAVICOMP_EXPORT void raviX_buffer_reserve(membuff_t *mb, size_t n);
 RAVICOMP_EXPORT void raviX_buffer_free(membuff_t *mb);
-static inline char *raviX_buffer_data(membuff_t *mb) { return mb->buf; }
-static inline size_t raviX_buffer_size(membuff_t *mb) { return mb->allocated_size; }
-static inline size_t raviX_buffer_len(membuff_t *mb) { return mb->pos; }
+static inline char *raviX_buffer_data(const membuff_t *mb) { return mb->buf; }
+static inline size_t raviX_buffer_size(const membuff_t *mb) { return mb->allocated_size; }
+static inline size_t raviX_buffer_len(const membuff_t *mb) { return mb->pos; }
 static inline void raviX_buffer_reset(membuff_t *mb) { mb->pos = 0; }
 
 /* following convert input to string before adding */

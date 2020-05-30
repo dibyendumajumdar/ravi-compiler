@@ -1,6 +1,6 @@
 #include <ravi_compiler.h>
 
-#include <ravi_ast.h>
+#include <implementation.h>
 
 const struct function_expression *raviX_ast_get_main_function(const struct compiler_state *compiler_state)
 {

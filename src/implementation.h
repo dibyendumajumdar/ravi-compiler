@@ -1,15 +1,10 @@
-#ifndef ravicomp_RAVI_AST_H
-#define ravicomp_RAVI_AST_H
+#ifndef ravicomp_IMPLEMENTATION_H
+#define ravicomp_IMPLEMENTATION_H
 
 /*
-A parser and syntax tree builder for Ravi. This is work in progress.
-Once ready it will be used to create a new byte code generator for Ravi.
-
-The parser will perform following actions:
-
-a) Generate syntax tree
-b) Perform type checking (Ravi enhancement)
-*/
+ * Internal header file for the implementation.
+ * The data structures defined here are private.
+ */
 
 #include "ravi_compiler.h"
 

@@ -1,10 +1,15 @@
 /*
 Copyright (C) 2018-2020 Dibyendu Majumdar
+
+This file contains the Linearizer. The goal of the Linearizer is
+generate a linear intermediate representation (IR) from the AST
+suitable for further analysis.
 */
+
+#include "implementation.h"
 
 #include "fnv_hash.h"
 #include "ptrlist.h"
-#include "ravi_ast.h"
 
 #include <assert.h>
 #include <stddef.h>
