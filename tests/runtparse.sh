@@ -155,4 +155,8 @@ $command "for i =1,10 do if i == 2 then break end end return"
 $command -f input/t013.lua
 $command -f input/t014.lua
 
+$command "function foo(bar: integer[], zee: number[], ...) end"
+$command "function foo(bar: number, zee: string) end"
+$command "function foo(bar: closure, zee: My.User.Type) end"
+
 exit 0

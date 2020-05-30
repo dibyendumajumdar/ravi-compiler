@@ -9499,3 +9499,108 @@ L8
 L9
 	MOV {T(7)} {T(6)}
 	CBR {T(6)} {L7, L6}
+function foo(bar: integer[], zee: number[], ...) end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol integer[] 
+     ,
+      zee --local symbol number[] 
+    )
+    --locals  bar, zee
+    end
+end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol integer[] 
+     ,
+      zee --local symbol number[] 
+    )
+    --locals  bar, zee
+    end
+end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {foo, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	TOIARRAY {local(bar, 0)}
+	TOFARRAY {local(zee, 1)}
+	BR {L1}
+L1 (exit)
+function foo(bar: number, zee: string) end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol number 
+     ,
+      zee --local symbol string 
+    )
+    --locals  bar, zee
+    end
+end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol number 
+     ,
+      zee --local symbol string 
+    )
+    --locals  bar, zee
+    end
+end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {foo, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	TOFLT {local(bar, 0)}
+	TOSTRING {local(zee, 1)}
+	BR {L1}
+L1 (exit)
+function foo(bar: closure, zee: My.User.Type) end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol closure 
+     ,
+      zee --local symbol userdata My.User.Type
+    )
+    --locals  bar, zee
+    end
+end
+function()
+   foo --global symbol any 
+   =
+    function(
+      bar --local symbol closure 
+     ,
+      zee --local symbol userdata My.User.Type
+    )
+    --locals  bar, zee
+    end
+end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {foo, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	TOCLOSURE {local(bar, 0)}
+	TOTYPE {'My.User.Type' Ks(0)} {local(zee, 1)}
+	BR {L1}
+L1 (exit)
