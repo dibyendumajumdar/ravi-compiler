@@ -40,7 +40,7 @@ static void start_scope(struct linearizer_state *linearizer, struct proc *proc, 
 static void end_scope(struct linearizer_state *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
-static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
+static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
 static void linearize_function(struct linearizer_state *linearizer);
 static struct instruction* allocate_instruction(struct proc* proc, enum opcode op);
 static void free_temp_pseudo(struct proc* proc, struct pseudo* pseudo);
@@ -454,7 +454,7 @@ static void linearize_function_args(struct linearizer_state *linearizer)
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
 		/* The arg symbols already have register assigned by the local scope */
-		assert(sym->variable.pseudo); // We should already have a regiter assigned
+		assert(sym->variable.pseudo); // We should already have a register assigned
 		instruct_totype(proc, sym->variable.pseudo, &sym->variable.value_type);
 	}
 	END_FOR_EACH_PTR(sym)
@@ -579,10 +579,10 @@ static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_nod
 	return target;
 }
 
-static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src)
+static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src)
 {
 	// TODO we should use type specific MOVE instructions
-	struct instruction *mov = allocate_instruction(proc, op_mov);
+	struct instruction *mov = allocate_instruction(proc, op);
 	add_instruction_operand(proc, mov, src);
 	add_instruction_target(proc, mov, target);
 	add_instruction(proc, mov);
@@ -653,7 +653,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 
 	struct pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
 	struct pseudo *operand1 = linearize_expression(proc, e1);
-	instruct_move(proc, result, operand1);
+	instruct_move(proc, op_mov, result, operand1);
 	free_temp_pseudo(proc, operand1);
 	if (is_and)
 		instruct_cbr(proc, result, first_block, end_block); // If first value is true then evaluate the second
@@ -662,7 +662,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 
 	start_block(proc, first_block);
 	struct pseudo *operand2 = linearize_expression(proc, e2);
-	instruct_move(proc, result, operand2);
+	instruct_move(proc, op_mov, result, operand2);
 	free_temp_pseudo(proc, operand2);
 	instruct_br(proc, allocate_block_pseudo(proc, end_block));
 
@@ -1149,23 +1149,23 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	return target;
 }
 
-static void linearize_store_var(struct proc *proc, ravitype_t var_type, struct pseudo *var_pseudo, ravitype_t val_type,
-				struct pseudo *val_pseudo)
+static void linearize_store_var(struct proc *proc, const struct var_type *var_type, struct pseudo *var_pseudo, 
+	const struct var_type *val_type, struct pseudo *val_pseudo)
 {
 	// ravitype_t var_type = var_node->common_expr.type.type_code;
 	// ravitype_t val_type = var_node->common_expr.type.type_code;
 
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
-		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
+		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
 	} else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
-		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type);
+		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
 	} else {
-		instruct_move(proc, var_pseudo, val_pseudo); // TODO add type specialization
+		instruct_move(proc, op_mov, var_pseudo, val_pseudo); // TODO add type specialization
 	}
 }
 
 struct node_info {
-	ravitype_t type_code;
+	const struct var_type *vartype;
 	struct pseudo *pseudo;
 };
 
@@ -1180,7 +1180,7 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 	FOR_EACH_PTR(expr_list, expr)
 	{
 		struct pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
-		valinfo[i].type_code = expr->common_expr.type.type_code;
+		valinfo[i].vartype = &expr->common_expr.type;
 		valinfo[i].pseudo = val_pseudo;
 		i++;
 		if (i < ne && val_pseudo->type == PSEUDO_RANGE) {
@@ -1196,8 +1196,8 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 		if (nv > ne) {
 			if (last_val_pseudo != NULL && last_val_pseudo->type == PSEUDO_RANGE) {
 				int pick = nv - ne;
-				linearize_store_var(proc, varinfo[nv - 1].type_code, varinfo[nv - 1].pseudo,
-						    valinfo[ne - 1].type_code,
+				linearize_store_var(proc, varinfo[nv - 1].vartype, varinfo[nv - 1].pseudo,
+						    valinfo[ne - 1].vartype,
 						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
 			} else {
 				// TODO store NIL
@@ -1209,8 +1209,8 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 				assert(ne == note_ne);
 				valinfo[ne - 1].pseudo = allocate_range_select_pseudo(proc, valinfo[ne - 1].pseudo, 0);
 			}
-			linearize_store_var(proc, varinfo[nv - 1].type_code, varinfo[nv - 1].pseudo,
-					    valinfo[ne - 1].type_code, valinfo[ne - 1].pseudo);
+			linearize_store_var(proc, varinfo[nv - 1].vartype, varinfo[nv - 1].pseudo,
+					    valinfo[ne - 1].vartype, valinfo[ne - 1].pseudo);
 			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
 			nv--;
 			ne--;
@@ -1262,7 +1262,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	FOR_EACH_PTR(node->expression_stmt.var_expr_list, var)
 	{
 		struct pseudo *var_pseudo = linearize_expression(proc, var);
-		varinfo[i].type_code = var->common_expr.type.type_code;
+		varinfo[i].vartype = &var->common_expr.type;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
@@ -1283,7 +1283,7 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 	{
 		struct pseudo *var_pseudo = sym->variable.pseudo;
 		assert(var_pseudo);
-		varinfo[i].type_code = sym->variable.value_type.type_code;
+		varinfo[i].vartype = &sym->variable.value_type;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
 	}
@@ -1682,14 +1682,14 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 		convert_range_to_temp(t); // Only accept one result
 	}
 	struct pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
-	instruct_move(proc, index_var_pseudo, t);
+	instruct_move(proc, op_mov, index_var_pseudo, t);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
 	struct pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
-	instruct_move(proc, limit_pseudo, t);
+	instruct_move(proc, op_mov, limit_pseudo, t);
 
 	if (step_expr == NULL)
 		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
@@ -1700,7 +1700,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 		}
 	}
 	struct pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
-	instruct_move(proc, step_pseudo, t);
+	instruct_move(proc, op_mov, step_pseudo, t);
 
 	struct pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
@@ -1730,7 +1730,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
 
 	start_block(proc, Lbody);
-	instruct_move(proc, var_sym->variable.pseudo, index_var_pseudo);
+	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo);
 
 	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
@@ -1825,7 +1825,8 @@ static void linearize_function_statement(struct proc *proc, struct ast_node *nod
 	}
 	struct pseudo *function_pseudo = linearize_function_expr(proc, node->function_stmt.function_expr);
 	/* Following will potentially convert load to store */
-	linearize_store_var(proc, prev_node->common_expr.type.type_code, prev_pseudo, RAVI_TFUNCTION, function_pseudo);
+	linearize_store_var(proc, &prev_node->common_expr.type, prev_pseudo, 
+		&node->function_stmt.function_expr->common_expr.type, function_pseudo);
 }
 
 static void linearize_statement(struct proc *proc, struct ast_node *node)
