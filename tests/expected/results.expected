@@ -5747,6 +5747,8 @@ L0 (entry)
 L1 (exit)
 define Proc(1)
 L0 (entry)
+	TOTABLE {local(t, 0)}
+	TOINT {local(i, 1)}
 	LEN {local(t, 0)} {T(0)}
 	MOV {T(0)} {local(i, 1)}
 	BR {L1}
@@ -7663,6 +7665,8 @@ L0 (entry)
 L1 (exit)
 define Proc(1)
 L0 (entry)
+	TOTABLE {local(a, 0)}
+	TOTABLE {local(b, 1)}
 	LOADGLOBAL {assert} {T(0)}
 	TGETik {local(a, 0), 1 Kint(0)} {T(1)}
 	LEN {T(1)} {T(2)}
