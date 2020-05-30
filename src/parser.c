@@ -791,9 +791,7 @@ static struct ast_node *parse_simple_expression(struct parser_state *parser)
 		break;
 	}
 	case TOK_DOTS: { /* vararg */
-		// Not handled yet
-		raviX_syntaxerror(parser->ls, "Var args not supported");
-		expr = NULL;
+		expr = new_literal_expression(parser, RAVI_TVARARGS);
 		break;
 	}
 	case '{': { /* constructor */

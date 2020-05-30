@@ -473,6 +473,9 @@ void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level)
 		case RAVI_TSTRING:
 			printf_buf(buf, "'%t'", node->literal_expr.u.ts);
 			break;
+		case RAVI_TVARARGS:
+			printf_buf(buf, "...");
+			break;
 		default:
 			assert(0);
 		}

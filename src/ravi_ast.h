@@ -107,7 +107,8 @@ typedef enum {
 	RAVI_TSTRING,	  /* string */
 	RAVI_TNIL,	  /* NIL */
 	RAVI_TBOOLEAN,	  /* boolean */
-	RAVI_TUSERDATA	  /* userdata or lightuserdata */
+	RAVI_TUSERDATA,	  /* userdata or lightuserdata */
+	RAVI_TVARARGS     /* Not a real type - represents ... */
 } ravitype_t;
 
 /* Lua type info. We need to support user defined types too which are known by name */

@@ -458,6 +458,9 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 	case RAVI_TBOOLEAN:
 		pseudo = allocate_boolean_pseudo(proc, expr->literal_expr.u.i);
 		break;
+	case RAVI_TVARARGS:
+		handle_error(proc->linearizer->ast_container, "Var args not supported");
+		break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
@@ -1835,7 +1838,6 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case STMT_FOR_IN: {
-		// typecheck_for_in_statment(container, function, node);
 		handle_error(proc->linearizer->ast_container, "STMT_FOR_IN not yet implemented");
 		break;
 	}
