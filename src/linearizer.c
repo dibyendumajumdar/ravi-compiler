@@ -37,6 +37,8 @@ static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, struct pseudo *target, struct pseudo *src);
 static void linearize_function(struct linearizer_state *linearizer);
+static struct instruction* allocate_instruction(struct proc* proc, enum opcode op);
+static void free_temp_pseudo(struct proc* proc, struct pseudo* pseudo);
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
@@ -191,6 +193,50 @@ static const struct constant *allocate_integer_constant(struct proc *proc, int i
 	return add_constant(proc, &c);
 }
 
+static inline void add_instruction_operand(struct proc* proc, struct instruction* insn, struct pseudo* pseudo)
+{
+	ptrlist_add((struct ptr_list**) & insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
+}
+
+static inline void add_instruction_target(struct proc* proc, struct instruction* insn, struct pseudo* pseudo)
+{
+	ptrlist_add((struct ptr_list**) & insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
+}
+
+static struct instruction* allocate_instruction(struct proc* proc, enum opcode op)
+{
+	struct instruction* insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
+	insn->opcode = op;
+	return insn;
+}
+
+static void free_instruction_operand_pseudos(struct proc* proc, struct instruction* insn)
+{
+	struct pseudo* operand;
+	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
+	END_FOR_EACH_PTR_REVERSE(operand)
+}
+
+static inline void add_instruction(struct proc* proc, struct instruction* insn)
+{
+	assert(insn->block == NULL || insn->block == proc->current_bb);
+	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	insn->block = proc->current_bb;
+}
+
+static inline void remove_instruction(struct basic_block* block, struct instruction* insn)
+{
+	ptrlist_remove((struct ptr_list**) & block->insns, insn, 1);
+	insn->block = NULL;
+}
+
+static inline struct instruction* last_instruction(struct basic_block* block)
+{
+	if (ptrlist_size((struct ptr_list*)block->insns) == 0)
+		return NULL;
+	return (struct instruction*)ptrlist_last((struct ptr_list*)block->insns);
+}
+
 static const struct constant *allocate_string_constant(struct proc *proc, const struct string_object *s)
 {
 	struct constant c = {.type = RAVI_TSTRING, .s = s};
@@ -257,8 +303,7 @@ Specific types for floating and integer values so that we can
 localise the assignment of these to registers.
 The generic 'any' type is used for other types
 but has variant called PSEUDO_RANGE. This is used in function calls
-to represent multiple return values, and will most likely also
-be used to represent var arg. Most of the time these get converted
+to represent multiple return values. Most of the time these get converted
 back to normal temp pseudo, but in some cases we need to reference
 a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
 */
@@ -369,6 +414,33 @@ static inline void set_current_proc(struct linearizer_state *linearizer, struct 
 	linearizer->current_proc = proc;
 }
 
+static void instruct_totype(struct proc* proc, struct pseudo* target, const struct var_type* vtype)
+{
+	enum opcode targetop = op_nop;
+	switch (vtype->type_code) {
+	case RAVI_TNUMFLT: targetop = op_toflt; break;
+	case RAVI_TNUMINT: targetop = op_toint; break;
+	case RAVI_TSTRING: targetop = op_tostring; break;
+	case RAVI_TFUNCTION: targetop = op_toclosure; break;
+	case RAVI_TTABLE: targetop = op_totable; break;
+	case RAVI_TARRAYFLT: targetop = op_tofarray; break;
+	case RAVI_TARRAYINT: targetop = op_toiarray; break;
+	case RAVI_TUSERDATA: targetop = op_totype;
+		break;
+	default:
+		return;
+	}
+	struct instruction* insn = allocate_instruction(proc, targetop);
+	if (targetop == op_totype) {
+		assert(vtype->type_name);
+		const struct constant* tname_constant = allocate_string_constant(proc, vtype->type_name);
+		struct pseudo* tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
+		add_instruction_operand(proc, insn, tname_pseudo);
+	}
+	add_instruction_target(proc, insn, target);
+	add_instruction(proc, insn);
+}
+
 static void linearize_function_args(struct linearizer_state *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
@@ -377,8 +449,8 @@ static void linearize_function_args(struct linearizer_state *linearizer)
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
 		/* The arg symbols already have register assigned by the local scope */
-		/* TODO we need to add type assertion operators for typed args */
-		// handle_error(linearizer->ast_container, "feature not yet implemented");
+		assert(sym->variable.pseudo); // We should already have a regiter assigned
+		instruct_totype(proc, sym->variable.pseudo, &sym->variable.value_type);
 	}
 	END_FOR_EACH_PTR(sym)
 }
@@ -390,49 +462,6 @@ static void linearize_statement_list(struct proc *proc, struct ast_node_list *li
 	END_FOR_EACH_PTR(node)
 }
 
-static struct instruction *allocate_instruction(struct proc *proc, enum opcode op)
-{
-	struct instruction *insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
-	insn->opcode = op;
-	return insn;
-}
-
-static void free_instruction_operand_pseudos(struct proc *proc, struct instruction *insn)
-{
-	struct pseudo *operand;
-	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
-	END_FOR_EACH_PTR_REVERSE(operand)
-}
-
-static inline void add_instruction(struct proc *proc, struct instruction *insn)
-{
-	assert(insn->block == NULL || insn->block == proc->current_bb);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
-	insn->block = proc->current_bb;
-}
-
-static inline void remove_instruction(struct basic_block *block, struct instruction *insn)
-{
-	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
-	insn->block = NULL;
-}
-
-static inline struct instruction *last_instruction(struct basic_block *block)
-{
-	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
-		return NULL;
-	return (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
-}
-
-static inline void add_instruction_operand(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
-{
-	ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
-}
-
-static inline void add_instruction_target(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
-{
-	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
-}
 
 static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 {
