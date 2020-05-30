@@ -12,8 +12,8 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 #include <string.h>
 
 #ifndef _WIN32
-#include <unistd.h>
 #include <alloca.h>
+#include <unistd.h>
 #else
 #include <io.h>
 #include <malloc.h>
@@ -1742,6 +1742,55 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	proc->current_break_target = previous_break_target;
 }
 
+static void linearize_function_statement(struct proc *proc, struct ast_node *node)
+{
+	/* function funcname funcbody */
+	/* funcname ::= Name {‘.’ Name} [‘:’ Name] */
+
+	// Note the similarity of following to the handling of suffixed expressions and assignment expressions
+	// In truth we could translate this to an expression statement - the only benefit here is that we
+	// do not allow selectors to be arbitrary expressions
+	struct pseudo *prev_pseudo = linearize_symbol_expression(proc, node->function_stmt.name);
+	struct ast_node *prev_node = node->function_stmt.name;
+	struct ast_node *this_node;
+	FOR_EACH_PTR(node->function_stmt.selectors, this_node)
+	{
+		struct pseudo *next;
+		if (this_node->type == EXPR_FIELD_SELECTOR) {
+			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
+			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
+			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
+						     key_pseudo, this_node->common_expr.type.type_code);
+		} else {
+			next = NULL;
+			handle_error(proc->linearizer->ast_container,
+				     "Unexpected expr type in function name selector list");
+		}
+		prev_node = this_node;
+		prev_pseudo = next;
+	}
+	END_FOR_EACH_PTR(node)
+	// FIXME maybe better to add the method name to the selector list above in the parser
+	// then we could have just handled it above rather than as a special case
+	if (node->function_stmt.method_name) {
+		this_node = node->function_stmt.method_name;
+		if (this_node->type == EXPR_FIELD_SELECTOR) {
+			struct pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
+			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
+			prev_pseudo =
+			    instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
+						  key_pseudo, this_node->common_expr.type.type_code);
+		} else {
+			handle_error(proc->linearizer->ast_container,
+				     "Unexpected expr type in function name selector list");
+		}
+		prev_node = this_node;
+	}
+	struct pseudo *function_pseudo = linearize_function_expr(proc, node->function_stmt.function_expr);
+	/* Following will potentially convert load to store */
+	linearize_store_var(proc, prev_node->common_expr.type.type_code, prev_pseudo, RAVI_TFUNCTION, function_pseudo);
+}
+
 static void linearize_statement(struct proc *proc, struct ast_node *node)
 {
 	switch (node->type) {
@@ -1757,8 +1806,7 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
 		break;
 	}
 	case STMT_FUNCTION: {
-		// typecheck_ast_node(container, function, node->function_stmt.function_expr);
-		handle_error(proc->linearizer->ast_container, "STMT_FUNCTION not yet implemented");
+		linearize_function_statement(proc, node);
 		break;
 	}
 	case STMT_LABEL: {
@@ -2060,10 +2108,9 @@ int raviX_ast_linearize(struct linearizer_state *linearizer)
 	int rc = setjmp(linearizer->ast_container->env);
 	if (rc == 0) {
 		linearize_function(linearizer);
-	}
-	else {
+	} else {
 		// dump it
-		//raviX_output_linearizer(linearizer, stderr);
+		// raviX_output_linearizer(linearizer, stderr);
 	}
 	return rc;
 }
