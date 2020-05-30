@@ -2024,7 +2024,7 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 		raviX_buffer_add_fstring(mb, "T(%d[%d..])", pseudo->regnum, pseudo->range_pseudo->regnum);
 		break;
 	case PSEUDO_PROC:
-		raviX_buffer_add_fstring(mb, "Proc(%d)", pseudo->proc->id);
+		raviX_buffer_add_fstring(mb, "Proc%%%d", pseudo->proc->id);
 		break;
 	case PSEUDO_NIL:
 		raviX_buffer_add_string(mb, "nil");
@@ -2129,7 +2129,7 @@ static void output_basic_block(struct proc *proc, struct basic_block *bb, membuf
 static void output_proc(struct proc *proc, membuff_t *mb)
 {
 	struct basic_block *bb;
-	raviX_buffer_add_fstring(mb, "define Proc(%d)\n", proc->id);
+	raviX_buffer_add_fstring(mb, "define Proc%%%d\n", proc->id);
 	for (int i = 0; i < (int)proc->node_count; i++) {
 		bb = n2bb(proc->nodes[i]);
 		output_basic_block(proc, bb, mb);
