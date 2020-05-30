@@ -2539,6 +2539,37 @@ function()
       end
     end
 end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {x, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(0)}
+	MOV {10 Kint(1)} {Tint(1)}
+	MOV {1 Kint(0)} {Tint(2)}
+	LIii {0 Kint(2), Tint(2)} {Tint(3)}
+	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	CBR {Tint(3)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(i, 0)}
+	LOADGLOBAL {print} {T(0)}
+	CALL {T(0), local(i, 0)} {T(0..)}
+	BR {L2}
+L6
+	BR {L1}
 function x() local a=1; function y() return function() return a end end; end
 function()
    x --global symbol any 
@@ -2594,6 +2625,28 @@ function()
         end
     end
 end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {x, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	MOV {1 Kint(0)} {local(a, 0)}
+	CLOSURE {Proc(2)} {T(1)}
+	STOREGLOBAL {y, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(2)
+L0 (entry)
+	CLOSURE {Proc(3)} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc(3)
+L0 (entry)
+	RET {Upval(0)} {L1}
+L1 (exit)
 return @integer 1
 function()
   return
@@ -7601,6 +7654,113 @@ function()
      --[primary end]
     --[suffixed expr end]
 end
+define Proc(0)
+L0 (entry)
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {matmul, T(1)}
+	LOADGLOBAL {matmul} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	LOADGLOBAL {assert} {T(0)}
+	TGETik {local(a, 0), 1 Kint(0)} {T(1)}
+	LEN {T(1)} {T(2)}
+	TOINT {T(2)}
+	LEN {local(b, 1)} {T(3)}
+	EQ {T(2), T(3)} {T(4)}
+	CALL {T(0), T(4)} {T(0..)}
+	LEN {local(a, 0)} {T(4)}
+	TGETik {local(a, 0), 1 Kint(0)} {T(3)}
+	LEN {T(3)} {T(2)}
+	TGETik {local(b, 1), 1 Kint(0)} {T(5)}
+	LEN {T(5)} {T(6)}
+	NEWTABLE {T(7)}
+	MOV {T(7)} {local(x, 5)}
+	MOV {T(6)} {local(p, 4)}
+	MOV {T(2)} {local(n, 3)}
+	MOV {T(4)} {local(m, 2)}
+	LOADGLOBAL {matrix} {T(4)}
+	GETsk {T(4), 'T' Ks(1)} {T(2)}
+	CALL {T(2), local(b, 1)} {T(2..)}
+	MOV {T(2[2..])} {local(c, 6)}
+	MOV {1 Kint(0)} {Tint(0)}
+	MOV {local(m, 2)} {Tint(1)}
+	MOV {1 Kint(0)} {Tint(2)}
+	LIii {0 Kint(2), Tint(2)} {Tint(3)}
+	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	CBR {Tint(3)} {L3, L4}
+L3
+	LEii {Tint(1), Tint(0)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L4
+	LIii {Tint(0), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L6, L5}
+L5
+	MOV {Tint(0)} {local(i, 7)}
+	LOADGLOBAL {table} {T(6)}
+	GETsk {T(6), 'numarray' Ks(3)} {T(7)}
+	CALL {T(7), local(p, 4), 0 Kint(2)} {T(7..)}
+	MOV {T(7[7..])} {local(xi, 8)}
+	TPUTik {local(x, 5), local(i, 7), local(xi, 8)}
+	MOV {1 Kint(0)} {Tint(5)}
+	MOV {local(p, 4)} {Tint(6)}
+	MOV {1 Kint(0)} {Tint(7)}
+	LIii {0 Kint(2), Tint(7)} {Tint(8)}
+	SUBii {Tint(5), Tint(7)} {Tint(5)}
+	BR {L7}
+L6
+	RET {local(x, 5)} {L1}
+L7
+	ADDii {Tint(5), Tint(7)} {Tint(5)}
+	CBR {Tint(8)} {L8, L9}
+L8
+	LEii {Tint(6), Tint(5)} {Tint(9)}
+	CBR {Tint(9)} {L11, L10}
+L9
+	LIii {Tint(5), Tint(6)} {Tint(9)}
+	CBR {Tint(9)} {L11, L10}
+L10
+	MOV {Tint(5)} {local(j, 9)}
+	TGETik {local(a, 0), local(i, 7)} {T(8)}
+	TOFARRAY {T(8)}
+	TGETik {local(c, 6), local(j, 9)} {T(9)}
+	TOFARRAY {T(9)}
+	MOV {T(9)} {local(cj, 12)}
+	MOV {T(8)} {local(ai, 11)}
+	MOV {0 Kint(2)} {local(sum, 10)}
+	MOV {1 Kint(0)} {Tint(10)}
+	MOV {local(n, 3)} {Tint(11)}
+	MOV {1 Kint(0)} {Tint(12)}
+	LIii {0 Kint(2), Tint(12)} {Tint(13)}
+	SUBii {Tint(10), Tint(12)} {Tint(10)}
+	BR {L12}
+L11
+	BR {L2}
+L12
+	ADDii {Tint(10), Tint(12)} {Tint(10)}
+	CBR {Tint(13)} {L13, L14}
+L13
+	LEii {Tint(11), Tint(10)} {Tint(14)}
+	CBR {Tint(14)} {L16, L15}
+L14
+	LIii {Tint(10), Tint(11)} {Tint(14)}
+	CBR {Tint(14)} {L16, L15}
+L15
+	MOV {Tint(10)} {local(k, 13)}
+	FAGETik {local(ai, 11), local(k, 13)} {Tflt(0)}
+	FAGETik {local(cj, 12), local(k, 13)} {Tflt(1)}
+	MULff {Tflt(0), Tflt(1)} {Tflt(2)}
+	ADDff {local(sum, 10), Tflt(2)} {Tflt(1)}
+	MOV {Tflt(1)} {local(sum, 10)}
+	BR {L12}
+L16
+	FAPUTfv {local(xi, 8), local(j, 9), local(sum, 10)}
+	BR {L7}
 return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)
 function()
   return
@@ -9042,6 +9202,35 @@ function()
       end
     end
 end
+define Proc(0)
+L0 (entry)
+	NEWTABLE {T(0)}
+	MOV {T(0)} {local(msgs, 0)}
+	CLOSURE {Proc(1)} {T(1)}
+	STOREGLOBAL {Message, T(1)}
+	BR {L1}
+L1 (exit)
+define Proc(1)
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	LOADGLOBAL {_nomsg} {T(0)}
+	NOT {T(0)} {T(1)}
+	CBR {T(1)} {L3, L4}
+L3
+	LOADGLOBAL {print} {T(2)}
+	CALL {T(2), local(m, 0)} {T(2..)}
+	LEN {Upval(0)} {T(3)}
+	ADD {T(3), 1 Kint(0)} {T(4)}
+	LOADGLOBAL {string} {T(5)}
+	GETsk {T(5), 'sub' Ks(1)} {T(6)}
+	UNMi {3 Kint(2)} {Tint(0)}
+	CALL {T(6), local(m, 0), 3 Kint(2), Tint(0)} {T(6..)}
+	PUT {Upval(0), T(4), T(6[6..])}
+	BR {L4}
+L4
+	BR {L1}
 _soft = rawget(_G, "_soft") or false
 Z[1][2] = false or true
 local _g
