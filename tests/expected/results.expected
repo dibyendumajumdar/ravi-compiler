@@ -492,7 +492,7 @@ L0 (entry)
 	POW {3 Kint(0), 0 Kint(1)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
 	ADDfi {Tflt(1), 5 Kint(2)} {Tflt(2)}
-	IDIV {Tflt(2), 3 Kint(0)} {T(0)}
+	IDIV {Tflt(2), 3.000000000000 Kflt(3)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD
@@ -909,19 +909,19 @@ function()
 end
 define Proc%0
 L0 (entry)
-	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
+	UNMi {2 Kint(1)} {Tint(0)}
 	POW {2.000000000000 Kflt(0), Tint(0)} {Tflt(0)}
-	DIVii {1 Kint(1), 4 Kint(2)} {Tflt(1)}
+	DIVii {1 Kint(2), 4 Kint(3)} {Tflt(1)}
 	EQff {Tflt(0), Tflt(1)} {T(1)}
 	MOV {T(1)} {T(0)}
 	CBR {T(0)} {L2, L3}
 L1 (exit)
 L2
-	UNMi {2.000000000000 Kflt(0)} {Tint(0)}
+	UNMi {2 Kint(1)} {Tint(0)}
 	UNMi {Tint(0)} {Tint(1)}
-	POW {2.000000000000 Kflt(0), Tint(1)} {Tflt(1)}
+	POW {2 Kint(1), Tint(1)} {Tflt(1)}
 	UNMf {Tflt(1)} {Tflt(0)}
-	UNMi {4 Kint(2)} {Tint(1)}
+	UNMi {4 Kint(3)} {Tint(1)}
 	UNMi {Tint(1)} {Tint(2)}
 	UNMi {Tint(2)} {Tint(3)}
 	EQ {Tflt(0), Tint(3)} {T(1)}
@@ -2104,16 +2104,16 @@ L6
 	MOV {2 Kint(1)} {T(3)}
 	BR {L7}
 L7
-	UNMf {1 Kint(0)} {Tflt(0)}
+	UNMf {1.250000000000 Kflt(2)} {Tflt(0)}
 	MOV {Tflt(0)} {T(2)}
 	CBR {T(2)} {L9, L8}
 L8
-	UNMi {4 Kint(2)} {Tint(0)}
+	UNMi {4 Kint(3)} {Tint(0)}
 	MOV {Tint(0)} {T(2)}
 	BR {L9}
 L9
 	ADD {T(3), T(2)} {T(4)}
-	EQ {T(4), 0.750000000000 Kflt(3)} {T(2)}
+	EQ {T(4), 0.750000000000 Kflt(4)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
 return (b or a)+1 == 2 and (10 or a)+1 == 11
@@ -5678,7 +5678,8 @@ end
 define Proc%0
 L0 (entry)
 	LEN {local(t, 0)} {T(0)}
-	MOV {T(0)} {local(len, 1)}
+	TOINT {T(0)}
+	MOVi {T(0)} {local(len, 1)}
 	RET {local(len, 1)} {L1}
 L1 (exit)
 return function(t: table, i: integer) i = #t end
@@ -5750,7 +5751,8 @@ L0 (entry)
 	TOTABLE {local(t, 0)}
 	TOINT {local(i, 1)}
 	LEN {local(t, 0)} {T(0)}
-	MOV {T(0)} {local(i, 1)}
+	TOINT {T(0)}
+	MOVi {T(0)} {local(i, 1)}
 	BR {L1}
 L1 (exit)
 ::L1:: a = 1; goto L1; return
@@ -6862,9 +6864,9 @@ L4
 	CBR {Tint(4)} {L6, L5}
 L5
 	MOV {Tint(0)} {local(j, 1)}
-	MOV {0 Kint(2)} {local(sum, 0)}
+	MOV {0.000000000000 Kflt(3)} {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(5)}
-	MOV {10000 Kint(3)} {Tint(6)}
+	MOV {10000 Kint(4)} {Tint(6)}
 	MOV {1 Kint(0)} {Tint(7)}
 	LIii {0 Kint(2), Tint(7)} {Tint(8)}
 	SUBii {Tint(5), Tint(7)} {Tint(5)}
@@ -6883,7 +6885,7 @@ L9
 L10
 	MOV {Tint(5)} {local(k, 2)}
 	MULii {local(k, 2), local(k, 2)} {Tint(10)}
-	DIVfi {1 Kint(0), Tint(10)} {Tflt(0)}
+	DIVfi {1.000000000000 Kflt(5), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
 	BR {L7}
@@ -7681,12 +7683,16 @@ L0 (entry)
 	LEN {T(5)} {T(6)}
 	NEWTABLE {T(7)}
 	MOV {T(7)} {local(x, 5)}
-	MOV {T(6)} {local(p, 4)}
-	MOV {T(2)} {local(n, 3)}
-	MOV {T(4)} {local(m, 2)}
+	TOINT {T(6)}
+	MOVi {T(6)} {local(p, 4)}
+	TOINT {T(2)}
+	MOVi {T(2)} {local(n, 3)}
+	TOINT {T(4)}
+	MOVi {T(4)} {local(m, 2)}
 	LOADGLOBAL {matrix} {T(4)}
 	GETsk {T(4), 'T' Ks(1)} {T(2)}
 	CALL {T(2), local(b, 1)} {T(2..)}
+	TOTABLE {T(2[2..])}
 	MOV {T(2[2..])} {local(c, 6)}
 	MOV {1 Kint(0)} {Tint(0)}
 	MOV {local(m, 2)} {Tint(1)}
@@ -7708,7 +7714,8 @@ L5
 	MOV {Tint(0)} {local(i, 7)}
 	LOADGLOBAL {table} {T(6)}
 	GETsk {T(6), 'numarray' Ks(3)} {T(7)}
-	CALL {T(7), local(p, 4), 0 Kint(2)} {T(7..)}
+	CALL {T(7), local(p, 4), 0.000000000000 Kflt(4)} {T(7..)}
+	TOFARRAY {T(7[7..])}
 	MOV {T(7[7..])} {local(xi, 8)}
 	TPUTik {local(x, 5), local(i, 7), local(xi, 8)}
 	MOV {1 Kint(0)} {Tint(5)}
@@ -7736,7 +7743,7 @@ L10
 	TOFARRAY {T(9)}
 	MOV {T(9)} {local(cj, 12)}
 	MOV {T(8)} {local(ai, 11)}
-	MOV {0 Kint(2)} {local(sum, 10)}
+	MOVf {0.000000000000 Kflt(4)} {local(sum, 10)}
 	MOV {1 Kint(0)} {Tint(10)}
 	MOV {local(n, 3)} {Tint(11)}
 	MOV {1 Kint(0)} {Tint(12)}
@@ -7760,7 +7767,7 @@ L15
 	FAGETik {local(cj, 12), local(k, 13)} {Tflt(1)}
 	MULff {Tflt(0), Tflt(1)} {Tflt(2)}
 	ADDff {local(sum, 10), Tflt(2)} {Tflt(1)}
-	MOV {Tflt(1)} {local(sum, 10)}
+	MOVf {Tflt(1)} {local(sum, 10)}
 	BR {L12}
 L16
 	FAPUTfv {local(xi, 8), local(j, 9), local(sum, 10)}
@@ -8213,9 +8220,9 @@ L0 (entry)
 	ADDfi {Tflt(0), Tint(1)} {Tflt(1)}
 	MOD {Tflt(1), 8 Kint(1)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
-	DIVfi {Tflt(1), 2.000000000000 Kflt(0)} {Tflt(2)}
-	MULfi {Tflt(2), 4 Kint(3)} {Tflt(1)}
-	SUBfi {Tflt(1), 3 Kint(4)} {Tflt(2)}
+	DIVfi {Tflt(1), 2 Kint(3)} {Tflt(2)}
+	MULfi {Tflt(2), 4 Kint(4)} {Tflt(1)}
+	SUBfi {Tflt(1), 3 Kint(5)} {Tflt(2)}
 	RET {Tflt(2)} {L1}
 L1 (exit)
 return -((2^8 + -(-1)) % 8)//2 * 4 - 3

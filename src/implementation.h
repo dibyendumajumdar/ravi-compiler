@@ -381,9 +381,6 @@ DECLARE_PTR_LIST(proc_list, struct proc);
 enum opcode {
 	op_nop,
 	op_ret,
-	op_loadk,
-	op_loadnil,
-	op_loadbool,
 	op_add,
 	op_addff,
 	op_addfi,
@@ -457,6 +454,10 @@ enum opcode {
 	op_cbr,
 	op_br,
 	op_mov,
+	op_movi,
+	op_movif, /* int to float if compatible else error */
+	op_movf,
+	op_movfi, /* float to int if compatible else error */
 	op_call,
 	op_get,
 	op_get_ikey,

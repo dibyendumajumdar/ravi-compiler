@@ -42,8 +42,8 @@ static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
 static void linearize_function(struct linearizer_state *linearizer);
-static struct instruction* allocate_instruction(struct proc* proc, enum opcode op);
-static void free_temp_pseudo(struct proc* proc, struct pseudo* pseudo);
+static struct instruction *allocate_instruction(struct proc *proc, enum opcode op);
+static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo);
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
@@ -122,14 +122,14 @@ void raviX_destroy_linearizer(struct linearizer_state *linearizer)
 
 /**
  * We assume strings are all interned and can be compared by
- * address
+ * address. Return true if values match else false.
  */
 static int compare_constants(const void *a, const void *b)
 {
 	const struct constant *c1 = (const struct constant *)a;
 	const struct constant *c2 = (const struct constant *)b;
 	if (c1->type != c2->type)
-		return 1;
+		return 0;
 	if (c1->type == RAVI_TNUMINT)
 		return c1->i == c2->i;
 	else if (c1->type == RAVI_TNUMFLT)
@@ -166,7 +166,7 @@ static const struct constant *add_constant(struct proc *proc, const struct const
 		memcpy(c1, c, sizeof(struct constant));
 		c1->index = reg;
 		set_add(proc->constants, c1);
-		// printf("Created new constant and assigned reg %d\n", reg);
+		// printf("Created new constant of type %d and assigned reg %d\n", c->type, reg);
 		return c1;
 	} else {
 		const struct constant *c1 = entry->key;
@@ -198,48 +198,48 @@ static const struct constant *allocate_integer_constant(struct proc *proc, int i
 	return add_constant(proc, &c);
 }
 
-static inline void add_instruction_operand(struct proc* proc, struct instruction* insn, struct pseudo* pseudo)
+static inline void add_instruction_operand(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
 {
-	ptrlist_add((struct ptr_list**) & insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
-static inline void add_instruction_target(struct proc* proc, struct instruction* insn, struct pseudo* pseudo)
+static inline void add_instruction_target(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
 {
-	ptrlist_add((struct ptr_list**) & insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
-static struct instruction* allocate_instruction(struct proc* proc, enum opcode op)
+static struct instruction *allocate_instruction(struct proc *proc, enum opcode op)
 {
-	struct instruction* insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
+	struct instruction *insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
 	insn->opcode = op;
 	return insn;
 }
 
-static void free_instruction_operand_pseudos(struct proc* proc, struct instruction* insn)
+static void free_instruction_operand_pseudos(struct proc *proc, struct instruction *insn)
 {
-	struct pseudo* operand;
+	struct pseudo *operand;
 	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
 	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
-static inline void add_instruction(struct proc* proc, struct instruction* insn)
+static inline void add_instruction(struct proc *proc, struct instruction *insn)
 {
 	assert(insn->block == NULL || insn->block == proc->current_bb);
-	ptrlist_add((struct ptr_list**) & proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 	insn->block = proc->current_bb;
 }
 
-static inline void remove_instruction(struct basic_block* block, struct instruction* insn)
+static inline void remove_instruction(struct basic_block *block, struct instruction *insn)
 {
-	ptrlist_remove((struct ptr_list**) & block->insns, insn, 1);
+	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
 	insn->block = NULL;
 }
 
-static inline struct instruction* last_instruction(struct basic_block* block)
+static inline struct instruction *last_instruction(struct basic_block *block)
 {
-	if (ptrlist_size((struct ptr_list*)block->insns) == 0)
+	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
-	return (struct instruction*)ptrlist_last((struct ptr_list*)block->insns);
+	return (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
 
 static const struct constant *allocate_string_constant(struct proc *proc, const struct string_object *s)
@@ -419,27 +419,42 @@ static inline void set_current_proc(struct linearizer_state *linearizer, struct 
 	linearizer->current_proc = proc;
 }
 
-static void instruct_totype(struct proc* proc, struct pseudo* target, const struct var_type* vtype)
+static void instruct_totype(struct proc *proc, struct pseudo *target, const struct var_type *vtype)
 {
 	enum opcode targetop = op_nop;
 	switch (vtype->type_code) {
-	case RAVI_TNUMFLT: targetop = op_toflt; break;
-	case RAVI_TNUMINT: targetop = op_toint; break;
-	case RAVI_TSTRING: targetop = op_tostring; break;
-	case RAVI_TFUNCTION: targetop = op_toclosure; break;
-	case RAVI_TTABLE: targetop = op_totable; break;
-	case RAVI_TARRAYFLT: targetop = op_tofarray; break;
-	case RAVI_TARRAYINT: targetop = op_toiarray; break;
-	case RAVI_TUSERDATA: targetop = op_totype;
+	case RAVI_TNUMFLT:
+		targetop = op_toflt;
+		break;
+	case RAVI_TNUMINT:
+		targetop = op_toint;
+		break;
+	case RAVI_TSTRING:
+		targetop = op_tostring;
+		break;
+	case RAVI_TFUNCTION:
+		targetop = op_toclosure;
+		break;
+	case RAVI_TTABLE:
+		targetop = op_totable;
+		break;
+	case RAVI_TARRAYFLT:
+		targetop = op_tofarray;
+		break;
+	case RAVI_TARRAYINT:
+		targetop = op_toiarray;
+		break;
+	case RAVI_TUSERDATA:
+		targetop = op_totype;
 		break;
 	default:
 		return;
 	}
-	struct instruction* insn = allocate_instruction(proc, targetop);
+	struct instruction *insn = allocate_instruction(proc, targetop);
 	if (targetop == op_totype) {
 		assert(vtype->type_name);
-		const struct constant* tname_constant = allocate_string_constant(proc, vtype->type_name);
-		struct pseudo* tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
+		const struct constant *tname_constant = allocate_string_constant(proc, vtype->type_name);
+		struct pseudo *tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
 		add_instruction_operand(proc, insn, tname_pseudo);
 	}
 	add_instruction_target(proc, insn, target);
@@ -466,7 +481,6 @@ static void linearize_statement_list(struct proc *proc, struct ast_node_list *li
 	FOR_EACH_PTR(list, node) { linearize_statement(proc, node); }
 	END_FOR_EACH_PTR(node)
 }
-
 
 static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 {
@@ -1149,18 +1163,50 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	return target;
 }
 
-static void linearize_store_var(struct proc *proc, const struct var_type *var_type, struct pseudo *var_pseudo, 
-	const struct var_type *val_type, struct pseudo *val_pseudo)
+/** Is the type NIL-able */
+static bool is_nillable(const struct var_type *var_type)
 {
-	// ravitype_t var_type = var_node->common_expr.type.type_code;
-	// ravitype_t val_type = var_node->common_expr.type.type_code;
+	return var_type->type_code != RAVI_TARRAYFLT && var_type->type_code != RAVI_TARRAYINT &&
+	       var_type->type_code != RAVI_TNUMFLT && var_type->type_code != RAVI_TNUMINT;
+}
 
+/* Check if we can assign value to variable */
+static bool is_compatible(const struct var_type *var_type, const struct var_type *val_type)
+{
+	if (var_type->type_code == RAVI_TANY)
+		return true;
+	if (is_nillable(var_type) && val_type->type_code == RAVI_TNIL)
+		return true;
+	if (val_type->type_code == var_type->type_code && val_type->type_name == var_type->type_name)
+		return true;
+	if ((var_type->type_code == RAVI_TNUMFLT && val_type->type_code == RAVI_TNUMINT) ||
+	    (var_type->type_code == RAVI_TNUMINT && val_type->type_code == RAVI_TNUMFLT))
+		/* Maybe conversion is possible so allow */
+		return true;
+	return false;
+}
+
+static void linearize_store_var(struct proc *proc, const struct var_type *var_type, struct pseudo *var_pseudo,
+				const struct var_type *val_type, struct pseudo *val_pseudo)
+{
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
 		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
 	} else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
 		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
 	} else {
-		instruct_move(proc, op_mov, var_pseudo, val_pseudo); // TODO add type specialization
+		assert(!var_pseudo->insn);
+		assert(var_type->type_code != RAVI_TVARARGS && var_type->type_code != RAVI_TNIL);
+		if (!is_compatible(var_type, val_type)) {
+			instruct_totype(proc, val_pseudo, var_type);
+			val_type = var_type; // Because of the type assertion!
+		}
+		enum opcode op = op_mov;
+		if (var_type->type_code == RAVI_TNUMINT) {
+			op = val_type->type_code == RAVI_TNUMINT ? op_movi : op_movfi;
+		} else if (var_type->type_code == RAVI_TNUMFLT) {
+			op = val_type->type_code == RAVI_TNUMFLT ? op_movf : op_movif;
+		}
+		instruct_move(proc, op, var_pseudo, val_pseudo);
 	}
 }
 
@@ -1825,8 +1871,8 @@ static void linearize_function_statement(struct proc *proc, struct ast_node *nod
 	}
 	struct pseudo *function_pseudo = linearize_function_expr(proc, node->function_stmt.function_expr);
 	/* Following will potentially convert load to store */
-	linearize_store_var(proc, &prev_node->common_expr.type, prev_pseudo, 
-		&node->function_stmt.function_expr->common_expr.type, function_pseudo);
+	linearize_store_var(proc, &prev_node->common_expr.type, prev_pseudo,
+			    &node->function_stmt.function_expr->common_expr.type, function_pseudo);
 }
 
 static void linearize_statement(struct proc *proc, struct ast_node *node)
@@ -2068,16 +2114,17 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 }
 
 static const char *op_codenames[] = {
-    "NOOP",	 "RET",	      "LOADK",	  "LOADNIL", "LOADBOOL", "ADD",	    "ADDff",  "ADDfi",	    "ADDii",
-    "SUB",	 "SUBff",     "SUBfi",	  "SUBif",   "SUBii",	 "MUL",	    "MULff",  "MULfi",	    "MULii",
-    "DIV",	 "DIVff",     "DIVfi",	  "DIVif",   "DIVii",	 "IDIV",    "BAND",   "BANDii",	    "BOR",
-    "BORii",	 "BXOR",      "BXORii",	  "SHL",     "SHLii",	 "SHR",	    "SHRii",  "EQ",	    "EQii",
-    "EQff",	 "LT",	      "LIii",	  "LTff",    "LE",	 "LEii",    "LEff",   "MOD",	    "POW",
-    "CLOSURE",	 "UNM",	      "UNMi",	  "UNMf",    "LEN",	 "LENi",    "TOINT",  "TOFLT",	    "TOCLOSURE",
-    "TOSTRING",	 "TOIARRAY",  "TOFARRAY", "TOTABLE", "TOTYPE",	 "NOT",	    "BNOT",   "LOADGLOBAL", "NEWTABLE",
-    "NEWIARRAY", "NEWFARRAY", "PUT",	  "PUTik",   "PUTsk",	 "TPUT",    "TPUTik", "TPUTsk",	    "IAPUT",
-    "IAPUTiv",	 "FAPUT",     "FAPUTfv",  "CBR",     "BR",	 "MOV",	    "CALL",   "GET",	    "GETik",
-    "GETsk",	 "TGET",      "TGETik",	  "TGETsk",  "IAGET",	 "IAGETik", "FAGET",  "FAGETik",    "STOREGLOBAL"};
+    "NOOP",	  "RET",    "ADD",  "ADDff",  "ADDfi",	    "ADDii",	 "SUB",	      "SUBff",	   "SUBfi",
+    "SUBif",	  "SUBii",  "MUL",  "MULff",  "MULfi",	    "MULii",	 "DIV",	      "DIVff",	   "DIVfi",
+    "DIVif",	  "DIVii",  "IDIV", "BAND",   "BANDii",	    "BOR",	 "BORii",     "BXOR",	   "BXORii",
+    "SHL",	  "SHLii",  "SHR",  "SHRii",  "EQ",	    "EQii",	 "EQff",      "LT",	   "LIii",
+    "LTff",	  "LE",	    "LEii", "LEff",   "MOD",	    "POW",	 "CLOSURE",   "UNM",	   "UNMi",
+    "UNMf",	  "LEN",    "LENi", "TOINT",  "TOFLT",	    "TOCLOSURE", "TOSTRING",  "TOIARRAY",  "TOFARRAY",
+    "TOTABLE",	  "TOTYPE", "NOT",  "BNOT",   "LOADGLOBAL", "NEWTABLE",	 "NEWIARRAY", "NEWFARRAY", "PUT",
+    "PUTik",	  "PUTsk",  "TPUT", "TPUTik", "TPUTsk",	    "IAPUT",	 "IAPUTiv",   "FAPUT",	   "FAPUTfv",
+    "CBR",	  "BR",	    "MOV",  "MOVi",   "MOVif",	    "MOVf",	 "MOVfi",     "CALL",	   "GET",
+    "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
+    "STOREGLOBAL"};
 
 static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {
