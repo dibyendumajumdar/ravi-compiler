@@ -2091,7 +2091,9 @@ static void output_pseudo(struct pseudo *pseudo, membuff_t *mb)
 			break;
 		}
 		case SYM_UPVALUE: {
-			raviX_buffer_add_fstring(mb, "Upval(%u)", pseudo->regnum);
+			raviX_buffer_add_fstring(mb, "Upval(%u, Proc%%%d, %s)", pseudo->regnum,
+						 pseudo->symbol->upvalue.target_variable->variable.block->function->function_expr.proc_id,
+						 pseudo->symbol->upvalue.target_variable->variable.var_name->str);
 			break;
 		}
 		case SYM_GLOBAL: {

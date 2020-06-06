@@ -5,7 +5,7 @@ function f()
        a = a + 1
        return a
      end
-  end
+  end, a
 end
 #
 return function()

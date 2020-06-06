@@ -2645,7 +2645,7 @@ L0 (entry)
 L1 (exit)
 define Proc%4
 L0 (entry)
-	RET {Upval(0)} {L1}
+	RET {Upval(0, Proc%2, a)} {L1}
 L1 (exit)
 return @integer 1
 function()
@@ -6081,7 +6081,7 @@ L0 (entry)
 L1 (exit)
 define Proc%4
 L0 (entry)
-	RET {Upval(0)} {L1}
+	RET {Upval(0, Proc%2, a)} {L1}
 L1 (exit)
 define Proc%5
 L0 (entry)
@@ -6090,7 +6090,7 @@ L0 (entry)
 L1 (exit)
 define Proc%6
 L0 (entry)
-	RET {Upval(0)} {L1}
+	RET {Upval(0, Proc%2, a)} {L1}
 L1 (exit)
 return function (a, b, c, d, e)
     if a == b then goto l1
@@ -9232,13 +9232,13 @@ L2
 L3
 	LOADGLOBAL {print} {T(2)}
 	CALL {T(2), local(m, 0)} {T(2..)}
-	LEN {Upval(0)} {T(3)}
+	LEN {Upval(0, Proc%1, msgs)} {T(3)}
 	ADD {T(3), 1 Kint(0)} {T(4)}
 	LOADGLOBAL {string} {T(5)}
 	GETsk {T(5), 'sub' Ks(1)} {T(6)}
 	UNMi {3 Kint(2)} {Tint(0)}
 	CALL {T(6), local(m, 0), 3 Kint(2), Tint(0)} {T(6..)}
-	PUT {Upval(0), T(4), T(6[6..])}
+	PUT {Upval(0, Proc%1, msgs), T(4), T(6[6..])}
 	BR {L4}
 L4
 	BR {L1}
