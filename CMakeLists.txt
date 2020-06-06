@@ -80,3 +80,10 @@ target_link_libraries(tastwalk ravicomp)
 target_include_directories(tastwalk
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+
+add_executable(trun tests/trun.c tests/tcommon.c tests/tcommon.h)
+target_link_libraries(trun ravicomp)
+target_include_directories(trun
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")

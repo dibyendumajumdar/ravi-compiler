@@ -1,0 +1,24 @@
+local i = 0
+#
+local i, j = 1, 2
+#
+local a = a
+#
+local a = b
+#
+local a, b = x, y
+#
+local a: integer return a+3
+#
+local i: integer; return t[i/5]
+#
+local t: integer[]; return t[0]
+#
+local t: table local len: integer = #t return len
+#
+_soft = rawget(_G, "_soft") or false
+Z[1][2] = false or true
+local _g
+r()[a].name = _g and 'Dibyendu' or 'majumdar'
+#
+

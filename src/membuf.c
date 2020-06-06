@@ -54,14 +54,18 @@ void raviX_buffer_reserve(membuff_t *mb, size_t n)
 	}
 }
 void raviX_buffer_free(membuff_t *mb) { free(mb->buf); }
-void raviX_buffer_add_string(membuff_t *mb, const char *str)
+void raviX_buffer_add_bytes(membuff_t *mb, const char *str, size_t len)
 {
-	size_t len = strlen(str);
 	size_t required_size = mb->pos + len + 1; /* extra byte for NULL terminator */
 	raviX_buffer_resize(mb, required_size);
 	assert(mb->allocated_size - mb->pos > len);
 	raviX_string_copy(&mb->buf[mb->pos], str, mb->allocated_size - mb->pos);
 	mb->pos += len;
+}
+void raviX_buffer_add_string(membuff_t *mb, const char *str)
+{
+	size_t len = strlen(str);
+	raviX_buffer_add_bytes(mb, str, len);
 }
 
 void raviX_buffer_add_fstring(membuff_t *mb, const char *fmt, ...)

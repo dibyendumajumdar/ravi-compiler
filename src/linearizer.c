@@ -395,7 +395,8 @@ static struct proc *allocate_proc(struct linearizer_state *linearizer, struct as
 	assert(function_expr->type == EXPR_FUNCTION);
 	struct proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
 	proc->function_expr = function_expr;
-	proc->id = ptrlist_size((struct ptr_list *)linearizer->all_procs);
+	proc->id = ptrlist_size((struct ptr_list *)linearizer->all_procs)+1; // so that 0 is not assigned
+	function_expr->function_expr.proc_id = proc->id;
 	ptrlist_add((struct ptr_list **)&linearizer->all_procs, proc, &linearizer->ptrlist_allocator);
 	if (linearizer->current_proc) {
 		proc->parent = linearizer->current_proc;

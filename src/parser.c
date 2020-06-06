@@ -1470,6 +1470,7 @@ static struct ast_node *new_function(struct parser_state *parser)
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;
 	node->function_expr.is_vararg = false;
+	node->function_expr.proc_id = 0;
 	node->function_expr.args = NULL;
 	node->function_expr.child_functions = NULL;
 	node->function_expr.upvalues = NULL;

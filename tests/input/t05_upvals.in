@@ -1,0 +1,39 @@
+local a = 1
+function f()
+  return function()
+     return function()
+       a = a + 1
+       return a
+     end
+  end
+end
+#
+return function()
+    local a = 1
+	local function y()
+		return function() return a end
+	end
+	local a = 5
+	local function z()
+		return function() return a end
+	end
+	return y, z
+end
+#
+local x
+do
+  local y = 12
+  goto l1
+  ::l2:: x = x + 1; goto l3
+  ::l1:: x = y; goto l2
+end
+::l3:: ::l3_1:: assert(x == 13)
+#
+local msgs = {}
+function Message (m)
+  if not _nomsg then
+    print(m)
+    msgs[#msgs+1] = string.sub(m, 3, -3)
+  end
+end
+#

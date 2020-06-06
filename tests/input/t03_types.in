@@ -1,0 +1,56 @@
+function foo(bar: integer[], zee: number[], ...) end
+#
+function foo(bar: number, zee: string) end
+#
+function foo(bar: closure, zee: My.User.Type) end
+#
+return @integer 1
+#
+return @string 'hello'
+#
+return @table {}
+#
+return @integer[] {}
+#
+return @number[] {}
+#
+return @closure function() end
+#
+return @number 54.4
+#
+return @User.Type a
+#
+return @integer[]{[1] = 5.5, [2] = 4}
+#
+return @number[] {[1] = 4, [2] = 5.4}
+#
+local a: integer return a+3
+#
+local i: integer; return t[i/5]
+#
+local t: integer[]; return t[0]
+#
+local t: integer[] if (t[1] == 5) then return true end return false
+#
+local t: table local len: integer = #t return len
+#
+return function(t: table, i: integer) i = #t end
+#
+function matmul(a: table, b: table)
+  	assert(@integer(#a[1]) == #b);
+  	local m: integer, n: integer, p: integer, x: table = #a, #a[1], #b[1], {};
+  	local c: table = matrix.T(b); -- transpose for efficiency
+  	for i = 1, m do
+  		local xi: number[] = table.numarray(p, 0.0)
+  		x[i] = xi
+  		for j = 1, p do
+  			local sum: number, ai: number[], cj: number[] = 0.0, @number[](a[i]), @number[](c[j]);
+  			-- for luajit, caching c[j] or not makes no difference; lua is not so clever
+  			for k = 1, n do sum = sum + ai[k] * cj[k] end
+  			xi[j] = sum;
+  		end
+  	end
+  	return x
+  end
+return matmul
+#

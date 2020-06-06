@@ -544,6 +544,7 @@ static inline void raviX_buffer_reset(membuff_t *mb) { mb->pos = 0; }
 
 /* following convert input to string before adding */
 RAVICOMP_EXPORT void raviX_buffer_add_string(membuff_t *mb, const char *str);
+RAVICOMP_EXPORT void raviX_buffer_add_bytes(membuff_t *mb, const char *str, size_t len);
 RAVICOMP_EXPORT void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...) FORMAT_ATTR(2);
 
 /* strncpy() replacement with guaranteed 0 termination */

@@ -243,6 +243,7 @@ struct function_expression {
 	struct var_type type;
 	unsigned int is_vararg : 1;
 	unsigned int is_method : 1;
+	uint32_t proc_id; /* Backend allocated id */
 	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
 	struct block_scope *main_block;		       /* the function's main block */
 	struct ast_node_list *function_statement_list; /* statements in this block */
