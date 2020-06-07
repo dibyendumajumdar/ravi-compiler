@@ -1,6 +1,6 @@
 ## Sources
 
-* `trun.c` - a new driver for executing tests - handles multiple cases in a single input file. Runs lexer, parser, typechecker, linearizer, CFG geneartion, etc. and then dumps it all out on `stdout`.
+* `trun.c` - a new driver for executing tests - handles multiple cases in a single input file. Runs lexer, parser, typechecker, linearizer, CFG generation, etc. and then dumps it all out on `stdout`.
 * `tparse.c` - a simple driver that takes some source text as input and runs lexer, parser, typechecker, and linearizer on the input.
 * `tstrset.c` - basic smoke test for strings in sets
 * `tgraph.c` - basic smoke test for graph data structure.
