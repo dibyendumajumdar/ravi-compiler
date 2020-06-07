@@ -364,15 +364,14 @@ struct parser_state {
 Linearizer
 */
 struct instruction;
-struct node;
 struct basic_block;
-struct edge;
+//struct edge;
 struct cfg;
 struct proc;
 struct constant;
 
 DECLARE_PTR_LIST(instruction_list, struct instruction);
-DECLARE_PTR_LIST(edge_list, struct edge);
+//DECLARE_PTR_LIST(edge_list, struct edge);
 DECLARE_PTR_LIST(pseudo_list, struct pseudo);
 DECLARE_PTR_LIST(proc_list, struct proc);
 
@@ -510,23 +509,23 @@ struct instruction {
 	struct basic_block *block; /* owning block */
 };
 
-struct edge {
-	struct node *from;
-	struct node *to;
-};
+//struct edge {
+//	struct node *from;
+//	struct node *to;
+//};
+//
+//#define NODE_FIELDS                                                                                                    \
+//	uint32_t index;                                                                                                \
+//	struct edge_list *pred;                                                                                        \
+//	struct edge_list *succ
+//
+//struct node {
+//	NODE_FIELDS;
+//};
 
-#define NODE_FIELDS                                                                                                    \
-	uint32_t index;                                                                                                \
-	struct edge_list *pred;                                                                                        \
-	struct edge_list *succ
-
-struct node {
-	NODE_FIELDS;
-};
-
-/* Basic block is a specialization of node */
+/* Basic block */
 struct basic_block {
-	NODE_FIELDS;
+	uint32_t index; /* The index of the block is a key to enable retrieving the block from its container */
 	struct instruction_list *insns;
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
@@ -534,9 +533,7 @@ DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 #define CFG_FIELDS                                                                                                     \
 	unsigned node_count;                                                                                           \
 	unsigned allocated;                                                                                            \
-	struct node **nodes;                                                                                           \
-	struct node *entry;                                                                                            \
-	struct node *exit
+	struct basic_block **nodes
 
 struct cfg {
 	CFG_FIELDS;
@@ -558,6 +555,12 @@ struct constant {
 	};
 };
 
+/* We have two distinguished basic blocks in every proc */
+enum {
+	ENTRY_BLOCK = 0,
+	EXIT_BLOCK = 1
+};
+
 /* proc is a type of cfg */
 struct proc {
 	CFG_FIELDS;
@@ -577,12 +580,9 @@ struct proc {
 	unsigned num_constants;
 };
 
-static inline struct basic_block *n2bb(struct node *n) { return (struct basic_block *)n; }
-static inline struct node *bb2n(struct basic_block *bb) { return (struct node *)bb; }
-
 struct linearizer_state {
 	struct allocator instruction_allocator;
-	struct allocator edge_allocator;
+	//struct allocator edge_allocator;
 	struct allocator pseudo_allocator;
 	struct allocator ptrlist_allocator;
 	struct allocator basic_block_allocator;

@@ -4,6 +4,13 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 This file contains the Linearizer. The goal of the Linearizer is
 generate a linear intermediate representation (IR) from the AST
 suitable for further analysis.
+
+The linear IR is organized in basic blocks.
+Each proc has an entry block and exit block. Additional blocks
+are created as necessary.
+
+Each basic block contains a sequence of instructions.
+The final instruction of a block must always be a branch instruction.
 */
 
 #include "implementation.h"
@@ -79,8 +86,8 @@ struct linearizer_state *raviX_init_linearizer(struct compiler_state *container)
 {
 	struct linearizer_state *linearizer = (struct linearizer_state *)calloc(1, sizeof(struct linearizer_state));
 	linearizer->ast_container = container;
-	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double),
-			     sizeof(struct edge) * 32);
+//	raviX_allocator_init(&linearizer->edge_allocator, "edge_allocator", sizeof(struct edge), sizeof(double),
+//			     sizeof(struct edge) * 32);
 	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(struct instruction),
 			     sizeof(double), sizeof(struct instruction) * 128);
 	raviX_allocator_init(&linearizer->ptrlist_allocator, "ptrlist_allocator", sizeof(struct ptr_list),
@@ -109,7 +116,7 @@ void raviX_destroy_linearizer(struct linearizer_state *linearizer)
 			set_destroy(proc->constants, NULL);
 	}
 	END_FOR_EACH_PTR(proc)
-	raviX_allocator_destroy(&linearizer->edge_allocator);
+	//raviX_allocator_destroy(&linearizer->edge_allocator);
 	raviX_allocator_destroy(&linearizer->instruction_allocator);
 	raviX_allocator_destroy(&linearizer->ptrlist_allocator);
 	raviX_allocator_destroy(&linearizer->pseudo_allocator);
@@ -1397,7 +1404,7 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	assert(node->type == STMT_RETURN);
 	struct instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
-	add_instruction_target(proc, insn, allocate_block_pseudo(proc, n2bb(proc->exit)));
+	add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	add_instruction(proc, insn);
 	// FIXME add edge to exit block
 	// FIXME terminate block
@@ -1940,19 +1947,20 @@ static struct basic_block *create_block(struct proc *proc)
 {
 	if (proc->node_count >= proc->allocated) {
 		unsigned new_size = proc->allocated + 25;
-		struct node **new_data =
-		    raviX_allocator_allocate(&proc->linearizer->unsized_allocator, new_size * sizeof(struct node *));
+		struct basic_block **new_data =
+		    raviX_allocator_allocate(&proc->linearizer->unsized_allocator, new_size * sizeof(struct basic_block *));
 		assert(new_data != NULL);
 		if (proc->node_count > 0) {
-			memcpy(new_data, proc->nodes, proc->allocated * sizeof(struct node *));
+			memcpy(new_data, proc->nodes, proc->allocated * sizeof(struct basic_block *));
 		}
 		proc->allocated = new_size;
 		proc->nodes = new_data;
 	}
 	assert(proc->node_count < proc->allocated);
 	struct basic_block *new_block = raviX_allocator_allocate(&proc->linearizer->basic_block_allocator, 0);
+	/* note that each block must have an index that can be used to access the block as nodes[index] */
 	new_block->index = proc->node_count;
-	proc->nodes[proc->node_count++] = bb2n(new_block);
+	proc->nodes[proc->node_count++] = new_block;
 	return new_block;
 }
 
@@ -1980,9 +1988,11 @@ static void start_block(struct proc *proc, struct basic_block *bb_to_start)
 static void initialize_graph(struct proc *proc)
 {
 	assert(proc != NULL);
-	proc->entry = bb2n(create_block(proc));
-	proc->exit = bb2n(create_block(proc));
-	start_block(proc, n2bb(proc->entry));
+	struct basic_block *entry = create_block(proc);
+	assert(entry->index == ENTRY_BLOCK);
+	struct basic_block *exit = create_block(proc);
+	assert(exit->index == EXIT_BLOCK);
+	start_block(proc, entry);
 }
 
 /**
@@ -2032,12 +2042,15 @@ static void linearize_function(struct linearizer_state *linearizer)
 	struct ast_node *func_expr = proc->function_expr;
 	assert(func_expr->type == EXPR_FUNCTION);
 	initialize_graph(proc);
+	assert(proc->node_count >= 2);
+	assert(proc->nodes[ENTRY_BLOCK] != NULL);
+	assert(proc->nodes[EXIT_BLOCK] != NULL);
 	start_scope(linearizer, proc, func_expr->function_expr.main_block);
 	linearize_function_args(linearizer);
 	linearize_statement_list(proc, func_expr->function_expr.function_statement_list);
 	end_scope(linearizer, proc);
 	if (!is_block_terminated(proc->current_bb)) {
-		instruct_br(proc, allocate_block_pseudo(proc, n2bb(proc->exit)));
+		instruct_br(proc, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	}
 }
 
@@ -2167,9 +2180,9 @@ static void output_instructions(struct instruction_list *list, membuff_t *mb)
 static void output_basic_block(struct proc *proc, struct basic_block *bb, membuff_t *mb)
 {
 	raviX_buffer_add_fstring(mb, "L%d", bb->index);
-	if (bb2n(bb) == proc->entry) {
+	if (bb->index == ENTRY_BLOCK) {
 		raviX_buffer_add_string(mb, " (entry)\n");
-	} else if (bb2n(bb) == proc->exit) {
+	} else if (bb->index == EXIT_BLOCK) {
 		raviX_buffer_add_string(mb, " (exit)\n");
 	} else {
 		raviX_buffer_add_string(mb, "\n");
@@ -2182,7 +2195,7 @@ static void output_proc(struct proc *proc, membuff_t *mb)
 	struct basic_block *bb;
 	raviX_buffer_add_fstring(mb, "define Proc%%%d\n", proc->id);
 	for (int i = 0; i < (int)proc->node_count; i++) {
-		bb = n2bb(proc->nodes[i]);
+		bb = proc->nodes[i];
 		output_basic_block(proc, bb, mb);
 	}
 }
