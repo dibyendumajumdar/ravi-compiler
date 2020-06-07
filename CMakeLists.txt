@@ -9,6 +9,7 @@ set(HEADERS
         src/allocate.h
         src/ptrlist.h
         src/fnv_hash.h
+        src/graph.h
         src/hash_table.h
         src/set.h
         src/membuf.h
@@ -19,6 +20,7 @@ set(SRCS
         src/ast_walker.c
         src/ptrlist.c
         src/fnv_hash.c
+        src/graph.c
         src/hash_table.c
         src/set.c
         src/lexer.c
@@ -84,6 +86,13 @@ target_include_directories(tastwalk
 add_executable(trun tests/trun.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(trun ravicomp)
 target_include_directories(trun
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
+        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+
+add_executable(tgraph tests/tgraph.c)
+target_link_libraries(tgraph ravicomp)
+target_include_directories(tgraph
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include")

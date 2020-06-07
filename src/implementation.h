@@ -365,13 +365,11 @@ Linearizer
 */
 struct instruction;
 struct basic_block;
-//struct edge;
 struct cfg;
 struct proc;
 struct constant;
 
 DECLARE_PTR_LIST(instruction_list, struct instruction);
-//DECLARE_PTR_LIST(edge_list, struct edge);
 DECLARE_PTR_LIST(pseudo_list, struct pseudo);
 DECLARE_PTR_LIST(proc_list, struct proc);
 
@@ -509,20 +507,6 @@ struct instruction {
 	struct basic_block *block; /* owning block */
 };
 
-//struct edge {
-//	struct node *from;
-//	struct node *to;
-//};
-//
-//#define NODE_FIELDS                                                                                                    \
-//	uint32_t index;                                                                                                \
-//	struct edge_list *pred;                                                                                        \
-//	struct edge_list *succ
-//
-//struct node {
-//	NODE_FIELDS;
-//};
-
 /* Basic block */
 struct basic_block {
 	uint32_t index; /* The index of the block is a key to enable retrieving the block from its container */
@@ -530,13 +514,10 @@ struct basic_block {
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 
-#define CFG_FIELDS                                                                                                     \
-	unsigned node_count;                                                                                           \
-	unsigned allocated;                                                                                            \
-	struct basic_block **nodes
-
 struct cfg {
-	CFG_FIELDS;
+	unsigned node_count;
+	unsigned allocated;
+	struct basic_block **nodes;
 };
 
 struct pseudo_generator {
@@ -563,7 +544,7 @@ enum {
 
 /* proc is a type of cfg */
 struct proc {
-	CFG_FIELDS;
+	struct cfg cfg;
 	uint32_t id; /* ID for the proc */
 	struct linearizer_state *linearizer;
 	struct proc_list *procs;	/* procs defined in this proc */
@@ -582,7 +563,6 @@ struct proc {
 
 struct linearizer_state {
 	struct allocator instruction_allocator;
-	//struct allocator edge_allocator;
 	struct allocator pseudo_allocator;
 	struct allocator ptrlist_allocator;
 	struct allocator basic_block_allocator;
@@ -599,6 +579,5 @@ struct linearizer_state {
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
 void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
 void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
-void luaX_token2str(struct lexer_state *ls, int token);
 
 #endif
