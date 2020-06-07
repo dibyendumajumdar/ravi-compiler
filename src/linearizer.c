@@ -239,7 +239,7 @@ static inline void remove_instruction(struct basic_block *block, struct instruct
 	insn->block = NULL;
 }
 
-static inline struct instruction *last_instruction(struct basic_block *block)
+struct instruction *raviX_last_instruction(struct basic_block *block)
 {
 	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
@@ -408,6 +408,7 @@ static struct proc *allocate_proc(struct linearizer_state *linearizer, struct as
 	}
 	proc->constants = set_create(hash_constant, compare_constants);
 	proc->linearizer = linearizer;
+	proc->cfg = NULL;
 	return proc;
 }
 
@@ -1401,7 +1402,7 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	assert(node->type == STMT_RETURN);
 	struct instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
-	add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->cfg.nodes[EXIT_BLOCK]));
+	add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	add_instruction(proc, insn);
 	// FIXME add edge to exit block
 	// FIXME terminate block
@@ -1412,7 +1413,7 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
    a return or a branch */
 static bool is_block_terminated(struct basic_block *block)
 {
-	struct instruction *last_insn = last_instruction(block);
+	struct instruction *last_insn = raviX_last_instruction(block);
 	if (last_insn == NULL)
 		return false;
 	if (last_insn->opcode == op_ret || last_insn->opcode == op_cbr || last_insn->opcode == op_br)
@@ -1942,22 +1943,22 @@ static void linearize_statement(struct proc *proc, struct ast_node *node)
  */
 static struct basic_block *create_block(struct proc *proc)
 {
-	if (proc->cfg.node_count >= proc->cfg.allocated) {
-		unsigned new_size = proc->cfg.allocated + 25;
+	if (proc->node_count >= proc->allocated) {
+		unsigned new_size = proc->allocated + 25;
 		struct basic_block **new_data =
 		    raviX_allocator_allocate(&proc->linearizer->unsized_allocator, new_size * sizeof(struct basic_block *));
 		assert(new_data != NULL);
-		if (proc->cfg.node_count > 0) {
-			memcpy(new_data, proc->cfg.nodes, proc->cfg.allocated * sizeof(struct basic_block *));
+		if (proc->node_count > 0) {
+			memcpy(new_data, proc->nodes, proc->allocated * sizeof(struct basic_block *));
 		}
-		proc->cfg.allocated = new_size;
-		proc->cfg.nodes = new_data;
+		proc->allocated = new_size;
+		proc->nodes = new_data;
 	}
-	assert(proc->cfg.node_count < proc->cfg.allocated);
+	assert(proc->node_count < proc->allocated);
 	struct basic_block *new_block = raviX_allocator_allocate(&proc->linearizer->basic_block_allocator, 0);
 	/* note that each block must have an index that can be used to access the block as nodes[index] */
-	new_block->index = proc->cfg.node_count;
-	proc->cfg.nodes[proc->cfg.node_count++] = new_block;
+	new_block->index = proc->node_count;
+	proc->nodes[proc->node_count++] = new_block;
 	return new_block;
 }
 
@@ -2039,15 +2040,15 @@ static void linearize_function(struct linearizer_state *linearizer)
 	struct ast_node *func_expr = proc->function_expr;
 	assert(func_expr->type == EXPR_FUNCTION);
 	initialize_graph(proc);
-	assert(proc->cfg.node_count >= 2);
-	assert(proc->cfg.nodes[ENTRY_BLOCK] != NULL);
-	assert(proc->cfg.nodes[EXIT_BLOCK] != NULL);
+	assert(proc->node_count >= 2);
+	assert(proc->nodes[ENTRY_BLOCK] != NULL);
+	assert(proc->nodes[EXIT_BLOCK] != NULL);
 	start_scope(linearizer, proc, func_expr->function_expr.main_block);
 	linearize_function_args(linearizer);
 	linearize_statement_list(proc, func_expr->function_expr.function_statement_list);
 	end_scope(linearizer, proc);
 	if (!is_block_terminated(proc->current_bb)) {
-		instruct_br(proc, allocate_block_pseudo(proc, proc->cfg.nodes[EXIT_BLOCK]));
+		instruct_br(proc, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	}
 }
 
@@ -2155,22 +2156,22 @@ static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 	raviX_buffer_add_string(mb, "}");
 }
 
-static void output_instruction(struct instruction *insn, membuff_t *mb)
+static void output_instruction(struct instruction *insn, membuff_t *mb, const char *prefix, const char *suffix)
 {
-	raviX_buffer_add_fstring(mb, "\t%s", op_codenames[insn->opcode]);
+	raviX_buffer_add_fstring(mb, "%s%s", prefix, op_codenames[insn->opcode]);
 	if (insn->operands) {
 		output_pseudo_list(insn->operands, mb);
 	}
 	if (insn->targets) {
 		output_pseudo_list(insn->targets, mb);
 	}
-	raviX_buffer_add_string(mb, "\n");
+	raviX_buffer_add_string(mb, suffix);
 }
 
-static void output_instructions(struct instruction_list *list, membuff_t *mb)
+static void output_instructions(struct instruction_list *list, membuff_t *mb, const char *prefix, const char *suffix)
 {
 	struct instruction *insn;
-	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb); }
+	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb, prefix, suffix); }
 	END_FOR_EACH_PTR(insn)
 }
 
@@ -2184,15 +2185,23 @@ static void output_basic_block(struct proc *proc, struct basic_block *bb, membuf
 	} else {
 		raviX_buffer_add_string(mb, "\n");
 	}
-	output_instructions(bb->insns, mb);
+	output_instructions(bb->insns, mb, "\t", "\n");
 }
+
+void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, membuff_t *mb)
+{
+	raviX_buffer_add_string(mb, "<TABLE>\n");
+	output_instructions(bb->insns, mb, "<TR><TD>", "</TD></TR>\n");
+	raviX_buffer_add_string(mb, "</TABLE>\n");
+}
+
 
 static void output_proc(struct proc *proc, membuff_t *mb)
 {
 	struct basic_block *bb;
 	raviX_buffer_add_fstring(mb, "define Proc%%%d\n", proc->id);
-	for (int i = 0; i < (int)proc->cfg.node_count; i++) {
-		bb = proc->cfg.nodes[i];
+	for (int i = 0; i < (int)proc->node_count; i++) {
+		bb = proc->nodes[i];
 		output_basic_block(proc, bb, mb);
 	}
 }

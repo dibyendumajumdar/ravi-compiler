@@ -365,7 +365,6 @@ Linearizer
 */
 struct instruction;
 struct basic_block;
-struct cfg;
 struct proc;
 struct constant;
 
@@ -514,12 +513,6 @@ struct basic_block {
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 
-struct cfg {
-	unsigned node_count;
-	unsigned allocated;
-	struct basic_block **nodes;
-};
-
 struct pseudo_generator {
 	uint8_t next_reg;
 	int16_t free_pos;
@@ -544,7 +537,9 @@ enum {
 
 /* proc is a type of cfg */
 struct proc {
-	struct cfg cfg;
+	unsigned node_count;
+	unsigned allocated;
+	struct basic_block **nodes;
 	uint32_t id; /* ID for the proc */
 	struct linearizer_state *linearizer;
 	struct proc_list *procs;	/* procs defined in this proc */
@@ -559,6 +554,7 @@ struct proc {
 	struct pseudo_generator temp_pseudos;	  /* All other temporaries */
 	struct set *constants;			  /* constants used by this proc */
 	unsigned num_constants;
+	struct graph *cfg;
 };
 
 struct linearizer_state {
@@ -579,5 +575,11 @@ struct linearizer_state {
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recusrively */
 void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
 void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
+void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, membuff_t *mb);
+
+struct instruction *raviX_last_instruction(struct basic_block *block);
+
+int raviX_construct_cfg(struct proc *proc);
+void raviX_output_cfg(struct proc *proc, FILE *fp);
 
 #endif

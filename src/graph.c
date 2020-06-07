@@ -41,7 +41,7 @@ void raviX_destroy_graph(struct graph *g)
 {
 	for (unsigned i = 0; i < g->allocated; i++) {
 		if (g->nodes[i])
-			raviX_destroy_node(&g->nodes[i]);
+			raviX_destroy_node(g->nodes[i]);
 	}
 	raviX_allocator_destroy(&g->node_allocator);
 	free(g->nodes);
@@ -159,4 +159,21 @@ struct edge_list* raviX_node_predecessors(struct graph* g, uint32_t n)
 uint32_t raviX_edge_count(struct edge_list* list)
 {
 	return list->count;
+}
+
+uint32_t raviX_get_edge(struct edge_list* list, uint32_t i)
+{
+	if (i < list->count)
+		return list->nodes[i];
+	assert(false);
+	return (uint32_t)-1;
+}
+
+void raviX_for_each_node(struct graph *g, void (*callback)(void *arg, struct graph *g, uint32_t nodeid), void *arg)
+{
+	for (unsigned i = 0; i < g->allocated; i++) {
+		if (g->nodes[i] != NULL) {
+			callback(arg, g, g->nodes[i]->index);
+		}
+	}
 }

@@ -5,6 +5,7 @@
 #include "ptrlist.h"
 #include "allocate.h"
 #include "membuf.h"
+#include "implementation.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,6 +108,9 @@ static int do_code(const char *code)
 		goto L_linend;
 	}
 	raviX_output_linearizer(linearizer, stdout);
+
+	raviX_construct_cfg(linearizer->main_proc);
+	raviX_output_cfg(linearizer->main_proc, stdout);
 
 	L_linend:
 	raviX_destroy_linearizer(linearizer);

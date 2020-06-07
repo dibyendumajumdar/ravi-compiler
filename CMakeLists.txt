@@ -21,6 +21,7 @@ set(SRCS
         src/ptrlist.c
         src/fnv_hash.c
         src/graph.c
+        src/cfg.c
         src/hash_table.c
         src/set.c
         src/lexer.c
