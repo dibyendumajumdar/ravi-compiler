@@ -54,11 +54,14 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 	struct edge_list *edge_list = raviX_node_successors(g, nodeid);
 	if (!edge_list)
 		return;
-	membuff_t buf;
-	raviX_buffer_init(&buf, 1024);
-	raviX_output_basic_block_as_table(proc, proc->nodes[nodeid], &buf);
-	fprintf(fp, "L%d [shape=none, margin=0, label=<%s>];\n", nodeid, raviX_buffer_data(&buf));
-	raviX_buffer_reset(&buf);
+	struct basic_block *block = proc->nodes[nodeid];
+	if (ptrlist_size((const struct ptr_list *) block->insns) > 0) {
+		membuff_t buf;
+		raviX_buffer_init(&buf, 1024);
+		raviX_output_basic_block_as_table(proc, block, &buf);
+		fprintf(fp, "L%d [shape=none, margin=0, label=<%s>];\n", nodeid, raviX_buffer_data(&buf));
+		raviX_buffer_reset(&buf);
+	}
 	for (unsigned i = 0; i < raviX_edge_count(edge_list); i++) {
 		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_edge(edge_list, i));
 	}

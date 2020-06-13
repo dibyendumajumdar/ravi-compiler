@@ -2190,9 +2190,9 @@ static void output_basic_block(struct proc *proc, struct basic_block *bb, membuf
 
 void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, membuff_t *mb)
 {
-	raviX_buffer_add_string(mb, "<TABLE>\n");
+	raviX_buffer_add_string(mb, "<TABLE BORDER=\"0\" CELLBORDER=\"0\">\n");
 	output_instructions(bb->insns, mb, "<TR><TD>", "</TD></TR>\n");
-	raviX_buffer_add_string(mb, "</TABLE>\n");
+	raviX_buffer_add_string(mb, "</TABLE>");
 }
 
 
