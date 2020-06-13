@@ -88,6 +88,11 @@ extern void raviX_allocator_destroy(struct allocator *A);
 extern void raviX_allocator_transfer(struct allocator *A,
 			       struct allocator *transfer_to);
 
+/* Not allocator based - this is generic memory allocation. Th reallocation pattern is used often enough that
+   it is useful to have one place to do it. Sizes are in bytes. This realloc differs from the normal
+   recalloc in that it initializes the new region to 0 */
+extern void *raviX_reallocate(void *oldp, size_t oldsize, size_t newsize);
+
 #ifdef __cplusplus
 }
 #endif

@@ -506,9 +506,10 @@ struct instruction {
 	struct basic_block *block; /* owning block */
 };
 
+typedef uint32_t nodeId_t; /* The type used to identify nodes in CFG */
 /* Basic block */
 struct basic_block {
-	uint32_t index; /* The index of the block is a key to enable retrieving the block from its container */
+	nodeId_t index; /* The index of the block is a key to enable retrieving the block from its container */
 	struct instruction_list *insns;
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
@@ -554,7 +555,7 @@ struct proc {
 	struct pseudo_generator temp_pseudos;	  /* All other temporaries */
 	struct set *constants;			  /* constants used by this proc */
 	unsigned num_constants;
-	struct graph *cfg;
+	struct graph *cfg;  /* place holder for control flow graph; the linearizer does not create this */
 };
 
 struct linearizer_state {

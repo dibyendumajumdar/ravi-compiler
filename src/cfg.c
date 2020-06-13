@@ -44,7 +44,6 @@ struct CfgArg {
 	FILE *fp;
 	struct proc *proc;
 };
-void raviX_output_cfg(struct proc *proc, FILE *fp);
 
 static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 {

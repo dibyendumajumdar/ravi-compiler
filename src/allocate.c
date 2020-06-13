@@ -167,6 +167,21 @@ void raviX_allocator_transfer(struct allocator *A, struct allocator *transfer_to
   A->freelist_ = NULL;
 }
 
+void *raviX_reallocate(void *oldp, size_t oldsize, size_t newsize) {
+  if (newsize == 0) {
+    free(oldp);
+    return NULL;
+  }
+  void *newp = realloc(oldp, newsize);
+  if (!newp) {
+    fprintf(stderr, "out of memory\n");
+    abort();
+  }
+  memset(newp + oldsize, 0, newsize-oldsize);
+  return newp;
+}
+
+
 #if 0
 
 struct foo {
