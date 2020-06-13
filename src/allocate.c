@@ -177,7 +177,7 @@ void *raviX_reallocate(void *oldp, size_t oldsize, size_t newsize) {
     fprintf(stderr, "out of memory\n");
     abort();
   }
-  memset(newp + oldsize, 0, newsize-oldsize);
+  memset(((char *)newp) + oldsize, 0, newsize-oldsize);
   return newp;
 }
 
