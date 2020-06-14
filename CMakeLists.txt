@@ -22,6 +22,7 @@ set(SRCS
         src/fnv_hash.c
         src/graph.c
         src/cfg.c
+        src/dominator.c
         src/hash_table.c
         src/set.c
         src/lexer.c

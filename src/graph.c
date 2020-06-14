@@ -223,6 +223,26 @@ uint32_t raviX_graph_size(struct graph* g)
 	return count;
 }
 
+uint32_t raviX_node_RPO(struct node *n)
+{
+	assert(n);
+	return n->rpost;
+}
+nodeId_t raviX_node_index(struct node *n)
+{
+	assert(n);
+	return n->index;
+}
+struct node *raviX_graph_node(struct graph *g, nodeId_t index)
+{
+	assert(index < g->allocated);
+	return g->nodes[index];
+}
+struct edge_list* raviX_predecessors(struct node *n)
+{
+	assert(n);
+	return &n->in_edges;
+}
 struct classifier_state {
 	uint32_t preorder;
 	uint32_t rpostorder;
@@ -288,6 +308,34 @@ void raviX_classify_edges(struct graph* g)
 	}
 
 	DFS_classify(g, g->nodes[g->entry], &state);
+}
+
+static int rpost_cmp (const void *a1, const void *a2) {
+	const struct node *n1 = *((const struct node **) a1);
+	const struct node *n2 = *((const struct node **) a2);
+	int result = n1->rpost - n2->rpost;
+	return result;
+}
+
+static int post_cmp (const void *a1, const void *a2) { return -rpost_cmp (a1, a2); }
+
+struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward)
+{
+	uint32_t N = raviX_graph_size(g);
+	struct node **nodes = calloc(N, sizeof(struct node *));
+	unsigned j = 0;
+	for (unsigned i = 0; i < g->allocated; i++)
+	{
+		if (g->nodes[i] == NULL)
+			continue;
+		nodes[j++] = g->nodes[i];
+	}
+	assert(j == N);
+	qsort(nodes, N, sizeof(struct node *), forward ? post_cmp: rpost_cmp );
+	for (unsigned i = 0; i < N; i++) {
+		fprintf(stdout, "node % rpost %d\n", nodes[i]->index, nodes[i]->rpost);
+	}
+	return nodes;
 }
 
 static void draw_node(void *arg, struct graph *g, uint32_t nodeid)

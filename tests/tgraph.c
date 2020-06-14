@@ -65,10 +65,40 @@ static int test2()
 	return errcount;
 }
 
+static struct graph* make_graph2()
+{
+	struct graph* g = raviX_init_graph(0, 4, NULL);
+	raviX_add_edge(g, 0, 1);
+	raviX_add_edge(g, 1, 2);
+	raviX_add_edge(g, 1, 5);
+	raviX_add_edge(g, 2, 3);
+	raviX_add_edge(g, 5, 6);
+	raviX_add_edge(g, 5, 8);
+	raviX_add_edge(g, 6, 7);
+	raviX_add_edge(g, 8, 7);
+	raviX_add_edge(g, 7, 3);
+	raviX_add_edge(g, 3, 1);
+	raviX_add_edge(g, 3, 4);
+	return g;
+}
+
+static int test3() 
+{
+	int errcount = 0;
+	struct graph* g = make_graph2();
+	raviX_classify_edges(g);
+	struct dominator_tree* tree = raviX_new_dominator_tree(g);
+	raviX_calculate_dominator_tree(tree);
+	raviX_destroy_dominator_tree(tree);
+	return errcount;
+}
+
+
 int main(int argc, const char *argv[])
 {
 	int errcount = test1();
 	errcount += test2();
+	errcount += test3();
 	if (errcount == 0)
 		printf("Ok\n");
 	else

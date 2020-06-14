@@ -15,6 +15,7 @@
 
 /* nodeId_t is declared elsewhere */
 struct graph;
+struct node;
 struct edge_list;
 enum {
 	EDGE_TYPE_UNCLASSIFIED = 0,
@@ -43,11 +44,22 @@ nodeId_t raviX_get_edge(struct edge_list* list, uint32_t i);
 void raviX_for_each_node(struct graph *g, void (*callback)(void *arg, struct graph *g, nodeId_t nodeid), void *arg);
 
 const struct edge *raviX_get_edge_info(struct graph *g, nodeId_t from, nodeId_t to);
+uint32_t raviX_node_RPO(struct node *n);
+nodeId_t raviX_node_index(struct node *n);
+struct node *raviX_graph_node(struct graph *g, nodeId_t index);
+struct edge_list* raviX_predecessors(struct node *n);
 void raviX_classify_edges(struct graph* g);
+struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward);
 
 /* says how many nodes are in the graph */
 uint32_t raviX_graph_size(struct graph* g);
 /* Generates GraphViz (dot) output */
 void raviX_draw_graph(struct graph *g, FILE *fp);
+
+struct dominator_tree;
+
+struct dominator_tree *raviX_new_dominator_tree(struct graph *g);
+void raviX_calculate_dominator_tree(struct dominator_tree *state);
+void raviX_destroy_dominator_tree(struct dominator_tree *state);
 
 #endif
