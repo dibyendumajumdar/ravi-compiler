@@ -1,6 +1,7 @@
 #include "graph.h"
 
-static int test1() {
+static int test1()
+{
 	int errcount = 0;
 	struct graph *g = raviX_init_graph(0, 2, NULL);
 	raviX_add_edge(g, 0, 1);
@@ -38,36 +39,36 @@ static int test2()
 	int errcount = 0;
 	struct graph *g = make_graph();
 	raviX_classify_edges(g);
-	if (raviX_get_edge_info(g, 0, 1)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 0, 1)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 1, 2)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 1, 2)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 2,3)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 2, 3)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 2, 6)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 2, 6)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 3, 4)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 3, 4)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 4, 5)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge(g, 4, 5)->edge_type != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge_info(g, 0, 5)->edge_type != EDGE_TYPE_FORWARD)
+	if (raviX_get_edge(g, 0, 5)->edge_type != EDGE_TYPE_FORWARD)
 		errcount++;
-	if (raviX_get_edge_info(g, 1, 4)->edge_type != EDGE_TYPE_FORWARD)
+	if (raviX_get_edge(g, 1, 4)->edge_type != EDGE_TYPE_FORWARD)
 		errcount++;
-	if (raviX_get_edge_info(g, 6, 3)->edge_type != EDGE_TYPE_CROSS)
+	if (raviX_get_edge(g, 6, 3)->edge_type != EDGE_TYPE_CROSS)
 		errcount++;
-	if (raviX_get_edge_info(g, 3,2)->edge_type != EDGE_TYPE_BACKWARD)
+	if (raviX_get_edge(g, 3, 2)->edge_type != EDGE_TYPE_BACKWARD)
 		errcount++;
-	if (raviX_get_edge_info(g, 4, 1)->edge_type != EDGE_TYPE_BACKWARD)
+	if (raviX_get_edge(g, 4, 1)->edge_type != EDGE_TYPE_BACKWARD)
 		errcount++;
 	raviX_draw_graph(g, stdout);
 	raviX_destroy_graph(g);
 	return errcount;
 }
 
-static struct graph* make_graph2()
+static struct graph *make_graph2()
 {
-	struct graph* g = raviX_init_graph(0, 4, NULL);
+	struct graph *g = raviX_init_graph(0, 4, NULL);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	raviX_add_edge(g, 1, 5);
@@ -82,17 +83,18 @@ static struct graph* make_graph2()
 	return g;
 }
 
-static int test3() 
+static int test3()
 {
 	int errcount = 0;
-	struct graph* g = make_graph2();
+	struct graph *g = make_graph2();
 	raviX_classify_edges(g);
-	struct dominator_tree* tree = raviX_new_dominator_tree(g);
+	struct dominator_tree *tree = raviX_new_dominator_tree(g);
 	raviX_calculate_dominator_tree(tree);
+	raviX_dominator_tree_output(tree, stdout);
 	raviX_destroy_dominator_tree(tree);
+	raviX_destroy_graph(g);
 	return errcount;
 }
-
 
 int main(int argc, const char *argv[])
 {

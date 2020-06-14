@@ -1,0 +1,27 @@
+digraph {
+L0 -> L1
+L1 -> L2
+}
+digraph {
+L0 -> L1
+L0 -> L5
+L1 -> L2
+L1 -> L4
+L2 -> L3
+L2 -> L6
+L3 -> L4
+L3 -> L2
+L4 -> L5
+L4 -> L1
+L6 -> L3
+}
+IDOM[0] = 0
+IDOM[1] = 0
+IDOM[2] = 1
+IDOM[3] = 1
+IDOM[4] = 3
+IDOM[5] = 1
+IDOM[6] = 5
+IDOM[7] = 5
+IDOM[8] = 5
+Ok

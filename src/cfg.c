@@ -62,7 +62,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 		raviX_buffer_reset(&buf);
 	}
 	for (unsigned i = 0; i < raviX_edge_count(edge_list); i++) {
-		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_edge(edge_list, i));
+		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_nodeid_at_edge(edge_list, i));
 	}
 	struct proc *childproc;
 	FOR_EACH_PTR(proc->procs, childproc) { raviX_output_cfg(childproc, fp); }

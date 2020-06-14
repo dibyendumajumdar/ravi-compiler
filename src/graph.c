@@ -4,7 +4,7 @@
 
 struct node;
 struct graph {
-	unsigned allocated; /* tracks allocated size of nodes */
+	unsigned allocated;  /* tracks allocated size of nodes */
 	struct node **nodes; /* array[allocated] indexed by nodeId_t, note user must check if nodes[i] != NULL */
 	struct allocator node_allocator;
 	nodeId_t entry, exit; /* entry and exit nodes */
@@ -12,15 +12,15 @@ struct graph {
 };
 
 struct edge_list {
-	unsigned count : 16; /* in use */
+	unsigned count : 16;	 /* in use */
 	unsigned allocated : 16; /* tracks allocated size of nodes */
-	struct edge *edges; /* array[allocated] of edges, populated 0..count */
+	struct edge *edges;	 /* array[allocated] of edges, populated 0..count */
 };
 struct node {
-	nodeId_t index; /* the id of the basic_block */
-	uint32_t pre; /* preorder */
-	uint32_t rpost; /* reverse postorder? */
-	struct edge_list in_edges; /* in_edges come from predecessor nodes */
+	nodeId_t index;		    /* the id of the basic_block */
+	uint32_t pre;		    /* preorder */
+	uint32_t rpost;		    /* reverse postorder? */
+	struct edge_list in_edges;  /* in_edges come from predecessor nodes */
 	struct edge_list out_edges; /* out_edges lead to successor nodes */
 };
 
@@ -88,8 +88,8 @@ static struct edge *raviX_edge_list_find(const struct edge_list *edge_list, node
 static void raviX_edge_list_grow(struct edge_list *edge_list)
 {
 	unsigned new_size = edge_list->allocated + 8;
-	struct edge *edges =
-	    raviX_reallocate(edge_list->edges, edge_list->allocated * sizeof(struct edge), new_size * sizeof(struct edge));
+	struct edge *edges = raviX_reallocate(edge_list->edges, edge_list->allocated * sizeof(struct edge),
+					      new_size * sizeof(struct edge));
 	edge_list->allocated = new_size;
 	edge_list->edges = edges;
 }
@@ -165,7 +165,7 @@ bool raviX_has_edge(struct graph *g, nodeId_t from, nodeId_t to)
 	return raviX_edge_list_find(&prednode->out_edges, to) != NULL;
 }
 
-const struct edge *raviX_get_edge_info(struct graph *g, nodeId_t from, nodeId_t to)
+const struct edge *raviX_get_edge(struct graph *g, nodeId_t from, nodeId_t to)
 {
 	struct node *prednode = raviX_get_node(g, from);
 	if (prednode == NULL)
@@ -173,28 +173,25 @@ const struct edge *raviX_get_edge_info(struct graph *g, nodeId_t from, nodeId_t 
 	return raviX_edge_list_find(&prednode->out_edges, to);
 }
 
-struct edge_list* raviX_node_successors(struct graph* g, nodeId_t n)
+struct edge_list *raviX_node_successors(struct graph *g, nodeId_t n)
 {
-	struct node* prednode = raviX_get_node(g, n);
+	struct node *prednode = raviX_get_node(g, n);
 	if (prednode == NULL)
 		return false;
 	return &prednode->out_edges;
 }
 
-struct edge_list* raviX_node_predecessors(struct graph* g, nodeId_t n)
+struct edge_list *raviX_node_predecessors(struct graph *g, nodeId_t n)
 {
-	struct node* prednode = raviX_get_node(g, n);
+	struct node *prednode = raviX_get_node(g, n);
 	if (prednode == NULL)
 		return false;
 	return &prednode->in_edges;
 }
 
-uint32_t raviX_edge_count(struct edge_list* list)
-{
-	return list->count;
-}
+uint32_t raviX_edge_count(struct edge_list *list) { return list->count; }
 
-nodeId_t raviX_get_edge(struct edge_list* list, uint32_t i)
+nodeId_t raviX_get_nodeid_at_edge(struct edge_list *list, uint32_t i)
 {
 	if (i < list->count)
 		return list->edges[i].to_index;
@@ -212,7 +209,7 @@ void raviX_for_each_node(struct graph *g, void (*callback)(void *arg, struct gra
 }
 
 /* says how many nodes are in the graph */
-uint32_t raviX_graph_size(struct graph* g) 
+uint32_t raviX_graph_size(struct graph *g)
 {
 	uint32_t count = 0;
 	for (unsigned i = 0; i < g->allocated; i++) {
@@ -238,7 +235,7 @@ struct node *raviX_graph_node(struct graph *g, nodeId_t index)
 	assert(index < g->allocated);
 	return g->nodes[index];
 }
-struct edge_list* raviX_predecessors(struct node *n)
+struct edge_list *raviX_predecessors(struct node *n)
 {
 	assert(n);
 	return &n->in_edges;
@@ -252,7 +249,7 @@ struct classifier_state {
  * Do a recursive depth first search and mark nodes with pre/reverse post order sequence, as well
  * as classify edges. Algorithm from figure 3.2 in Building and Optimizing Compiler
  */
-static void DFS_classify(struct graph* g, struct node *n, struct classifier_state *state)
+static void DFS_classify(struct graph *g, struct node *n, struct classifier_state *state)
 {
 	assert(n);
 
@@ -261,19 +258,16 @@ static void DFS_classify(struct graph* g, struct node *n, struct classifier_stat
 
 	/* For each successor node */
 	for (unsigned i = 0; i < n->out_edges.count; i++) {
-		struct edge* E = &n->out_edges.edges[i];
-		struct node* S = g->nodes[E->to_index];
+		struct edge *E = &n->out_edges.edges[i];
+		struct node *S = g->nodes[E->to_index];
 		if (S->pre == 0) {
 			E->edge_type = EDGE_TYPE_TREE;
 			DFS_classify(g, S, state);
-		}
-		else if (S->rpost == 0) {
+		} else if (S->rpost == 0) {
 			E->edge_type = EDGE_TYPE_BACKWARD;
-		}
-		else if (n->pre < S->pre) {
+		} else if (n->pre < S->pre) {
 			E->edge_type = EDGE_TYPE_FORWARD;
-		}
-		else {
+		} else {
 			E->edge_type = EDGE_TYPE_CROSS;
 		}
 	}
@@ -282,18 +276,18 @@ static void DFS_classify(struct graph* g, struct node *n, struct classifier_stat
 	state->rpostorder--;
 }
 
-/* 
-Classify edges in the graph. Implements algorithm described in 
+/*
+Classify edges in the graph. Implements algorithm described in
 figure 3.2 - Building an Optimizing Compiler. This algorithm is also implemented
 in MIR.
 */
-void raviX_classify_edges(struct graph* g)
+void raviX_classify_edges(struct graph *g)
 {
 	uint32_t N = raviX_graph_size(g);
 	if (N == 0)
 		return;
 
-	struct classifier_state state = { .preorder = 1, .rpostorder = N };
+	struct classifier_state state = {.preorder = 1, .rpostorder = N};
 
 	/* reset all data we will be computing */
 	for (unsigned i = 0; i < g->allocated; i++) {
@@ -301,7 +295,7 @@ void raviX_classify_edges(struct graph* g)
 			g->nodes[i]->pre = 0;
 			g->nodes[i]->rpost = 0;
 			for (unsigned i = 0; i < g->nodes[i]->out_edges.count; i++) {
-				struct edge* E = &g->nodes[i]->out_edges.edges[i];
+				struct edge *E = &g->nodes[i]->out_edges.edges[i];
 				E->edge_type = 0;
 			}
 		}
@@ -310,42 +304,39 @@ void raviX_classify_edges(struct graph* g)
 	DFS_classify(g, g->nodes[g->entry], &state);
 }
 
-static int rpost_cmp (const void *a1, const void *a2) {
-	const struct node *n1 = *((const struct node **) a1);
-	const struct node *n2 = *((const struct node **) a2);
+static int rpost_cmp(const void *a1, const void *a2)
+{
+	const struct node *n1 = *((const struct node **)a1);
+	const struct node *n2 = *((const struct node **)a2);
 	int result = n1->rpost - n2->rpost;
 	return result;
 }
 
-static int post_cmp (const void *a1, const void *a2) { return -rpost_cmp (a1, a2); }
+static int post_cmp(const void *a1, const void *a2) { return -rpost_cmp(a1, a2); }
 
 struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward)
 {
 	uint32_t N = raviX_graph_size(g);
 	struct node **nodes = calloc(N, sizeof(struct node *));
 	unsigned j = 0;
-	for (unsigned i = 0; i < g->allocated; i++)
-	{
+	for (unsigned i = 0; i < g->allocated; i++) {
 		if (g->nodes[i] == NULL)
 			continue;
 		nodes[j++] = g->nodes[i];
 	}
 	assert(j == N);
-	qsort(nodes, N, sizeof(struct node *), forward ? post_cmp: rpost_cmp );
-	for (unsigned i = 0; i < N; i++) {
-		fprintf(stdout, "node % rpost %d\n", nodes[i]->index, nodes[i]->rpost);
-	}
+	qsort(nodes, N, sizeof(struct node *), forward ? post_cmp : rpost_cmp);
 	return nodes;
 }
 
 static void draw_node(void *arg, struct graph *g, uint32_t nodeid)
 {
-	FILE *fp = (FILE *) arg;
+	FILE *fp = (FILE *)arg;
 	struct edge_list *edge_list = raviX_node_successors(g, nodeid);
 	if (!edge_list)
 		return;
 	for (unsigned i = 0; i < raviX_edge_count(edge_list); i++) {
-		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_edge(edge_list, i));
+		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_nodeid_at_edge(edge_list, i));
 	}
 }
 
@@ -355,4 +346,3 @@ void raviX_draw_graph(struct graph *g, FILE *fp)
 	raviX_for_each_node(g, draw_node, fp);
 	fprintf(fp, "}\n");
 }
-
