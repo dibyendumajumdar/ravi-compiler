@@ -6,7 +6,8 @@
 * `ast_walker.c` (WIP) - will provide support for walking the AST
 * `typechecker.c` - responsible for performing typechecking and assigning types to various things. Runs on the AST.
 * `linearizer.c` (WIP) - responsible for generating linear intermediate code (linear IR). 
-* `cfg.c` (WIP) - responsible for constructing a control flow graph from the output of the linearizer.
+* `cfg.c` - responsible for constructing a control flow graph from the output of the linearizer.
+* `dominator.c` - implementation of dominator tree calculation  
 
 ## Utilities
 
