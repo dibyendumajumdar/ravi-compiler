@@ -1,9 +1,8 @@
 #include "graph.h"
 
-int main(int argc, const char *argv[])
-{
+static int test1() {
 	int errcount = 0;
-	struct graph *g = raviX_init_graph();
+	struct graph *g = raviX_init_graph(0, 2, NULL);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	if (!raviX_has_edge(g, 0, 1))
@@ -12,7 +11,64 @@ int main(int argc, const char *argv[])
 		errcount += 1;
 	if (raviX_has_edge(g, 0, 2))
 		errcount += 1;
+	raviX_draw_graph(g, stdout);
 	raviX_destroy_graph(g);
+	return errcount;
+}
+
+static struct graph *make_graph()
+{
+	struct graph *g = raviX_init_graph(0, 5, NULL);
+	raviX_add_edge(g, 0, 1);
+	raviX_add_edge(g, 1, 2);
+	raviX_add_edge(g, 2, 3);
+	raviX_add_edge(g, 3, 4);
+	raviX_add_edge(g, 4, 5);
+	raviX_add_edge(g, 0, 5);
+	raviX_add_edge(g, 1, 4);
+	raviX_add_edge(g, 3, 2);
+	raviX_add_edge(g, 2, 6);
+	raviX_add_edge(g, 6, 3);
+	raviX_add_edge(g, 4, 1);
+	return g;
+}
+
+static int test2()
+{
+	int errcount = 0;
+	struct graph *g = make_graph();
+	raviX_classify_edges(g);
+	if (raviX_get_edge_info(g, 0, 1)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 1, 2)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 2,3)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 2, 6)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 3, 4)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 4, 5)->edge_type != EDGE_TYPE_TREE)
+		errcount++;
+	if (raviX_get_edge_info(g, 0, 5)->edge_type != EDGE_TYPE_FORWARD)
+		errcount++;
+	if (raviX_get_edge_info(g, 1, 4)->edge_type != EDGE_TYPE_FORWARD)
+		errcount++;
+	if (raviX_get_edge_info(g, 6, 3)->edge_type != EDGE_TYPE_CROSS)
+		errcount++;
+	if (raviX_get_edge_info(g, 3,2)->edge_type != EDGE_TYPE_BACKWARD)
+		errcount++;
+	if (raviX_get_edge_info(g, 4, 1)->edge_type != EDGE_TYPE_BACKWARD)
+		errcount++;
+	raviX_draw_graph(g, stdout);
+	raviX_destroy_graph(g);
+	return errcount;
+}
+
+int main(int argc, const char *argv[])
+{
+	int errcount = test1();
+	errcount += test2();
 	if (errcount == 0)
 		printf("Ok\n");
 	else
