@@ -1,6 +1,6 @@
 #include "graph.h"
 
-static int test1()
+static int test1(void)
 {
 	int errcount = 0;
 	struct graph *g = raviX_init_graph(0, 2, NULL);
@@ -17,7 +17,7 @@ static int test1()
 	return errcount;
 }
 
-static struct graph *make_graph()
+static struct graph *make_graph(void)
 {
 	struct graph *g = raviX_init_graph(0, 5, NULL);
 	raviX_add_edge(g, 0, 1);
@@ -34,7 +34,7 @@ static struct graph *make_graph()
 	return g;
 }
 
-static int test2()
+static int test2(void)
 {
 	int errcount = 0;
 	struct graph *g = make_graph();
@@ -66,7 +66,7 @@ static int test2()
 	return errcount;
 }
 
-static struct graph *make_graph2()
+static struct graph *make_graph2(void)
 {
 	struct graph *g = raviX_init_graph(0, 4, NULL);
 	raviX_add_edge(g, 0, 1);
@@ -83,7 +83,7 @@ static struct graph *make_graph2()
 	return g;
 }
 
-static int test3()
+static int test3(void)
 {
 	int errcount = 0;
 	struct graph *g = make_graph2();
