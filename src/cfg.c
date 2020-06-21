@@ -50,8 +50,8 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 	struct CfgArg *myargs = (struct CfgArg *)arg;
 	FILE *fp = myargs->fp;
 	struct proc *proc = myargs->proc;
-	struct edge_list *edge_list = raviX_node_successors(g, nodeid);
-	if (!edge_list)
+	struct node_list *successors = raviX_successors(raviX_graph_node(g, nodeid));
+	if (!successors)
 		return;
 	struct basic_block *block = proc->nodes[nodeid];
 	if (ptrlist_size((const struct ptr_list *) block->insns) > 0) {
@@ -61,8 +61,8 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 		fprintf(fp, "L%d [shape=none, margin=0, label=<%s>];\n", nodeid, raviX_buffer_data(&buf));
 		raviX_buffer_reset(&buf);
 	}
-	for (unsigned i = 0; i < raviX_edge_count(edge_list); i++) {
-		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_get_nodeid_at_edge(edge_list, i));
+	for (unsigned i = 0; i < raviX_node_list_size(successors); i++) {
+		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_node_list_at(successors, i));
 	}
 	struct proc *childproc;
 	FOR_EACH_PTR(proc->procs, childproc) { raviX_output_cfg(childproc, fp); }

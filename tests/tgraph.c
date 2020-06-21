@@ -39,27 +39,27 @@ static int test2(void)
 	int errcount = 0;
 	struct graph *g = make_graph();
 	raviX_classify_edges(g);
-	if (raviX_get_edge(g, 0, 1)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 0, 1) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 1, 2)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 1, 2) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 2, 3)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 2, 3) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 2, 6)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 2, 6) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 3, 4)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 3, 4) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 4, 5)->edge_type != EDGE_TYPE_TREE)
+	if (raviX_get_edge_type(g, 4, 5) != EDGE_TYPE_TREE)
 		errcount++;
-	if (raviX_get_edge(g, 0, 5)->edge_type != EDGE_TYPE_FORWARD)
+	if (raviX_get_edge_type(g, 0, 5) != EDGE_TYPE_FORWARD)
 		errcount++;
-	if (raviX_get_edge(g, 1, 4)->edge_type != EDGE_TYPE_FORWARD)
+	if (raviX_get_edge_type(g, 1, 4) != EDGE_TYPE_FORWARD)
 		errcount++;
-	if (raviX_get_edge(g, 6, 3)->edge_type != EDGE_TYPE_CROSS)
+	if (raviX_get_edge_type(g, 6, 3) != EDGE_TYPE_CROSS)
 		errcount++;
-	if (raviX_get_edge(g, 3, 2)->edge_type != EDGE_TYPE_BACKWARD)
+	if (raviX_get_edge_type(g, 3, 2) != EDGE_TYPE_BACKWARD)
 		errcount++;
-	if (raviX_get_edge(g, 4, 1)->edge_type != EDGE_TYPE_BACKWARD)
+	if (raviX_get_edge_type(g, 4, 1) != EDGE_TYPE_BACKWARD)
 		errcount++;
 	raviX_draw_graph(g, stdout);
 	raviX_destroy_graph(g);
@@ -96,11 +96,33 @@ static int test3(void)
 	return errcount;
 }
 
+static int test4(void)
+{
+	int errcount = 0;
+	struct graph *g = make_graph2();
+	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 1))) != 2)
+		errcount++;
+	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 2))) != 1)
+		errcount++;
+	raviX_delete_edge(g, 1, 2);
+	struct node_list *succ = raviX_successors(raviX_graph_node(g, 1));
+	if (raviX_node_list_size(succ) != 1)
+		errcount++;
+	if (raviX_node_list_at(succ, 0) != 5)
+		errcount++;
+	struct node_list *preds = raviX_predecessors(raviX_graph_node(g, 2));
+	if (raviX_node_list_size(preds) != 0)
+		errcount++;
+	raviX_destroy_graph(g);
+	return errcount;
+}
+
 int main(int argc, const char *argv[])
 {
 	int errcount = test1();
 	errcount += test2();
 	errcount += test3();
+	errcount += test4();
 	if (errcount == 0)
 		printf("Ok\n");
 	else

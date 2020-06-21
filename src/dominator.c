@@ -2,10 +2,10 @@
 #include "implementation.h"
 #include "ravi_compiler.h"
 
-/* 
+/*
  * The dominator tree construction algorithm is based on figure 9.24,
  * chapter 9, p 532, of Engineering a Compiler.
- * 
+ *
  * The algorithm is also described in the paper 'A Simple, Fast
  * Dominance Algorithm' by Keith D. Cooper, Timothy J. Harvey and
  * Ken Kennedy.
@@ -15,12 +15,12 @@
 Some terminology:
 
 DOM(b): A node n in the CFG dominates b if n lies on every path from the entry node of the CFG to b.
-        DOM9b) contains every node n that dominates b.
+	DOM9b) contains every node n that dominates b.
 
 IDOM(b): For a node b, the set IDOM(b) contains exactly one node, the immediate dominator of b.
-         If n is b's immediate dominator then every node in {DOM(b) - b} is also in DOM(n).
+	 If n is b's immediate dominator then every node in {DOM(b) - b} is also in DOM(n).
 
-The dominator tree algorithm is an optimised version of forward data flow solver. The 
+The dominator tree algorithm is an optimised version of forward data flow solver. The
 algorithm iterates until a fixed point is reached. The output of the algorithm is the IDOM
 array that describes the dominator tree.
 */
@@ -28,7 +28,7 @@ array that describes the dominator tree.
 struct dominator_tree {
 	struct graph *g;
 	struct node **IDOM; /* IDOM[] - array of immediate dominators, one per node in the graph, indexed by node id */
-	uint32_t N;			    /* sizeof IDOM */
+	uint32_t N;	    /* sizeof IDOM */
 };
 
 struct dominator_tree *raviX_new_dominator_tree(struct graph *g)
@@ -73,10 +73,10 @@ static struct node *intersect(struct dominator_tree *state, struct node *i, stru
  * Because of the order in which this search occurs, we will always find at least 1
  * such predecessor.
  */
-static struct node *find_first_predecessor_with_idom(struct dominator_tree *state, struct edge_list *predlist)
+static struct node *find_first_predecessor_with_idom(struct dominator_tree *state, struct node_list *predlist)
 {
-	for (uint32_t i = 0; i < raviX_edge_count(predlist); i++) {
-		nodeId_t id = raviX_get_nodeid_at_edge(predlist, i);
+	for (uint32_t i = 0; i < raviX_node_list_size(predlist); i++) {
+		nodeId_t id = raviX_node_list_at(predlist, i);
 		if (state->IDOM[id])
 			return raviX_graph_node(state->g, id);
 	}
@@ -85,15 +85,15 @@ static struct node *find_first_predecessor_with_idom(struct dominator_tree *stat
 
 /**
  * Calculates the dominator tree.
- * Before this is called the graph edges should have been numbered in 
+ * Before this is called the graph links should have been numbered in
  * reverse post order.
  */
 void raviX_calculate_dominator_tree(struct dominator_tree *state)
 {
 	/*
 	Some implementation details:
-	The graph and edges reference nodes by node ids.
-	However the IDOM array references the node objects - i.e. 
+	The graph and links reference nodes by node ids.
+	However the IDOM array references the node objects - i.e.
 	pointers to 'struct node'. So we have some conversion from node id
 	to the node, and vice versa at various points.
 	*/
@@ -114,14 +114,14 @@ void raviX_calculate_dominator_tree(struct dominator_tree *state)
 			nodeId_t bid = raviX_node_index(b);
 			if (bid == ENTRY_BLOCK) // skip root
 				continue;
-			struct edge_list *predecessors = raviX_predecessors(b); // Predecessors of b
+			struct node_list *predecessors = raviX_predecessors(b); // Predecessors of b
 			// NewIDom = first (processed) predecessor of b, pick one
 			struct node *firstpred = find_first_predecessor_with_idom(state, predecessors);
 			assert(firstpred != NULL);
 			struct node *NewIDom = firstpred;
 			// for all other predecessors, p, of b
-			for (uint32_t k = 0; k < raviX_edge_count(predecessors); k++) {
-				nodeId_t pid = raviX_get_nodeid_at_edge(predecessors, k);
+			for (uint32_t k = 0; k < raviX_node_list_size(predecessors); k++) {
+				nodeId_t pid = raviX_node_list_at(predecessors, k);
 				struct node *p = raviX_graph_node(state->g, pid);
 				if (p == firstpred)
 					continue; // all other predecessors
