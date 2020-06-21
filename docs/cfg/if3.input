@@ -1,0 +1,1 @@
+if a < b then print 'case 1' elseif a==b then print 'case2' elseif a >= b then print 'case 3' else print 'last case' end

@@ -1,0 +1,46 @@
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(0)}</TD></TR>
+<TR><TD>MOV {10 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(2)}</TD></TR>
+<TR><TD>LIii {0 Kint(2), Tint(2)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(0), Tint(2)} {Tint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(0), Tint(2)} {Tint(0)}</TD></TR>
+<TR><TD>CBR {Tint(3)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LEii {Tint(1), Tint(0)} {Tint(4)}</TD></TR>
+<TR><TD>CBR {Tint(4)} {L6, L5}</TD></TR>
+</TABLE>>];
+L3 -> L6
+L3 -> L5
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>LIii {Tint(0), Tint(1)} {Tint(4)}</TD></TR>
+<TR><TD>CBR {Tint(4)} {L6, L5}</TD></TR>
+</TABLE>>];
+L4 -> L6
+L4 -> L5
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>MOV {Tint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(i, 0)} {T(0..)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L5 -> L2
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L1}</TD></TR>
+</TABLE>>];
+L6 -> L1
+}

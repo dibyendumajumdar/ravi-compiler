@@ -1,0 +1,30 @@
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L0 -> L3
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>CBR {true} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(0)} {T(0..)}</TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L5 -> L2
+}

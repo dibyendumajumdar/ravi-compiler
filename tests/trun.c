@@ -84,7 +84,9 @@ static void init_chunks(struct chunk_data *chunks)
 
 static int do_code(const char *code, const struct arguments *args)
 {
-	printf("%s\n", code);
+	if (args->codump) {
+		printf("%s\n", code);
+	}
 	int rc = 0;
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");

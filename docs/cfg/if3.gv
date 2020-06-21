@@ -1,0 +1,67 @@
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>LOADGLOBAL {a} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {b} {T(1)}</TD></TR>
+<TR><TD>LT {T(0), T(1)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L5, L3}</TD></TR>
+</TABLE>>];
+L2 -> L5
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LOADGLOBAL {a} {T(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {b} {T(0)}</TD></TR>
+<TR><TD>EQ {T(1), T(0)} {T(3)}</TD></TR>
+<TR><TD>CBR {T(3)} {L6, L4}</TD></TR>
+</TABLE>>];
+L3 -> L6
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>LOADGLOBAL {a} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {b} {T(1)}</TD></TR>
+<TR><TD>LE {T(1), T(0)} {T(4)}</TD></TR>
+<TR><TD>CBR {T(4)} {L7, L8}</TD></TR>
+</TABLE>>];
+L4 -> L7
+L4 -> L8
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'case 1' Ks(0)} {T(0..)}</TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L5 -> L9
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), 'case2' Ks(1)} {T(1..)}</TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L6 -> L9
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(5)}</TD></TR>
+<TR><TD>CALL {T(5), 'case 3' Ks(2)} {T(5..)}</TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L7 -> L9
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(6)}</TD></TR>
+<TR><TD>CALL {T(6), 'last case' Ks(3)} {T(6..)}</TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L8 -> L9
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L1}</TD></TR>
+</TABLE>>];
+L9 -> L1
+}

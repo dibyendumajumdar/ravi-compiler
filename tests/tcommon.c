@@ -21,6 +21,8 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			args->astdump = 0;
 		} else if (strcmp(argv[i], "--noirdump") == 0) {
 			args->irdump = 0;
+		} else if (strcmp(argv[i], "--nocodump") == 0) {
+			args->codump = 0;
 		} else if (strcmp(argv[i], "--nocfgdump") == 0) {
 			args->cfgdump = 0;
 		} else if (strcmp(argv[i], "-f") == 0) {

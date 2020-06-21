@@ -1,0 +1,1 @@
+for i=1,10 do for j = 10,1,-1 do print(i,j) end end
