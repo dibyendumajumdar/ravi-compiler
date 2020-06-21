@@ -82,7 +82,7 @@ static void init_chunks(struct chunk_data *chunks)
 	chunks->list = NULL;
 }
 
-static int do_code(const char *code)
+static int do_code(const char *code, const struct arguments *args)
 {
 	printf("%s\n", code);
 	int rc = 0;
@@ -92,25 +92,30 @@ static int do_code(const char *code)
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_exit;
 	}
-	raviX_output_ast(container, stdout);
+	if (args->astdump) {
+		raviX_output_ast(container, stdout);
+	}
 	rc = raviX_ast_typecheck(container);
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_exit;
 	}
-	raviX_output_ast(container, stdout);
-
+	if (args->astdump) {
+		raviX_output_ast(container, stdout);
+	}
 	struct linearizer_state *linearizer = raviX_init_linearizer(container);
-
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
 		goto L_linend;
 	}
-	raviX_output_linearizer(linearizer, stdout);
-
+	if (args->irdump) {
+		raviX_output_linearizer(linearizer, stdout);
+	}
 	raviX_construct_cfg(linearizer->main_proc);
-	raviX_output_cfg(linearizer->main_proc, stdout);
+	if (args->cfgdump) {
+		raviX_output_cfg(linearizer->main_proc, stdout);
+	}
 
 	L_linend:
 	raviX_destroy_linearizer(linearizer);
@@ -147,7 +152,7 @@ int main(int argc, const char *argv[])
 
 	const char *chunk = NULL;
 	FOR_EACH_PTR(chunks.list, chunk) {
-		do_code(chunk);
+		do_code(chunk, &args);
 	} END_FOR_EACH_PTR(chunk)
 
 	return 0;

@@ -9,11 +9,20 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	memset(args, 0, sizeof *args);
 	args->typecheck = 1;
 	args->linearize = 1;
+	args->astdump = 1;
+	args->irdump = 1;
+	args->cfgdump = 1;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--notypecheck") == 0) {
 			args->typecheck = 0;
 		} else if (strcmp(argv[i], "--nolinearize") == 0) {
 			args->linearize = 0;
+		} else if (strcmp(argv[i], "--noastdump") == 0) {
+			args->astdump = 0;
+		} else if (strcmp(argv[i], "--noirdump") == 0) {
+			args->irdump = 0;
+		} else if (strcmp(argv[i], "--nocfgdump") == 0) {
+			args->cfgdump = 0;
 		} else if (strcmp(argv[i], "-f") == 0) {
 			if (args->filename) {
 				fprintf(stderr, "-f already accepted\n");
