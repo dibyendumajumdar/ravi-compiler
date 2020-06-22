@@ -74,8 +74,8 @@ static inline struct node_link *node_list_get(const struct node_list *node_list,
 static void node_list_grow(struct node_list *node_list)
 {
 	unsigned new_size = node_list->allocated + 8u;
-	struct node_link *edges = raviX_reallocate(node_list->links, node_list->allocated * sizeof(struct node_link),
-						   new_size * sizeof(struct node_link));
+	struct node_link *edges = raviX_realloc_array(node_list->links, sizeof(struct node_link), node_list->allocated,
+						   new_size);
 	node_list->allocated = new_size;
 	node_list->links = edges;
 }
@@ -101,8 +101,7 @@ static void node_list_delete(struct node_list *node_list, nodeId_t index)
 	int64_t i = node_list_search(node_list, index);
 	if (i < 0)
 		return;
-	memmove(&node_list->links[i], &node_list->links[i + 1], (node_list->count - i - 1) * sizeof(struct node_link));
-	node_list->count--;
+	node_list->count = (unsigned) raviX_del_array_element(node_list->links, sizeof node_list->links[0], node_list->count, i, 1);
 }
 
 uint32_t raviX_node_list_size(struct node_list *list) { return list->count; }
@@ -161,7 +160,7 @@ static void raviX_graph_grow(struct graph *g, nodeId_t needed)
 {
 	unsigned new_size = needed + 8;
 	struct node **new_data =
-	    raviX_reallocate(g->nodes, g->allocated * sizeof(struct node *), new_size * sizeof(struct node *));
+	    raviX_realloc_array(g->nodes, sizeof(struct node*), g->allocated, new_size);
 	g->allocated = new_size;
 	g->nodes = new_data;
 }

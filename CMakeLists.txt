@@ -67,34 +67,35 @@ target_include_directories(ravicomp
 include(GenerateExportHeader)
 generate_export_header(ravicomp)
 
-add_executable(test_stringset tests/tstrset.c)
-target_link_libraries(test_stringset ravicomp)
-target_include_directories(test_stringset
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+add_executable(tmisc tests/tmisc.c)
+target_link_libraries(tmisc ravicomp)
+target_include_directories(tmisc
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(tparse tests/tparse.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tparse ravicomp)
 target_include_directories(tparse
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(tastwalk tests/tastwalk.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tastwalk ravicomp)
 target_include_directories(tastwalk
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(trun tests/trun.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(trun ravicomp)
 target_include_directories(trun
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(tgraph tests/tgraph.c)
 target_link_libraries(tgraph ravicomp)
 target_include_directories(tgraph
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
-        PUBLIC "${RaviCompiler_SOURCE_DIR}/include")
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")

@@ -88,10 +88,18 @@ extern void raviX_allocator_destroy(struct allocator *A);
 extern void raviX_allocator_transfer(struct allocator *A,
 			       struct allocator *transfer_to);
 
-/* Not allocator based - this is generic memory allocation. Th reallocation pattern is used often enough that
-   it is useful to have one place to do it. Sizes are in bytes. This realloc differs from the normal
-   recalloc in that it initializes the new region to 0 */
-extern void *raviX_reallocate(void *oldp, size_t oldsize, size_t newsize);
+/* 
+Reallocate array from old_n to new_n. If new_n is 0 then array memory is freed.
+If new_n is greater than old_n then old data is copied across and the 
+additional allocated space is zeroed out so caller can rely on the extra space being
+initialized to zeros.
+*/
+extern void* raviX_realloc_array(void* oldp, size_t element_size, size_t old_n, size_t new_n);
+/*
+Delete n elements starting at i from array a of size array_size, where sizeof(each element) is element_size.
+The freed up space will be zero initialized. Returns the new array_size.
+*/
+extern size_t raviX_del_array_element(void* p, size_t element_size, size_t array_size, size_t i, size_t n);
 
 #ifdef __cplusplus
 }
