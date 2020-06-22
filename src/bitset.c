@@ -35,21 +35,21 @@ static inline void mir_bitmap_assert_fail (const char *op) {
 
 #define BITMAP_WORD_BITS 64
 
-bitmap_t raviX_bitmap_create2(size_t init_bits_num) {
-	bitmap_t bm = calloc(1, sizeof(struct bitset_t));
+struct bitset_t * raviX_bitmap_create2(size_t init_bits_num) {
+	struct bitset_t * bm = calloc(1, sizeof(struct bitset_t));
 	bm->els_num = 0;
 	bm->size = (init_bits_num + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS;
 	bm->varr = calloc(bm->size, sizeof(bitmap_el_t));
 	return bm;
 }
 
-void raviX_bitmap_destroy(bitmap_t bm)
+void raviX_bitmap_destroy(struct bitset_t * bm)
 {
 	free(bm->varr);
 	free(bm);
 }
 
-static void bitmap_expand (bitmap_t bm, size_t nb) {
+static void bitmap_expand (struct bitset_t * bm, size_t nb) {
 	size_t new_len = (nb + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS;
 	if (new_len > bm->els_num) {
 		if (new_len > bm->size) {
@@ -60,7 +60,7 @@ static void bitmap_expand (bitmap_t bm, size_t nb) {
 	}
 }
 
-int raviX_bitmap_bit_p(const_bitmap_t bm, size_t nb) {
+int raviX_bitmap_bit_p(const struct bitset_t * bm, size_t nb) {
 	size_t nw, sh, len = bm->els_num;
 	bitmap_el_t *addr = bm->varr;
 
@@ -70,7 +70,7 @@ int raviX_bitmap_bit_p(const_bitmap_t bm, size_t nb) {
 	return (addr[nw] >> sh) & 1;
 }
 
-int raviX_bitmap_set_bit_p(bitmap_t bm, size_t nb) {
+int raviX_bitmap_set_bit_p(struct bitset_t * bm, size_t nb) {
 	size_t nw, sh;
 	bitmap_el_t *addr;
 	int res;
@@ -85,7 +85,7 @@ int raviX_bitmap_set_bit_p(bitmap_t bm, size_t nb) {
 	return res;
 }
 
-int raviX_bitmap_clear_bit_p(bitmap_t bm, size_t nb) {
+int raviX_bitmap_clear_bit_p(struct bitset_t * bm, size_t nb) {
 	size_t nw, sh, len = bm->els_num;
 	bitmap_el_t *addr = bm->varr;
 	int res;
@@ -98,7 +98,7 @@ int raviX_bitmap_clear_bit_p(bitmap_t bm, size_t nb) {
 	return res;
 }
 
-int raviX_bitmap_set_or_clear_bit_range_p(bitmap_t bm, size_t nb, size_t len, int set_p) {
+int raviX_bitmap_set_or_clear_bit_range_p(struct bitset_t * bm, size_t nb, size_t len, int set_p) {
 	size_t nw, lsh, rsh, range_len;
 	bitmap_el_t mask, *addr;
 	int res = 0;
@@ -124,7 +124,7 @@ int raviX_bitmap_set_or_clear_bit_range_p(bitmap_t bm, size_t nb, size_t len, in
 	return res;
 }
 
-void raviX_bitmap_copy(bitmap_t dst, const_bitmap_t src) {
+void raviX_bitmap_copy(struct bitset_t * dst, const struct bitset_t * src) {
 
 	size_t dst_len = dst->els_num;
 	size_t src_len = src->els_num;
@@ -137,8 +137,8 @@ void raviX_bitmap_copy(bitmap_t dst, const_bitmap_t src) {
 		src_len * sizeof (bitmap_el_t));
 }
 
-int raviX_bitmap_equal_p(const_bitmap_t bm1, const_bitmap_t bm2) {
-	const_bitmap_t temp_bm;
+int raviX_bitmap_equal_p(const struct bitset_t * bm1, const struct bitset_t * bm2) {
+	const struct bitset_t * temp_bm;
 	size_t i, temp_len, bm1_len = bm1->els_num;
 	size_t bm2_len = bm2->els_num;
 	bitmap_el_t *addr1, *addr2;
@@ -159,7 +159,7 @@ int raviX_bitmap_equal_p(const_bitmap_t bm1, const_bitmap_t bm2) {
 	return true;
 }
 
-int raviX_bitmap_intersect_p(const_bitmap_t bm1, const_bitmap_t bm2) {
+int raviX_bitmap_intersect_p(const struct bitset_t * bm1, const struct bitset_t * bm2) {
 	size_t i, min_len, bm1_len = bm1->els_num;
 	size_t bm2_len = bm2->els_num;
 	bitmap_el_t *addr1 = bm1->varr;
@@ -171,7 +171,7 @@ int raviX_bitmap_intersect_p(const_bitmap_t bm1, const_bitmap_t bm2) {
 	return false;
 }
 
-int raviX_bitmap_empty_p(const_bitmap_t bm) {
+int raviX_bitmap_empty_p(const struct bitset_t * bm) {
 	size_t i, len = bm->els_num;
 	bitmap_el_t *addr = bm->varr;
 
@@ -190,7 +190,7 @@ static bitmap_el_t bitmap_el_max3 (bitmap_el_t el1, bitmap_el_t el2, bitmap_el_t
 }
 
 /* Return the number of bits set in BM.  */
-size_t raviX_bitmap_bit_count(const_bitmap_t bm) {
+size_t raviX_bitmap_bit_count(const struct bitset_t * bm) {
 	size_t i, len = bm->els_num;
 	bitmap_el_t el, *addr = bm->varr;
 	size_t count = 0;
@@ -204,7 +204,7 @@ size_t raviX_bitmap_bit_count(const_bitmap_t bm) {
 	return count;
 }
 
-int raviX_bitmap_op2(bitmap_t dst, const_bitmap_t src1, const_bitmap_t src2,
+int raviX_bitmap_op2(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
 			      bitmap_el_t (*op) (bitmap_el_t, bitmap_el_t)) {
 	size_t i, len, bound, src1_len, src2_len;
 	bitmap_el_t old, *dst_addr, *src1_addr, *src2_addr;
@@ -228,8 +228,8 @@ int raviX_bitmap_op2(bitmap_t dst, const_bitmap_t src1, const_bitmap_t src2,
 	return change_p;
 }
 
-int raviX_bitmap_op3(bitmap_t dst, const_bitmap_t src1, const_bitmap_t src2,
-			      const_bitmap_t src3,
+int raviX_bitmap_op3(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
+			      const struct bitset_t * src3,
 			      bitmap_el_t (*op) (bitmap_el_t, bitmap_el_t, bitmap_el_t)) {
 	size_t i, len, bound, src1_len, src2_len, src3_len;
 	bitmap_el_t old, *dst_addr, *src1_addr, *src2_addr, *src3_addr;

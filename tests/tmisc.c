@@ -42,7 +42,7 @@ int test_memalloc()
 int test_bitmap()
 {
 	int status;
-	bitmap_t b1, b2, b3, b4;
+	struct bitset_t * b1, *b2, *b3, *b4;
 
 	b1 = raviX_bitmap_create();
 	b2 = raviX_bitmap_create();
