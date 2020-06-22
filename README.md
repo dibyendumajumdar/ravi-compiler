@@ -9,7 +9,7 @@ The goal of this project is to create a standalone parser and compiler for Lua /
 * parser (Mostly Done) - responsible for generating abstract syntax tree (AST).
 * typechecker (Mostly Done) - responsible for assigning types to variables when possible.
 * linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
-* optimizer (TODO) - responsible for improving the code
+* optimizer (Work in progress) - responsible for improving the code
 * codegenerator (TODO) - responsible for generate C code
 
 Our goal is to provide a re-usable Lua/Ravi parser/code generator that can be used by all kinds of tools and utilities.
@@ -21,6 +21,7 @@ Documentation is coming soon.
 For now you can look at following:
 * [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h)
 * [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests/expected/results.expected)
+* [CFG Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/docs/cfg)
 
 ## Why
 
