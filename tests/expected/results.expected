@@ -5792,12 +5792,10 @@ function()
 end
 define Proc%1
 L0 (entry)
-	BR {L2}
+	STOREGLOBAL {a, 1 Kint(0)}
+	BR {L0}
 L1 (exit)
 L2
-	STOREGLOBAL {a, 1 Kint(0)}
-	BR {L2}
-L3
 	RET {L1}
 ::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1
 function()
@@ -5890,18 +5888,16 @@ function()
 end
 define Proc%1
 L0 (entry)
-	BR {L2}
+	BR {L3}
 L1 (exit)
 L2
-	BR {L4}
-L3
 	STOREGLOBAL {x, 1 Kint(0)}
-	BR {L4}
-L4
+	BR {L3}
+L3
 	STOREGLOBAL {z, 2 Kint(1)}
 	STOREGLOBAL {y, 1 Kint(0)}
-	BR {L2}
-L5
+	BR {L0}
+L4
 	BR {L1}
 goto l1; do ::l1:: end
 function()
@@ -6299,15 +6295,15 @@ L4
 	EQ {local(a, 0), local(d, 3)} {T(2)}
 	CBR {T(2)} {L7, L8}
 L5
-	BR {L19}
+	BR {L9}
 L6
-	BR {L20}
+	BR {L9}
 L7
-	BR {L20}
+	BR {L9}
 L8
 	BR {L13}
 L9
-	BR {L19}
+	BR {L1}
 L10
 	BR {L9}
 L11
@@ -6318,23 +6314,15 @@ L13
 	EQ {local(a, 0), local(e, 4)} {T(3)}
 	CBR {T(3)} {L14, L15}
 L14
-	BR {L21}
+	BR {L9}
 L15
-	BR {L21}
+	BR {L9}
 L16
 	BR {L9}
 L17
 	BR {L16}
 L18
 	BR {L16}
-L19
-	BR {L20}
-L20
-	BR {L21}
-L21
-	BR {L22}
-L22
-	BR {L1}
 return function (a) while a < 10 do a = a + 1 end end
 function()
   return
@@ -6548,22 +6536,18 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	BR {L3}
-L3
 	LT {local(a, 0), 10 Kint(0)} {T(0)}
 	NOT {T(0)} {T(1)}
-	CBR {T(1)} {L4, L5}
+	CBR {T(1)} {L3, L4}
+L3
+	BR {L6}
 L4
-	BR {L8}
-L5
 	ADD {local(a, 0), 1 Kint(1)} {T(2)}
 	MOV {T(2)} {local(a, 0)}
-	BR {L2}
+	BR {L0}
+L5
+	BR {L4}
 L6
-	BR {L5}
-L7
-	BR {L8}
-L8
 	BR {L1}
 return function ()
     (function () end){f()}
@@ -8509,24 +8493,16 @@ end
 define Proc%1
 L0 (entry)
 	MOV {12 Kint(0)} {local(y, 1)}
-	BR {L5}
+	BR {L3}
 L1 (exit)
 L2
-	BR {L3}
-L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
 	MOV {T(0)} {local(x, 0)}
-	BR {L7}
-L4
-	BR {L5}
-L5
+	BR {L4}
+L3
 	MOV {local(y, 1)} {local(x, 0)}
-	BR {L3}
-L6
-	BR {L7}
-L7
-	BR {L8}
-L8
+	BR {L2}
+L4
 	LOADGLOBAL {assert} {T(0)}
 	EQ {local(x, 0), 13 Kint(2)} {T(1)}
 	CALL {T(0), T(1)} {T(0..)}

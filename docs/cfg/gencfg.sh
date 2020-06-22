@@ -11,7 +11,7 @@ doit "if 1 < 2 then print 'hi' end" "if1"
 doit "if 1 < 2 then print 'hi' else print 'no' end" "if2"
 doit "if a < b then print 'case 1' elseif a==b then print 'case2' elseif a >= b then print 'case 3' else print 'last case' end" "if3"
 # doit "function x(a, b, c, d, e) if a == b then goto l1 elseif a == c then goto l2 elseif a == d then goto l2 else if a == e then goto l3 else goto l3 end end ::l1:: ::l2:: ::l3:: ::l4:: end" "if4-goto"
-doit "local a, b, c, d, e if a == b then goto l1 elseif a == c then goto l2 elseif a == d then goto l2 else if a == e then goto l3 else goto l3 end end ::l1:: ::l2:: ::l3:: ::l4::" "if4-goto"
+doit "local a, b, c, d, e if a == b then goto l1 elseif a == c then goto l2 elseif a == d then goto l2 else if a == e then goto l3 else goto l3 end end ::l1:: print 'hello' ::l2:: ::l3:: ::l4::" "if4-goto"
 
 doit "for i=1,10 do print(i) end" "for1"
 doit "for i=1,10 do for j = 10,1,-1 do print(i,j) end end" "for2"
