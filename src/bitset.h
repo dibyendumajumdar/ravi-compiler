@@ -5,12 +5,12 @@
 extern "C" {
 #endif
 
-typedef uint64_t bitmap_el_t;
+typedef uint64_t bitset_el_t;
 
 struct bitset_t {
 	size_t els_num;
 	size_t size;
-	bitmap_el_t *varr;
+	bitset_el_t *varr;
 };
 
 extern struct bitset_t * raviX_bitmap_create2(size_t init_bits_num);
@@ -40,33 +40,31 @@ extern int raviX_bitmap_empty_p(const struct bitset_t * bm);
 /* Return the number of bits set in BM.  */
 extern size_t raviX_bitmap_bit_count(const struct bitset_t * bm);
 extern int raviX_bitmap_op2(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
-		       bitmap_el_t (*op) (bitmap_el_t, bitmap_el_t));
-static inline bitmap_el_t raviX_bitmap_el_and(bitmap_el_t el1, bitmap_el_t el2) { return el1 & el2; }
+			    bitset_el_t (*op) (bitset_el_t, bitset_el_t));
+static inline bitset_el_t raviX_bitmap_el_and(bitset_el_t el1, bitset_el_t el2) { return el1 & el2; }
 static inline int raviX_bitmap_and(struct bitset_t * dst, struct bitset_t * src1, struct bitset_t * src2) {
 	return raviX_bitmap_op2(dst, src1, src2, raviX_bitmap_el_and);
 }
-static inline bitmap_el_t raviX_bitmap_el_and_compl(bitmap_el_t el1, bitmap_el_t el2) {
+static inline bitset_el_t raviX_bitmap_el_and_compl(bitset_el_t el1, bitset_el_t el2) {
 	return el1 & ~el2;
 }
 static inline int raviX_bitmap_and_compl(struct bitset_t * dst, struct bitset_t * src1, struct bitset_t * src2) {
 	return raviX_bitmap_op2(dst, src1, src2, raviX_bitmap_el_and_compl);
 }
-static inline bitmap_el_t raviX_bitmap_el_ior(bitmap_el_t el1, bitmap_el_t el2) { return el1 | el2; }
+static inline bitset_el_t raviX_bitmap_el_ior(bitset_el_t el1, bitset_el_t el2) { return el1 | el2; }
 static inline int raviX_bitmap_ior(struct bitset_t * dst, struct bitset_t * src1, struct bitset_t * src2) {
 	return raviX_bitmap_op2(dst, src1, src2, raviX_bitmap_el_ior);
 }
 int raviX_bitmap_op3(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
-		const struct bitset_t * src3,
-		bitmap_el_t (*op) (bitmap_el_t, bitmap_el_t, bitmap_el_t));
-static inline bitmap_el_t raviX_bitmap_el_ior_and(bitmap_el_t el1, bitmap_el_t el2, bitmap_el_t el3) {
+		const struct bitset_t * src3, bitset_el_t (*op) (bitset_el_t, bitset_el_t, bitset_el_t));
+static inline bitset_el_t raviX_bitmap_el_ior_and(bitset_el_t el1, bitset_el_t el2, bitset_el_t el3) {
 	return el1 | (el2 & el3);
 }
 /* DST = SRC1 | (SRC2 & SRC3).  Return true if DST changed.  */
 static inline int raviX_bitmap_ior_and(struct bitset_t * dst, struct bitset_t * src1, struct bitset_t * src2, struct bitset_t * src3) {
 	return raviX_bitmap_op3(dst, src1, src2, src3, raviX_bitmap_el_ior_and);
 }
-static inline bitmap_el_t raviX_bitmap_el_ior_and_compl(bitmap_el_t el1, bitmap_el_t el2,
-						   bitmap_el_t el3) {
+static inline bitset_el_t raviX_bitmap_el_ior_and_compl(bitset_el_t el1, bitset_el_t el2, bitset_el_t el3) {
 	return el1 | (el2 & ~el3);
 }
 /* DST = SRC1 | (SRC2 & ~SRC3).  Return true if DST changed.  */
