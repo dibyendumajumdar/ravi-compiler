@@ -187,6 +187,7 @@ void *raviX_realloc_array(void *oldp, size_t element_size, size_t old_n, size_t 
 		free(oldp);
 		return NULL;
 	}
+	assert (new_n > old_n);
 	size_t newsize = element_size * new_n;
 	void *newp = realloc(oldp, newsize);
 	if (!newp) {

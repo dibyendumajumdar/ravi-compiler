@@ -7,6 +7,7 @@ set(PUBLIC_HEADERS
 set(HEADERS
         ${PUBLIC_HEADERS}
         src/allocate.h
+        src/bitset.h
         src/ptrlist.h
         src/fnv_hash.h
         src/graph.h
@@ -18,6 +19,7 @@ set(HEADERS
 set(SRCS
         src/allocate.c
         src/ast_walker.c
+        src/bitset.c
         src/ptrlist.c
         src/fnv_hash.c
         src/graph.c
