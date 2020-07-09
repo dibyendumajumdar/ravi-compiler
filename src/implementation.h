@@ -121,6 +121,7 @@ struct lua_variable_symbol {
 	struct var_type value_type;
 	const struct string_object *var_name; /* name of the variable */
 	struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
+	bool escaped; /* Has one or more up-value references */
 	struct pseudo *pseudo;	   /* backend data for the symbol */
 };
 struct lua_label_symbol {

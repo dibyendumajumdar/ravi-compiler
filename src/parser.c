@@ -138,6 +138,7 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const st
 	symbol->variable.block = scope;
 	symbol->variable.var_name = name;
 	symbol->variable.pseudo = NULL;
+	symbol->variable.escaped = false;
 	return symbol;
 }
 
@@ -247,6 +248,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
+	sym->variable.escaped = true; /* mark original variable as having escaped */
 	return true;
 }
 
