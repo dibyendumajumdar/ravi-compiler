@@ -1581,8 +1581,13 @@ encountered a goto statement but we did not know the block then.
 */
 static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 {
-	struct basic_block *block = create_block(proc);
-	start_block(proc, block);
+	/* If the current block is empty then we can use it as the label target */
+	struct basic_block* block = proc->current_bb;
+	if (ptrlist_size((const struct ptr_list*)block->insns) > 0) {
+		/* Create new block as label target */
+		block = create_block(proc);
+		start_block(proc, block);
+	}
 	if (node->label_stmt.symbol->label.pseudo != NULL) {
 		/* label pseudo was created by a goto statement */
 		assert(node->label_stmt.symbol->label.pseudo->block == NULL);

@@ -27,19 +27,19 @@ L4 -> L7
 L4 -> L8
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
-<TR><TD>BR {L19}</TD></TR>
+<TR><TD>BR {L9}</TD></TR>
 </TABLE>>];
-L5 -> L19
+L5 -> L9
 L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L6</B></TD></TR>
-<TR><TD>BR {L20}</TD></TR>
+<TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L6 -> L20
+L6 -> L19
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>BR {L20}</TD></TR>
+<TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L7 -> L20
+L7 -> L19
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>BR {L13}</TD></TR>
@@ -47,6 +47,8 @@ L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L8 -> L13
 L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L9</B></TD></TR>
+<TR><TD>LOADGLOBAL {print} {T(4)}</TD></TR>
+<TR><TD>CALL {T(4), 'hello' Ks(0)} {T(4..)}</TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L9 -> L19
@@ -74,14 +76,14 @@ L13 -> L14
 L13 -> L15
 L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L14</B></TD></TR>
-<TR><TD>BR {L21}</TD></TR>
+<TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L14 -> L21
+L14 -> L19
 L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L15</B></TD></TR>
-<TR><TD>BR {L21}</TD></TR>
+<TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L15 -> L21
+L15 -> L19
 L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L16</B></TD></TR>
 <TR><TD>BR {L9}</TD></TR>
@@ -99,22 +101,7 @@ L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L18 -> L16
 L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L19</B></TD></TR>
-<TR><TD>BR {L20}</TD></TR>
-</TABLE>>];
-L19 -> L20
-L20 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L20</B></TD></TR>
-<TR><TD>BR {L21}</TD></TR>
-</TABLE>>];
-L20 -> L21
-L21 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L21</B></TD></TR>
-<TR><TD>BR {L22}</TD></TR>
-</TABLE>>];
-L21 -> L22
-L22 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L22</B></TD></TR>
 <TR><TD>BR {L1}</TD></TR>
 </TABLE>>];
-L22 -> L1
+L19 -> L1
 }
