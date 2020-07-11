@@ -53,7 +53,6 @@ void raviX_destroy_dominator_tree(struct dominator_tree *state)
  */
 static struct node *intersect(struct dominator_tree *state, struct node *i, struct node *j)
 {
-	struct graph *g = state->g;
 	struct node *finger1 = i;
 	struct node *finger2 = j;
 	while (finger1 != finger2) {

@@ -47,12 +47,14 @@ if (WIN32)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
+include(CheckCCompilerFlag)
 if (NOT MSVC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wshadow -Wsign-compare -Wundef -Wwrite-strings \
-        -Wredundant-decls -Wdisabled-optimization -Wdouble-promotion \
-    	-Wlogical-op -Wno-aggressive-loop-optimizations \
-        -Wmissing-prototypes -Wnested-externs \
-        -Wstrict-prototypes -Werror=return-type -Wall -Wno-unused-parameter") # -Wc++-compat
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=return-type")
+    set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
+    check_c_compiler_flag("-fsanitize=address" COMPILER_ASAN_SUPPORTED)
+    if (COMPILER_ASAN_SUPPORTED AND NOT CMAKE_C_FLAGS_DEBUG MATCHES "-fsanitize=address")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+    endif()
 endif()
 
 include(GNUInstallDirs)

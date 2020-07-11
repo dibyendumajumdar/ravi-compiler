@@ -4,7 +4,7 @@
 #include <string.h>
 #include <bitset.h>
 
-int test_stringset()
+static int test_stringset(void)
 {
 	struct compiler_state *container = raviX_init_compiler();
 	int rc = 0;
@@ -26,7 +26,7 @@ int test_stringset()
 	return rc;
 }
 
-int test_memalloc()
+static int test_memalloc(void)
 {
 	int arry[5] = {1, 2, 3, 4, 5}; // 5 is extra sentinel
 	raviX_del_array_element(arry, sizeof arry[0], 4, 1, 2);
@@ -39,7 +39,7 @@ int test_memalloc()
 	return 0;
 }
 
-int test_bitset()
+static int test_bitset(void)
 {
 	int status;
 	struct bitset_t * b1, *b2, *b3, *b4;
