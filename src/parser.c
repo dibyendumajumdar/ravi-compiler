@@ -1583,6 +1583,7 @@ struct compiler_state *raviX_init_compiler()
 	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(struct string_object),
 			     sizeof(double), sizeof(struct string_object) * 64);
 	raviX_buffer_init(&container->buff, 1024);
+	raviX_buffer_init(&container->error_message, 256);
 	container->strings = set_create(string_hash, string_equal);
 	container->main_function = NULL;
 	container->killed = false;
@@ -1610,6 +1611,7 @@ void raviX_destroy_compiler(struct compiler_state *container)
 		}
 		set_destroy(container->strings, NULL);
 		raviX_buffer_free(&container->buff);
+		raviX_buffer_free(&container->error_message);
 		raviX_allocator_destroy(&container->symbol_allocator);
 		raviX_allocator_destroy(&container->block_scope_allocator);
 		raviX_allocator_destroy(&container->ast_node_allocator);
@@ -1618,5 +1620,6 @@ void raviX_destroy_compiler(struct compiler_state *container)
 		raviX_allocator_destroy(&container->string_object_allocator);
 		container->killed = true;
 	}
+	free(container);
 }
 

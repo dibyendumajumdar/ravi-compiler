@@ -2251,4 +2251,5 @@ void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp)
 	raviX_buffer_init(&mb, 4096);
 	raviX_show_linearizer(linearizer, &mb);
 	fputs(mb.buf, fp);
+	raviX_buffer_free(&mb);
 }

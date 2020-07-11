@@ -53,7 +53,7 @@ if (NOT MSVC)
     set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
     check_c_compiler_flag("-fsanitize=address" COMPILER_ASAN_SUPPORTED)
     if (COMPILER_ASAN_SUPPORTED AND NOT CMAKE_C_FLAGS_DEBUG MATCHES "-fsanitize=address")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
     endif()
 endif()
 

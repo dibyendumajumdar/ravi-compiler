@@ -82,6 +82,12 @@ static void init_chunks(struct chunk_data *chunks)
 	chunks->list = NULL;
 }
 
+static void destroy_chunks(struct chunk_data *chunks)
+{
+	raviX_allocator_destroy(&chunks->ptrlist_allocator);
+	raviX_allocator_destroy(&chunks->string_allocator);
+}
+
 static int do_code(const char *code, const struct arguments *args)
 {
 	if (args->codump) {
@@ -131,31 +137,37 @@ static int do_code(const char *code, const struct arguments *args)
 int main(int argc, const char *argv[])
 {
 	struct arguments args;
+	struct chunk_data chunks;
+
 	parse_arguments(&args, argc, argv);
+	init_chunks(&chunks);
 
 	const char* code = NULL;
 	if (args.code) {
 		code = args.code;
-	} else if (args.filename) {
-		code = read_file(args.filename);
 	}
+	int rc = 0;
 	if (!code) {
 		fprintf(stderr, "No code to process\n");
-		exit(1);
+		rc = 1;
+		goto L_exit;
 	}
 
-	struct chunk_data chunks;
-	init_chunks(&chunks);
 	uint32_t count = read_chunks(code, &chunks, "#");
 	if (count == 0) {
 		fprintf(stderr, "No code to process\n");
-		exit(1);
+		rc = 1;
+		goto L_exit;
 	}
 
 	const char *chunk = NULL;
 	FOR_EACH_PTR(chunks.list, chunk) {
 		do_code(chunk, &args);
 	} END_FOR_EACH_PTR(chunk)
+
+L_exit:
+	destroy_arguments(&args);
+	destroy_chunks(&chunks);
 
 	return 0;
 }

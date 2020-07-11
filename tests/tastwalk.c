@@ -301,14 +301,13 @@ int main(int argc, const char *argv[])
 	const char *code = NULL;
 	if (args.code) {
 		code = args.code;
-	} else if (args.filename) {
-		code = read_file(args.filename);
-	}
-	if (!code) {
-		fprintf(stderr, "No code to process\n");
-		exit(1);
 	}
 	int rc = 0;
+	if (!code) {
+		fprintf(stderr, "No code to process\n");
+		rc = 1;
+		goto L_exit;
+	}
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
@@ -325,6 +324,7 @@ int main(int argc, const char *argv[])
 
 L_exit:
 	raviX_destroy_compiler(container);
+	destroy_arguments(&args);
 
 	return rc;
 }

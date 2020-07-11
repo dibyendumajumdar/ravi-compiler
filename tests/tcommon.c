@@ -46,6 +46,9 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			}
 		}
 	}
+	if (args->filename && !args->code) {
+		args->code = read_file(args->filename);
+	}
 }
 
 const char *read_file(const char *filename)
@@ -78,5 +81,8 @@ const char *read_file(const char *filename)
 	return buffer;
 }
 
-
-
+void destroy_arguments(struct arguments *args)
+{
+	free((void *)args->filename);
+	free((void *)args->code);
+}

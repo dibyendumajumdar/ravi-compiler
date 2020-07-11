@@ -26,16 +26,15 @@ int main(int argc, const char *argv[])
 	const char* code = "for i=1,10 do print(i) end";
 	if (args.code) {
 		code = args.code;
-	} else if (args.filename) {
-		code = read_file(args.filename);
 	}
+	int rc = 0;
 	if (!code) {
 		fprintf(stderr, "No code to process\n");
-		exit(1);
+		rc = 1;
+		goto L_exit;
 	}
 
 	printf("%s\n", code);
-	int rc = 0;
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
@@ -64,6 +63,7 @@ L_linend:
 
 L_exit:
 	raviX_destroy_compiler(container);
+	destroy_arguments(&args);
 
 	return rc;
 }
