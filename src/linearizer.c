@@ -355,7 +355,7 @@ static struct pseudo *allocate_range_pseudo(struct proc *proc, struct pseudo *or
 
 /*
 A PSEUDO_RANGE_SELECT picks or selects a particular offset in the range
-specified by a PSEUDO_RANGE.
+specified by a PSEUDO_RANGE. Pick of 0 means pick first value from the range.
 */
 static struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pseudo *range_pseudo, int pick)
 {
@@ -1346,38 +1346,43 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 
 static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
 {
+	struct pseudo *result = NULL;
 	switch (expr->type) {
 	case EXPR_LITERAL: {
-		return linearize_literal(proc, expr);
+		result = linearize_literal(proc, expr);
 	} break;
 	case EXPR_BINARY: {
-		return linearize_binary_operator(proc, expr);
+		result = linearize_binary_operator(proc, expr);
 	} break;
 	case EXPR_FUNCTION: {
-		return linearize_function_expr(proc, expr);
+		result = linearize_function_expr(proc, expr);
 	} break;
 	case EXPR_UNARY: {
-		return linearize_unary_operator(proc, expr);
+		result = linearize_unary_operator(proc, expr);
 	} break;
 	case EXPR_SUFFIXED: {
-		return linearize_suffixedexpr(proc, expr);
+		result = linearize_suffixedexpr(proc, expr);
 	} break;
 	case EXPR_SYMBOL: {
-		return linearize_symbol_expression(proc, expr);
+		result = linearize_symbol_expression(proc, expr);
 	} break;
 	case EXPR_TABLE_LITERAL: {
-		return linearize_table_constructor(proc, expr);
+		result = linearize_table_constructor(proc, expr);
 	} break;
 	case EXPR_Y_INDEX:
 	case EXPR_FIELD_SELECTOR: {
-		return linearize_expression(proc, expr->index_expr.expr);
+		result = linearize_expression(proc, expr->index_expr.expr);
 	} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
 	}
-	assert(false);
-	return NULL;
+	assert(result);
+	if (result->type == PSEUDO_RANGE && expr->common_expr.truncate_results) {
+		// Need to truncate the results to 1
+		return allocate_range_select_pseudo(proc, result, 0);
+	}
+	return result;
 }
 
 static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_list, struct instruction *insn,

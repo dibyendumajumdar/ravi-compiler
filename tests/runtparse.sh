@@ -159,4 +159,6 @@ $command "function foo(bar: integer[], zee: number[], ...) end"
 $command "function foo(bar: number, zee: string) end"
 $command "function foo(bar: closure, zee: My.User.Type) end"
 
+$command "return (f())"
+
 exit 0

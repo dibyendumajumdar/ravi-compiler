@@ -104,3 +104,4 @@ return function ()
     (function () end){f()}
   end
 #
+return (f())

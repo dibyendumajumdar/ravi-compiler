@@ -694,6 +694,7 @@ static struct ast_node *parse_primary_expression(struct parser_state *parser)
 		int line = ls->linenumber;
 		raviX_next(ls);
 		primary_expr = parse_expression(parser);
+		primary_expr->common_expr.truncate_results = 1; /* Lua requires that we truncate results to 1 */
 		check_match(ls, ')', '(', line);
 		break;
 	}
@@ -952,7 +953,6 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		expr->unary_expr.type.type_name = usertype;
 	} else {
 		expr = parse_simple_expression(parser);
-		expr->common_expr.truncate_results = 1; /* Lua requires that we truncate results to 1 */
 	}
 	/* expand while operators have priorities higher than 'limit' */
 	op = get_binary_opr(ls->t.token);
