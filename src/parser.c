@@ -44,6 +44,13 @@ static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_
 	return node;
 }
 
+static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum ast_node_type type) {
+	struct ast_node *node = allocate_ast_node(parser, type);
+	node->common_expr.truncate_results = 0;
+	set_typecode(&node->common_expr.type, RAVI_TANY);
+	return node;
+}
+
 static void error_expected(struct lexer_state *ls, int token)
 {
 	raviX_token2str(token, &ls->container->error_message);
@@ -138,7 +145,7 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const st
 	symbol->variable.block = scope;
 	symbol->variable.var_name = name;
 	symbol->variable.pseudo = NULL;
-	symbol->variable.escaped = false;
+	symbol->variable.escaped = 0;
 	return symbol;
 }
 
@@ -248,7 +255,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
-	sym->variable.escaped = true; /* mark original variable as having escaped */
+	sym->variable.escaped = 1; /* mark original variable as having escaped */
 	return true;
 }
 
@@ -341,7 +348,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 		// always looked up
 		symbol = global;
 	}
-	struct ast_node *symbol_expr = allocate_ast_node(parser, EXPR_SYMBOL);
+	struct ast_node *symbol_expr = allocate_expr_ast_node(parser, EXPR_SYMBOL);
 	symbol_expr->symbol_expr.type = symbol->variable.value_type;
 	symbol_expr->symbol_expr.var = symbol;
 	return symbol_expr;
@@ -353,7 +360,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser)
 
 static struct ast_node *new_string_literal(struct parser_state *parser, const struct string_object *ts)
 {
-	struct ast_node *node = allocate_ast_node(parser, EXPR_LITERAL);
+	struct ast_node *node = allocate_expr_ast_node(parser, EXPR_LITERAL);
 	set_type(&node->literal_expr.type, RAVI_TSTRING);
 	node->literal_expr.u.ts = ts;
 	return node;
@@ -361,7 +368,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const st
 
 static struct ast_node *new_field_selector(struct parser_state *parser, const struct string_object *ts)
 {
-	struct ast_node *index = allocate_ast_node(parser, EXPR_FIELD_SELECTOR);
+	struct ast_node *index = allocate_expr_ast_node(parser, EXPR_FIELD_SELECTOR);
 	index->index_expr.expr = new_string_literal(parser, ts);
 	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
@@ -390,7 +397,7 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 	struct ast_node *expr = parse_expression(parser);
 	checknext(ls, ']');
 
-	struct ast_node *index = allocate_ast_node(parser, EXPR_Y_INDEX);
+	struct ast_node *index = allocate_expr_ast_node(parser, EXPR_Y_INDEX);
 	index->index_expr.expr = expr;
 	set_type(&index->index_expr.type, RAVI_TANY);
 	return index;
@@ -405,7 +412,7 @@ static struct ast_node *parse_yindex(struct parser_state *parser)
 static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, struct ast_node *key_expr,
 						struct ast_node *value_expr)
 {
-	struct ast_node *set = allocate_ast_node(parser, EXPR_TABLE_ELEMENT_ASSIGN);
+	struct ast_node *set = allocate_expr_ast_node(parser, EXPR_TABLE_ELEMENT_ASSIGN);
 	set->table_elem_assign_expr.key_expr = key_expr;
 	set->table_elem_assign_expr.value_expr = value_expr;
 	set->table_elem_assign_expr.type =
@@ -466,7 +473,7 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
 	sep -> ',' | ';' */
 	int line = ls->linenumber;
 	checknext(ls, '{');
-	struct ast_node *table_expr = allocate_ast_node(parser, EXPR_TABLE_LITERAL);
+	struct ast_node *table_expr = allocate_expr_ast_node(parser, EXPR_TABLE_LITERAL);
 	set_type(&table_expr->table_expr.type, RAVI_TTABLE);
 	table_expr->table_expr.expr_list = NULL;
 	do {
@@ -636,7 +643,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 					    int line)
 {
 	struct lexer_state *ls = parser->ls;
-	struct ast_node *call_expr = allocate_ast_node(parser, EXPR_FUNCTION_CALL);
+	struct ast_node *call_expr = allocate_expr_ast_node(parser, EXPR_FUNCTION_CALL);
 	call_expr->function_call_expr.method_name = methodname;
 	call_expr->function_call_expr.arg_list = NULL;
 	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
@@ -709,7 +716,7 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 	/* suffixedexp ->
 	primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	int line = ls->linenumber;
-	struct ast_node *suffixed_expr = allocate_ast_node(parser, EXPR_SUFFIXED);
+	struct ast_node *suffixed_expr = allocate_expr_ast_node(parser, EXPR_SUFFIXED);
 	suffixed_expr->suffixed_expr.primary_expr = parse_primary_expression(parser);
 	suffixed_expr->suffixed_expr.type = suffixed_expr->suffixed_expr.primary_expr->common_expr.type;
 	suffixed_expr->suffixed_expr.suffix_list = NULL;
@@ -749,7 +756,7 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type)
 {
-	struct ast_node *expr = allocate_ast_node(parser, EXPR_LITERAL);
+	struct ast_node *expr = allocate_expr_ast_node(parser, EXPR_LITERAL);
 	set_type(&expr->literal_expr.type, type);
 	expr->literal_expr.u.i = 0; /* initialize */
 	return expr;
@@ -939,12 +946,13 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		}
 		BinaryOperatorType ignored;
 		struct ast_node *subexpr = parse_sub_expression(parser, UNARY_PRIORITY, &ignored);
-		expr = allocate_ast_node(parser, EXPR_UNARY);
+		expr = allocate_expr_ast_node(parser, EXPR_UNARY);
 		expr->unary_expr.expr = subexpr;
 		expr->unary_expr.unary_op = uop;
 		expr->unary_expr.type.type_name = usertype;
 	} else {
 		expr = parse_simple_expression(parser);
+		expr->common_expr.truncate_results = 1; /* Lua requires that we truncate results to 1 */
 	}
 	/* expand while operators have priorities higher than 'limit' */
 	op = get_binary_opr(ls->t.token);
@@ -954,7 +962,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 		/* read sub-expression with higher priority */
 		struct ast_node *exprright = parse_sub_expression(parser, priority[op].right, &nextop);
 
-		struct ast_node *binexpr = allocate_ast_node(parser, EXPR_BINARY);
+		struct ast_node *binexpr = allocate_expr_ast_node(parser, EXPR_BINARY);
 		binexpr->binary_expr.expr_left = expr;
 		binexpr->binary_expr.expr_right = exprright;
 		binexpr->binary_expr.binary_op = op;
@@ -1468,7 +1476,7 @@ to previous scope which may be of parent function.
 */
 static struct ast_node *new_function(struct parser_state *parser)
 {
-	struct ast_node *node = allocate_ast_node(parser, EXPR_FUNCTION);
+	struct ast_node *node = allocate_expr_ast_node(parser, EXPR_FUNCTION);
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;
 	node->function_expr.is_vararg = false;

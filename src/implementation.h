@@ -121,7 +121,7 @@ struct lua_variable_symbol {
 	struct var_type value_type;
 	const struct string_object *var_name; /* name of the variable */
 	struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
-	bool escaped; /* Has one or more up-value references */
+	unsigned escaped: 1; /* Has one or more up-value references */
 	struct pseudo *pseudo;	   /* backend data for the symbol */
 };
 struct lua_label_symbol {
@@ -211,37 +211,40 @@ struct for_statement {
 };
 /* To access the type field common to all expr objects */
 /* all expr types must be compatible with base_expression */
+
+#define BASE_EXPRESSION_FIELDS struct var_type type; unsigned truncate_results: 1
+
 struct base_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 };
 struct literal_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	SemInfo u;
 };
 /* primaryexp -> NAME | '(' expr ')', NAME is parsed as EXPR_SYMBOL */
 struct symbol_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	struct lua_symbol *var;
 };
 /* EXPR_Y_INDEX or EXPR_FIELD_SELECTOR */
 struct index_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	struct ast_node *expr; /* '[' expr ']' */
 };
 /* EXPR_UNARY */
 struct unary_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	UnaryOperatorType unary_op;
 	struct ast_node *expr;
 };
 struct binary_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	BinaryOperatorType binary_op;
 	struct ast_node *expr_left;
 	struct ast_node *expr_right;
 };
 struct function_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	unsigned int is_vararg : 1;
 	unsigned int is_method : 1;
 	uint32_t proc_id; /* Backend allocated id */
@@ -257,7 +260,7 @@ struct function_expression {
 /* Assign values in table constructor */
 /* EXPR_TABLE_ELEMENT_ASSIGN - used in table constructor */
 struct table_element_assignment_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
 							else specifies index expression */
 	struct ast_node *value_expr;
@@ -265,13 +268,13 @@ struct table_element_assignment_expression {
 /* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
 /* table constructor expression EXPR_TABLE_LITERAL occurs in function call and simple expr */
 struct table_literal_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	struct ast_node_list *expr_list;
 };
 /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 /* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
 struct suffixed_expression {
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	struct ast_node *primary_expr;
 	struct ast_node_list *suffix_list;
 };
@@ -280,24 +283,23 @@ struct function_call_expression {
 	 * variables. This is not explicit in the AST but is required to ensure that function return
 	 * values do not overwrite the type of the variables in an inconsistent way.
 	 */
-	struct var_type type;
+	BASE_EXPRESSION_FIELDS;
 	const struct string_object *method_name; /* Optional method_name */
 	struct ast_node_list *arg_list;		 /* Call arguments */
 };
+#undef BASE_EXPRESSION_FIELDS
 
-/* Common statement type. All statement types must have the fields in this
- * struct at the beginning of the struct.
+/* ALL AST nodes start with following fields */
+#define BASE_AST_FIELDS enum ast_node_type type; int line_number
+/* Statement AST nodes have following common fields.
  */
 struct statement {
-	enum ast_node_type type;
-	int line_number;
+	BASE_AST_FIELDS;
 };
-/* Common expression type. All expression types must have the fields in this
-   type at the beginning of the struct
+/* Expression AST nodes have following common fields
 */
 struct expression {
-	enum ast_node_type type;
-	int line_number;
+	BASE_AST_FIELDS;
 	struct base_expression common_expr;
 };
 
@@ -309,8 +311,7 @@ we can have a transformation step to convert to a tree that is more like the cod
 The ast_node must be aligned with struct expression for expressions, and with struct statement for statements.
 */
 struct ast_node {
-	enum ast_node_type type;
-	int line_number; /* Source line number */
+	BASE_AST_FIELDS;
 	union {
 		struct return_statement return_stmt; /*STMT_RETURN */
 		struct label_statement label_stmt; /* STMT_LABEL */
@@ -336,6 +337,7 @@ struct ast_node {
 		struct function_call_expression function_call_expr;
 	};
 };
+#undef BASE_AST_FIELDS
 
 static inline void set_typecode(struct var_type *vt, ravitype_t t) { vt->type_code = t; }
 static inline void set_type(struct var_type *vt, ravitype_t t)
