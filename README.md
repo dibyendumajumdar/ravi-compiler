@@ -22,6 +22,7 @@ For now you can look at following:
 * [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h)
 * [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests/expected/results.expected)
 * [CFG Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/docs/cfg)
+* See the [Wiki](https://github.com/dibyendumajumdar/ravi-compiler/wiki) for various notes.
 
 ## Why
 
