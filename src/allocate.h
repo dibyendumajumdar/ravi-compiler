@@ -100,6 +100,30 @@ The freed up space will be zero initialized. Returns the new array_size.
 */
 extern size_t raviX_del_array_element(void* p, size_t element_size, size_t array_size, size_t i, size_t n);
 
+/* structure of a node */
+#define DECLARE_ARRAY(array_type, TYPE)                                 \
+	struct array_type {                                             \
+		unsigned allocated;                                     \
+		unsigned count;                                         \
+		TYPE *data;                                             \
+	}
+#define array_push(A, value) \
+	{ \
+		if ((A)->count == (A)->allocated) { \
+			unsigned newsize = (A)->allocated += 10; \
+			(A)->data = raviX_realloc_array((A)->data, sizeof((A)->data[0]), (A)->allocated, newsize); \
+			(A)->allocated = newsize; \
+		} \
+		(A)->data[(A)->count++] = value; \
+	}
+#define array_clearmem(A) \
+	{ \
+		raviX_realloc_array((A)->data, sizeof((A)->data[0]), (A)->allocated, 0); \
+		(A)->data = NULL; \
+		(A)->allocated = 0; \
+		(A)->count = 0; \
+	}
+
 #ifdef __cplusplus
 }
 #endif
