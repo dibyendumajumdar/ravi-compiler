@@ -88,6 +88,8 @@ void raviX_classify_edges(struct graph *g);
  */
 struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward);
 
+void raviX_sort_nodes_by_RPO(struct node **nodes, size_t count, bool forward);
+
 /* says how many nodes are in the graph */
 uint32_t raviX_graph_size(struct graph *g);
 /* Generates GraphViz (dot) output */

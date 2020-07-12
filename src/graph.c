@@ -351,6 +351,11 @@ static int rpost_cmp(const void *a1, const void *a2)
 
 static int post_cmp(const void *a1, const void *a2) { return -rpost_cmp(a1, a2); }
 
+void raviX_sort_nodes_by_RPO(struct node **nodes, size_t count, bool forward)
+{
+	qsort(nodes, count, sizeof(struct node *), forward ? post_cmp : rpost_cmp);
+}
+
 struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward)
 {
 	uint32_t N = raviX_graph_size(g);
@@ -362,7 +367,7 @@ struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward)
 		nodes[j++] = g->nodes[i];
 	}
 	assert(j == N);
-	qsort(nodes, N, sizeof(struct node *), forward ? post_cmp : rpost_cmp);
+	raviX_sort_nodes_by_RPO(nodes, N, forward);
 	return nodes;
 }
 
