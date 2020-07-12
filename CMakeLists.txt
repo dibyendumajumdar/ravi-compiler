@@ -14,7 +14,11 @@ set(HEADERS
         src/hash_table.h
         src/set.h
         src/membuf.h
-        src/implementation.h)
+        src/cfg.h
+        src/dominator.h
+        src/linearizer.h
+        src/common.h
+        src/parser.h)
 
 set(SRCS
         src/allocate.c

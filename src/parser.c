@@ -13,7 +13,7 @@ Note that the overall structure of the parser is loosely based on the Lua 5.3 pa
 */
 
 #include "fnv_hash.h"
-#include <implementation.h>
+#include <parser.h>
 
 /* forward declarations */
 static struct ast_node *parse_expression(struct parser_state *);

@@ -1,5 +1,6 @@
 #include "graph.h"
 
+#include <assert.h>
 #include <stdlib.h>
 
 struct node;

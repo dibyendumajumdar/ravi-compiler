@@ -1,6 +1,8 @@
-#include "graph.h"
-#include "implementation.h"
 #include "ravi_compiler.h"
+
+#include "graph.h"
+
+#include <assert.h>
 
 /*
  * The dominator tree construction algorithm is based on figure 9.24,

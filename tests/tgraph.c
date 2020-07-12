@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "dominator.h"
 
 static int test1(void)
 {

@@ -34,8 +34,7 @@
 * small bits and pieces of it with no maintenance overhead.
 */
 /*
-* This version is part of the dmr_c project.
-* Copyright (C) 2017 Dibyendu Majumdar
+* Portions Copyright (C) 2017-2020 Dibyendu Majumdar
 */
 
 #include <stddef.h>

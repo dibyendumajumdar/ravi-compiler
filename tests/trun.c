@@ -1,11 +1,14 @@
 /* simple smoke test for parser */
 
 #include "ravi_compiler.h"
-#include "tcommon.h"
-#include "ptrlist.h"
+
 #include "allocate.h"
 #include "membuf.h"
-#include "implementation.h"
+#include "parser.h"
+#include "cfg.h"
+
+#include "ptrlist.h"
+#include "tcommon.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -13,8 +13,8 @@ Each basic block contains a sequence of instructions.
 The final instruction of a block must always be a branch instruction.
 */
 
-#include "implementation.h"
-
+#include "parser.h"
+#include "linearizer.h"
 #include "fnv_hash.h"
 #include "ptrlist.h"
 
