@@ -1,6 +1,6 @@
 /**
  * A framework fpor performing data flow analysis.
- * The framework is based upon similar framework in MIR project.
+ * The framework is based upon similar framework in MIR project (https://github.com/vnmakarov/mir)
  */
 
 #include "dataflow_framework.h"

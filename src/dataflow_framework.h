@@ -9,6 +9,10 @@
 
 DECLARE_ARRAY(node_array, struct node *);
 
+/**
+ * The data flow framework is based on the implementation in MIR project.
+ * https://github.com/vnmakarov/mir
+ */
 struct dataflow_context {
 	struct graph *g;
 	struct node_array worklist;
