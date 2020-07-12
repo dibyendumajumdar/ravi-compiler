@@ -20,10 +20,10 @@ struct bitset_t {
 	bitset_el_t *varr;
 };
 
-extern struct bitset_t * raviX_bitset_create2(size_t init_bits_num);
-static inline struct bitset_t * raviX_bitset_create(void)
+extern void raviX_bitset_create2(struct bitset_t *, size_t init_bits_num);
+static inline void raviX_bitset_create(struct bitset_t *bm)
 {
-	return raviX_bitset_create2(0);
+	raviX_bitset_create2(bm, 0);
 }
 extern void raviX_bitset_destroy(struct bitset_t * bm);
 static inline void raviX_bitset_clear(struct bitset_t * bm)
@@ -31,6 +31,7 @@ static inline void raviX_bitset_clear(struct bitset_t * bm)
 	bm->els_num = 0;
 }
 extern int raviX_bitset_bit_p(const struct bitset_t * bm, size_t nb);
+/* Sets a bit ON and returns previous value */
 extern int raviX_bitset_set_bit_p(struct bitset_t * bm, size_t nb);
 extern int raviX_bitset_clear_bit_p(struct bitset_t * bm, size_t nb);
 extern int raviX_bitset_set_or_clear_bit_range_p(struct bitset_t * bm, size_t nb, size_t len, int set_p);

@@ -42,109 +42,109 @@ static int test_memalloc(void)
 static int test_bitset(void)
 {
 	int status;
-	struct bitset_t * b1, *b2, *b3, *b4;
+	struct bitset_t b1, b2, b3, b4;
 
-	b1 = raviX_bitset_create();
-	b2 = raviX_bitset_create();
-	b3 = raviX_bitset_create();
-	b4 = raviX_bitset_create();
-	status = raviX_bitset_empty_p(b1);
-	status &= raviX_bitset_bit_count(b1) == 0;
+	raviX_bitset_create(&b1);
+	raviX_bitset_create(&b2);
+	raviX_bitset_create(&b3);
+	raviX_bitset_create(&b4);
+	status = raviX_bitset_empty_p(&b1);
+	status &= raviX_bitset_bit_count(&b1) == 0;
 
-	status &= raviX_bitset_set_bit_p(b1, 1);
-	status &= raviX_bitset_set_bit_p(b1, 120);
-	status &= !raviX_bitset_set_bit_p(b1, 120);
-	status &= !raviX_bitset_empty_p(b1);
-	status &= raviX_bitset_bit_p(b1, 1);
-	status &= raviX_bitset_bit_p(b1, 120);
-	status &= !raviX_bitset_bit_p(b1, 42);
+	status &= raviX_bitset_set_bit_p(&b1, 1);
+	status &= raviX_bitset_set_bit_p(&b1, 120);
+	status &= !raviX_bitset_set_bit_p(&b1, 120);
+	status &= !raviX_bitset_empty_p(&b1);
+	status &= raviX_bitset_bit_p(&b1, 1);
+	status &= raviX_bitset_bit_p(&b1, 120);
+	status &= !raviX_bitset_bit_p(&b1, 42);
 
-	status &= raviX_bitset_clear_bit_p(b1, 120);
-	status &= !raviX_bitset_bit_p(b1, 120);
-	status &= raviX_bitset_set_bit_p(b1, 120);
+	status &= raviX_bitset_clear_bit_p(&b1, 120);
+	status &= !raviX_bitset_bit_p(&b1, 120);
+	status &= raviX_bitset_set_bit_p(&b1, 120);
 
-	raviX_bitset_copy(b2, b1);
-	status &= raviX_bitset_equal_p(b1, b2);
-	status &= raviX_bitset_intersect_p(b1, b2);
-	status &= !raviX_bitset_equal_p(b1, b3);
-	status &= !raviX_bitset_intersect_p(b1, b3);
+	raviX_bitset_copy(&b2, &b1);
+	status &= raviX_bitset_equal_p(&b1, &b2);
+	status &= raviX_bitset_intersect_p(&b1, &b2);
+	status &= !raviX_bitset_equal_p(&b1, &b3);
+	status &= !raviX_bitset_intersect_p(&b1, &b3);
 
-	raviX_bitset_clear(b2);
-	status &= raviX_bitset_empty_p(b2);
-	status &= raviX_bitset_bit_count(b2) == 0;
+	raviX_bitset_clear(&b2);
+	status &= raviX_bitset_empty_p(&b2);
+	status &= raviX_bitset_bit_count(&b2) == 0;
 
-	raviX_bitset_copy(b2, b1);
-	status &= raviX_bitset_equal_p(b1, b2);
-	status &= raviX_bitset_set_bit_p(b2, 1818);
+	raviX_bitset_copy(&b2, &b1);
+	status &= raviX_bitset_equal_p(&b1, &b2);
+	status &= raviX_bitset_set_bit_p(&b2, 1818);
 
-	status &= raviX_bitset_set_bit_p(b3, 555);
-	status &= raviX_bitset_set_bit_p(b3, 120);
-	status &= raviX_bitset_set_bit_p(b3, 42);
-	status &= !raviX_bitset_empty_p(b3);
-	status &= raviX_bitset_bit_count(b3) == 3;
-	status &= raviX_bitset_bit_p(b3, 555);
-	status &= raviX_bitset_bit_p(b3, 120);
-	status &= raviX_bitset_bit_p(b3, 42);
+	status &= raviX_bitset_set_bit_p(&b3, 555);
+	status &= raviX_bitset_set_bit_p(&b3, 120);
+	status &= raviX_bitset_set_bit_p(&b3, 42);
+	status &= !raviX_bitset_empty_p(&b3);
+	status &= raviX_bitset_bit_count(&b3) == 3;
+	status &= raviX_bitset_bit_p(&b3, 555);
+	status &= raviX_bitset_bit_p(&b3, 120);
+	status &= raviX_bitset_bit_p(&b3, 42);
 
-	status &= raviX_bitset_and(b4, b1, b2);
-	status &= raviX_bitset_equal_p(b4, b1);
+	status &= raviX_bitset_and(&b4, &b1, &b2);
+	status &= raviX_bitset_equal_p(&b4, &b1);
 
-	status &= raviX_bitset_ior(b4, b1, b2);
-	status &= raviX_bitset_equal_p(b4, b2);
+	status &= raviX_bitset_ior(&b4, &b1, &b2);
+	status &= raviX_bitset_equal_p(&b4, &b2);
 
-	status &= raviX_bitset_and_compl(b4, b2, b1);
-	status &= raviX_bitset_bit_p(b4, 1818);
-	status &= raviX_bitset_bit_count(b4) == 1;
+	status &= raviX_bitset_and_compl(&b4, &b2, &b1);
+	status &= raviX_bitset_bit_p(&b4, 1818);
+	status &= raviX_bitset_bit_count(&b4) == 1;
 
-	status &= raviX_bitset_and_compl(b4, b1, b2);
-	status &= raviX_bitset_bit_count(b4) == 0;
+	status &= raviX_bitset_and_compl(&b4, &b1, &b2);
+	status &= raviX_bitset_bit_count(&b4) == 0;
 
-	status &= raviX_bitset_ior_and(b4, b1, b2, b3);
-	status &= raviX_bitset_bit_p(b4, 1);
-	status &= raviX_bitset_bit_p(b4, 120);
-	status &= raviX_bitset_bit_count(b4) == 2;
+	status &= raviX_bitset_ior_and(&b4, &b1, &b2, &b3);
+	status &= raviX_bitset_bit_p(&b4, 1);
+	status &= raviX_bitset_bit_p(&b4, 120);
+	status &= raviX_bitset_bit_count(&b4) == 2;
 
-	status &= raviX_bitset_ior_and(b4, b3, b1, b2);
-	status &= raviX_bitset_bit_p(b4, 1);
-	status &= raviX_bitset_bit_p(b4, 555);
-	status &= raviX_bitset_bit_p(b4, 42);
-	status &= raviX_bitset_bit_p(b4, 120);
-	status &= raviX_bitset_bit_count(b4) == 4;
+	status &= raviX_bitset_ior_and(&b4, &b3, &b1, &b2);
+	status &= raviX_bitset_bit_p(&b4, 1);
+	status &= raviX_bitset_bit_p(&b4, 555);
+	status &= raviX_bitset_bit_p(&b4, 42);
+	status &= raviX_bitset_bit_p(&b4, 120);
+	status &= raviX_bitset_bit_count(&b4) == 4;
 
-	status &= raviX_bitset_ior_and_compl(b4, b1, b2, b3);
-	status &= raviX_bitset_bit_p(b4, 1);
-	status &= raviX_bitset_bit_p(b4, 1818);
-	status &= raviX_bitset_bit_p(b4, 120);
-	status &= raviX_bitset_bit_count(b4) == 3;
+	status &= raviX_bitset_ior_and_compl(&b4, &b1, &b2, &b3);
+	status &= raviX_bitset_bit_p(&b4, 1);
+	status &= raviX_bitset_bit_p(&b4, 1818);
+	status &= raviX_bitset_bit_p(&b4, 120);
+	status &= raviX_bitset_bit_count(&b4) == 3;
 
-	status &= raviX_bitset_ior_and_compl(b3, b1, b2, b3);
-	status &= raviX_bitset_bit_p(b3, 1);
-	status &= raviX_bitset_bit_p(b3, 1818);
-	status &= raviX_bitset_bit_p(b3, 120);
-	status &= raviX_bitset_bit_count(b3) == 3;
+	status &= raviX_bitset_ior_and_compl(&b3, &b1, &b2, &b3);
+	status &= raviX_bitset_bit_p(&b3, 1);
+	status &= raviX_bitset_bit_p(&b3, 1818);
+	status &= raviX_bitset_bit_p(&b3, 120);
+	status &= raviX_bitset_bit_count(&b3) == 3;
 
-	raviX_bitset_clear(b1);
-	status &= raviX_bitset_set_bit_range_p(b1, 1, 62);
-	for (int i = 1; i <= 62; i++) status &= raviX_bitset_clear_bit_p(b1, i);
-	status &= raviX_bitset_empty_p(b1);
+	raviX_bitset_clear(&b1);
+	status &= raviX_bitset_set_bit_range_p(&b1, 1, 62);
+	for (int i = 1; i <= 62; i++) status &= raviX_bitset_clear_bit_p(&b1, i);
+	status &= raviX_bitset_empty_p(&b1);
 
-	status &= raviX_bitset_set_bit_range_p(b1, 30, 362);
-	for (int i = 30; i < 362 + 30; i++) status &= raviX_bitset_clear_bit_p(b1, i);
-	status &= raviX_bitset_empty_p(b1);
+	status &= raviX_bitset_set_bit_range_p(&b1, 30, 362);
+	for (int i = 30; i < 362 + 30; i++) status &= raviX_bitset_clear_bit_p(&b1, i);
+	status &= raviX_bitset_empty_p(&b1);
 
-	status &= raviX_bitset_set_bit_range_p(b1, 1, 62);
-	status &= raviX_bitset_clear_bit_range_p(b1, 1, 62);
-	status &= raviX_bitset_empty_p(b1);
+	status &= raviX_bitset_set_bit_range_p(&b1, 1, 62);
+	status &= raviX_bitset_clear_bit_range_p(&b1, 1, 62);
+	status &= raviX_bitset_empty_p(&b1);
 
-	status &= raviX_bitset_set_bit_range_p(b1, 30, 362);
-	status &= raviX_bitset_clear_bit_range_p(b1, 30, 362);
-	status &= raviX_bitset_empty_p(b1);
+	status &= raviX_bitset_set_bit_range_p(&b1, 30, 362);
+	status &= raviX_bitset_clear_bit_range_p(&b1, 30, 362);
+	status &= raviX_bitset_empty_p(&b1);
 
-	status &= raviX_bitset_set_bit_range_p(b1, 30, 362);
+	status &= raviX_bitset_set_bit_range_p(&b1, 30, 362);
 
 	bitset_iterator_t iter;
 	size_t nb = 0, n = 0, nmax = 0, nmin = 10000;
-	FOREACH_BITSET_BIT(iter, b1, nb)
+	FOREACH_BITSET_BIT(iter, &b1, nb)
 	{
 		n++;
 		if (nmax < nb) nmax = nb;
@@ -154,10 +154,10 @@ static int test_bitset(void)
 	status &= nmin == 30 && nmax == 391;
 
 	fprintf (stderr, status ? "BITSET OK\n" : "BITSET FAILURE!\n");
-	raviX_bitset_destroy(b1);
-	raviX_bitset_destroy(b2);
-	raviX_bitset_destroy(b3);
-	raviX_bitset_destroy(b4);
+	raviX_bitset_destroy(&b1);
+	raviX_bitset_destroy(&b2);
+	raviX_bitset_destroy(&b3);
+	raviX_bitset_destroy(&b4);
 	return !status;
 }
 

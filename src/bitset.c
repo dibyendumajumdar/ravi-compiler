@@ -35,18 +35,15 @@ static inline void mir_bitset_assert_fail (const char *op) {
 
 #define BITMAP_WORD_BITS 64
 
-struct bitset_t * raviX_bitset_create2(size_t init_bits_num) {
-	struct bitset_t * bm = calloc(1, sizeof(struct bitset_t));
+void raviX_bitset_create2(struct bitset_t *bm, size_t init_bits_num) {
 	bm->els_num = 0;
 	bm->size = (init_bits_num + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS;
 	bm->varr = calloc(bm->size, sizeof(bitset_el_t));
-	return bm;
 }
 
 void raviX_bitset_destroy(struct bitset_t * bm)
 {
 	free(bm->varr);
-	free(bm);
 }
 
 static void bitset_expand (struct bitset_t * bm, size_t nb) {
