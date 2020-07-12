@@ -18,6 +18,7 @@ set(HEADERS
         src/dominator.h
         src/linearizer.h
         src/common.h
+        src/dataflow_framework.h
         src/parser.h)
 
 set(SRCS
@@ -36,6 +37,7 @@ set(SRCS
         src/ast_printer.c
         src/typechecker.c
         src/linearizer.c
+        src/dataflow_framework.c
         src/membuf.c
         )
 
