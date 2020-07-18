@@ -11,7 +11,9 @@ static void process_statement(struct compiler_state *container, struct ast_node 
 
 #define l_mathop(op) op
 
+#ifndef CHAR_BIT
 #define CHAR_BIT 8
+#endif
 /* number of bits in an integer */
 #define NBITS ((int)(sizeof(lua_Integer) * CHAR_BIT))
 /*
@@ -149,7 +151,7 @@ static void handle_error(struct compiler_state *container, const char *msg)
 ** 'floor(q) == trunc(q)' when 'q >= 0' or when 'q' is integer,
 ** otherwise 'floor(q) == trunc(q) - 1'.
 */
-lua_Integer luaV_idiv(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
+static lua_Integer luaV_idiv(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
 {
 	if (unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
 		if (n == 0)
@@ -168,7 +170,7 @@ lua_Integer luaV_idiv(struct compiler_state *compiler_state, lua_Integer m, lua_
 ** negative operands follows C99 behavior. See previous comment
 ** about luaV_idiv.)
 */
-lua_Integer luaV_mod(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
+static lua_Integer luaV_mod(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
 {
 	if (unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
 		if (n == 0)
@@ -185,7 +187,7 @@ lua_Integer luaV_mod(struct compiler_state *compiler_state, lua_Integer m, lua_I
 /*
 ** Float modulus
 */
-lua_Number luaV_modf(lua_Number m, lua_Number n)
+static lua_Number luaV_modf(lua_Number m, lua_Number n)
 {
 	lua_Number r;
 	luai_nummod(m, n, r);
@@ -195,7 +197,7 @@ lua_Number luaV_modf(lua_Number m, lua_Number n)
 /*
 ** Shift left operation. (Shift right just negates 'y'.)
 */
-lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y)
+static lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y)
 {
 	if (y < 0) { /* shift right? */
 		if (y <= -NBITS)
@@ -271,7 +273,7 @@ static lua_Number numarith(struct compiler_state *compiler_state, int op, lua_Nu
 /*
 ** try to convert a float to an integer, rounding according to 'mode'.
 */
-int luaV_flttointeger(lua_Number n, lua_Integer *p, F2Imod mode)
+static int luaV_flttointeger(lua_Number n, lua_Integer *p, F2Imod mode)
 {
 	lua_Number f = l_floor(n);
 	if (n != f) { /* not an integral value? */
@@ -288,7 +290,7 @@ int luaV_flttointeger(lua_Number n, lua_Integer *p, F2Imod mode)
 ** without string coercion.
 ** ("Fast track" handled by macro 'tointegerns'.)
 */
-int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p, F2Imod mode)
+static int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p, F2Imod mode)
 {
 	if (ttisfloat(obj))
 		return luaV_flttointeger(fltvalue(obj), p, mode);
@@ -299,7 +301,7 @@ int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p, F2Imo
 		return 0;
 }
 
-int luaO_rawarith(struct compiler_state *compiler_state, int op, const struct literal_expression *p1,
+static int luaO_rawarith(struct compiler_state *compiler_state, int op, const struct literal_expression *p1,
 		  const struct literal_expression *p2, struct literal_expression *res)
 {
 	switch (op) {
@@ -411,6 +413,9 @@ static void process_expression(struct compiler_state *container, struct ast_node
 	case EXPR_TABLE_LITERAL:
 		process_expression_list(container, node->table_expr.expr_list);
 		break;
+	default:
+		assert(0);
+		break;
 	}
 }
 
@@ -479,6 +484,9 @@ static void process_statement(struct compiler_state *container, struct ast_node 
 	case STMT_FOR_NUM:
 		process_statement_list(container, node->for_stmt.expr_list);
 		process_statement_list(container, node->for_stmt.for_statement_list);
+		break;
+	default:
+		assert(0);
 		break;
 	}
 }

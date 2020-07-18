@@ -1,5 +1,6 @@
-#include "ravi_compiler.h"
+#include "dominator.h"
 
+#include "ravi_compiler.h"
 #include "graph.h"
 
 #include <assert.h>

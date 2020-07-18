@@ -68,6 +68,10 @@ include(GNUInstallDirs)
 
 set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 
+if (NOT WIN32)
+    set(EXTRA_LIBRARIES m)
+endif ()
+
 add_library(ravicomp STATIC
         ${HEADERS}
         ${SRCS})
@@ -75,6 +79,7 @@ target_include_directories(ravicomp
         PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
         PUBLIC "${RaviCompiler_SOURCE_DIR}/include"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src")
+target_link_libraries(ravicomp ${EXTRA_LIBRARIES})
 include(GenerateExportHeader)
 generate_export_header(ravicomp)
 
