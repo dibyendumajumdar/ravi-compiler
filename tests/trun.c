@@ -114,6 +114,16 @@ static int do_code(const char *code, const struct arguments *args)
 	if (args->astdump) {
 		raviX_output_ast(container, stdout);
 	}
+	if (args->simplify_ast) {
+		rc = raviX_ast_simplify(container);
+	}
+	if (rc != 0) {
+		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		goto L_exit;
+	}
+	if (args->astdump) {
+		raviX_output_ast(container, stdout);
+	}
 	struct linearizer_state *linearizer = raviX_init_linearizer(container);
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {

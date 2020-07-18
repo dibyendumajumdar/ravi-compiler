@@ -25,7 +25,8 @@
 
 enum { MAXVARS = 125 };
 #define LUA_ENV "_ENV"
-#define LUA_MAXINTEGER INT_MAX
+#define LUA_MAXINTEGER		LLONG_MAX
+#define LUA_MININTEGER		LLONG_MIN
 
 typedef unsigned long long lua_Unsigned;
 typedef unsigned char lu_byte;
@@ -365,5 +366,7 @@ struct parser_state {
 };
 
 void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recursively */
+
+int raviX_ast_simplify(struct compiler_state* container);
 
 #endif

@@ -4,7 +4,7 @@
 struct arguments {
 	const char *filename;
 	const char *code;
-	unsigned typecheck : 1, linearize : 1, astdump : 1, irdump : 1, cfgdump: 1, codump: 1;
+	unsigned typecheck : 1, linearize : 1, astdump : 1, irdump : 1, cfgdump : 1, codump : 1, simplify_ast : 1;
 };
 extern void parse_arguments(struct arguments *args, int argc, const char *argv[]);
 extern void destroy_arguments(struct arguments *args);

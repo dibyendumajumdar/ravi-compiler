@@ -212,7 +212,7 @@ typedef enum BinaryOperatorType {
 
 /* Unary operators */
 typedef enum UnaryOperatorType {
-	UNOPR_MINUS,
+	UNOPR_MINUS = BINOPR_NOBINOPR+1,
 	UNOPR_BNOT,
 	UNOPR_NOT,
 	UNOPR_LEN,

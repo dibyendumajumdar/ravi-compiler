@@ -2,7 +2,6 @@
 #define ravicomp_DATAFLOW_FRAMEWORK_H
 
 #include "graph.h"
-
 #include <stdbool.h>
 
 extern void raviX_solve_dataflow(struct graph *g, bool forward_p,
