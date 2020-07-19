@@ -59,7 +59,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 		raviX_buffer_init(&buf, 1024);
 		raviX_output_basic_block_as_table(proc, block, &buf);
 		fprintf(fp, "L%d [shape=none, margin=0, label=<%s>];\n", nodeid, raviX_buffer_data(&buf));
-		raviX_buffer_reset(&buf);
+		raviX_buffer_free(&buf);
 	}
 	for (unsigned i = 0; i < raviX_node_list_size(successors); i++) {
 		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_node_list_at(successors, i));

@@ -17,6 +17,7 @@ The final instruction of a block must always be a branch instruction.
 #include "linearizer.h"
 #include "fnv_hash.h"
 #include "ptrlist.h"
+#include "graph.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -112,6 +113,8 @@ void raviX_destroy_linearizer(struct linearizer_state *linearizer)
 	{
 		if (proc->constants)
 			set_destroy(proc->constants, NULL);
+		if (proc->cfg) 
+			raviX_destroy_graph(proc->cfg);
 	}
 	END_FOR_EACH_PTR(proc)
 	raviX_allocator_destroy(&linearizer->instruction_allocator);
