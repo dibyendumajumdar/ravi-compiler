@@ -50,7 +50,7 @@ static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
 static void linearize_function(struct linearizer_state *linearizer);
 static struct instruction *allocate_instruction(struct proc *proc, enum opcode op);
-static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo);
+static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free_temp_pseudo);
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
@@ -222,7 +222,7 @@ static struct instruction *allocate_instruction(struct proc *proc, enum opcode o
 static void free_instruction_operand_pseudos(struct proc *proc, struct instruction *insn)
 {
 	struct pseudo *operand;
-	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand); }
+	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand, false); }
 	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
@@ -338,7 +338,7 @@ static struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = pseudo_type;
 	pseudo->regnum = reg;
-	pseudo->temp_type = type;
+	pseudo->temp_for_local = NULL;
 	return pseudo;
 }
 
@@ -367,10 +367,13 @@ static struct pseudo *allocate_range_select_pseudo(struct proc *proc, struct pse
 	return pseudo;
 }
 
-static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo)
+static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free_local)
 {
 	if (pseudo->freed)
 		return;
+	if (!free_local && pseudo->temp_for_local) {
+		return;
+	}
 	struct pseudo_generator *gen;
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
@@ -674,7 +677,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 	struct pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
 	struct pseudo *operand1 = linearize_expression(proc, e1);
 	instruct_move(proc, op_mov, result, operand1);
-	free_temp_pseudo(proc, operand1);
+	free_temp_pseudo(proc, operand1, false);
 	if (is_and)
 		instruct_cbr(proc, result, first_block, end_block); // If first value is true then evaluate the second
 	else
@@ -683,7 +686,7 @@ static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, b
 	start_block(proc, first_block);
 	struct pseudo *operand2 = linearize_expression(proc, e2);
 	instruct_move(proc, op_mov, result, operand2);
-	free_temp_pseudo(proc, operand2);
+	free_temp_pseudo(proc, operand2, false);
 	instruct_br(proc, allocate_block_pseudo(proc, end_block));
 
 	start_block(proc, end_block);
@@ -850,8 +853,8 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 	ravitype_t target_type = node->binary_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
 	create_binary_instruction(proc, targetop, operand1, operand2, target);
-	free_temp_pseudo(proc, operand1);
-	free_temp_pseudo(proc, operand2);
+	free_temp_pseudo(proc, operand1, false);
+	free_temp_pseudo(proc, operand2, false);
 
 	return target;
 }
@@ -986,7 +989,7 @@ static void convert_loadglobal_to_store(struct proc *proc, struct instruction *i
 	insn->opcode = op_storeglobal;
 	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
-	free_temp_pseudo(proc, get_target);
+	free_temp_pseudo(proc, get_target, false);
 	add_instruction(proc, insn);
 }
 
@@ -1028,7 +1031,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	insn->opcode = putop;
 	add_instruction_operand(proc, insn, value_pseudo);
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
-	free_temp_pseudo(proc, get_target);
+	free_temp_pseudo(proc, get_target, false);
 	add_instruction(proc, insn);
 }
 
@@ -1139,8 +1142,8 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 	struct pseudo *value_pseudo = linearize_expression(proc, expr->table_elem_assign_expr.value_expr);
 	ravitype_t value_type = expr->table_elem_assign_expr.value_expr->common_expr.type.type_code;
 	instruct_indexed_store(proc, table_type, table, index_pseudo, index_type, value_pseudo, value_type);
-	free_temp_pseudo(proc, index_pseudo);
-	free_temp_pseudo(proc, value_pseudo);
+	free_temp_pseudo(proc, index_pseudo, false);
+	free_temp_pseudo(proc, value_pseudo, false);
 	return next;
 }
 
@@ -1263,7 +1266,7 @@ static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_l
 			}
 			linearize_store_var(proc, varinfo[nv - 1].vartype, varinfo[nv - 1].pseudo,
 					    valinfo[ne - 1].vartype, valinfo[ne - 1].pseudo);
-			free_temp_pseudo(proc, valinfo[ne - 1].pseudo);
+			free_temp_pseudo(proc, valinfo[ne - 1].pseudo, false);
 			nv--;
 			ne--;
 		}
@@ -1802,11 +1805,11 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 
 	end_scope(proc->linearizer, proc);
 
-	free_temp_pseudo(proc, stop_pseudo);
-	free_temp_pseudo(proc, step_positive);
-	free_temp_pseudo(proc, step_pseudo);
-	free_temp_pseudo(proc, limit_pseudo);
-	free_temp_pseudo(proc, index_var_pseudo);
+	free_temp_pseudo(proc, stop_pseudo, false);
+	free_temp_pseudo(proc, step_positive, false);
+	free_temp_pseudo(proc, step_pseudo, false);
+	free_temp_pseudo(proc, limit_pseudo, false);
+	free_temp_pseudo(proc, index_var_pseudo, false);
 
 	start_block(proc, Lend);
 
@@ -1828,7 +1831,7 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	start_block(proc, test_block);
 	struct pseudo *condition_pseudo = linearize_expression(proc, node->while_or_repeat_stmt.condition);
 	instruct_cbr(proc, condition_pseudo, body_block, end_block);
-	free_temp_pseudo(proc, condition_pseudo);
+	free_temp_pseudo(proc, condition_pseudo, false);
 
 	start_block(proc, body_block);
 	start_scope(proc->linearizer, proc, node->while_or_repeat_stmt.loop_scope);
@@ -2013,8 +2016,22 @@ static void start_scope(struct linearizer_state *linearizer, struct proc *proc, 
 	FOR_EACH_PTR(scope->symbol_list, sym)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
-			uint8_t reg = allocate_register(&proc->local_pseudos);
-			allocate_symbol_pseudo(proc, sym, reg);
+			uint8_t reg;
+			if (!sym->variable.escaped &&
+			    (sym->variable.value_type.type_code == RAVI_TNUMFLT ||
+			     sym->variable.value_type.type_code == RAVI_TNUMINT)) {
+				struct pseudo *pseudo;
+				if (sym->variable.value_type.type_code == RAVI_TNUMFLT)
+					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMFLT);
+				else
+					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+				sym->variable.pseudo = pseudo;
+				pseudo->temp_for_local = sym; /* Note that this temp is for a local */
+			}
+			else {
+				reg = allocate_register(&proc->local_pseudos);
+				allocate_symbol_pseudo(proc, sym, reg);
+			}
 			// printf("Assigning register %d to local %s\n", (int)reg, getstr(sym->var.var_name));
 		}
 	}
@@ -2034,9 +2051,18 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
 			struct pseudo *pseudo = sym->variable.pseudo;
-			assert(pseudo && pseudo->type == PSEUDO_SYMBOL && pseudo->symbol == sym);
-			// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
-			free_register(proc, &proc->local_pseudos, pseudo->regnum);
+			if (pseudo->type == PSEUDO_SYMBOL) {
+				assert(pseudo && pseudo->type == PSEUDO_SYMBOL && pseudo->symbol == sym);
+				// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
+				free_register(proc, &proc->local_pseudos, pseudo->regnum);
+			}
+			else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT) {
+				assert(sym == pseudo->temp_for_local);
+				free_temp_pseudo(proc, sym->variable.pseudo, true);
+			}
+			else {
+				assert(false);
+			}
 		}
 	}
 	END_FOR_EACH_PTR_REVERSE(sym)
