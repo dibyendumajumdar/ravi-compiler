@@ -2017,7 +2017,7 @@ static void start_scope(struct linearizer_state *linearizer, struct proc *proc, 
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
 			uint8_t reg;
-			if (!sym->variable.escaped &&
+			if (!sym->variable.escaped && !sym->variable.function_parameter &&
 			    (sym->variable.value_type.type_code == RAVI_TNUMFLT ||
 			     sym->variable.value_type.type_code == RAVI_TNUMINT)) {
 				struct pseudo *pseudo;

@@ -586,6 +586,7 @@ static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_
 			case TOK_NAME: { /* param -> NAME */
 					/* RAVI change - add type */
 				struct lua_symbol *symbol = parse_local_variable_declaration(parser);
+				symbol->variable.function_parameter = 1;
 				add_symbol(parser->container, list, symbol);
 				add_local_symbol_to_current_scope(parser, symbol);
 				nparams++;
