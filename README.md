@@ -1,13 +1,14 @@
 ![build](https://github.com/dibyendumajumdar/ravi-compiler/workflows/build/badge.svg)
 
 # ravi-compiler
-Experimental compiler for Ravi and Lua 5.3
+Experimental compiler for Ravi and Lua. 
 
-The goal of this project is to create a standalone parser and compiler for Lua / Ravi 5.3. The output of the compiler will be C code suitable for JITing. The compiler library will consist of distinct modules:
+The goal of this project is to create a standalone parser and compiler for Lua / Ravi. The output of the compiler will be C code suitable for JITing. The compiler library will consist of distinct modules:
 
 * lexer (Done) - responsible for tokenizing an input buffer
 * parser (Mostly Done) - responsible for generating abstract syntax tree (AST).
 * typechecker (Mostly Done) - responsible for assigning types to variables when possible.
+* AST simplifier (Work in progress) - responsible for performing some initial simplifications such as constant folding.
 * linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
 * optimizer (Work in progress) - responsible for improving the code
 * codegenerator (TODO) - responsible for generate C code
@@ -19,10 +20,10 @@ Our goal is to provide a re-usable Lua/Ravi parser/code generator that can be us
 Documentation is coming soon.
 
 For now you can look at following:
-* [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h)
-* [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests/expected/results.expected)
+* [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h) - only the lexer and parser API are public for now
+* [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests)
 * [CFG Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/docs/cfg)
-* See the [Wiki](https://github.com/dibyendumajumdar/ravi-compiler/wiki) for various notes.
+* See the [Wiki](https://github.com/dibyendumajumdar/ravi-compiler/wiki) for various notes
 
 ## Why
 
@@ -47,7 +48,7 @@ make
 
 ## Testing
 
-At the moment we have a simple test driver program named `tparse`. It takes a string input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking and also any linear IR output if supported. Example of the output can be found in the `tests/expected` folder.
+At the moment we have a couple of simple test driver programs: `tparse` and `trun`. These drivers take a string or file input which must be a valid Lua/Ravi chunk of code, and output the AST, the result of type checking, linear IR output if supported, and the CFG as a `dot` file. Example of the output can be found in the `tests/expected` folder.
 
 Suppose `tparse` was built in `build` folder then you can run the tests as follows:
 
@@ -56,3 +57,5 @@ cd tests && sh runtests.sh ../build/tparse
 ```
 
 The test script compares the output to the expected output. Any difference will cause the test script to fail.
+
+The `trun` utility will eventually replace `tparse` as it can handle multiple chunks of code in a single input file. 

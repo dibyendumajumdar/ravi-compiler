@@ -12,6 +12,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	args->astdump = 1;
 	args->irdump = 1;
 	args->cfgdump = 1;
+	args->codump = 1;
 	args->simplify_ast = 0;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--notypecheck") == 0) {
