@@ -1,16 +1,15 @@
 /*
-A parser and syntax tree builder for Ravi. This is work in progress.
-Once ready it will be used to create a new byte code generator for Ravi.
+A parser and syntax tree builder for Ravi. 
+Note that the overall structure of the parser is loosely based on the Lua 5.3 parser.
 
-The parser will perform following actions:
+The parser retains the syntactic structure - including constant expressions and some redundant
+syntax nodes because these are useful for testing and understanding.
 
-a) Generate syntax tree
-b) Perform type checking (Ravi enhancement)
+A later pass simplifies the AST - see ast_simplify.c
 
 Copyright (C) 2018-2020 Dibyendu Majumdar
-
-Note that the overall structure of the parser is loosely based on the Lua 5.3 parser.
 */
+/* Portions Copyright (C) 1994-2019 Lua.org, PUC-Rio.*/
 
 #include "fnv_hash.h"
 #include <parser.h>

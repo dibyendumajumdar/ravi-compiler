@@ -1,9 +1,10 @@
-/* Replace constant expressions with constants */
+/* Replace constant expressions with constants, and simply any other expressions if possible */
 /* Portions Copyright (C) 1994-2019 Lua.org, PUC-Rio.*/
 
 #include <parser.h>
 
 #include <math.h>
+#include <string.h>
 
 static void process_expression_list(struct compiler_state *container, struct ast_node_list *node);
 static void process_statement_list(struct compiler_state *container, struct ast_node_list *node);
@@ -302,7 +303,7 @@ static int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p
 }
 
 static int luaO_rawarith(struct compiler_state *compiler_state, int op, const struct literal_expression *p1,
-		  const struct literal_expression *p2, struct literal_expression *res)
+			 const struct literal_expression *p2, struct literal_expression *res)
 {
 	switch (op) {
 	case BINOPR_BAND:
@@ -354,6 +355,10 @@ static void process_expression(struct compiler_state *container, struct ast_node
 		process_expression(container, node->suffixed_expr.primary_expr);
 		if (node->suffixed_expr.suffix_list) {
 			process_statement_list(container, node->suffixed_expr.suffix_list);
+		} else {
+			// We can simplify and get rid of the suffixed expr
+			// TODO free primary_expr
+			memcpy(node, node->suffixed_expr.primary_expr, sizeof(struct ast_node));
 		}
 		break;
 	case EXPR_FUNCTION_CALL:
@@ -374,8 +379,10 @@ static void process_expression(struct compiler_state *container, struct ast_node
 				node->literal_expr.type.type_code = result.type.type_code;
 				if (node->literal_expr.type.type_code == RAVI_TNUMFLT)
 					node->literal_expr.u.r = result.u.r;
-				else
+				else {
+					assert(node->literal_expr.type.type_code == RAVI_TNUMINT);
 					node->literal_expr.u.i = result.u.i;
+				}
 				// TODO free expr_left and expr_right
 			}
 		}
@@ -390,8 +397,10 @@ static void process_expression(struct compiler_state *container, struct ast_node
 				node->literal_expr.type.type_code = result.type.type_code;
 				if (node->literal_expr.type.type_code == RAVI_TNUMFLT)
 					node->literal_expr.u.r = result.u.r;
-				else
+				else {
+					assert(node->literal_expr.type.type_code == RAVI_TNUMINT);
 					node->literal_expr.u.i = result.u.i;
+				}
 				// TODO free unary_expr.expr
 			}
 		}
