@@ -175,12 +175,14 @@ int main(int argc, const char *argv[])
 
 	const char *chunk = NULL;
 	FOR_EACH_PTR(chunks.list, chunk) {
-		do_code(chunk, &args);
+		if (do_code(chunk, &args) != 0) {
+			rc = 1;
+		}
 	} END_FOR_EACH_PTR(chunk)
 
 L_exit:
 	destroy_arguments(&args);
 	destroy_chunks(&chunks);
 
-	return 0;
+	return rc;
 }
