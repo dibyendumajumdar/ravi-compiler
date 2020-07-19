@@ -94,6 +94,7 @@ add_executable(tparse tests/tparse.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tparse ravicomp)
 target_include_directories(tparse
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
 add_executable(tastwalk tests/tastwalk.c tests/tcommon.c tests/tcommon.h)

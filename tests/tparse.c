@@ -1,7 +1,9 @@
 /* simple smoke test for parser */
 
 #include "ravi_compiler.h"
+#include "parser.h"
 #include "tcommon.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +50,16 @@ int main(int argc, const char *argv[])
 		goto L_exit;
 	}
 	raviX_output_ast(container, stdout);
-
+	if (args.simplify_ast) {
+		rc = raviX_ast_simplify(container);
+		if (rc != 0) {
+			fprintf(stderr, "%s\n", raviX_get_last_error(container));
+			goto L_exit;
+		}
+		if (args.astdump) {
+			raviX_output_ast(container, stdout);
+		}
+	}
 	struct linearizer_state *linearizer = raviX_init_linearizer(container);
 
 	rc = raviX_ast_linearize(linearizer);

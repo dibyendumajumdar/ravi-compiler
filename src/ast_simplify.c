@@ -354,7 +354,7 @@ static void process_expression(struct compiler_state *container, struct ast_node
 	case EXPR_SUFFIXED:
 		process_expression(container, node->suffixed_expr.primary_expr);
 		if (node->suffixed_expr.suffix_list) {
-			process_statement_list(container, node->suffixed_expr.suffix_list);
+			process_expression_list(container, node->suffixed_expr.suffix_list);
 		} else {
 			// We can simplify and get rid of the suffixed expr
 			// TODO free primary_expr
@@ -370,7 +370,9 @@ static void process_expression(struct compiler_state *container, struct ast_node
 		process_expression(container, node->binary_expr.expr_left);
 		process_expression(container, node->binary_expr.expr_right);
 		if (node->binary_expr.expr_left->type == EXPR_LITERAL &&
-		    node->binary_expr.expr_right->type == EXPR_LITERAL) {
+		    node->binary_expr.expr_right->type == EXPR_LITERAL && 
+			node->binary_expr.binary_op >= BINOPR_ADD &&
+			node->binary_expr.binary_op <= BINOPR_SHR) {
 			struct literal_expression result = {.type.type_code = RAVI_TANY};
 			if (luaO_rawarith(container, node->binary_expr.binary_op,
 					  &node->binary_expr.expr_left->literal_expr,
@@ -389,7 +391,8 @@ static void process_expression(struct compiler_state *container, struct ast_node
 		break;
 	case EXPR_UNARY:
 		process_expression(container, node->unary_expr.expr);
-		if (node->unary_expr.expr->type == EXPR_LITERAL) {
+		if (node->unary_expr.expr->type == EXPR_LITERAL && 
+			(node->unary_expr.unary_op == UNOPR_BNOT || node->unary_expr.unary_op == UNOPR_MINUS)) {
 			struct literal_expression result = {.type.type_code = RAVI_TANY};
 			if (luaO_rawarith(container, node->unary_expr.unary_op, &node->unary_expr.expr->literal_expr,
 					  &node->unary_expr.expr->literal_expr, &result)) {
@@ -491,10 +494,11 @@ static void process_statement(struct compiler_state *container, struct ast_node 
 		break;
 	case STMT_FOR_IN:
 	case STMT_FOR_NUM:
-		process_statement_list(container, node->for_stmt.expr_list);
+		process_expression_list(container, node->for_stmt.expr_list);
 		process_statement_list(container, node->for_stmt.for_statement_list);
 		break;
 	default:
+		fprintf(stderr, "AST = %d\n", node->type);
 		assert(0);
 		break;
 	}

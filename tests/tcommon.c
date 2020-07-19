@@ -12,7 +12,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	args->astdump = 1;
 	args->irdump = 1;
 	args->cfgdump = 1;
-	args->simplify_ast = 1;
+	args->simplify_ast = 0;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--notypecheck") == 0) {
 			args->typecheck = 0;
@@ -26,8 +26,8 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			args->codump = 0;
 		} else if (strcmp(argv[i], "--nocfgdump") == 0) {
 			args->cfgdump = 0;
-		} else if (strcmp(argv[i], "--noastsimplify") == 0) {
-			args->simplify_ast = 0;
+		} else if (strcmp(argv[i], "--simplify-ast") == 0) {
+			args->simplify_ast = 1;
 		} else if (strcmp(argv[i], "-f") == 0) {
 			if (args->filename) {
 				fprintf(stderr, "-f already accepted\n");
