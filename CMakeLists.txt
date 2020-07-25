@@ -19,6 +19,7 @@ set(HEADERS
         src/linearizer.h
         src/common.h
         src/dataflow_framework.h
+        src/optimizer.h
         src/parser.h)
 
 set(SRCS
@@ -39,6 +40,7 @@ set(SRCS
         src/typechecker.c
         src/linearizer.c
         src/dataflow_framework.c
+        src/opt_unusedcode.c
         src/membuf.c
         )
 

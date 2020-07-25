@@ -14,6 +14,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	args->cfgdump = 1;
 	args->codump = 1;
 	args->simplify_ast = 0;
+	args->remove_unreachable_blocks = 0;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--notypecheck") == 0) {
 			args->typecheck = 0;
@@ -29,6 +30,8 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			args->cfgdump = 0;
 		} else if (strcmp(argv[i], "--simplify-ast") == 0) {
 			args->simplify_ast = 1;
+		} else if (strcmp(argv[i], "--remove-unreachable-blocks") == 0) {
+			args->remove_unreachable_blocks = 1;
 		} else if (strcmp(argv[i], "-f") == 0) {
 			if (args->filename) {
 				fprintf(stderr, "-f already accepted\n");

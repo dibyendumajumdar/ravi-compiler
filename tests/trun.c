@@ -6,6 +6,7 @@
 #include "membuf.h"
 #include "parser.h"
 #include "cfg.h"
+#include "optimizer.h"
 
 #include "ptrlist.h"
 #include "tcommon.h"
@@ -134,8 +135,17 @@ static int do_code(const char *code, const struct arguments *args)
 		raviX_output_linearizer(linearizer, stdout);
 	}
 	raviX_construct_cfg(linearizer->main_proc);
-	if (args->cfgdump) {
+	if (args->cfgdump && !args->remove_unreachable_blocks) { // Only dump out final CFG for now as we need it as clean output
 		raviX_output_cfg(linearizer->main_proc, stdout);
+	}
+	if (args->remove_unreachable_blocks) {
+		raviX_remove_unreachable_blocks(linearizer);
+		if (args->irdump) {
+			raviX_output_linearizer(linearizer, stdout);
+		}
+		if (args->cfgdump) {
+			raviX_output_cfg(linearizer->main_proc, stdout);
+		}
 	}
 
 	L_linend:

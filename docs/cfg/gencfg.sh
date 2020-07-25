@@ -3,7 +3,7 @@ doit()
     code=$1
     name=$2
     echo "$code" > $name.input
-    ../../build/trun --noastdump --noirdump --nocodump "$code" > $name.gv
+    ../../build/trun --noastdump --noirdump --nocodump --remove-unreachable-blocks "$code" > $name.gv
     dot -Tsvg -o$name.svg $name.gv
 }
 
