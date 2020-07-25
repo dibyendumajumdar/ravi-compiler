@@ -10,6 +10,7 @@
 * `cfg.c` - responsible for constructing a control flow graph from the output of the linearizer.
 * `dominator.c` - implementation of dominator tree calculation - this is not used yet
 * `dataflow_framework.c` - a framework for calculating dataflow equations - not used yet
+* `opt_unusedcode.c` - a simple optimization pass that deletes unreachable basic blocks
 
 ## Utilities
 
