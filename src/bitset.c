@@ -67,16 +67,19 @@ int raviX_bitset_bit_p(const struct bitset_t * bm, size_t nb) {
 	return (addr[nw] >> sh) & 1;
 }
 
-int raviX_bitset_set_bit_p(struct bitset_t * bm, size_t nb) {
+/* Set the given bit to 1, and return true if the bit was previously unset, i.e.
+ * this set caused bit to change from 0 to 1
+ */
+int raviX_bitset_set_bit_p(struct bitset_t * bm, size_t bit) {
 	size_t nw, sh;
 	bitset_el_t *addr;
 	int res;
 
-	bitset_expand (bm, nb + 1);
+	bitset_expand (bm, bit + 1);
 	addr = bm->varr;
-	nw = nb / BITMAP_WORD_BITS;
-	sh = nb % BITMAP_WORD_BITS;
-	res = ((addr[nw] >> sh) & 1) == 0;
+	nw = bit / BITMAP_WORD_BITS;
+	sh = bit % BITMAP_WORD_BITS;
+	res = ((addr[nw] >> sh) & 1) == 0; /* Was this bit previously unset? */
 	assert(nw < bm->els_num);
 	addr[nw] |= (bitset_el_t) 1 << sh;
 	return res;
