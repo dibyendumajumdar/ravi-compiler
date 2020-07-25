@@ -52,21 +52,6 @@ L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L9 -> L19
-L10 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L10</B></TD></TR>
-<TR><TD>BR {L9}</TD></TR>
-</TABLE>>];
-L10 -> L9
-L11 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L11</B></TD></TR>
-<TR><TD>BR {L9}</TD></TR>
-</TABLE>>];
-L11 -> L9
-L12 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L12</B></TD></TR>
-<TR><TD>BR {L9}</TD></TR>
-</TABLE>>];
-L12 -> L9
 L13 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L13</B></TD></TR>
 <TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
@@ -84,21 +69,6 @@ L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L15 -> L19
-L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L16</B></TD></TR>
-<TR><TD>BR {L9}</TD></TR>
-</TABLE>>];
-L16 -> L9
-L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L17</B></TD></TR>
-<TR><TD>BR {L16}</TD></TR>
-</TABLE>>];
-L17 -> L16
-L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L18</B></TD></TR>
-<TR><TD>BR {L16}</TD></TR>
-</TABLE>>];
-L18 -> L16
 L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L19</B></TD></TR>
 <TR><TD>BR {L1}</TD></TR>
