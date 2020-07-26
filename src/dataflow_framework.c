@@ -12,10 +12,6 @@
 
 DECLARE_ARRAY(node_array, struct node *);
 
-/**
- * The data flow framework is based on the implementation in MIR project.
- * https://github.com/vnmakarov/mir
- */
 struct dataflow_context {
 	struct graph *g;
 	struct node_array worklist;
@@ -69,6 +65,7 @@ void raviX_solve_dataflow(struct graph *g, bool forward_p,
 			int changed_p = iter == 0;
 			struct node *bb = addr[i];
 			struct node_list *nodes = forward_p ? raviX_predecessors(bb) : raviX_successors(bb);
+			// TODO should we pass the nodes array to the join function?
 			if (raviX_node_list_size(nodes) == 0)
 				join_function(ctx.userdata, raviX_node_index(bb), true);
 			else

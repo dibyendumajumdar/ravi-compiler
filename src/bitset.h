@@ -8,6 +8,9 @@
 #ifndef ravicomp_BITSET_H
 #define ravicomp_BITSET_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

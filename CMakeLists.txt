@@ -42,6 +42,7 @@ set(SRCS
         src/dataflow_framework.c
         src/opt_unusedcode.c
         src/membuf.c
+        src/df_liveness.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
