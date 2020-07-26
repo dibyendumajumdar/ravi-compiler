@@ -6,6 +6,7 @@
 #include "cfg.h"
 #include "graph.h"
 #include "allocate.h"
+#include "optimizer.h"
 
 /**
  * Check if a basic block has 0 predecessors. If so we can remove it from the CFG.
