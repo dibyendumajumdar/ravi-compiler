@@ -601,6 +601,7 @@ static const char Lua_header[] =
 
 
 struct function {
+	struct proc *proc;
 	char fname[30];
 	membuff_t prologue;
 	membuff_t body;
@@ -623,6 +624,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 }
 
 static void initfn(struct function *fn, struct proc *proc) {
+	fn->proc = proc;
 	snprintf(fn->fname, sizeof fn->fname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
 	raviX_buffer_init(&fn->body, 4096);
@@ -650,10 +652,95 @@ static void cleanup(struct function *fn) {
 	raviX_buffer_free(&fn->body);
 }
 
+static struct pseudo *get_target_value(struct instruction *insn, unsigned i)
+{
+	if (insn->targets == NULL)
+		return NULL;
+	return (struct pseudo *) ptrlist_nth_entry((struct ptr_list *)insn->targets, i);
+}
+
+static void emit_reg(struct function *fn, const char *name, int regnum) {
+	raviX_buffer_add_fstring(&fn->body, "%s = R(%d);\n", name, regnum);
+}
+
+/* dest_value must be TValue * */
+static void emit_assign(struct function *fn, const char *dest_value, struct pseudo *pseudo)
+{
+	if (pseudo->type == PSEUDO_NIL) {
+		raviX_buffer_add_fstring(&fn->body, "setnilvalue(%s);\n", dest_value);
+	}
+	else if (pseudo->type == PSEUDO_TRUE) {
+		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 1);\n", dest_value);
+	}
+	else if (pseudo->type == PSEUDO_FALSE) {
+		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 0);\n", dest_value);
+	}
+}
+
+static void emit_jump(struct function *fn, struct pseudo *pseudo)
+{
+	assert(pseudo->type == PSEUDO_BLOCK);
+	raviX_buffer_add_fstring(&fn->body, "goto L%d;\n", pseudo->block->index);
+}
+
+static void emit_op_ret(struct function *fn, struct instruction *insn) {
+#ifdef RAVI_DEFER_STATEMENT
+	raviX_buffer_add_string(&fn->body, "if (cl->p->sizep > 0) {\n luaF_close(L, base, LUA_OK);\n");
+	raviX_buffer_add_string(&fn->body, " base = ci->u.l.base;\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
+#else
+	raviX_buffer_add_string(&fn->body, "if (cl->p->sizep > 0) luaF_close(L, base);\n");
+#endif
+	//emit_reg(fn, "ra", A);
+	//raviX_buffer_add_fstring(&fn->body, "result = (%d != 0 ? %d - 1 : cast_int(L->top - ra));\n", B, B);
+	//raviX_buffer_add_string(&fn->body, "return luaD_poscall(L, ci, ra, result);\n");
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " StkId res = ci->func;\n");
+	raviX_buffer_add_string(&fn->body, " int wanted = ci->nresults;\n");
+	raviX_buffer_add_string(&fn->body, " L->ci = ci->previous;\n");
+	struct pseudo *pseudo;
+	FOR_EACH_PTR(insn->operands, pseudo) {
+		emit_assign(fn, "res", pseudo);
+		raviX_buffer_add_string(&fn->body, "res++;\n");
+	} END_FOR_EACH_PTR(pseudo)
+	raviX_buffer_add_string(&fn->body, "}\n");
+	emit_jump(fn, get_target_value(insn, 0));
+}
+
+static void output_instruction(struct function *fn, struct instruction *insn)
+{
+	switch (insn->opcode) {
+	case op_ret: emit_op_ret(fn, insn);
+	}
+}
+
+static void output_instructions(struct function *fn, struct instruction_list *list)
+{
+	struct instruction *insn;
+	FOR_EACH_PTR(list, insn) { output_instruction(fn, insn); }
+	END_FOR_EACH_PTR(insn)
+}
+
+static void output_basic_block(struct function *fn, struct basic_block *bb)
+{
+	raviX_buffer_add_fstring(&fn->body, "L%d:\n", bb->index);
+	if (bb->index == ENTRY_BLOCK) {
+	} else if (bb->index == EXIT_BLOCK) {
+	} else {
+	}
+	output_instructions(fn, bb->insns);
+}
+
 static void output_proc(struct proc *proc, membuff_t *mb)
 {
 	struct function fn;
 	initfn(&fn, proc);
+
+	struct basic_block *bb;
+	for (int i = 0; i < (int)proc->node_count; i++) {
+		bb = proc->nodes[i];
+		output_basic_block(&fn, bb);
+	}
 
 	raviX_buffer_add_string(mb, fn.prologue.buf);
 	raviX_buffer_add_string(mb, fn.body.buf);
