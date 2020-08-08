@@ -325,11 +325,11 @@ static struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 	enum pseudo_type pseudo_type;
 	switch (type) {
 	case RAVI_TNUMFLT:
-		gen = &proc->temp_int_pseudos;
+		gen = &proc->temp_flt_pseudos;
 		pseudo_type = PSEUDO_TEMP_FLT;
 		break;
 	case RAVI_TNUMINT:
-		gen = &proc->temp_flt_pseudos;
+		gen = &proc->temp_int_pseudos;
 		pseudo_type = PSEUDO_TEMP_INT;
 		break;
 	default:
@@ -380,10 +380,10 @@ static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free
 	struct pseudo_generator *gen;
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
-		gen = &proc->temp_int_pseudos;
+		gen = &proc->temp_flt_pseudos;
 		break;
 	case PSEUDO_TEMP_INT:
-		gen = &proc->temp_flt_pseudos;
+		gen = &proc->temp_int_pseudos;
 		break;
 	case PSEUDO_RANGE:
 	case PSEUDO_TEMP_ANY:

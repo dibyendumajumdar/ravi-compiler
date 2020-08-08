@@ -606,6 +606,22 @@ struct function {
 	membuff_t body;
 };
 
+static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, membuff_t *mb)
+{
+	if (gen->next_reg == 0)
+		return;
+	for (unsigned i = 0; i < gen->next_reg; i++) {
+		if (i == 0) {
+			raviX_buffer_add_fstring(mb, "%s ", type);
+		}
+		if (i > 0) {
+			raviX_buffer_add_string(mb, ", ");
+		}
+		raviX_buffer_add_fstring(mb, "%s%d", prefix, i);
+	}
+	raviX_buffer_add_string(mb, ";\n");
+}
+
 static void initfn(struct function *fn, struct proc *proc) {
 	snprintf(fn->fname, sizeof fn->fname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
@@ -625,6 +641,8 @@ static void initfn(struct function *fn, struct proc *proc) {
 	raviX_buffer_add_string(&fn->prologue, "LClosure *cl = clLvalue(ci->func);\n");
 	raviX_buffer_add_string(&fn->prologue, "TValue *k = cl->p->k;\n");
 	raviX_buffer_add_string(&fn->prologue, "StkId base = ci->u.l.base;\n");
+	emit_vars("lua_Integer", "i_", &proc->temp_int_pseudos, &fn->prologue);
+	emit_vars("lua_Number", "f_", &proc->temp_flt_pseudos, &fn->prologue);
 }
 
 static void cleanup(struct function *fn) {
