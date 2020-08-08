@@ -20,7 +20,8 @@ set(HEADERS
         src/common.h
         src/dataflow_framework.h
         src/optimizer.h
-        src/parser.h)
+        src/parser.h
+        src/codegen.h)
 
 set(SRCS
         src/allocate.c
@@ -43,6 +44,7 @@ set(SRCS
         src/opt_unusedcode.c
         src/membuf.c
         src/df_liveness.c
+        src/codegen.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")

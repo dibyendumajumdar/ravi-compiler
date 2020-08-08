@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "cfg.h"
 #include "optimizer.h"
+#include "codegen.h"
 
 #include "ptrlist.h"
 #include "tcommon.h"
@@ -146,6 +147,9 @@ static int do_code(const char *code, const struct arguments *args)
 		if (args->cfgdump) {
 			raviX_output_cfg(linearizer->main_proc, stdout);
 		}
+	}
+	if (args->gen_C) {
+		raviX_generate_C_tofile(linearizer, stdout);
 	}
 
 	L_linend:
