@@ -1593,17 +1593,19 @@ encountered a goto statement but we did not know the block then.
 static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 {
 	/* If the current block is empty then we can use it as the label target */
-	struct basic_block* block = proc->current_bb;
-	if (ptrlist_size((const struct ptr_list*)block->insns) > 0) {
-		/* Create new block as label target */
-		block = create_block(proc);
+	struct basic_block* block;
+	if (node->label_stmt.symbol->label.pseudo != NULL) {
+		assert(node->label_stmt.symbol->label.pseudo->block != NULL);
+		block = node->label_stmt.symbol->label.pseudo->block;
 		start_block(proc, block);
 	}
-	if (node->label_stmt.symbol->label.pseudo != NULL) {
-		/* label pseudo was created by a goto statement */
-		assert(node->label_stmt.symbol->label.pseudo->block == NULL);
-		node->label_stmt.symbol->label.pseudo->block = block;
-	} else {
+	else {
+		block = proc->current_bb;
+		if (ptrlist_size((const struct ptr_list*)block->insns) > 0) {
+			/* Create new block as label target */
+			block = create_block(proc);
+			start_block(proc, block);
+		}
 		node->label_stmt.symbol->label.pseudo = allocate_block_pseudo(proc, block);
 	}
 }
@@ -1611,11 +1613,15 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 /* TODO move this logic to parser? */
 /* Search for a label going up scopes starting from the scope where the goto statement appeared. */
 static struct lua_symbol *find_label(struct proc *proc, struct block_scope *block,
-				     const struct string_object *label_name)
+				     const struct string_object *label_name, struct block_scope **min_closing_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
+	*min_closing_block = NULL;
 	while (block != NULL && block->function == function) {
 		struct lua_symbol *symbol;
+		if (block->need_close) {
+			*min_closing_block = block;
+		}
 		FOR_EACH_PTR_REVERSE(block->symbol_list, symbol)
 		{
 			if (symbol->symbol_type == SYM_LABEL && symbol->label.label_name == label_name) {
@@ -1626,6 +1632,57 @@ static struct lua_symbol *find_label(struct proc *proc, struct block_scope *bloc
 		block = block->parent;
 	}
 	return NULL;
+}
+
+struct block_scope *find_min_closing_block(struct block_scope *block, struct block_scope *target_block)
+{
+	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
+	struct block_scope *min_closing_block = NULL;
+	while (block != NULL && block->function == function) {
+		if (block->need_close) {
+			min_closing_block = block;
+		}
+		if (block == target_block)
+			break;
+		block = block->parent;
+	}
+	return min_closing_block;
+}
+
+static bool is_already_closed(struct proc *proc, struct basic_block *block)
+{
+	struct instruction *last_insn = raviX_last_instruction(block);
+	if (last_insn == NULL)
+		return false;
+	if (last_insn->opcode == op_ret)
+		return true;
+	if (last_insn->opcode == op_close) {
+		// hmmm
+		assert(false);
+	}
+	return false;
+}
+
+static void instruct_close(struct proc *proc, struct basic_block *block, struct block_scope *scope)
+{
+	if (is_already_closed(proc, block))
+		return;
+	/* temporarily make block current */
+	struct basic_block *prev_current = proc->current_bb;
+	proc->current_bb = block;
+	struct lua_symbol *symbol;
+	FOR_EACH_PTR(scope->symbol_list, symbol)
+	{
+		if (symbol->symbol_type == SYM_LOCAL && symbol->variable.escaped) {
+			assert(symbol->variable.pseudo);
+			struct instruction *insn = allocate_instruction(proc, op_close);
+			add_instruction_operand(proc, insn, symbol->variable.pseudo);
+			add_instruction(proc, insn);
+			break;
+		}
+	}
+	END_FOR_EACH_PTR(symbol)
+	proc->current_bb = prev_current;
 }
 
 /*
@@ -1640,22 +1697,34 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 		if (proc->current_break_target == NULL) {
 			handle_error(proc->linearizer->ast_container, "no current break target");
 		}
+		struct block_scope *min_closing_block = find_min_closing_block(node->goto_stmt.goto_scope, proc->current_break_scope);
 		instruct_br(proc, allocate_block_pseudo(proc, proc->current_break_target));
 		start_block(proc, create_block(proc));
+		if (min_closing_block) {
+			instruct_close(proc, proc->current_break_target, min_closing_block);
+		}
 		return;
 	}
 	/* The AST does not provide link to the label so we have to search for the label in the goto scope
 	   and above */
 	if (node->goto_stmt.goto_scope) {
-		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name);
+		struct block_scope *min_closing_block = NULL;
+		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name, &min_closing_block);
 		if (symbol) {
 			/* label found */
 			if (symbol->label.pseudo == NULL) {
-				/* No pseudo? create with NULL target block, must be filled by a label statement */
-				symbol->label.pseudo = allocate_block_pseudo(proc, NULL);
+				/* No pseudo? create with target block to be processed later when label is encountered */
+				symbol->label.pseudo = allocate_block_pseudo(proc, create_block(proc));
+			}
+			else {
+				assert(symbol->label.pseudo->block != NULL);
 			}
 			instruct_br(proc, symbol->label.pseudo);
 			start_block(proc, create_block(proc));
+			if (min_closing_block) {
+				/* close intruction needs to go after the label */
+				instruct_close(proc, symbol->label.pseudo->block, min_closing_block);
+			}
 			return;
 		}
 	}
@@ -1783,7 +1852,9 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	struct basic_block *Lbody = create_block(proc);
 	struct basic_block *Lend = create_block(proc);
 	struct basic_block *previous_break_target = proc->current_break_target;
+	struct block_scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = Lend;
+	proc->current_break_scope = proc->current_scope;
 
 	start_block(proc, L1);
 	create_binary_instruction(proc, op_addii, index_var_pseudo, step_pseudo, index_var_pseudo);
@@ -1804,6 +1875,10 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
 	end_scope(proc->linearizer, proc);
 
+	if (proc->current_break_scope->need_close) {
+		/* need to put close instruction in current basic block */
+		instruct_close(proc, proc->current_bb, proc->current_break_scope);
+	}
 	instruct_br(proc, allocate_block_pseudo(proc, L1));
 
 	end_scope(proc->linearizer, proc);
@@ -1817,6 +1892,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	start_block(proc, Lend);
 
 	proc->current_break_target = previous_break_target;
+	proc->current_break_scope = previous_break_scope;
 }
 
 static void linearize_while_statment(struct proc *proc, struct ast_node *node)
@@ -1825,7 +1901,9 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	struct basic_block *body_block = create_block(proc);
 	struct basic_block *end_block = create_block(proc);
 	struct basic_block *previous_break_target = proc->current_break_target;
+	struct block_scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = end_block;
+	proc->current_break_scope = node->while_or_repeat_stmt.loop_scope;
 
 	if (node->type == STMT_REPEAT) {
 		instruct_br(proc, allocate_block_pseudo(proc, body_block));
@@ -1840,11 +1918,16 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	start_scope(proc->linearizer, proc, node->while_or_repeat_stmt.loop_scope);
 	linearize_statement_list(proc, node->while_or_repeat_stmt.loop_statement_list);
 	end_scope(proc->linearizer, proc);
+
+	if (proc->current_break_scope->need_close) {
+		instruct_close(proc, proc->current_bb, proc->current_break_scope);
+	}
 	instruct_br(proc, allocate_block_pseudo(proc, test_block));
 
 	start_block(proc, end_block);
 
 	proc->current_break_target = previous_break_target;
+	proc->current_break_scope = previous_break_scope;
 }
 
 static void linearize_function_statement(struct proc *proc, struct ast_node *node)
@@ -2050,6 +2133,9 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 {
 	struct block_scope *scope = proc->current_scope;
 	struct lua_symbol *sym;
+	if (scope->need_close) {
+		instruct_close(proc, proc->current_bb, scope);
+	}
 	FOR_EACH_PTR_REVERSE(scope->symbol_list, sym)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
@@ -2177,7 +2263,7 @@ static const char *op_codenames[] = {
     "PUTik",	  "PUTsk",  "TPUT", "TPUTik", "TPUTsk",	    "IAPUT",	 "IAPUTiv",   "FAPUT",	   "FAPUTfv",
     "CBR",	  "BR",	    "MOV",  "MOVi",   "MOVif",	    "MOVf",	 "MOVfi",     "CALL",	   "GET",
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
-    "STOREGLOBAL"};
+    "STOREGLOBAL", "CLOSE"};
 
 static void output_pseudo_list(struct pseudo_list *list, membuff_t *mb)
 {

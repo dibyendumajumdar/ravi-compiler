@@ -2636,6 +2636,7 @@ L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
 	CLOSURE {Proc%3} {T(1)}
 	STOREGLOBAL {y, T(1)}
+	CLOSE {local(a, 0)}
 	BR {L1}
 L1 (exit)
 define Proc%3
@@ -5888,15 +5889,15 @@ function()
 end
 define Proc%1
 L0 (entry)
-	BR {L3}
+	BR {L2}
 L1 (exit)
 L2
-	STOREGLOBAL {x, 1 Kint(0)}
-	BR {L3}
-L3
 	STOREGLOBAL {z, 2 Kint(1)}
 	STOREGLOBAL {y, 1 Kint(0)}
 	BR {L0}
+L3
+	STOREGLOBAL {x, 1 Kint(0)}
+	BR {L2}
 L4
 	BR {L1}
 goto l1; do ::l1:: end
@@ -6295,34 +6296,40 @@ L4
 	EQ {local(a, 0), local(d, 3)} {T(2)}
 	CBR {T(2)} {L7, L8}
 L5
-	BR {L9}
+	BR {L10}
 L6
-	BR {L9}
+	BR {L12}
 L7
-	BR {L9}
+	BR {L12}
 L8
-	BR {L13}
+	BR {L15}
 L9
-	BR {L1}
+	BR {L10}
 L10
-	BR {L9}
+	BR {L12}
 L11
 	BR {L9}
 L12
-	BR {L9}
+	BR {L19}
 L13
-	EQ {local(a, 0), local(e, 4)} {T(3)}
-	CBR {T(3)} {L14, L15}
+	BR {L9}
 L14
 	BR {L9}
 L15
-	BR {L9}
+	EQ {local(a, 0), local(e, 4)} {T(3)}
+	CBR {T(3)} {L16, L17}
 L16
-	BR {L9}
+	BR {L19}
 L17
-	BR {L16}
+	BR {L19}
 L18
-	BR {L16}
+	BR {L9}
+L19
+	BR {L1}
+L20
+	BR {L18}
+L21
+	BR {L18}
 return function (a) while a < 10 do a = a + 1 end end
 function()
   return
@@ -6540,15 +6547,17 @@ L2
 	NOT {T(0)} {T(1)}
 	CBR {T(1)} {L3, L4}
 L3
-	BR {L6}
+	BR {L5}
 L4
 	ADD {local(a, 0), 1 Kint(1)} {T(2)}
 	MOV {T(2)} {local(a, 0)}
 	BR {L0}
 L5
-	BR {L4}
-L6
 	BR {L1}
+L6
+	BR {L4}
+L7
+	BR {L5}
 return function ()
     (function () end){f()}
   end
@@ -8493,20 +8502,24 @@ end
 define Proc%1
 L0 (entry)
 	MOV {12 Kint(0)} {local(y, 1)}
-	BR {L3}
+	BR {L2}
 L1 (exit)
 L2
+	MOV {local(y, 1)} {local(x, 0)}
+	BR {L3}
+L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
 	MOV {T(0)} {local(x, 0)}
 	BR {L4}
-L3
-	MOV {local(y, 1)} {local(x, 0)}
-	BR {L2}
 L4
 	LOADGLOBAL {assert} {T(0)}
 	EQ {local(x, 0), 13 Kint(2)} {T(1)}
 	CALL {T(0), T(1)} {T(0..)}
 	BR {L1}
+L5
+	BR {L2}
+L6
+	BR {L4}
 for i=1,10 do print(i) end
 function()
 --locals  i
@@ -9195,6 +9208,7 @@ L0 (entry)
 	MOV {T(0)} {local(msgs, 0)}
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {Message, T(1)}
+	CLOSE {local(msgs, 0)}
 	BR {L1}
 L1 (exit)
 define Proc%2

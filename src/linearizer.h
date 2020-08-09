@@ -117,6 +117,7 @@ enum opcode {
 	op_faget,
 	op_faget_ikey,
 	op_storeglobal,
+	op_close
 };
 
 enum pseudo_type {
@@ -191,7 +192,9 @@ struct proc {
 	struct ast_node *function_expr; /* function ast that we are compiling */
 	struct block_scope *current_scope;
 	struct basic_block *current_bb;
-	struct basic_block *current_break_target; /* track the current break target, previous target must be saved / restored in stack discipline */
+	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /
+						     restored in stack discipline */
+	struct block_scope *current_break_scope;  /* as above track the block scope */
 	struct pseudo_generator local_pseudos;	  /* locals */
 	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */

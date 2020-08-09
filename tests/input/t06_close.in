@@ -1,0 +1,34 @@
+#
+local z, a do (function() a =1 end)() end
+#
+function add3(x)
+    return function (y)
+        return function (z) return x + y + z end
+    end
+end
+#
+local a = {}
+local x = 10
+for i = 1, 2 do
+        local j = i
+        a[i] = function() return x + j end
+end
+x = 20
+#
+local x = 1
+do
+        for i = 1,10 do
+                local j = i;
+                (function () x = x + j end)()
+                if i == 5 then break end
+        end
+end
+print(x)
+#
+function A(a)
+    local function B(b)
+        local function C(c)
+            return c + g + b + a
+        end
+    end
+end

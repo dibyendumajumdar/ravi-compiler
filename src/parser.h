@@ -152,6 +152,7 @@ struct block_scope {
 	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	struct block_scope *parent;	     /* parent block, may belong to parent function */
 	struct lua_symbol_list *symbol_list; /* symbols defined in this block */
+	unsigned need_close: 1;              /* When we exit scope of this block the upvalues need to be closed */
 };
 
 /*STMT_RETURN */
@@ -248,8 +249,9 @@ struct binary_expression {
 };
 struct function_expression {
 	BASE_EXPRESSION_FIELDS;
-	unsigned int is_vararg : 1;
-	unsigned int is_method : 1;
+	unsigned is_vararg : 1;
+	unsigned is_method : 1;
+	unsigned need_close : 1;
 	uint32_t proc_id; /* Backend allocated id */
 	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
 	struct block_scope *main_block;		       /* the function's main block */

@@ -1,5 +1,5 @@
 /*
-A parser and syntax tree builder for Ravi. 
+A parser and syntax tree builder for Ravi.
 Note that the overall structure of the parser is loosely based on the Lua 5.3 parser.
 
 The parser retains the syntactic structure - including constant expressions and some redundant
@@ -254,7 +254,9 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
-	sym->variable.escaped = 1; /* mark original variable as having escaped */
+	sym->variable.escaped = 1;	     /* mark original variable as having escaped */
+	sym->variable.block->need_close = 1; /* mark block containing variable as needing close operation */
+	sym->variable.block->function->function_expr.need_close = 1;
 	return true;
 }
 
@@ -1454,6 +1456,7 @@ static struct block_scope *new_scope(struct parser_state *parser)
 	scope->symbol_list = NULL;
 	// scope->do_statement_list = NULL;
 	scope->function = parser->current_function;
+	scope->need_close = 0;
 	assert(scope->function && scope->function->type == EXPR_FUNCTION);
 	scope->parent = parser->current_scope;
 	parser->current_scope = scope;
@@ -1480,6 +1483,7 @@ static struct ast_node *new_function(struct parser_state *parser)
 	set_type(&node->function_expr.type, RAVI_TFUNCTION);
 	node->function_expr.is_method = false;
 	node->function_expr.is_vararg = false;
+	node->function_expr.need_close = false;
 	node->function_expr.proc_id = 0;
 	node->function_expr.args = NULL;
 	node->function_expr.child_functions = NULL;
