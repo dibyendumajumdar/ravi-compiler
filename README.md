@@ -11,7 +11,7 @@ The goal of this project is to create a standalone parser and compiler for Lua /
 * AST simplifier (Work in progress) - responsible for performing some initial simplifications such as constant folding.
 * linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
 * optimizer (Work in progress) - responsible for improving the code
-* codegenerator (Work in progress) - responsible for generate C code
+* codegenerator (Work in progress) - responsible for generating C code
 
 Our goal is to provide a re-usable Lua/Ravi parser/code generator that can be used by all kinds of tools and utilities.
 
