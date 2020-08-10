@@ -14,6 +14,25 @@ Each basic block consists of a sequence of `instruction`s and ends with a branch
 Instructions are uniformly represented as follows. Each instruction has an op code. Each instruction has a list of operands and a list of targets.
 Conceptually the targets represent the output of the instruction, wheras operands are the input, although sometimes the interpretation may be different.
 
+Intruction operands and targets are represented via a `pseudo` type. This is a union type that allows various different types of objects to be
+uniformly represented in an instruction. Following are the possible types:
+
+<dl>
+    <dt>PSEUDO_SYMBOL</dt><dd></dd>
+	<dt>PSEUDO_TEMP_FLT</dt><dd></dd>
+	<dt>PSEUDO_TEMP_INT</dt><dd></dd>
+	<dt>PSEUDO_TEMP_ANY</dt><dd></dd>
+	<dt>PSEUDO_CONSTANT</dt><dd></dd>
+	<dt>PSEUDO_PROC</dt><dd></dd>
+	<dt>PSEUDO_NIL</dt><dd></dd>
+	<dt>PSEUDO_TRUE</dt><dd></dd>
+	<dt>PSEUDO_FALSE</dt><dd></dd>
+	<dt>PSEUDO_BLOCK</dt><dd></dd>
+	<dt>PSEUDO_RANGE</dt><dd></dd>
+	<dt>PSEUDO_RANGE_SELECT</dt><dd></dd>
+</dl>
+
+
 ## Branching Instructions
 
 #### op_ret 
