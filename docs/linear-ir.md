@@ -7,11 +7,16 @@ The code for each function is translated to linear IR. Each function is represen
 Each `proc` has a set of `basic blocks` - there are two distinguished basic blocks, the `entry` block and the
 `exit` block.
 
-Each basic block consists of a sequence of instructions and ends with a branching instruction.
+Each basic block consists of a sequence of `instruction`s and ends with a branching instruction.
+
+## Representation of Instructions
+
+Instructions are uniformly represented as follows. Each instruction has an op code. Each instruction has a list of operands and a list of targets.
+Conceptually the targets represent the output of the instruction, wheras operands are the input, although sometimes the interpretation may be different.
 
 ## Branching Instructions
 
-### op_ret 
+#### op_ret 
 
 Returns values to calling function
 
