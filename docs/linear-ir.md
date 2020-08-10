@@ -49,10 +49,10 @@ Returns values to calling function
 The `op_ret` instruction must perform some housekeeping. 
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
-any deferred closures executed. 
-* Next it must copy the return values to the stack position starting from `ci->func`, but respecting the `ci->nresults` fields which says
-how many values the caller is expecting. If the caller is expecting more values that we have then the extra values should be
+any deferred closures executed. Note that this call may be omitted of no variables in the proc escaped.
+* Next it must copy the return values to the stack position starting from `ci->func`, but respecting the `ci->nresults` field which says
+how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be
 set to `nil`. 
 * The `L->ci` must be set to the parent of the current function.
-
+* TBC How should stack top be adjusted?
 
