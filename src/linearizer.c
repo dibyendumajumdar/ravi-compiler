@@ -1592,15 +1592,16 @@ encountered a goto statement but we did not know the block then.
 */
 static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 {
-	/* If the current block is empty then we can use it as the label target */
 	struct basic_block* block;
 	if (node->label_stmt.symbol->label.pseudo != NULL) {
+		/* This means the block got created when we saw the goto statement, so we just need to make it current */
 		assert(node->label_stmt.symbol->label.pseudo->block != NULL);
 		block = node->label_stmt.symbol->label.pseudo->block;
 		start_block(proc, block);
 	}
 	else {
 		block = proc->current_bb;
+		/* If the current block is empty then we can use it as the label target */
 		if (ptrlist_size((const struct ptr_list*)block->insns) > 0) {
 			/* Create new block as label target */
 			block = create_block(proc);
@@ -1611,7 +1612,10 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 }
 
 /* TODO move this logic to parser? */
-/* Search for a label going up scopes starting from the scope where the goto statement appeared. */
+/* Search for a label going up scopes starting from the scope where the goto statement appeared.
+ * Also return via min_closing_block the ancestor scope that is greater than or equal to the
+ * label scope, and where a local variable escaped.
+ */
 static struct lua_symbol *find_label(struct proc *proc, struct block_scope *block,
 				     const struct string_object *label_name, struct block_scope **min_closing_block)
 {
@@ -1634,6 +1638,10 @@ static struct lua_symbol *find_label(struct proc *proc, struct block_scope *bloc
 	return NULL;
 }
 
+/*
+* Starting from block, go up the hierarchy until target_block and determine the oldest
+* ancestor block that has escaped variables and thus needs to be closed.
+*/
 struct block_scope *find_min_closing_block(struct block_scope *block, struct block_scope *target_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
@@ -1649,6 +1657,10 @@ struct block_scope *find_min_closing_block(struct block_scope *block, struct blo
 	return min_closing_block;
 }
 
+/*
+ * Checks if a basic block is already closed - for now we check if the last
+ * instruction in the block is op_ret, which also handles closing of up-values.
+ */
 static bool is_already_closed(struct proc *proc, struct basic_block *block)
 {
 	struct instruction *last_insn = raviX_last_instruction(block);
@@ -1663,6 +1675,13 @@ static bool is_already_closed(struct proc *proc, struct basic_block *block)
 	return false;
 }
 
+/* Adds a OP_CLOSE instruction at the specified basic block, but only if any local variables in the given
+ * scope escaped, i.e. were referenced as upvalues.
+ * Note that the proc's current_bb remains unchanged after this call. Normally we would expect
+ * the current basic block to be where we insert instructions but in this case there are scenarios
+ * such as when processing goto or break statemnt where the close instruction must be added to the
+ * the goto / break target block.
+ */
 static void instruct_close(struct proc *proc, struct basic_block *block, struct block_scope *scope)
 {
 	if (is_already_closed(proc, block))
@@ -1670,9 +1689,14 @@ static void instruct_close(struct proc *proc, struct basic_block *block, struct 
 	/* temporarily make block current */
 	struct basic_block *prev_current = proc->current_bb;
 	proc->current_bb = block;
+
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(scope->symbol_list, symbol)
 	{
+		/* We add the first escaping variable as the operand to op_close.
+		 * op_close is meant to scan the stack from that point and close
+		 * any open upvalues
+		 */
 		if (symbol->symbol_type == SYM_LOCAL && symbol->variable.escaped) {
 			assert(symbol->variable.pseudo);
 			struct instruction *insn = allocate_instruction(proc, op_close);
@@ -1682,6 +1706,8 @@ static void instruct_close(struct proc *proc, struct basic_block *block, struct 
 		}
 	}
 	END_FOR_EACH_PTR(symbol)
+	
+	/* restore current basic block */
 	proc->current_bb = prev_current;
 }
 
@@ -1697,10 +1723,12 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 		if (proc->current_break_target == NULL) {
 			handle_error(proc->linearizer->ast_container, "no current break target");
 		}
+		/* Find the oldest ancestor scope that may need to be closed */
 		struct block_scope *min_closing_block = find_min_closing_block(node->goto_stmt.goto_scope, proc->current_break_scope);
 		instruct_br(proc, allocate_block_pseudo(proc, proc->current_break_target));
 		start_block(proc, create_block(proc));
 		if (min_closing_block) {
+			/* Note that the close instruction goes to the target block of the goto */
 			instruct_close(proc, proc->current_break_target, min_closing_block);
 		}
 		return;
@@ -1716,13 +1744,13 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 				/* No pseudo? create with target block to be processed later when label is encountered */
 				symbol->label.pseudo = allocate_block_pseudo(proc, create_block(proc));
 			}
-			else {
+			else {				
 				assert(symbol->label.pseudo->block != NULL);
 			}
 			instruct_br(proc, symbol->label.pseudo);
 			start_block(proc, create_block(proc));
 			if (min_closing_block) {
-				/* close intruction needs to go after the label */
+				/* Note that the close instruction goes to the target block of the goto */
 				instruct_close(proc, symbol->label.pseudo->block, min_closing_block);
 			}
 			return;
@@ -1875,8 +1903,9 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
 	end_scope(proc->linearizer, proc);
 
+	/* If the fornum block has escaped local vars then we need to close */
 	if (proc->current_break_scope->need_close) {
-		/* need to put close instruction in current basic block */
+		/* Note we put close instruction in current basic block */
 		instruct_close(proc, proc->current_bb, proc->current_break_scope);
 	}
 	instruct_br(proc, allocate_block_pseudo(proc, L1));
@@ -1919,6 +1948,7 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	linearize_statement_list(proc, node->while_or_repeat_stmt.loop_statement_list);
 	end_scope(proc->linearizer, proc);
 
+	/* If the while/repeat block has escaped local vars then we need to close */
 	if (proc->current_break_scope->need_close) {
 		instruct_close(proc, proc->current_bb, proc->current_break_scope);
 	}
