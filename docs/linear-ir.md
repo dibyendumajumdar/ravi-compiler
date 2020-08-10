@@ -24,9 +24,9 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_TEMP_ANY</dt><dd>a temporary of any type, must be on Lua stack</dd>
 	<dt>PSEUDO_CONSTANT</dt><dd>a literal constant</dd>
 	<dt>PSEUDO_PROC</dt><dd>A Lua function</dd>
-	<dt>PSEUDO_NIL</dt><dd>`nil` value</dd>
-	<dt>PSEUDO_TRUE</dt><dd>`true` value</dd>
-	<dt>PSEUDO_FALSE</dt><dd>`false` value</dd>
+	<dt>PSEUDO_NIL</dt><dd>nil value</dd>
+	<dt>PSEUDO_TRUE</dt><dd>true value</dd>
+	<dt>PSEUDO_FALSE</dt><dd>false value</dd>
 	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
