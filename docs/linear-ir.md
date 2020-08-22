@@ -44,16 +44,14 @@ Returns values to calling function, and sets `L->ci` to parent.
     <dt>operands</dt>
     <dd>0 or more pseudos representing values to be returned</dd>
     <dt>target</dt>
-    <dd>The block to which we should jump to</dd>
+    <dd>The block to which we should jump to. Note that all returns jump to the exit block</dd>
 </dl> 
 
 The `op_ret` instruction must perform some housekeeping. 
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
-any deferred closures executed. Note that this call may be omitted of no variables in the proc/child procs escaped.
-* Next it must copy the return values to the stack position starting from `ci->func` (`ci->base - 1`), but respecting the `ci->nresults` field which says
-how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be
-set to `nil`. Note that if `ci->nresults == -1` caller wants all available values.
+any deferred closures executed. This call may be omitted if no variables in the proc including child procs escaped.
+* Next it must copy the return values to the stack, results must be placed at `ci->func` (`ci->base - 1`) and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
 * The `L->ci` must be set to the parent of the current function.
-* TBC How should stack top be adjusted?
+* TBC For compatibility with Lua/ravi, if the number of expected results was `-1` then we should set `L->top` to just past the last result copied, else restore the `L-top` to the previous callers `ci->top`.
 
