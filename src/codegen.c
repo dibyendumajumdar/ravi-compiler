@@ -605,8 +605,10 @@ struct function {
 	membuff_t body;
 };
 
+/* readonly statics */
 static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
+static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, membuff_t *mb)
 {
@@ -810,7 +812,6 @@ static void emit_jump(struct function *fn, struct pseudo *pseudo)
 static void emit_op_ret(struct function *fn, struct instruction *insn)
 {
 	// TODO Only call luaF_close if needed
-	// TODO handle ci->nresults > available results
 #ifdef RAVI_DEFER_STATEMENT
 	raviX_buffer_add_string(&fn->body, "if (cl->p->sizep > 0) {\n luaF_close(L, base, LUA_OK);\n");
 	raviX_buffer_add_string(&fn->body, " base = ci->u.l.base;\n");
@@ -834,7 +835,15 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 		raviX_buffer_add_string(&fn->body, "}\n");
 		i++;
 	}
-	END_FOR_EACH_PTR(pseudo)
+	END_FOR_EACH_PTR(pseudo);
+	raviX_buffer_add_fstring(&fn->body, "if (%d < wanted) {\nint j = %d;\n", i, i);
+	raviX_buffer_add_string(&fn->body, "while (j < wanted) {\n");
+	{
+		raviX_buffer_add_string(&fn->body, "setnilvalue(R(j-1));\n");
+		raviX_buffer_add_string(&fn->body, "j++;\n");
+	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	emit_jump(fn, get_target_value(insn, 0));
 }
@@ -862,6 +871,9 @@ static void output_basic_block(struct function *fn, struct basic_block *bb)
 	} else {
 	}
 	output_instructions(fn, bb->insns);
+	if (bb->index == EXIT_BLOCK) {
+		raviX_buffer_add_string(&fn->body, "return result;\n");
+	}
 }
 
 static void output_proc(struct proc *proc, membuff_t *mb)
@@ -875,6 +887,7 @@ static void output_proc(struct proc *proc, membuff_t *mb)
 		output_basic_block(&fn, bb);
 	}
 
+	raviX_buffer_add_string(&fn.body, "}\n");
 	raviX_buffer_add_string(mb, fn.prologue.buf);
 	raviX_buffer_add_string(mb, fn.body.buf);
 	cleanup(&fn);
