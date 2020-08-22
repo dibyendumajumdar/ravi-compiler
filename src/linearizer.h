@@ -136,8 +136,9 @@ enum pseudo_type {
 	PSEUDO_FALSE,
 	PSEUDO_BLOCK, /* Points to a basic block, used as targets for jumps */
 	PSEUDO_RANGE, /* Represents a range of registers from a certain starting register */
-	PSEUDO_RANGE_SELECT /* Picks a certain register from a range */
+	PSEUDO_RANGE_SELECT, /* Picks a certain register from a range */
 	/* TODO we need a type for var args */
+	PSEUDO_LUASTACK /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
 };
 
 /* pseudo represents a pseudo (virtual) register */
@@ -151,6 +152,7 @@ struct pseudo {
 		struct proc *proc;		 /* PSEUDO_PROC */
 		struct basic_block *block;	 /* PSEUDO_BLOCK */
 		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
+		int stackidx; /* PSEUDO_LUASTACK */
 	};
 };
 
@@ -228,6 +230,6 @@ void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
 void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, membuff_t *mb);
 
 struct instruction *raviX_last_instruction(struct basic_block *block);
-
+struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg);
 
 #endif

@@ -30,6 +30,7 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
+	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to base, can be negative</dd>
 </dl>
 
 
@@ -37,7 +38,7 @@ uniformly represented in an instruction. Following are the possible types:
 
 #### op_ret 
 
-Returns values to calling function
+Returns values to calling function, and sets `L->ci` to parent.
 
 <dl>
     <dt>operands</dt>
@@ -49,10 +50,10 @@ Returns values to calling function
 The `op_ret` instruction must perform some housekeeping. 
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
-any deferred closures executed. Note that this call may be omitted of no variables in the proc escaped.
-* Next it must copy the return values to the stack position starting from `ci->func`, but respecting the `ci->nresults` field which says
+any deferred closures executed. Note that this call may be omitted of no variables in the proc/child procs escaped.
+* Next it must copy the return values to the stack position starting from `ci->func` (`ci->base - 1`), but respecting the `ci->nresults` field which says
 how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be
-set to `nil`. 
+set to `nil`. Note that if `ci->nresults == -1` caller wants all available values.
 * The `L->ci` must be set to the parent of the current function.
 * TBC How should stack top be adjusted?
 

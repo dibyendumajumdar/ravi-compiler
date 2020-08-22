@@ -255,6 +255,14 @@ static const struct constant *allocate_string_constant(struct proc *proc, const 
 	return add_constant(proc, &c);
 }
 
+struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg)
+{
+	struct pseudo* pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
+	pseudo->type = PSEUDO_LUASTACK;
+	pseudo->regnum = reg;
+	return pseudo;
+}
+
 static struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym, unsigned reg)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
