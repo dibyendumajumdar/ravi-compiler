@@ -4,6 +4,7 @@
  */
 
 #include "codegen.h"
+#include "ravi_api.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -880,6 +881,7 @@ static void output_proc(struct proc *proc, membuff_t *mb)
 {
 	struct function fn;
 	initfn(&fn, proc);
+	raviX_buffer_reset(mb);
 
 	struct basic_block *bb;
 	for (int i = 0; i < (int)proc->node_count; i++) {
@@ -891,27 +893,52 @@ static void output_proc(struct proc *proc, membuff_t *mb)
 	raviX_buffer_add_string(mb, fn.prologue.buf);
 	raviX_buffer_add_string(mb, fn.body.buf);
 	cleanup(&fn);
+
+    struct proc *childproc;
+    FOR_EACH_PTR(proc->procs, childproc)
+        {
+            output_proc(childproc, mb);
+        }
+    END_FOR_EACH_PTR(childproc)
 }
 
-void raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb)
+/* Create new proto - if parent is not NULL then this will become a child of the parent */
+static Proto *stub_newProto (void *context, Proto *parent) {
+	return NULL;
+}
+
+/* Add a string constant to Proto and return its index */
+static int stub_newStringConstant (void *context, Proto *proto, const char *s, unsigned len) {
+	return 0;
+}
+
+/* Compile the C code for the given proto, and C source */
+static void stub_compileProto(void *context, Proto *proto, const char *C_src, unsigned len) {
+}
+
+static struct Ravi_CompilerInterface stub_compilerInterface = {
+    .source_name = "input",
+    .source = NULL,
+    .source_len = 0,
+    .lua_compileProto = stub_compileProto,
+    .lua_newProto = stub_newProto,
+    .lua_newStringConstant = stub_newStringConstant
+};
+
+Proto *raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb, struct Ravi_CompilerInterface *ravi_interface)
 {
+	if (ravi_interface == NULL)
+		ravi_interface = &stub_compilerInterface;
 	// raviX_buffer_add_string(mb, Lua_header);
 	output_proc(linearizer->main_proc, mb);
-	struct proc *proc;
-	FOR_EACH_PTR(linearizer->all_procs, proc)
-	{
-		if (proc == linearizer->main_proc)
-			continue;
-		output_proc(proc, mb);
-	}
-	END_FOR_EACH_PTR(proc)
+	return NULL;
 }
 
 void raviX_generate_C_tofile(struct linearizer_state *linearizer, FILE *fp)
 {
 	membuff_t mb;
 	raviX_buffer_init(&mb, 4096);
-	raviX_generate_C(linearizer, &mb);
+	raviX_generate_C(linearizer, &mb, NULL);
 	fprintf(fp, "%s\n", mb.buf);
 	raviX_buffer_free(&mb);
 }

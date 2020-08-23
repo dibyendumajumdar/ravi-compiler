@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 
 set(PUBLIC_HEADERS
-    include/ravi_compiler.h)
+    include/ravi_compiler.h
+    include/ravi_api.h)
 
 set(HEADERS
         ${PUBLIC_HEADERS}
@@ -45,6 +46,7 @@ set(SRCS
         src/membuf.c
         src/df_liveness.c
         src/codegen.c
+        src/ravi_binding.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
@@ -121,3 +123,13 @@ target_include_directories(tgraph
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
+
+install(FILES ${PUBLIC_HEADERS}
+        DESTINATION include/ravicomp)
+install(TARGETS ravicomp
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT RaviCompiler_Runtime
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RaviCompiler_Development
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT RaviCompiler_Runtime)
+install(FILES
+        ${PROJECT_BINARY_DIR}/ravicomp_export.h DESTINATION include/ravicomp
+        )
