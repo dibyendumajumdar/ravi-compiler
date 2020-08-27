@@ -2,6 +2,7 @@
 #define ravicomp_RAVIAPI_H
 
 #include "ravicomp_export.h"
+#include "ravi_compiler.h"
 
 #include <stdlib.h>
 
@@ -10,29 +11,35 @@
  * that this library can use to create various data structures needed by Ravi.
  */
 
-//typedef struct lua_State lua_State;
+typedef struct lua_State lua_State;
 typedef struct Proto Proto; /* Function prototype in Ravi/Lua */
 //typedef struct LClosure LClosure; /* A Lua Closure object */
+
+typedef int (*lua_CFunction)(lua_State* L);
 
 struct Ravi_CompilerInterface {
 	void *context;
 	const char *source; /* Source to be compiled */
 	size_t source_len; /* Size of source */
 	const char *source_name; /* Name of the source */
+	Proto *main_proto; /* Main proto that will represent Lua chunk */
 
-	/* Create new proto - if parent is not NULL then this will become a child of the parent */
+	/* Create new proto - this will become a child of the parent */
 	Proto *(*lua_newProto) (void *context, Proto *parent);
 
-	/* Create a Lua Closure object with specified number of upvalues */
-	//LClosure *(*lua_newLuaClosure) (lua_State *L, int number_of_upvalues);
+	/* Add a string constant to Proto and return its index, information may be added to string->userdata */
+	int (*lua_newStringConstant) (void *context, Proto *proto, struct string_object *string);
 
-	/* Add a string constant to Proto and return its index */
-	int (*lua_newStringConstant) (void *context, Proto *proto, const char *s, unsigned len);
+	/* Compile the C code and return a module */
+	void *(*lua_compile_C)(void *context, const char *C_src, unsigned len);
 
-	/* Compile the C code for the given proto, and C source */
-	void (*lua_compileProto)(void *context, Proto *proto, const char *C_src, unsigned len);
+	/* Return a C function pointer by name */
+	lua_CFunction(*lua_getFunction)(void *context, void *module, const char* name);
+
+	/* Set the given function */
+	void (*lua_setProtoFunction)(void* context, Proto* p, lua_CFunction func);
 };
 
-RAVICOMP_EXPORT Proto *raviX_compile(struct Ravi_CompilerInterface *compiler_interface);
+RAVICOMP_EXPORT int raviX_compile(struct Ravi_CompilerInterface *compiler_interface);
 
 #endif

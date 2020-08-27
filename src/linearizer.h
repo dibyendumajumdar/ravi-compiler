@@ -209,6 +209,7 @@ struct proc {
 	struct set *constants;			  /* constants used by this proc */
 	unsigned num_constants;
 	struct graph *cfg;  /* place holder for control flow graph; the linearizer does not create this */
+	char funcname[30]; /* Each proc needs a name inside a module - name is a short string */
 };
 
 struct linearizer_state {

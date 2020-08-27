@@ -601,7 +601,6 @@ static const char Lua_header[] =
 
 struct function {
 	struct proc *proc;
-	char fname[30];
 	membuff_t prologue;
 	membuff_t body;
 };
@@ -639,11 +638,12 @@ static void emit_varname(struct pseudo *pseudo, membuff_t *mb)
 static void initfn(struct function *fn, struct proc *proc)
 {
 	fn->proc = proc;
-	snprintf(fn->fname, sizeof fn->fname, "__ravifunc_%d", proc->id);
+	/* Set a name that can be used later to retrieve the compiled code */
+	snprintf(proc->funcname, sizeof proc->funcname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
 	raviX_buffer_init(&fn->body, 4096);
-	raviX_buffer_add_fstring(&fn->prologue, "extern int %s(lua_State *L);\n", fn->fname);
-	raviX_buffer_add_fstring(&fn->prologue, "int %s(lua_State *L) {\n", fn->fname);
+	raviX_buffer_add_fstring(&fn->prologue, "extern int %s(lua_State *L);\n", proc->funcname);
+	raviX_buffer_add_fstring(&fn->prologue, "int %s(lua_State *L) {\n", proc->funcname);
 	raviX_buffer_add_string(&fn->prologue, "int error_code = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "int result = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "CallInfo *ci = L->ci;\n");
@@ -849,44 +849,59 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	emit_jump(fn, get_target_value(insn, 0));
 }
 
-static void output_instruction(struct function *fn, struct instruction *insn)
+static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	switch (insn->opcode) {
 	case op_ret:
 		emit_op_ret(fn, insn);
+	default:
+		return -1;
 	}
+	return 0;
 }
 
-static void output_instructions(struct function *fn, struct instruction_list *list)
+static int output_instructions(struct function *fn, struct instruction_list *list)
 {
 	struct instruction *insn;
-	FOR_EACH_PTR(list, insn) { output_instruction(fn, insn); }
+	int rc = 0;
+	FOR_EACH_PTR(list, insn)
+	{
+		rc = output_instruction(fn, insn);
+		if (rc != 0)
+			break;
+	}
 	END_FOR_EACH_PTR(insn)
+	return rc;
 }
 
-static void output_basic_block(struct function *fn, struct basic_block *bb)
+static int output_basic_block(struct function *fn, struct basic_block *bb)
 {
+	int rc = 0;
 	raviX_buffer_add_fstring(&fn->body, "L%d:\n", bb->index);
 	if (bb->index == ENTRY_BLOCK) {
 	} else if (bb->index == EXIT_BLOCK) {
 	} else {
 	}
-	output_instructions(fn, bb->insns);
+	rc = output_instructions(fn, bb->insns);
 	if (bb->index == EXIT_BLOCK) {
 		raviX_buffer_add_string(&fn->body, "return result;\n");
 	}
+	return rc;
 }
 
-static void output_proc(struct proc *proc, membuff_t *mb)
+/* Generate C code for each proc recursively */
+static int output_proc(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, membuff_t *mb)
 {
+	int rc = 0;
 	struct function fn;
 	initfn(&fn, proc);
-	raviX_buffer_reset(mb);
 
 	struct basic_block *bb;
 	for (int i = 0; i < (int)proc->node_count; i++) {
 		bb = proc->nodes[i];
-		output_basic_block(&fn, bb);
+		rc = output_basic_block(&fn, bb);
+		if (rc != 0)
+			break;
 	}
 
 	raviX_buffer_add_string(&fn.body, "}\n");
@@ -894,44 +909,77 @@ static void output_proc(struct proc *proc, membuff_t *mb)
 	raviX_buffer_add_string(mb, fn.body.buf);
 	cleanup(&fn);
 
-    struct proc *childproc;
-    FOR_EACH_PTR(proc->procs, childproc)
-        {
-            output_proc(childproc, mb);
-        }
-    END_FOR_EACH_PTR(childproc)
-}
+	if (rc != 0)
+		return rc;
 
-/* Create new proto - if parent is not NULL then this will become a child of the parent */
-static Proto *stub_newProto (void *context, Proto *parent) {
-	return NULL;
-}
-
-/* Add a string constant to Proto and return its index */
-static int stub_newStringConstant (void *context, Proto *proto, const char *s, unsigned len) {
+	struct proc *childproc;
+	FOR_EACH_PTR(proc->procs, childproc)
+	{
+		rc = output_proc(ravi_interface, childproc, mb);
+		if (rc != 0)
+			return rc;
+	}
+	END_FOR_EACH_PTR(childproc);
 	return 0;
 }
 
-/* Compile the C code for the given proto, and C source */
-static void stub_compileProto(void *context, Proto *proto, const char *C_src, unsigned len) {
+/* Traverse the proto hierarchy and assign each proto its compiled function; child protos are created along the way */
+static int gen_proc(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, void *module, Proto *proto)
+{
+	lua_CFunction f = ravi_interface->lua_getFunction(ravi_interface->context, module, proc->funcname);
+	ravi_interface->lua_setProtoFunction(ravi_interface->context, proto, f);
+	struct proc *childproc;
+	FOR_EACH_PTR(proc->procs, childproc)
+	{
+		Proto *child_proto = ravi_interface->lua_newProto(ravi_interface->context, proto);
+		if (gen_proc(ravi_interface, childproc, module, child_proto) != 0)
+			return -1;
+	} END_FOR_EACH_PTR(childproc);
+	return 0;
 }
 
+static Proto *stub_newProto(void *context, Proto *parent) { return NULL; }
+
+static int stub_newStringConstant(void *context, Proto *proto, struct string_object *s) { return 0; }
+
+static void *stub_lua_compile_C(void *context, const char *C_src, unsigned len) { return NULL; }
+
+static lua_CFunction stub_lua_getFunction(void *context, void *module, const char *name) { return NULL; }
+
+static void stub_lua_setProtoFunction(void *context, Proto *p, lua_CFunction func) {}
+
 static struct Ravi_CompilerInterface stub_compilerInterface = {
+    .context = NULL,
     .source_name = "input",
     .source = NULL,
     .source_len = 0,
-    .lua_compileProto = stub_compileProto,
+    .main_proto = NULL,
+    .lua_compile_C = stub_lua_compile_C,
+    .lua_getFunction = stub_lua_getFunction,
+    .lua_setProtoFunction = stub_lua_setProtoFunction,
     .lua_newProto = stub_newProto,
-    .lua_newStringConstant = stub_newStringConstant
+    .lua_newStringConstant = stub_newStringConstant,
 };
 
-Proto *raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb, struct Ravi_CompilerInterface *ravi_interface)
+/* Generate and compile C code */
+int raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb, struct Ravi_CompilerInterface *ravi_interface)
 {
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
-	// raviX_buffer_add_string(mb, Lua_header);
-	output_proc(linearizer->main_proc, mb);
-	return NULL;
+	raviX_buffer_add_string(mb, Lua_header);
+	/* Recursively generate code for procs */
+	if (output_proc(ravi_interface, linearizer->main_proc, mb) != 0) {
+		return -1;
+	}
+	/* Compile the generated code */
+	void *module = ravi_interface->lua_compile_C(ravi_interface->context, mb->buf, mb->pos);
+	if (module == NULL) {
+		return -1;
+	}
+	if (gen_proc(ravi_interface, linearizer->main_proc, ravi_interface->main_proto, module) != 0) {
+		return -1;
+	}
+	return 0;
 }
 
 void raviX_generate_C_tofile(struct linearizer_state *linearizer, FILE *fp)
