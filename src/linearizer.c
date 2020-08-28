@@ -1650,7 +1650,7 @@ static struct lua_symbol *find_label(struct proc *proc, struct block_scope *bloc
 * Starting from block, go up the hierarchy until target_block and determine the oldest
 * ancestor block that has escaped variables and thus needs to be closed.
 */
-struct block_scope *find_min_closing_block(struct block_scope *block, struct block_scope *target_block)
+static struct block_scope *find_min_closing_block(struct block_scope *block, struct block_scope *target_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
 	struct block_scope *min_closing_block = NULL;

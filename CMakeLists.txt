@@ -79,7 +79,12 @@ if (NOT WIN32)
     set(EXTRA_LIBRARIES m)
 endif ()
 
-add_library(ravicomp STATIC
+if (WIN32)
+    set(LIBTYPE STATIC)
+else()
+    set(LIBTYPE SHARED)
+endif()
+add_library(ravicomp ${LIBTYPE}
         ${HEADERS}
         ${SRCS})
 target_include_directories(ravicomp

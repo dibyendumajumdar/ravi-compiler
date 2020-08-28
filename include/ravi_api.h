@@ -31,10 +31,12 @@ struct Ravi_CompilerInterface {
 	int (*lua_newStringConstant) (void *context, Proto *proto, struct string_object *string);
 
 	/* Compile the C code and return a module */
-	void *(*lua_compile_C)(void *context, const char *C_src, unsigned len);
+	void (*init_C_compiler)(void *context);
+	void *(*compile_C)(void *context, const char *C_src, unsigned len);
+	void (*finish_C_compiler)(void *context);
 
 	/* Return a C function pointer by name */
-	lua_CFunction(*lua_getFunction)(void *context, void *module, const char* name);
+	lua_CFunction(*get_compiled_function)(void *context, void *module, const char* name);
 
 	/* Set the given function */
 	void (*lua_setProtoFunction)(void* context, Proto* p, lua_CFunction func);
