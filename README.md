@@ -3,7 +3,7 @@
 # ravi-compiler
 Experimental compiler for Ravi and Lua. 
 
-The goal of this project is to create a standalone parser and compiler for Lua / Ravi. The output of the compiler will be C code suitable for JITing. The compiler library will consist of distinct modules:
+The goal of this project is to create a standalone parser and compiler for Lua / Ravi. The output of the compiler will be C code suitable for JITing and/or AOT. The compiler library will consist of distinct modules:
 
 * lexer (Done) - responsible for tokenizing an input buffer
 * parser (Mostly Done) - responsible for generating abstract syntax tree (AST).
