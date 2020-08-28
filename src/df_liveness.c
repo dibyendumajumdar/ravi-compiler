@@ -24,7 +24,7 @@ struct liveness_data {
 	struct liveness_info_array lives;
 };
 
-void init_liveness_data(struct proc *proc, struct liveness_data *liveness_data)
+static void init_liveness_data(struct proc *proc, struct liveness_data *liveness_data)
 {
 	memset(liveness_data, 0, sizeof(*liveness_data));
 	for (unsigned i = 0; i < proc->node_count; i++) {
@@ -38,7 +38,7 @@ void init_liveness_data(struct proc *proc, struct liveness_data *liveness_data)
 	}
 }
 
-void destroy_liveness_data(struct liveness_data *liveness_data)
+static void destroy_liveness_data(struct liveness_data *liveness_data)
 {
 	for (unsigned i = 0; i < liveness_data->lives.count; i++) {
 		raviX_bitset_create(&liveness_data->lives.data[i]->use);
