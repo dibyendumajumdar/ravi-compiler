@@ -38,7 +38,7 @@ static const char* scan_next(const char *cp, const char *endp) {
 	return nextp;
 }
 
-static void add_chunk(struct chunk_data *chunks, membuff_t* buf)
+static void add_chunk(struct chunk_data *chunks, buffer_t * buf)
 {
 	size_t len = raviX_buffer_len(buf);
 	char *s = raviX_allocator_allocate(&chunks->string_allocator, len+1);
@@ -51,7 +51,7 @@ static void add_chunk(struct chunk_data *chunks, membuff_t* buf)
  * Each chunk will be added as an item in the list
  */
 static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const char *delim) {
-	membuff_t buf;
+	buffer_t buf;
 	raviX_buffer_init(&buf, 1024);
 	const char *cp = input;
 	const char *endp = input + strlen(input);

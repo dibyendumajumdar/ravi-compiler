@@ -228,8 +228,8 @@ struct linearizer_state {
 	uint32_t proc_id;
 };
 
-void raviX_show_linearizer(struct linearizer_state *linearizer, membuff_t *mb);
-void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, membuff_t *mb);
+void raviX_show_linearizer(struct linearizer_state *linearizer, buffer_t *mb);
+void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, buffer_t *mb);
 
 struct instruction *raviX_last_instruction(struct basic_block *block);
 struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg);

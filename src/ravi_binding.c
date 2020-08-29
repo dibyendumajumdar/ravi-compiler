@@ -36,7 +36,7 @@ int raviX_compile(struct Ravi_CompilerInterface *compiler_interface)
 	raviX_construct_cfg(linearizer->main_proc);
 	raviX_remove_unreachable_blocks(linearizer);
 
-	membuff_t buf;
+	buffer_t buf;
 	raviX_buffer_init(&buf, 4096);
 	rc = raviX_generate_C(linearizer, &buf, compiler_interface);
 	raviX_buffer_free(&buf);

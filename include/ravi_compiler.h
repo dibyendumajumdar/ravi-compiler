@@ -112,7 +112,7 @@ typedef struct {
 	char *buf;
 	size_t allocated_size;
 	size_t pos;
-} membuff_t;
+} buffer_t;
 
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
@@ -136,7 +136,7 @@ RAVICOMP_EXPORT void raviX_next(struct lexer_state *ls);
  */
 RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
 /* Convert a token to text format. The token will be written to current position in mb. */
-RAVICOMP_EXPORT void raviX_token2str(int token, membuff_t *mb);
+RAVICOMP_EXPORT void raviX_token2str(int token, buffer_t *mb);
 /* Release all data structures used by the lexer */
 RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
 
@@ -534,19 +534,19 @@ RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *sy
 #define FORMAT_ATTR(pos)
 #endif
 
-RAVICOMP_EXPORT void raviX_buffer_init(membuff_t *mb, size_t initial_size);
-RAVICOMP_EXPORT void raviX_buffer_resize(membuff_t *mb, size_t new_size);
-RAVICOMP_EXPORT void raviX_buffer_reserve(membuff_t *mb, size_t n);
-RAVICOMP_EXPORT void raviX_buffer_free(membuff_t *mb);
-static inline char *raviX_buffer_data(const membuff_t *mb) { return mb->buf; }
-static inline size_t raviX_buffer_size(const membuff_t *mb) { return mb->allocated_size; }
-static inline size_t raviX_buffer_len(const membuff_t *mb) { return mb->pos; }
-static inline void raviX_buffer_reset(membuff_t *mb) { mb->pos = 0; }
+RAVICOMP_EXPORT void raviX_buffer_init(buffer_t *mb, size_t initial_size);
+RAVICOMP_EXPORT void raviX_buffer_resize(buffer_t *mb, size_t new_size);
+RAVICOMP_EXPORT void raviX_buffer_reserve(buffer_t *mb, size_t n);
+RAVICOMP_EXPORT void raviX_buffer_free(buffer_t *mb);
+static inline char *raviX_buffer_data(const buffer_t *mb) { return mb->buf; }
+static inline size_t raviX_buffer_size(const buffer_t *mb) { return mb->allocated_size; }
+static inline size_t raviX_buffer_len(const buffer_t *mb) { return mb->pos; }
+static inline void raviX_buffer_reset(buffer_t *mb) { mb->pos = 0; }
 
 /* following convert input to string before adding */
-RAVICOMP_EXPORT void raviX_buffer_add_string(membuff_t *mb, const char *str);
-RAVICOMP_EXPORT void raviX_buffer_add_bytes(membuff_t *mb, const char *str, size_t len);
-RAVICOMP_EXPORT void raviX_buffer_add_fstring(membuff_t *mb, const char *str, ...) FORMAT_ATTR(2);
+RAVICOMP_EXPORT void raviX_buffer_add_string(buffer_t *mb, const char *str);
+RAVICOMP_EXPORT void raviX_buffer_add_bytes(buffer_t *mb, const char *str, size_t len);
+RAVICOMP_EXPORT void raviX_buffer_add_fstring(buffer_t *mb, const char *str, ...) FORMAT_ATTR(2);
 
 /* strncpy() replacement with guaranteed 0 termination */
 RAVICOMP_EXPORT void raviX_string_copy(char *buf, const char *src, size_t buflen);

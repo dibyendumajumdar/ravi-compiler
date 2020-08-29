@@ -601,8 +601,8 @@ static const char Lua_header[] =
 
 struct function {
 	struct proc *proc;
-	membuff_t prologue;
-	membuff_t body;
+	buffer_t prologue;
+	buffer_t body;
 };
 
 /* readonly statics */
@@ -610,7 +610,7 @@ static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
 static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
-static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, membuff_t *mb)
+static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, buffer_t *mb)
 {
 	if (gen->next_reg == 0)
 		return;
@@ -626,7 +626,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, ";\n");
 }
 
-static void emit_varname(struct pseudo *pseudo, membuff_t *mb)
+static void emit_varname(struct pseudo *pseudo, buffer_t *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
@@ -890,7 +890,7 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 }
 
 /* Generate C code for each proc recursively */
-static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, membuff_t *mb)
+static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, buffer_t *mb)
 {
 	int rc = 0;
 	struct function fn;
@@ -984,7 +984,7 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {
 };
 
 /* Generate and compile C code */
-int raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb, struct Ravi_CompilerInterface *ravi_interface)
+int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface)
 {
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
@@ -1013,7 +1013,7 @@ int raviX_generate_C(struct linearizer_state *linearizer, membuff_t *mb, struct 
 
 void raviX_generate_C_tofile(struct linearizer_state *linearizer, FILE *fp)
 {
-	membuff_t mb;
+	buffer_t mb;
 	raviX_buffer_init(&mb, 4096);
 	raviX_generate_C(linearizer, &mb, NULL);
 	fprintf(fp, "%s\n", mb.buf);

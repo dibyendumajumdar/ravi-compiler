@@ -125,7 +125,7 @@ const struct string_object *raviX_create_string(struct compiler_state *container
 #define lua_str2number(s, p) ((lua_Number)strtod((s), (p)))
 static void save(struct lexer_state *ls, int c);
 
-void raviX_token2str(int token, membuff_t *mb)
+void raviX_token2str(int token, buffer_t *mb)
 {
 	if (token < FIRST_RESERVED) { /* single-byte symbols? */
 		assert(token == cast_uchar(token));
@@ -167,7 +167,7 @@ void raviX_syntaxerror(struct lexer_state *ls, const char *msg) { lexerror(ls, m
 
 static void save(struct lexer_state *ls, int c)
 {
-	membuff_t *b = ls->buff;
+	buffer_t *b = ls->buff;
 	if (raviX_buffer_len(b) + 1 > raviX_buffer_size(b)) {
 		size_t newsize;
 		if (raviX_buffer_size(b) >= INT_MAX / 2)

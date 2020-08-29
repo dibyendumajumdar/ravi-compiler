@@ -53,9 +53,9 @@ struct compiler_state {
 	struct ast_node *main_function;
 	struct linearizer_state *linearizer;
 	int (*error_handler)(const char *fmt, ...);
-	membuff_t buff;		 /* temp storage for literals, used by the lexer and parser */
+	buffer_t buff;		 /* temp storage for literals, used by the lexer and parser */
 	jmp_buf env;		 /* For error handling */
-	membuff_t error_message; /* For error handling, error message is saved here */
+	buffer_t error_message; /* For error handling, error message is saved here */
 	bool killed;		 /* flag to check if this is already destroyed */
 };
 
@@ -75,7 +75,7 @@ struct lexer_state {
 	size_t bufsize;
 	size_t n;
 	const char *p;
-	membuff_t *buff;    /* buffer for tokens, points to the buffer in compiler_state */
+	buffer_t *buff;    /* buffer for tokens, points to the buffer in compiler_state */
 	const char *source; /* current source name */
 	const char *envn;   /* environment variable name */
 };
@@ -368,7 +368,7 @@ struct parser_state {
 	struct block_scope *current_scope;
 };
 
-void raviX_print_ast_node(membuff_t *buf, struct ast_node *node, int level); /* output the AST structure recursively */
+void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level); /* output the AST structure recursively */
 
 int raviX_ast_simplify(struct compiler_state* container);
 
