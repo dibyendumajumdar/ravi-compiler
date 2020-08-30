@@ -37,3 +37,16 @@ function Message (m)
   end
 end
 #
+local b
+local function z(p1,p2)
+	do
+	    local x,y
+	end
+	local a,x,c,y
+	local function t()
+	        a =1
+    		return y + x + function()
+    		        b = 2
+                    return x * y end
+	end
+end

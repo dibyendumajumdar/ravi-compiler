@@ -30,6 +30,13 @@ struct Ravi_CompilerInterface {
 	/* Add a string constant to Proto and return its index, information may be added to string->userdata */
 	int (*lua_newStringConstant) (void *context, Proto *proto, struct string_object *string);
 
+	/* Add an upvalue. If the upvalue refers to a local variable in parent proto then idx should contain
+	 * the register for the local variable and instack should be true, else idx should have the index of
+	 * upvalue in parent proto and instack should be false.
+	 */
+	int (*add_upvalue) (void *context, Proto *f, struct string_object* name, unsigned idx, int instack,
+		     unsigned typecode, struct string_object* usertype);
+
 	/* Compile the C code and return a module */
 	void (*init_C_compiler)(void *context);
 	void *(*compile_C)(void *context, const char *C_src, unsigned len);
