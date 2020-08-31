@@ -968,6 +968,7 @@ static void stub_finish_C_compiler(void *context) {}
 static void *stub_compile_C(void *context, const char *C_src, unsigned len) { return NULL; }
 static lua_CFunction stub_lua_getFunction(void *context, void *module, const char *name) { return NULL; }
 static void stub_lua_setProtoFunction(void *context, Proto *p, lua_CFunction func) {}
+static void stub_lua_setVarArg(void *context, Proto *p) {}
 
 static struct Ravi_CompilerInterface stub_compilerInterface = {
     .context = NULL,
@@ -982,6 +983,7 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {
     .lua_setProtoFunction = stub_lua_setProtoFunction,
     .lua_newProto = stub_newProto,
     .lua_newStringConstant = stub_newStringConstant,
+    .lua_setVarArg = stub_lua_setVarArg
 };
 
 /* Generate and compile C code */
@@ -990,11 +992,18 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
 
+	struct string_object *envs = raviX_create_string(linearizer->ast_container, "_ENV", 4);
+
 	/* Add the common header portion */
 	raviX_buffer_add_string(mb, Lua_header);
 
 	/* Create protos for each proc we will compile */
 	Proto *main_proto = ravi_interface->main_proto;
+	/* Mark the main proc as var arg */
+	ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
+	/* Add the upvalue for _ENV */
+	ravi_interface->add_upvalue(ravi_interface->context, main_proto, envs, 0, 0, RAVI_TANY, NULL);
+	/* Create all the child protos as we will need them to be there for code gen */
 	create_protos(ravi_interface, linearizer->main_proc, main_proto);
 
 	/* Recursively generate C code for procs */

@@ -47,6 +47,8 @@ struct Ravi_CompilerInterface {
 
 	/* Set the given function */
 	void (*lua_setProtoFunction)(void* context, Proto* p, lua_CFunction func);
+	/* Mark the function as var arg */
+	void (*lua_setVarArg)(void *context, Proto* p);
 };
 
 RAVICOMP_EXPORT int raviX_compile(struct Ravi_CompilerInterface *compiler_interface);
