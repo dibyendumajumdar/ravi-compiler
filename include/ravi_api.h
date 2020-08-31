@@ -38,6 +38,8 @@ struct Ravi_CompilerInterface {
 	void (*lua_setProtoFunction)(void* context, Proto* p, lua_CFunction func);
 	/* Mark the function as var arg */
 	void (*lua_setVarArg)(void *context, Proto* p);
+	void (*lua_setMaxStackSize)(void *context, Proto *p, unsigned max_stack_size);
+	void (*lua_setNumParams)(void *context, Proto *p, unsigned num_params);
 
 	/* ------------------------ Following apis are for compiling code -------------------------------- */
 	void (*init_C_compiler)(void *context);

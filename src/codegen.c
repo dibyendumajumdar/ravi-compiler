@@ -891,12 +891,27 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 	return rc;
 }
 
+static unsigned compute_max_stack_size(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc)
+{
+	/* max stack size is number of Lua vars plus any temps + some space */
+	/* TODO this is probably incorrect */
+	return proc->local_pseudos.next_reg + proc->temp_pseudos.next_reg + 10;
+}
+
+static unsigned get_num_params(struct proc *proc)
+{
+	return ptrlist_size((const struct ptr_list *) proc->function_expr->function_expr.args);
+}
+
 /* Generate C code for each proc recursively */
 static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, buffer_t *mb)
 {
 	int rc = 0;
 	struct function fn;
 	initfn(&fn, proc);
+
+	ravi_interface->lua_setMaxStackSize(ravi_interface->context, (Proto *)proc->userdata, compute_max_stack_size(ravi_interface, proc));
+	ravi_interface->lua_setNumParams(ravi_interface->context, (Proto *)proc->userdata, get_num_params(proc));
 
 	struct basic_block *bb;
 	for (int i = 0; i < (int)proc->node_count; i++) {
@@ -1015,8 +1030,8 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 
 	/* Create protos for each proc we will compile */
 	Proto *main_proto = ravi_interface->main_proto;
-	/* Mark the main proc as var arg */
-	ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
+	/* We don't support var args yet */
+	//ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
 	/* Add the upvalue for _ENV */
 	ravi_interface->lua_addUpValue(ravi_interface->context, main_proto, envs, 0, 0, RAVI_TANY, NULL);
 	/* Create all the child protos as we will need them to be there for code gen */
