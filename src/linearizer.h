@@ -172,9 +172,9 @@ struct basic_block {
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 
 struct pseudo_generator {
-	uint8_t next_reg;
-	int16_t free_pos;
-	uint8_t free_regs[256];
+	uint8_t next_reg; /* Next register if no free registers, initially 0 */
+	int16_t free_pos; /* number of values in free_regs */
+	uint8_t free_regs[256]; /* list of free registers */
 };
 
 struct constant {
