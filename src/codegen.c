@@ -823,6 +823,8 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 #endif
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, "int wanted = ci->nresults;\n");
+	raviX_buffer_add_string(&fn->body, "result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
+	/* FIXME following is not exactly correct as the last operand could have a range pseudo to TOS */
 	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n",
 				 ptrlist_size((struct ptr_list *)insn->operands));
 	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
@@ -846,6 +848,7 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
+	raviX_buffer_add_string(&fn->body, "L->top = R(-1) + wanted;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	emit_jump(fn, get_target_value(insn, 0));
 }
@@ -989,6 +992,10 @@ static int stub_lua_addUpValue(void *context, Proto *f, struct string_object* na
 				     unsigned typecode, struct string_object* usertype) {
 	return 0;
 }
+static void stub_lua_setNumParams(void *context, Proto *p, unsigned num_params) {
+}
+static void stub_lua_setMaxStackSize(void *context, Proto *p, unsigned max_stack_size) {
+}
 static void debug_message(void *context, const char *filename, long long line, const char *message)
 {
 	fprintf(stdout, "%s:%lld: %s\n", filename, line, message);
@@ -1013,6 +1020,8 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {
     .lua_newStringConstant = stub_newStringConstant,
     .lua_setVarArg = stub_lua_setVarArg,
     .lua_addUpValue = stub_lua_addUpValue,
+    .lua_setNumParams = stub_lua_setNumParams,
+    .lua_setMaxStackSize = stub_lua_setMaxStackSize,
     .error_message = error_message,
     .debug_message = debug_message
 };
