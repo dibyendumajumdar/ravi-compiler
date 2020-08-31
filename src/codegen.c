@@ -746,7 +746,8 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 			emit_reg_accessor(fn, src);
 			raviX_buffer_add_string(&fn->body, ";\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst);
-			raviX_buffer_add_string(&fn->body, ";\n*dst_reg = *src_reg;\n}\n");
+			// FIXME - check value assignment approach
+			raviX_buffer_add_string(&fn->body, ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
 		} else if (src->type == PSEUDO_TEMP_INT) {
 			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst);
