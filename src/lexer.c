@@ -89,13 +89,13 @@ with the keyword else this attribute will be -1. The hash value of the string is
 attribute. Note that we need to allow strings that have embedded 0 character hence the length
 is explicit. But all tokens and reserved keywords are expected to be standard C strings.
 */
-const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
+struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
 {
 	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1, .userdata = NULL};
 	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
-		return (const struct string_object *)entry->key;
+		return (struct string_object *)entry->key;
 	else {
 		struct string_object *new_string = raviX_allocator_allocate(&container->string_object_allocator, 0);
 		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1); /* allow for 0 terminator */
