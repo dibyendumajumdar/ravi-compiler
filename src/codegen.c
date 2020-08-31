@@ -854,6 +854,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	switch (insn->opcode) {
 	case op_ret:
 		emit_op_ret(fn, insn);
+		break;
 	default:
 		return -1;
 	}
