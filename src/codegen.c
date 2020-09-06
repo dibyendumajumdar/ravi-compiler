@@ -684,7 +684,7 @@ static void cleanup(struct function *fn)
 }
 
 /* access a pseudo that is on Lua stack or is an upvalue */
-static void emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
+static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
 		// Note pseudo->stackidx is relative to ci->func
@@ -699,14 +699,17 @@ static void emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 			raviX_buffer_add_fstring(&fn->body, "cl->upvals[%d]->v", pseudo->regnum);
 		} else {
 			assert(0);
+			return -1;
 		}
 	} else {
 		assert(0);
+		return -1;
 	}
+	return 0;
 }
 
 /*copy floating point value to a temporary float */
-static void emit_move_flttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
 {
 	if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMFLT) {
@@ -715,6 +718,7 @@ static void emit_move_flttemp(struct function *fn, struct pseudo *src, struct ps
 		} else {
 			// FIXME can we have int value?
 			assert(0);
+			return -1;
 		}
 	} else if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
 		raviX_buffer_add_string(&fn->body, "{\nTValue *reg = ");
@@ -724,11 +728,13 @@ static void emit_move_flttemp(struct function *fn, struct pseudo *src, struct ps
 		raviX_buffer_add_string(&fn->body, " = fltvalue(reg);\n}\n");
 	} else {
 		assert(0);
+		return -1;
 	}
+	return 0;
 }
 
 /*copy integer value to temporary int */
-static void emit_move_inttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
 {
 	if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMFLT) {
@@ -737,6 +743,7 @@ static void emit_move_inttemp(struct function *fn, struct pseudo *src, struct ps
 		} else {
 			// FIXME can we have float value?
 			assert(0);
+			return -1;
 		}
 	} else if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
 		raviX_buffer_add_string(&fn->body, "{\nTValue *reg = ");
@@ -746,11 +753,13 @@ static void emit_move_inttemp(struct function *fn, struct pseudo *src, struct ps
 		raviX_buffer_add_string(&fn->body, " = ivalue(reg);\n}\n");
 	} else {
 		assert(0);
+		return -1;
 	}
+	return 0;
 }
 
 /* copy a value from source pseudo to destination pseudo.*/
-static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst)
 {
 	if (dst->type == PSEUDO_TEMP_FLT) {
 		emit_move_flttemp(fn, src, dst);
@@ -810,15 +819,19 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 				    "dst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.gc = src_reg->value_.gc;\n");
 			} else {
 				assert(0);
+				return -1;
 			}
 			raviX_buffer_add_string(&fn->body, "}\n");
 		} else {
 			/* range pesudos not supported yet */
 			assert(0);
+			return -1;
 		}
 	} else {
 		assert(0);
+		return -1;
 	}
+	return 0;
 }
 
 /* dest_value must be TValue * */
@@ -833,13 +846,19 @@ static void emit_assign(struct function *fn, const char *dest_value, struct pseu
 	}
 }
 
-static void emit_jump(struct function *fn, struct pseudo *pseudo)
+static int emit_jump(struct function *fn, struct pseudo *pseudo)
 {
 	assert(pseudo->type == PSEUDO_BLOCK);
 	raviX_buffer_add_fstring(&fn->body, "goto L%d;\n", pseudo->block->index);
+	return 0;
 }
 
-static void emit_op_ret(struct function *fn, struct instruction *insn)
+static int emit_op_mov(struct function *fn, struct instruction *insn)
+{
+	return emit_move(fn, get_operand(insn, 0), get_target(insn, 0));
+}
+
+static int emit_op_ret(struct function *fn, struct instruction *insn)
 {
 	// TODO Only call luaF_close if needed (i.e. some variable escaped)
 #ifdef RAVI_DEFER_STATEMENT
@@ -888,6 +907,7 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	emit_jump(fn, get_target(insn, 0));
+	return 0;
 }
 
 static int output_instruction(struct function *fn, struct instruction *insn)
