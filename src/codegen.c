@@ -603,6 +603,7 @@ struct function {
 	struct proc *proc;
 	buffer_t prologue;
 	buffer_t body;
+	struct Ravi_CompilerInterface *api;
 };
 
 /* readonly statics */
@@ -635,9 +636,10 @@ static void emit_varname(struct pseudo *pseudo, buffer_t *mb)
 	}
 }
 
-static void initfn(struct function *fn, struct proc *proc)
+static void initfn(struct function *fn, struct proc *proc, struct Ravi_CompilerInterface *api)
 {
 	fn->proc = proc;
+	fn->api = api;
 	/* Set a name that can be used later to retrieve the compiled code */
 	snprintf(proc->funcname, sizeof proc->funcname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
@@ -747,7 +749,8 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 			raviX_buffer_add_string(&fn->body, ";\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst);
 			// FIXME - check value assignment approach
-			raviX_buffer_add_string(&fn->body, ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
+			raviX_buffer_add_string(
+			    &fn->body, ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
 		} else if (src->type == PSEUDO_TEMP_INT) {
 			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst);
@@ -782,11 +785,17 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 			} else if (src->constant->type == RAVI_TNIL) {
 				raviX_buffer_add_string(&fn->body, "setnilvalue(dst_reg);\n");
 			} else if (src->constant->type == RAVI_TSTRING) {
-				// FIXME issue #32 We should add string constants to the proto
-				assert(0);
+				/* TODO we discard const below as we need to update the string constant but this is not nice */
+				unsigned k = fn->api->lua_newStringConstant(
+				    fn->api->context, (Proto *)fn->proc->userdata, (struct string_object *) src->constant->s);
+				raviX_buffer_add_fstring(&fn->body, "TValue *src_reg = K(%u);\n", k);
+				raviX_buffer_add_string(
+				    &fn->body,
+				    "dst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.gc = src_reg->value_.gc;\n");
 			} else {
 				assert(0);
 			}
+			raviX_buffer_add_string(&fn->body, "}\n");
 		} else {
 			assert(0);
 		}
@@ -819,7 +828,9 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, " base = ci->u.l.base;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 #else
-	raviX_buffer_add_string(&fn->body, "if (cl->p->sizep > 0) luaF_close(L, base);\n");
+	if (ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+		raviX_buffer_add_string(&fn->body, "luaF_close(L, base);\n");
+	}
 #endif
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, "int wanted = ci->nresults;\n");
@@ -903,7 +914,7 @@ static unsigned compute_max_stack_size(struct Ravi_CompilerInterface *ravi_inter
 
 static unsigned get_num_params(struct proc *proc)
 {
-	return ptrlist_size((const struct ptr_list *) proc->function_expr->function_expr.args);
+	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
 }
 
 /* Generate C code for each proc recursively */
@@ -911,9 +922,10 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 {
 	int rc = 0;
 	struct function fn;
-	initfn(&fn, proc);
+	initfn(&fn, proc, ravi_interface);
 
-	ravi_interface->lua_setMaxStackSize(ravi_interface->context, (Proto *)proc->userdata, compute_max_stack_size(ravi_interface, proc));
+	ravi_interface->lua_setMaxStackSize(ravi_interface->context, (Proto *)proc->userdata,
+					    compute_max_stack_size(ravi_interface, proc));
 	ravi_interface->lua_setNumParams(ravi_interface->context, (Proto *)proc->userdata, get_num_params(proc));
 
 	struct basic_block *bb;
@@ -988,43 +1000,37 @@ static void *stub_compile_C(void *context, const char *C_src, unsigned len) { re
 static lua_CFunction stub_lua_getFunction(void *context, void *module, const char *name) { return NULL; }
 static void stub_lua_setProtoFunction(void *context, Proto *p, lua_CFunction func) {}
 static void stub_lua_setVarArg(void *context, Proto *p) {}
-static int stub_lua_addUpValue(void *context, Proto *f, struct string_object* name, unsigned idx, int instack,
-				     unsigned typecode, struct string_object* usertype) {
+static int stub_lua_addUpValue(void *context, Proto *f, struct string_object *name, unsigned idx, int instack,
+			       unsigned typecode, struct string_object *usertype)
+{
 	return 0;
 }
-static void stub_lua_setNumParams(void *context, Proto *p, unsigned num_params) {
-}
-static void stub_lua_setMaxStackSize(void *context, Proto *p, unsigned max_stack_size) {
-}
+static void stub_lua_setNumParams(void *context, Proto *p, unsigned num_params) {}
+static void stub_lua_setMaxStackSize(void *context, Proto *p, unsigned max_stack_size) {}
 static void debug_message(void *context, const char *filename, long long line, const char *message)
 {
 	fprintf(stdout, "%s:%lld: %s\n", filename, line, message);
 }
-static void error_message(void *context, const char *message)
-{
-	fprintf(stdout, "ERROR: %s\n", message);
-}
+static void error_message(void *context, const char *message) { fprintf(stdout, "ERROR: %s\n", message); }
 
-static struct Ravi_CompilerInterface stub_compilerInterface = {
-    .context = NULL,
-    .source_name = "input",
-    .source = NULL,
-    .source_len = 0,
-    .main_proto = NULL,
-    .init_C_compiler = stub_init_C_compiler,
-    .compile_C = stub_compile_C,
-    .finish_C_compiler = stub_finish_C_compiler,
-    .get_compiled_function = stub_lua_getFunction,
-    .lua_setProtoFunction = stub_lua_setProtoFunction,
-    .lua_newProto = stub_newProto,
-    .lua_newStringConstant = stub_newStringConstant,
-    .lua_setVarArg = stub_lua_setVarArg,
-    .lua_addUpValue = stub_lua_addUpValue,
-    .lua_setNumParams = stub_lua_setNumParams,
-    .lua_setMaxStackSize = stub_lua_setMaxStackSize,
-    .error_message = error_message,
-    .debug_message = debug_message
-};
+static struct Ravi_CompilerInterface stub_compilerInterface = {.context = NULL,
+							       .source_name = "input",
+							       .source = NULL,
+							       .source_len = 0,
+							       .main_proto = NULL,
+							       .init_C_compiler = stub_init_C_compiler,
+							       .compile_C = stub_compile_C,
+							       .finish_C_compiler = stub_finish_C_compiler,
+							       .get_compiled_function = stub_lua_getFunction,
+							       .lua_setProtoFunction = stub_lua_setProtoFunction,
+							       .lua_newProto = stub_newProto,
+							       .lua_newStringConstant = stub_newStringConstant,
+							       .lua_setVarArg = stub_lua_setVarArg,
+							       .lua_addUpValue = stub_lua_addUpValue,
+							       .lua_setNumParams = stub_lua_setNumParams,
+							       .lua_setMaxStackSize = stub_lua_setMaxStackSize,
+							       .error_message = error_message,
+							       .debug_message = debug_message};
 
 /* Generate and compile C code */
 int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface)
@@ -1040,7 +1046,7 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	/* Create protos for each proc we will compile */
 	Proto *main_proto = ravi_interface->main_proto;
 	/* We don't support var args yet */
-	//ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
+	// ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
 	/* Add the upvalue for _ENV */
 	ravi_interface->lua_addUpValue(ravi_interface->context, main_proto, envs, 0, 0, RAVI_TANY, NULL);
 	/* Create all the child protos as we will need them to be there for code gen */
