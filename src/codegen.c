@@ -614,22 +614,22 @@ static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
 {
-	return (struct pseudo *) ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
+	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
 }
 
 static inline struct pseudo *get_target(struct instruction *insn, unsigned idx)
 {
-	return (struct pseudo *) ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
 }
 
 static inline unsigned get_num_operands(struct instruction *insn)
 {
-	return ptrlist_size((const struct ptr_list *) insn->operands);
+	return ptrlist_size((const struct ptr_list *)insn->operands);
 }
 
 static inline unsigned get_num_targets(struct instruction *insn)
 {
-	return ptrlist_size((const struct ptr_list *) insn->targets);
+	return ptrlist_size((const struct ptr_list *)insn->targets);
 }
 
 static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, buffer_t *mb)
@@ -835,16 +835,16 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 }
 
 /* dest_value must be TValue * */
-static void emit_assign(struct function *fn, const char *dest_value, struct pseudo *pseudo)
-{
-	if (pseudo->type == PSEUDO_NIL) {
-		raviX_buffer_add_fstring(&fn->body, "setnilvalue(%s);\n", dest_value);
-	} else if (pseudo->type == PSEUDO_TRUE) {
-		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 1);\n", dest_value);
-	} else if (pseudo->type == PSEUDO_FALSE) {
-		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 0);\n", dest_value);
-	}
-}
+// static void emit_assign(struct function *fn, const char *dest_value, struct pseudo *pseudo)
+//{
+//	if (pseudo->type == PSEUDO_NIL) {
+//		raviX_buffer_add_fstring(&fn->body, "setnilvalue(%s);\n", dest_value);
+//	} else if (pseudo->type == PSEUDO_TRUE) {
+//		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 1);\n", dest_value);
+//	} else if (pseudo->type == PSEUDO_FALSE) {
+//		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 0);\n", dest_value);
+//	}
+//}
 
 static int emit_jump(struct function *fn, struct pseudo *pseudo)
 {
@@ -853,8 +853,38 @@ static int emit_jump(struct function *fn, struct pseudo *pseudo)
 	return 0;
 }
 
+static int emit_op_cbr(struct function *fn, struct instruction *insn)
+{
+	assert(insn->opcode == op_cbr);
+	struct pseudo *cond_pseudo = get_operand(insn, 0);
+	if (cond_pseudo->type == PSEUDO_FALSE || cond_pseudo->type == PSEUDO_NIL) {
+		emit_jump(fn, get_target(insn, 1));
+	} else if (cond_pseudo->type == PSEUDO_TRUE || cond_pseudo->type == PSEUDO_CONSTANT ||
+		   cond_pseudo->type == PSEUDO_TEMP_FLT || cond_pseudo->type == PSEUDO_TEMP_INT) {
+		emit_jump(fn, get_target(insn, 0));
+	} else if (cond_pseudo->type == PSEUDO_TEMP_ANY || cond_pseudo->type == PSEUDO_SYMBOL) {
+		raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
+		emit_reg_accessor(fn, cond_pseudo);
+		raviX_buffer_add_fstring(&fn->body, ";\nif (!l_isfalse(src_reg)) goto L%d;\n",
+					 get_target(insn, 0)->block->index);
+		raviX_buffer_add_fstring(&fn->body, "else goto L%d;\n", get_target(insn, 1)->block->index);
+		raviX_buffer_add_string(&fn->body, "}\n");
+	} else {
+		assert(0);
+		return -1;
+	}
+	return 0;
+}
+
+static int emit_op_br(struct function *fn, struct instruction *insn)
+{
+	assert(insn->opcode == op_br);
+	return emit_jump(fn, get_target(insn, 0));
+}
+
 static int emit_op_mov(struct function *fn, struct instruction *insn)
 {
+	assert(insn->opcode == op_mov);
 	return emit_move(fn, get_operand(insn, 0), get_target(insn, 0));
 }
 
@@ -880,8 +910,7 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "int wanted = ci->nresults;\n");
 	raviX_buffer_add_string(&fn->body, "result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
 	/* FIXME following is not exactly correct as the last operand could have a range pseudo to TOS */
-	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n",
-				 get_num_operands(insn));
+	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n", get_num_operands(insn));
 	struct pseudo *pseudo;
 	int i = 0;
 	FOR_EACH_PTR(insn->operands, pseudo)
@@ -916,6 +945,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	switch (insn->opcode) {
 	case op_ret:
 		rc = emit_op_ret(fn, insn);
+		break;
+	case op_br:
+		rc = emit_op_br(fn, insn);
+		break;
+	case op_cbr:
+		rc = emit_op_cbr(fn, insn);
 		break;
 	case op_mov:
 		rc = emit_op_mov(fn, insn);

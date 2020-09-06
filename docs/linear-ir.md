@@ -69,3 +69,25 @@ Copies a value from one location to another
 </dl>
 
 * The move operation deals with scalar quantities, table/array store/loads are handled by different operators.
+
+### op_br
+
+Branches unconditionally to the target block
+
+<dl>
+    <dt>operands</dt>
+    <dd>none</dd>
+    <dt>targets</dt>
+    <dd>1 target block</dd>
+</dl>
+
+### op_cbr
+
+Branches conditionally to one of two blocks.
+
+<dl>
+    <dt>operands</dt>
+    <dd>The condition pseudo to be tested for truth</dd>
+    <dt>targets</dt>
+    <dd>Two block pseudos, the first is the target for true condition and second for false condition</dd>
+</dl>
