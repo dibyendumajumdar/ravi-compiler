@@ -1006,6 +1006,9 @@ static void assign_compiled_functions_to_protos(struct Ravi_CompilerInterface *r
 //	}
 //}
 
+/* Create protos for all the procs with the correct relationships. We do this recursively for all the
+ * child procs. The top-level proto is precreated by the caller (actually it is precreated on the Ravi side).
+ */
 static void create_protos(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
 {
 	proc->userdata = proto;
