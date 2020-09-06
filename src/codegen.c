@@ -591,6 +591,7 @@ static const char Lua_header[] =
     "extern void raviV_op_bnot(lua_State *L, TValue *ra, TValue *rb);\n"
     "#define R(i) (base + i)\n"
     "#define K(i) (k + i)\n"
+    "#define S(i) (stackbase + i)\n"
     "#define tonumberns(o,n) \\\n"
     "	(ttisfloat(o) ? ((n) = fltvalue(o), 1) : \\\n"
     "	(ttisinteger(o) ? ((n) = cast_num(ivalue(o)), 1) : 0))\n"
@@ -673,8 +674,8 @@ static struct pseudo *get_target_value(struct instruction *insn, unsigned i)
 static void emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
-		// Note pseudo->stackidx is relative to base and may be negative
-		raviX_buffer_add_fstring(&fn->body, "R(%d)", pseudo->stackidx);
+		// Note pseudo->stackidx is relative to ci->func
+		raviX_buffer_add_fstring(&fn->body, "S(%d)", pseudo->stackidx);
 	} else if (pseudo->type == PSEUDO_TEMP_ANY) {
 		// Note we put all temps on Lua stack after the locals
 		raviX_buffer_add_fstring(&fn->body, "R(%d)", pseudo->regnum + fn->proc->local_pseudos.next_reg);
@@ -785,9 +786,11 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 			} else if (src->constant->type == RAVI_TNIL) {
 				raviX_buffer_add_string(&fn->body, "setnilvalue(dst_reg);\n");
 			} else if (src->constant->type == RAVI_TSTRING) {
-				/* TODO we discard const below as we need to update the string constant but this is not nice */
-				unsigned k = fn->api->lua_newStringConstant(
-				    fn->api->context, (Proto *)fn->proc->userdata, (struct string_object *) src->constant->s);
+				/* TODO we discard const below as we need to update the string constant but this is not
+				 * nice */
+				unsigned k =
+				    fn->api->lua_newStringConstant(fn->api->context, (Proto *)fn->proc->userdata,
+								   (struct string_object *)src->constant->s);
 				raviX_buffer_add_fstring(&fn->body, "TValue *src_reg = K(%u);\n", k);
 				raviX_buffer_add_string(
 				    &fn->body,
@@ -797,8 +800,11 @@ static void emit_move(struct function *fn, struct pseudo *src, struct pseudo *ds
 			}
 			raviX_buffer_add_string(&fn->body, "}\n");
 		} else {
+			/* range pesudos not supported yet */
 			assert(0);
 		}
+	} else {
+		assert(0);
 	}
 }
 
@@ -822,30 +828,35 @@ static void emit_jump(struct function *fn, struct pseudo *pseudo)
 
 static void emit_op_ret(struct function *fn, struct instruction *insn)
 {
-	// TODO Only call luaF_close if needed
+	// TODO Only call luaF_close if needed (i.e. some variable escaped)
 #ifdef RAVI_DEFER_STATEMENT
-	raviX_buffer_add_string(&fn->body, "if (cl->p->sizep > 0) {\n luaF_close(L, base, LUA_OK);\n");
-	raviX_buffer_add_string(&fn->body, " base = ci->u.l.base;\n");
-	raviX_buffer_add_string(&fn->body, "}\n");
+	if (ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+		raviX_buffer_add_string(&fn->body, "{\nluaF_close(L, base, LUA_OK);\n");
+		raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n");
+		raviX_buffer_add_string(&fn->body, "}\n");
+	}
 #else
 	if (ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
 		raviX_buffer_add_string(&fn->body, "luaF_close(L, base);\n");
 	}
 #endif
 	raviX_buffer_add_string(&fn->body, "{\n");
+	/* Results are copied to stack position given by ci->func and above.
+	 * stackbase is set here so S(n) refers to (stackbase+n)
+	 */
+	raviX_buffer_add_string(&fn->body, "TValue *stackbase = ci->func;\n");
 	raviX_buffer_add_string(&fn->body, "int wanted = ci->nresults;\n");
 	raviX_buffer_add_string(&fn->body, "result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
 	/* FIXME following is not exactly correct as the last operand could have a range pseudo to TOS */
 	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n",
 				 ptrlist_size((struct ptr_list *)insn->operands));
-	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
 	struct pseudo *pseudo;
 	int i = 0;
 	FOR_EACH_PTR(insn->operands, pseudo)
 	{
-		// First result should be copied to base[-1] so all offsets are adjusted by -1.
-		struct pseudo dummy_dest = {.type = PSEUDO_LUASTACK, .stackidx = i - 1};
+		struct pseudo dummy_dest = {.type = PSEUDO_LUASTACK, .stackidx = i}; /* will go to stackbase[i] */
 		raviX_buffer_add_fstring(&fn->body, "if (%d < wanted) {\n", i);
+		/* FIXME last argument might be a range pseudo */
 		emit_move(fn, pseudo, &dummy_dest);
 		raviX_buffer_add_string(&fn->body, "}\n");
 		i++;
@@ -854,12 +865,14 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_fstring(&fn->body, "if (%d < wanted) {\nint j = %d;\n", i, i);
 	raviX_buffer_add_string(&fn->body, "while (j < wanted) {\n");
 	{
-		raviX_buffer_add_string(&fn->body, "setnilvalue(R(j-1));\n");
+		raviX_buffer_add_string(&fn->body, "setnilvalue(S(j));\n");
 		raviX_buffer_add_string(&fn->body, "j++;\n");
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
-	raviX_buffer_add_string(&fn->body, "L->top = R(-1) + wanted;\n");
+	/* FIXME the rule for L->top needs to be checked */
+	raviX_buffer_add_string(&fn->body, "L->top = S(0) + wanted;\n");
+	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	emit_jump(fn, get_target_value(insn, 0));
 }
