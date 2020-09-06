@@ -612,6 +612,26 @@ static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
 static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
+static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
+{
+	return (struct pseudo *) ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
+}
+
+static inline struct pseudo *get_target(struct instruction *insn, unsigned idx)
+{
+	return (struct pseudo *) ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+}
+
+static inline unsigned get_num_operands(struct instruction *insn)
+{
+	return ptrlist_size((const struct ptr_list *) insn->operands);
+}
+
+static inline unsigned get_num_targets(struct instruction *insn)
+{
+	return ptrlist_size((const struct ptr_list *) insn->targets);
+}
+
 static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, buffer_t *mb)
 {
 	if (gen->next_reg == 0)
@@ -661,13 +681,6 @@ static void cleanup(struct function *fn)
 {
 	raviX_buffer_free(&fn->prologue);
 	raviX_buffer_free(&fn->body);
-}
-
-static struct pseudo *get_target_value(struct instruction *insn, unsigned i)
-{
-	if (insn->targets == NULL)
-		return NULL;
-	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, i);
 }
 
 /* access a pseudo that is on Lua stack or is an upvalue */
@@ -849,7 +862,7 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
 	/* FIXME following is not exactly correct as the last operand could have a range pseudo to TOS */
 	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n",
-				 ptrlist_size((struct ptr_list *)insn->operands));
+				 get_num_operands(insn));
 	struct pseudo *pseudo;
 	int i = 0;
 	FOR_EACH_PTR(insn->operands, pseudo)
@@ -874,7 +887,7 @@ static void emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "L->top = S(0) + wanted;\n");
 	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
-	emit_jump(fn, get_target_value(insn, 0));
+	emit_jump(fn, get_target(insn, 0));
 }
 
 static int output_instruction(struct function *fn, struct instruction *insn)
@@ -925,7 +938,7 @@ static unsigned compute_max_stack_size(struct Ravi_CompilerInterface *ravi_inter
 	return proc->local_pseudos.next_reg + proc->temp_pseudos.next_reg + 10;
 }
 
-static unsigned get_num_params(struct proc *proc)
+static inline unsigned get_num_params(struct proc *proc)
 {
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
 }
