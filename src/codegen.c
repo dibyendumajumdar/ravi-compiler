@@ -912,14 +912,18 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
+	int rc = 0;
 	switch (insn->opcode) {
 	case op_ret:
-		emit_op_ret(fn, insn);
+		rc = emit_op_ret(fn, insn);
+		break;
+	case op_mov:
+		rc = emit_op_mov(fn, insn);
 		break;
 	default:
-		return -1;
+		rc = -1;
 	}
-	return 0;
+	return rc;
 }
 
 static int output_instructions(struct function *fn, struct instruction_list *list)
