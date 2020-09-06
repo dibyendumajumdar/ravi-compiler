@@ -34,7 +34,9 @@ uniformly represented in an instruction. Following are the possible types:
 </dl>
 
 
-## Branching Instructions
+## Instructions
+
+The instruction set in the intermediate representation is covered here. As each opcode is implemented end to end, it will be added to the list below.
 
 #### op_ret 
 
@@ -55,3 +57,15 @@ any deferred closures executed. This call may be omitted if no variables in the 
 * The `L->ci` must be set to the parent of the current function.
 * TBC For compatibility with Lua/ravi, if the number of expected results was `-1` then we should set `L->top` to just past the last result copied, else restore the `L-top` to the previous callers `ci->top`.
 
+### op_mov
+
+Copies a value from one location to another
+
+<dl>
+    <dt>operands<dt>
+    <dd>1 source pseudo</dd>
+    <dt>targets</dt>
+    <dd>1 target pseudo</dd>
+</dl>
+
+* The move operation deals with scalar quantities, table/array store/loads are handled by different operators.
