@@ -30,7 +30,7 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
-	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to base, can be negative</dd>
+	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to ci->func, used by backend for copying results to calling function. Will never be emitted in the IR.</dd>
 </dl>
 
 
@@ -51,7 +51,7 @@ The `op_ret` instruction must perform some housekeeping.
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
 any deferred closures executed. This call may be omitted if no variables in the proc including child procs escaped.
-* Next it must copy the return values to the stack, results must be placed at `ci->func` (`ci->base - 1`) and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
+* Next it must copy the return values to the stack, results must be placed at `ci->func` and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
 * The `L->ci` must be set to the parent of the current function.
 * TBC For compatibility with Lua/ravi, if the number of expected results was `-1` then we should set `L->top` to just past the last result copied, else restore the `L-top` to the previous callers `ci->top`.
 
