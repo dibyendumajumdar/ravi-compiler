@@ -160,5 +160,6 @@ $command "function foo(bar: number, zee: string) end"
 $command "function foo(bar: closure, zee: My.User.Type) end"
 
 $command "return (f())"
+$command "return {g()}, f(g())"
 
 exit 0

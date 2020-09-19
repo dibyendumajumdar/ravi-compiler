@@ -467,6 +467,48 @@ static struct ast_node *parse_field(struct parser_state *parser)
 	return NULL;
 }
 
+static struct ast_node* has_function_call(struct ast_node *expr)
+{
+	if (!expr)
+		return NULL;
+	if (expr->type == EXPR_FUNCTION_CALL)
+		return expr;
+	else if (expr->type == EXPR_SUFFIXED) {
+		if (expr->suffixed_expr.suffix_list) {
+			return has_function_call((struct ast_node *) ptrlist_last((struct ptr_list *) expr->suffixed_expr.suffix_list));
+		}
+		else {
+			return has_function_call(expr->suffixed_expr.primary_expr);
+		}
+	}
+	else {
+		return NULL;
+	}
+}
+
+/* If a call expr appears as the last in the expression list then mark it as multi-return (-1)
+ * i.e. the caller wants all available returns.
+ */
+static void set_multireturn(struct parser_state *parser, struct ast_node_list *expr_list, bool in_table_constructor)
+{
+	struct ast_node *last_expr = (struct ast_node *) ptrlist_last((struct ptr_list *) expr_list);
+	if (!last_expr)
+		return;
+	if (in_table_constructor) {
+		if (last_expr->type == EXPR_TABLE_ELEMENT_ASSIGN && last_expr->table_elem_assign_expr.key_expr == NULL) {
+			last_expr = last_expr->table_elem_assign_expr.value_expr;
+		}
+		else {
+			return;
+		}
+	}
+	struct ast_node *call_expr = has_function_call(last_expr);
+	if (call_expr) {
+		// Last expr so accept all available results
+		call_expr->function_call_expr.num_results = -1;
+	}
+}
+
 static struct ast_node *parse_table_constructor(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
@@ -483,6 +525,7 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
 		struct ast_node *field_expr = parse_field(parser);
 		add_ast_node(parser->container, &table_expr->table_expr.expr_list, field_expr);
 	} while (testnext(ls, ',') || testnext(ls, ';'));
+	set_multireturn(parser, table_expr->table_expr.expr_list, true);
 	check_match(ls, '}', '{', line);
 	return table_expr;
 }
@@ -648,6 +691,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 	struct ast_node *call_expr = allocate_expr_ast_node(parser, EXPR_FUNCTION_CALL);
 	call_expr->function_call_expr.method_name = methodname;
 	call_expr->function_call_expr.arg_list = NULL;
+	call_expr->function_call_expr.num_results = 1; /* By default we expect one arg */
 	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
 	switch (ls->t.token) {
 	case '(': { /* funcargs -> '(' [ explist ] ')' */
@@ -656,6 +700,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 			;
 		else {
 			parse_expression_list(parser, &call_expr->function_call_expr.arg_list);
+			set_multireturn(parser, call_expr->function_call_expr.arg_list, false);
 		}
 		check_match(ls, ')', '(', line);
 		break;
@@ -1249,6 +1294,23 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
 	return stmt;
 }
 
+/**
+ * If a call expression is at the end of a local or expression statement then
+ * we need to check the number of return values that is expected.
+ */
+static void limit_function_call_results(struct parser_state *parser, int num_lhs, struct ast_node_list *expr_list)
+{
+	// FIXME probably doesn't handle var arg case
+	struct ast_node *last_expr = (struct ast_node *) ptrlist_last((struct ptr_list *) expr_list);
+	struct ast_node *call_expr = has_function_call(last_expr);
+	if (!call_expr)
+		return;
+	int num_expr = ptrlist_size((const struct ptr_list *) expr_list);
+	if (num_expr < num_lhs) {
+		call_expr->function_call_expr.num_results = (num_lhs - num_expr) + 1;
+	}
+}
+
 static struct ast_node *parse_local_statement(struct parser_state *parser)
 {
 	struct lexer_state *ls = parser->ls;
@@ -1271,6 +1333,7 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
 		/* nexps = 0; */
 		;
 	}
+	limit_function_call_results(parser, nvars, node->local_stmt.expr_list);
 	/* local symbols are only added to scope at the end of the local statement */
 	struct lua_symbol *sym = NULL;
 	FOR_EACH_PTR(node->local_stmt.var_list, sym) { add_local_symbol_to_current_scope(parser, sym); }
@@ -1331,6 +1394,8 @@ static struct ast_node *parse_expression_statement(struct parser_state *parser)
 		stmt->expression_stmt.var_expr_list = current_list;
 		current_list = NULL;
 		parse_expression_list(parser, &current_list);
+		limit_function_call_results(
+		    parser, ptrlist_size((const struct ptr_list *)stmt->expression_stmt.var_expr_list), current_list);
 	}
 	stmt->expression_stmt.expr_list = current_list;
 	// TODO Check that if not assignment then it is a function call
@@ -1348,6 +1413,7 @@ static struct ast_node *parse_return_statement(struct parser_state *parser)
 	else {
 		/*nret = */
 		parse_expression_list(parser, &return_stmt->return_stmt.expr_list); /* optional return values */
+		set_multireturn(parser, return_stmt->return_stmt.expr_list, false);
 	}
 	testnext(ls, ';'); /* skip optional semicolon */
 	return return_stmt;

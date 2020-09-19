@@ -291,6 +291,7 @@ struct function_call_expression {
 	BASE_EXPRESSION_FIELDS;
 	const struct string_object *method_name; /* Optional method_name */
 	struct ast_node_list *arg_list;		 /* Call arguments */
+	int num_results;			 /* How many results do we expect, -1 means all available results */
 };
 #undef BASE_EXPRESSION_FIELDS
 

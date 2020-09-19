@@ -9644,3 +9644,102 @@ L0 (entry)
 	CALL {T(0)} {T(0..)}
 	RET {T(0[0..])} {L1}
 L1 (exit)
+return {g()}, f(g())
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          g --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       f --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+          --[suffixed expr start] any
+           --[primary start] any
+             g --global symbol any 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+  return
+    { --[table constructor start] table
+      --[indexed assign start] any
+      --[value start]
+       --[suffixed expr start] any
+        --[primary start] any
+          g --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+   ,
+    --[suffixed expr start] any
+     --[primary start] any
+       f --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+          --[suffixed expr start] any
+           --[primary start] any
+             g --global symbol any 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+define Proc%1
+L0 (entry)
+	NEWTABLE {T(0)}
+	LOADGLOBAL {g} {T(1)}
+	CALL {T(1)} {T(1..)}
+	TPUTik {T(0), 1 Kint(0), T(1..)}
+	LOADGLOBAL {f} {T(1)}
+	LOADGLOBAL {g} {T(2)}
+	CALL {T(2)} {T(2..)}
+	CALL {T(1), T(2..)} {T(1..)}
+	RET {T(0), T(1..)} {L1}
+L1 (exit)
