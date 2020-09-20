@@ -24,7 +24,7 @@ The compiler library will consist of distinct modules:
 
 ## Status
 
-* Work in progress - currently woking on C code generation from the IR
+* Work in progress - currently working on C code generation from the IR
 
 ## Documentation
 
