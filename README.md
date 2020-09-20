@@ -1,19 +1,30 @@
 ![build](https://github.com/dibyendumajumdar/ravi-compiler/workflows/build/badge.svg)
 
 # ravi-compiler
-Experimental compiler for Ravi and Lua. 
+A compiler for Ravi and Lua.
 
-The goal of this project is to create a standalone parser and compiler for Lua / Ravi. The output of the compiler will be C code suitable for JITing and/or AOT. The compiler library will consist of distinct modules:
+## Goals
 
-* lexer (Done) - responsible for tokenizing an input buffer
-* parser (Mostly Done) - responsible for generating abstract syntax tree (AST).
-* typechecker (Mostly Done) - responsible for assigning types to variables when possible.
-* AST simplifier (Work in progress) - responsible for performing some initial simplifications such as constant folding.
-* linearizer (Work in progress) - responsible for constructing a linear IR representation of the AST.
+* Create a re-usable Lua/Ravi lexer/parser
+* Define conventional linear intermediate representation (IR)
+* Generate C code from Lua/Ravi source
+* Support Ahead of time (AOT) compilation
+
+## Modules
+
+The compiler library will consist of distinct modules:
+
+* lexer (alpha) - responsible for tokenizing an input buffer
+* parser (alpha) - responsible for generating abstract syntax tree (AST).
+* typechecker (alpha) - responsible for assigning types to variables when possible.
+* AST simplifier (alpha) - responsible for performing some initial simplifications such as constant folding.
+* linearizer (alpha) - responsible for constructing a linear IR representation of the AST.
 * optimizer (Work in progress) - responsible for improving the code
 * codegenerator (Work in progress) - responsible for generating C code
 
-Our goal is to provide a re-usable Lua/Ravi parser/code generator that can be used by all kinds of tools and utilities.
+## Status
+
+* Work in progress - currently woking on C code generation from the IR
 
 ## Documentation
 
