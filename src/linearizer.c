@@ -1089,6 +1089,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 	struct pseudo *return_pseudo = allocate_range_pseudo(
 	    proc, callsite_pseudo); /* Base reg for function call - where return values will be placed */
 	add_instruction_target(proc, insn, return_pseudo);
+	add_instruction_target(proc, insn, allocate_constant_pseudo(proc, allocate_integer_constant(proc, expr->function_call_expr.num_results)));
 	add_instruction(proc, insn);
 
 	free_instruction_operand_pseudos(proc, insn);
