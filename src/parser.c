@@ -358,7 +358,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 			env->symbol_type = SYM_ENV;
 			env->variable.var_name = varname;
 			env->variable.block = NULL;
-			set_type(&global->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
+			set_type(&env->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
 			// First time we encounter the global _ENV we add as upvalue
 			add_upvalue_in_levels_upto(parser, parser->current_function, NULL, env);
 		}
