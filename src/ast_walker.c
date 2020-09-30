@@ -608,6 +608,8 @@ const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua
 }
 const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
 {
+	if (symbol->target_variable->symbol_type == SYM_ENV)
+		return NULL;
 	assert(symbol->target_function->type == EXPR_FUNCTION);
 	return &symbol->target_function->function_expr;
 }

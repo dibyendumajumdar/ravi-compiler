@@ -229,13 +229,13 @@ static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, 
  */
 static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node *function, struct lua_symbol *sym)
 {
-	assert(sym->symbol_type == SYM_LOCAL);
+	assert(sym->symbol_type == SYM_LOCAL || sym->symbol_type == SYM_ENV);
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL);
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL || symbol->upvalue.target_variable->symbol_type == SYM_ENV);
 			if (sym == symbol->upvalue.target_variable) {
 				return false;
 			}
@@ -254,9 +254,11 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
-	sym->variable.escaped = 1;	     /* mark original variable as having escaped */
-	sym->variable.block->need_close = 1; /* mark block containing variable as needing close operation */
-	sym->variable.block->function->function_expr.need_close = 1;
+	if (sym->symbol_type == SYM_LOCAL) {
+		sym->variable.escaped = 1;	     /* mark original variable as having escaped */
+		sym->variable.block->need_close = 1; /* mark block containing variable as needing close operation */
+		sym->variable.block->function->function_expr.need_close = 1;
+	}
 	return true;
 }
 
@@ -315,7 +317,7 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
 static struct ast_node *new_symbol_reference(struct parser_state *parser, const struct string_object *varname)
 {
 	bool is_local = false;
-	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local);
+	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local); // Search in all scopes
 	if (symbol) {
 		// TODO we had a bug here - see t013.lua
 		// Need more test cases for this
@@ -332,6 +334,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
 			// We found an upvalue but it is not at the same level
 			// Ensure all levels have the upvalue
+			// Note that if the uvalue refers to special _ENV symbol then target function will be NULL
 			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.target_function,
 						   symbol->upvalue.target_variable);
 			// TODO Following search could be avoided if above returned the symbol
@@ -347,6 +350,25 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 		// We don't add globals to any scope so that they are
 		// always looked up
 		symbol = global;
+		// We have to check whether we need to add upvalue for _ENV
+		bool is_local = false;
+		struct lua_symbol *env = search_for_variable(parser, parser->container->_ENV, &is_local);
+		if (env == NULL) {
+			struct lua_symbol *env = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+			env->symbol_type = SYM_ENV;
+			env->variable.var_name = varname;
+			env->variable.block = NULL;
+			set_type(&global->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
+			// First time we encounter the global _ENV we add as upvalue
+			add_upvalue_in_levels_upto(parser, parser->current_function, NULL, env);
+		}
+		else if (env->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
+			// We found an upvalue but it is not at the same level
+			// Ensure all levels have the upvalue
+			// Note that if the upvalue refers to special _ENV symbol then target function will be NULL
+			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.target_function,
+						   symbol->upvalue.target_variable);
+		}
 	}
 	struct ast_node *symbol_expr = allocate_expr_ast_node(parser, EXPR_SYMBOL);
 	symbol_expr->symbol_expr.type = symbol->variable.value_type;

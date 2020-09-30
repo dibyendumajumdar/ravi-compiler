@@ -118,6 +118,11 @@ static inline const char *get_as_str(const struct string_object *ts) { return ts
 static void print_symbol(buffer_t *buf, struct lua_symbol *sym, int level)
 {
 	switch (sym->symbol_type) {
+	case SYM_ENV: {
+		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "_ENV",
+			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
+		break;
+	}
 	case SYM_GLOBAL: {
 		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "global symbol",
 			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
@@ -143,6 +148,7 @@ static void print_symbol_name(buffer_t *buf, struct lua_symbol *sym)
 {
 	switch (sym->symbol_type) {
 	case SYM_LOCAL:
+	case SYM_ENV:
 	case SYM_GLOBAL: {
 		printf_buf(buf, "%t", sym->variable.var_name);
 		break;

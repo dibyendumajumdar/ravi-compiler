@@ -289,7 +289,8 @@ enum symbol_type {
 	SYM_LOCAL,   /* lua_variable_symbol */
 	SYM_UPVALUE, /* lua_upvalue_symbol */
 	SYM_GLOBAL,  /* lua_variable_symbol, Global symbols are never added to a scope so they are always looked up */
-	SYM_LABEL    /* lua_label_symbol */
+	SYM_LABEL,    /* lua_label_symbol */
+	SYM_ENV      /* Special symbol type for _ENV */
 };
 struct lua_symbol;
 struct lua_upvalue_symbol;
