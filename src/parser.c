@@ -1657,6 +1657,7 @@ struct compiler_state *raviX_init_compiler()
 	container->main_function = NULL;
 	container->killed = false;
 	container->linearizer = NULL;
+	container->_ENV = raviX_create_string(container, "_ENV", 4);
 	return container;
 }
 

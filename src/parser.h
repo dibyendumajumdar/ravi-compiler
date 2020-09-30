@@ -57,6 +57,7 @@ struct compiler_state {
 	jmp_buf env;		 /* For error handling */
 	buffer_t error_message; /* For error handling, error message is saved here */
 	bool killed;		 /* flag to check if this is already destroyed */
+	const struct string_object *_ENV; /* name of the env variable */
 };
 
 /* number of reserved words */
