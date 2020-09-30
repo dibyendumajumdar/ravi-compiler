@@ -312,9 +312,8 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
 /* Creates a symbol reference to the name; the returned symbol reference
  * may be local, upvalue or global.
  */
-static struct ast_node *new_symbol_reference(struct parser_state *parser)
+static struct ast_node *new_symbol_reference(struct parser_state *parser, const struct string_object *varname)
 {
-	const struct string_object *varname = check_name_and_next(parser->ls);
 	bool is_local = false;
 	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local);
 	if (symbol) {
@@ -746,7 +745,7 @@ static struct ast_node *parse_primary_expression(struct parser_state *parser)
 		break;
 	}
 	case TOK_NAME: {
-		primary_expr = new_symbol_reference(parser);
+		primary_expr = new_symbol_reference(parser, check_name_and_next(parser->ls));
 		break;
 	}
 	default: {
@@ -1351,7 +1350,7 @@ static struct ast_node *parse_function_name(struct parser_state *parser)
 	function_stmt->function_stmt.function_expr = NULL;
 	function_stmt->function_stmt.method_name = NULL;
 	function_stmt->function_stmt.selectors = NULL;
-	function_stmt->function_stmt.name = new_symbol_reference(parser);
+	function_stmt->function_stmt.name = new_symbol_reference(parser, check_name_and_next(parser->ls));
 	while (ls->t.token == '.') {
 		add_ast_node(parser->container, &function_stmt->function_stmt.selectors, parse_field_selector(parser));
 	}
