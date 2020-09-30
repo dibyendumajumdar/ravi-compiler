@@ -210,7 +210,7 @@ static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, 
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL);
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL || symbol->upvalue.target_variable->symbol_type == SYM_ENV);
 			if (name == symbol->upvalue.target_variable->variable.var_name) {
 				return symbol;
 			}
