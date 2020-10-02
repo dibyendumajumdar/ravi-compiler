@@ -311,6 +311,32 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
 	}
 }
 
+/**
+ * Adds an upvalue for _ENV. 
+ */
+static void add_upvalue_for_ENV(struct parser_state *parser)
+{
+	// We have to check whether we need to add upvalue for _ENV
+	bool is_local = false;
+	struct lua_symbol *env = search_for_variable(parser, parser->container->_ENV, &is_local);
+	if (env == NULL) {
+		// Create special upvalue symbol _ENV - so that upvalues can reference it
+		struct lua_symbol *env = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+		env->symbol_type = SYM_ENV;
+		env->variable.var_name = parser->container->_ENV;
+		env->variable.block = NULL;
+		set_type(&env->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
+		// First time we encounter the global _ENV we add as upvalue
+		add_upvalue_in_levels_upto(parser, parser->current_function, NULL, env);
+	} else if (env->symbol_type == SYM_UPVALUE && env->upvalue.target_function != parser->current_function) {
+		// We found an upvalue but it is not at the same level
+		// Ensure all levels have the upvalue
+		// Note that if the upvalue refers to special _ENV symbol then target function will be NULL
+		add_upvalue_in_levels_upto(parser, parser->current_function, env->upvalue.target_function,
+					   env->upvalue.target_variable);
+	}
+}
+
 /* Creates a symbol reference to the name; the returned symbol reference
  * may be local, upvalue or global.
  */
@@ -350,25 +376,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 		// We don't add globals to any scope so that they are
 		// always looked up
 		symbol = global;
-		// We have to check whether we need to add upvalue for _ENV
-		bool is_local = false;
-		struct lua_symbol *env = search_for_variable(parser, parser->container->_ENV, &is_local);
-		if (env == NULL) {
-			struct lua_symbol *env = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-			env->symbol_type = SYM_ENV;
-			env->variable.var_name = varname;
-			env->variable.block = NULL;
-			set_type(&env->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
-			// First time we encounter the global _ENV we add as upvalue
-			add_upvalue_in_levels_upto(parser, parser->current_function, NULL, env);
-		}
-		else if (env->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
-			// We found an upvalue but it is not at the same level
-			// Ensure all levels have the upvalue
-			// Note that if the upvalue refers to special _ENV symbol then target function will be NULL
-			add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.target_function,
-						   symbol->upvalue.target_variable);
-		}
+		add_upvalue_for_ENV(parser); // Since we have a global reference we need to add upvalue for _ENV
 	}
 	struct ast_node *symbol_expr = allocate_expr_ast_node(parser, EXPR_SYMBOL);
 	symbol_expr->symbol_expr.type = symbol->variable.value_type;

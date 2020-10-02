@@ -49,6 +49,7 @@ L0 (entry)
 L1 (exit)
 return a
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -57,6 +58,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -2118,6 +2120,7 @@ L9
 	BR {L3}
 return (b or a)+1 == 2 and (10 or a)+1 == 11
 function()
+--upvalues  _ENV
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2170,6 +2173,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2367,6 +2371,7 @@ L7
 	BR {L3}
 return (x>y) and x or y == 2
 function()
+--upvalues  _ENV
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2407,6 +2412,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2470,10 +2476,12 @@ L5
 	CBR {T(0)} {L3, L2}
 function x() for i = 1, 10 do; print(i); end end
 function()
+--upvalues  _ENV
    x --global symbol any 
    =
     function()
     --locals  i
+    --upvalues  _ENV
       for
         i --local symbol any 
       =
@@ -2505,10 +2513,12 @@ function()
     end
 end
 function()
+--upvalues  _ENV
    x --global symbol any 
    =
     function()
     --locals  i
+    --upvalues  _ENV
       for
         i --local symbol integer 
       =
@@ -2572,10 +2582,12 @@ L6
 	BR {L1}
 function x() local a=1; function y() return function() return a end end; end
 function()
+--upvalues  _ENV
    x --global symbol any 
    =
     function()
     --locals  a
+    --upvalues  _ENV
       local
       --[symbols]
         a --local symbol any 
@@ -2599,10 +2611,12 @@ function()
     end
 end
 function()
+--upvalues  _ENV
    x --global symbol any 
    =
     function()
     --locals  a
+    --upvalues  _ENV
       local
       --[symbols]
         a --local symbol any 
@@ -2799,6 +2813,7 @@ L0 (entry)
 L1 (exit)
 return @User.Type a
 function()
+--upvalues  _ENV
   return
     --[unary expr start] any
     @<usertype>
@@ -2810,6 +2825,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[unary expr start] User.Type
     @<usertype>
@@ -2881,6 +2897,7 @@ L0 (entry)
 L1 (exit)
 return {[1] = a}
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
@@ -2902,6 +2919,7 @@ function()
     } --[table constructor end]
 end
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
@@ -2931,6 +2949,7 @@ L0 (entry)
 L1 (exit)
 return {a = b}
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
@@ -2951,6 +2970,7 @@ function()
     } --[table constructor end]
 end
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
@@ -3577,6 +3597,7 @@ L5
 	CBR {T(0)} {L3, L2}
 return x[1]
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3592,6 +3613,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3614,6 +3636,7 @@ L0 (entry)
 L1 (exit)
 return x()
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3628,6 +3651,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3649,6 +3673,7 @@ L0 (entry)
 L1 (exit)
 return x[1]()
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3668,6 +3693,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3695,6 +3721,7 @@ L0 (entry)
 L1 (exit)
 return x[1]:name()
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3714,6 +3741,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3742,6 +3770,7 @@ L0 (entry)
 L1 (exit)
 return x[1]:name(1,2)
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3764,6 +3793,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3795,6 +3825,7 @@ L0 (entry)
 L1 (exit)
 return x(), y()
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3821,6 +3852,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3856,6 +3888,7 @@ L0 (entry)
 L1 (exit)
 return y(x())
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3881,6 +3914,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -3915,6 +3949,7 @@ L0 (entry)
 L1 (exit)
 x = 1
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -3929,6 +3964,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -3949,6 +3985,7 @@ L0 (entry)
 L1 (exit)
 x = 1, 2
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -3965,6 +4002,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -3987,6 +4025,7 @@ L0 (entry)
 L1 (exit)
 x[1] = 1
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4008,6 +4047,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4036,6 +4076,7 @@ L0 (entry)
 L1 (exit)
 x[1] = b
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4061,6 +4102,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4094,6 +4136,7 @@ L0 (entry)
 L1 (exit)
 x[1][1] = b
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4124,6 +4167,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4163,6 +4207,7 @@ L0 (entry)
 L1 (exit)
 x()
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4180,6 +4225,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4204,6 +4250,7 @@ L0 (entry)
 L1 (exit)
 x()[1]
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4226,6 +4273,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4256,6 +4304,7 @@ L0 (entry)
 L1 (exit)
 x()[1](a,b)
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4293,6 +4342,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[expression list start]
      --[suffixed expr start] any
@@ -4341,6 +4391,7 @@ L0 (entry)
 L1 (exit)
 x,y = 1,2
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4363,6 +4414,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4392,6 +4444,7 @@ L0 (entry)
 L1 (exit)
 x,y = f()
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4422,6 +4475,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4461,6 +4515,7 @@ L0 (entry)
 L1 (exit)
 x[1],y[1],c,d = 1,z()
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4519,6 +4574,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4590,6 +4646,7 @@ L0 (entry)
 L1 (exit)
 x[1][2],y[1],c,d = 1,z()
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4653,6 +4710,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4730,6 +4788,7 @@ L0 (entry)
 L1 (exit)
 x,y = y,x
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4760,6 +4819,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4799,6 +4859,7 @@ L0 (entry)
 L1 (exit)
 x,y,z = z,y,x
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4841,6 +4902,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4894,6 +4956,7 @@ L0 (entry)
 L1 (exit)
 i = 3; i, a[i] = i+1, 20
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -4947,6 +5010,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -5012,6 +5076,7 @@ L0 (entry)
 L1 (exit)
 x(y(a[10],5,z()))[1] = 9
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -5074,6 +5139,7 @@ function()
   --[expression statement end]
 end
 function()
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -5204,6 +5270,7 @@ L1 (exit)
 local a = a
 function()
 --locals  a
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5216,6 +5283,7 @@ function()
 end
 function()
 --locals  a
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5235,6 +5303,7 @@ L1 (exit)
 local a = b
 function()
 --locals  a
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5247,6 +5316,7 @@ function()
 end
 function()
 --locals  a
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5266,6 +5336,7 @@ L1 (exit)
 local a, b = x, y
 function()
 --locals  a, b
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5286,6 +5357,7 @@ function()
 end
 function()
 --locals  a, b
+--upvalues  _ENV
   local
   --[symbols]
     a --local symbol any 
@@ -5353,6 +5425,7 @@ L1 (exit)
 local i: integer; return t[i/5]
 function()
 --locals  i
+--upvalues  _ENV
   local
   --[symbols]
     i --local symbol integer 
@@ -5380,6 +5453,7 @@ function()
 end
 function()
 --locals  i
+--upvalues  _ENV
   local
   --[symbols]
     i --local symbol integer 
@@ -5458,6 +5532,7 @@ L0 (entry)
 L1 (exit)
 return f()[1]
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -5477,6 +5552,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -5504,6 +5580,7 @@ L0 (entry)
 L1 (exit)
 return x.y[1]
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -5523,6 +5600,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -5758,6 +5836,7 @@ L0 (entry)
 L1 (exit)
 ::L1:: a = 1; goto L1; return
 function()
+--upvalues  _ENV
   ::L1::
   --[expression statement start]
    --[var list start]
@@ -5775,6 +5854,7 @@ function()
   return
 end
 function()
+--upvalues  _ENV
   ::L1::
   --[expression statement start]
    --[var list start]
@@ -5800,6 +5880,7 @@ L2
 	RET {L1}
 ::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1
 function()
+--upvalues  _ENV
   ::l1::
   do
     goto l1
@@ -5844,6 +5925,7 @@ function()
   goto l1
 end
 function()
+--upvalues  _ENV
   ::l1::
   do
     goto l1
@@ -6562,8 +6644,10 @@ return function ()
     (function () end){f()}
   end
 function()
+--upvalues  _ENV
   return
     function()
+    --upvalues  _ENV
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] closure
@@ -6600,8 +6684,10 @@ function()
     end
 end
 function()
+--upvalues  _ENV
   return
     function()
+    --upvalues  _ENV
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -6902,6 +6988,7 @@ function matmul(a: table, b: table)
   end
 return matmul
 function()
+--upvalues  _ENV
    matmul --global symbol any 
    =
     function(
@@ -6910,6 +6997,7 @@ function()
       b --local symbol table 
     )
     --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
+    --upvalues  _ENV
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -7277,6 +7365,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
    matmul --global symbol any 
    =
     function(
@@ -7285,6 +7374,7 @@ function()
       b --local symbol table 
     )
     --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
+    --upvalues  _ENV
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -8341,6 +8431,7 @@ end
 ::l3:: ::l3_1:: assert(x == 13)
 function()
 --locals  x, y
+--upvalues  _ENV
   local
   --[symbols]
     x --local symbol any 
@@ -8421,6 +8512,7 @@ function()
 end
 function()
 --locals  x, y
+--upvalues  _ENV
   local
   --[symbols]
     x --local symbol any 
@@ -8523,6 +8615,7 @@ L6
 for i=1,10 do print(i) end
 function()
 --locals  i
+--upvalues  _ENV
   for
     i --local symbol any 
   =
@@ -8554,6 +8647,7 @@ function()
 end
 function()
 --locals  i
+--upvalues  _ENV
   for
     i --local symbol integer 
   =
@@ -8611,6 +8705,7 @@ L6
 for i=10,1,-1 do print(i) end
 function()
 --locals  i
+--upvalues  _ENV
   for
     i --local symbol any 
   =
@@ -8647,6 +8742,7 @@ function()
 end
 function()
 --locals  i
+--upvalues  _ENV
   for
     i --local symbol integer 
   =
@@ -8709,6 +8805,7 @@ L6
 	BR {L1}
 while true do print('forever') end
 function()
+--upvalues  _ENV
   while
    true
   do
@@ -8731,6 +8828,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV
   while
    true
   do
@@ -8766,6 +8864,7 @@ L4
 	BR {L1}
 repeat print('forever') brek until true
 function()
+--upvalues  _ENV
   repeat
     --[expression statement start]
      --[expression list start]
@@ -8797,6 +8896,7 @@ function()
   --[repeat end]
 end
 function()
+--upvalues  _ENV
   repeat
     --[expression statement start]
      --[expression list start]
@@ -8842,6 +8942,7 @@ L4
 	BR {L1}
 repeat print('forever') break until true return
 function()
+--upvalues  _ENV
   repeat
     --[expression statement start]
      --[expression list start]
@@ -8866,6 +8967,7 @@ function()
   return
 end
 function()
+--upvalues  _ENV
   repeat
     --[expression statement start]
      --[expression list start]
@@ -8996,6 +9098,7 @@ end
 
 function()
 --locals  msgs
+--upvalues  _ENV
   local
   --[symbols]
     msgs --local symbol any 
@@ -9008,7 +9111,7 @@ function()
       m --local symbol any 
     )
     --locals  m
-    --upvalues  msgs
+    --upvalues  _ENV, msgs
       if
        --[unary expr start] any
        not
@@ -9100,6 +9203,7 @@ function()
 end
 function()
 --locals  msgs
+--upvalues  _ENV
   local
   --[symbols]
     msgs --local symbol any 
@@ -9112,7 +9216,7 @@ function()
       m --local symbol any 
     )
     --locals  m
-    --upvalues  msgs
+    --upvalues  _ENV, msgs
       if
        --[unary expr start] any
        not
@@ -9222,13 +9326,13 @@ L2
 L3
 	LOADGLOBAL {print} {T(2)}
 	CALL {T(2), local(m, 0)} {T(2..), 1 Kint(0)}
-	LEN {Upval(0, Proc%1, msgs)} {T(3)}
+	LEN {Upval(1, Proc%1, msgs)} {T(3)}
 	ADD {T(3), 1 Kint(0)} {T(4)}
 	LOADGLOBAL {string} {T(5)}
 	GETsk {T(5), 'sub' Ks(1)} {T(6)}
 	UNMi {3 Kint(2)} {Tint(0)}
 	CALL {T(6), local(m, 0), 3 Kint(2), Tint(0)} {T(6..), 1 Kint(0)}
-	PUT {Upval(0, Proc%1, msgs), T(4), T(6[6..])}
+	PUT {Upval(1, Proc%1, msgs), T(4), T(6[6..])}
 	BR {L4}
 L4
 	BR {L1}
@@ -9238,6 +9342,7 @@ local _g
 r()[a].name = _g and 'Dibyendu' or 'majumdar'
 function()
 --locals  _g
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9348,6 +9453,7 @@ function()
 end
 function()
 --locals  _g
+--upvalues  _ENV
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9498,6 +9604,7 @@ L9
 	CBR {T(6)} {L7, L6}
 function foo(bar: integer[], zee: number[], ...) end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9509,6 +9616,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9533,6 +9641,7 @@ L0 (entry)
 L1 (exit)
 function foo(bar: number, zee: string) end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9544,6 +9653,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9568,6 +9678,7 @@ L0 (entry)
 L1 (exit)
 function foo(bar: closure, zee: My.User.Type) end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9579,6 +9690,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV
    foo --global symbol any 
    =
     function(
@@ -9603,6 +9715,7 @@ L0 (entry)
 L1 (exit)
 return (f())
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -9621,6 +9734,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -9646,6 +9760,7 @@ L0 (entry)
 L1 (exit)
 return {g()}, f(g())
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
@@ -9689,6 +9804,7 @@ function()
     --[suffixed expr end]
 end
 function()
+--upvalues  _ENV
   return
     { --[table constructor start] table
       --[indexed assign start] any
