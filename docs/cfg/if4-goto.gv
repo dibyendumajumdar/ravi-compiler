@@ -27,48 +27,53 @@ L4 -> L7
 L4 -> L8
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
-<TR><TD>BR {L9}</TD></TR>
+<TR><TD>BR {L10}</TD></TR>
 </TABLE>>];
-L5 -> L9
+L5 -> L10
 L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L6</B></TD></TR>
-<TR><TD>BR {L19}</TD></TR>
+<TR><TD>BR {L12}</TD></TR>
 </TABLE>>];
-L6 -> L19
+L6 -> L12
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>BR {L19}</TD></TR>
+<TR><TD>BR {L12}</TD></TR>
 </TABLE>>];
-L7 -> L19
+L7 -> L12
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
-<TR><TD>BR {L13}</TD></TR>
+<TR><TD>BR {L15}</TD></TR>
 </TABLE>>];
-L8 -> L13
-L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L9</B></TD></TR>
+L8 -> L15
+L10 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L10</B></TD></TR>
 <TR><TD>LOADGLOBAL {print} {T(4)}</TD></TR>
 <TR><TD>CALL {T(4), 'hello' Ks(0)} {T(4..)}</TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L10 -> L12
+L12 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L12</B></TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L9 -> L19
-L13 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L13</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
-<TR><TD>CBR {T(3)} {L14, L15}</TD></TR>
-</TABLE>>];
-L13 -> L14
-L13 -> L15
-L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
-<TR><TD><B>L14</B></TD></TR>
-<TR><TD>BR {L19}</TD></TR>
-</TABLE>>];
-L14 -> L19
+L12 -> L19
 L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L15</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
+<TR><TD>CBR {T(3)} {L16, L17}</TD></TR>
+</TABLE>>];
+L15 -> L16
+L15 -> L17
+L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L16</B></TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
-L15 -> L19
+L16 -> L19
+L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L17</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L17 -> L19
 L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L19</B></TD></TR>
 <TR><TD>BR {L1}</TD></TR>
