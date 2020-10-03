@@ -397,6 +397,9 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 		// resolved by _ENV[name] - we leave that to the code generator to decide.
 		// However adding an upvalue later is hard so we do it here.
 		add_upvalue_for_ENV(parser);
+		bool is_local;
+		global->variable.env = search_for_variable(parser, parser->container->_ENV, &is_local);
+		assert(global->variable.env);
 	}
 	struct ast_node *symbol_expr = allocate_expr_ast_node(parser, EXPR_SYMBOL);
 	symbol_expr->symbol_expr.type = symbol->variable.value_type;
