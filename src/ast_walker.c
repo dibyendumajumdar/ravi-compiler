@@ -282,8 +282,7 @@ bool raviX_function_statement_is_method(const struct function_statement *stateme
 }
 const struct index_expression *raviX_function_statement_method_name(const struct function_statement *statement)
 {
-	assert(statement->method_name->type == EXPR_Y_INDEX ||
-	       statement->method_name->type == EXPR_FIELD_SELECTOR);
+	assert(statement->method_name->type == EXPR_Y_INDEX || statement->method_name->type == EXPR_FIELD_SELECTOR);
 	return &statement->method_name->index_expr;
 }
 bool raviX_function_statement_has_selectors(const struct function_statement *statement)
@@ -469,14 +468,12 @@ const struct var_type *raviX_binary_expression_type(const struct binary_expressi
 }
 const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression)
 {
-	assert(expression->expr_left->type >= EXPR_LITERAL &&
-	       expression->expr_left->type <= EXPR_FUNCTION_CALL);
+	assert(expression->expr_left->type >= EXPR_LITERAL && expression->expr_left->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_left;
 }
 const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression)
 {
-	assert(expression->expr_right->type >= EXPR_LITERAL &&
-	       expression->expr_right->type <= EXPR_FUNCTION_CALL);
+	assert(expression->expr_right->type >= EXPR_LITERAL && expression->expr_right->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_right;
 }
 BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression)
@@ -499,8 +496,7 @@ raviX_table_element_assignment_expression_key(const struct table_element_assignm
 const struct expression *
 raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression)
 {
-	assert(expression->value_expr->type >= EXPR_LITERAL &&
-	       expression->value_expr->type <= EXPR_FUNCTION_CALL);
+	assert(expression->value_expr->type >= EXPR_LITERAL && expression->value_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->value_expr;
 }
 const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression)
@@ -526,8 +522,7 @@ const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expr
 }
 const struct expression *raviX_suffixed_expression_primary(const struct suffixed_expression *expression)
 {
-	assert(expression->primary_expr->type >= EXPR_LITERAL &&
-	       expression->primary_expr->type <= EXPR_FUNCTION_CALL);
+	assert(expression->primary_expr->type >= EXPR_LITERAL && expression->primary_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->primary_expr;
 }
 void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
@@ -603,13 +598,19 @@ const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol
 }
 const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol)
 {
+	if (symbol->target_variable->symbol_type == SYM_ENV) {
+		assert(symbol->target_function == NULL);
+		return NULL;
+	}
 	assert(symbol->target_variable->symbol_type == SYM_LOCAL);
 	return &symbol->target_variable->variable;
 }
 const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
 {
-	if (symbol->target_variable->symbol_type == SYM_ENV)
+	if (symbol->target_variable->symbol_type == SYM_ENV) {
+		assert(symbol->target_function == NULL);
 		return NULL;
+	}
 	assert(symbol->target_function->type == EXPR_FUNCTION);
 	return &symbol->target_function->function_expr;
 }

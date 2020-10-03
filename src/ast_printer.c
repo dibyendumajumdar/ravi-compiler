@@ -154,7 +154,12 @@ static void print_symbol_name(buffer_t *buf, struct lua_symbol *sym)
 		break;
 	}
 	case SYM_UPVALUE: {
-		printf_buf(buf, "%t", sym->upvalue.target_variable->variable.var_name);
+		if (sym->upvalue.target_variable->symbol_type == SYM_ENV) {
+			printf_buf(buf, "%t*", sym->upvalue.target_variable->variable.var_name);
+		}
+		else {
+			printf_buf(buf, "%t", sym->upvalue.target_variable->variable.var_name);
+		}
 		break;
 	}
 	default:

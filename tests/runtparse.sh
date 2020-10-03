@@ -162,4 +162,5 @@ $command "function foo(bar: closure, zee: My.User.Type) end"
 $command "return (f())"
 $command "return {g()}, f(g())"
 
+$command "local _ENV = {}; return function() x = 1 end"
 exit 0

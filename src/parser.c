@@ -36,14 +36,16 @@ static void add_ast_node(struct compiler_state *container, struct ast_node_list 
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
 
-static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_node_type type) {
+static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_node_type type)
+{
 	struct ast_node *node = (struct ast_node *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = type;
 	node->line_number = parser->ls->lastline;
 	return node;
 }
 
-static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum ast_node_type type) {
+static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum ast_node_type type)
+{
 	struct ast_node *node = allocate_ast_node(parser, type);
 	node->common_expr.truncate_results = 0;
 	set_typecode(&node->common_expr.type, RAVI_TANY);
@@ -210,7 +212,8 @@ static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, 
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL || symbol->upvalue.target_variable->symbol_type == SYM_ENV);
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL ||
+			       symbol->upvalue.target_variable->symbol_type == SYM_ENV);
 			if (name == symbol->upvalue.target_variable->variable.var_name) {
 				return symbol;
 			}
@@ -235,7 +238,8 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
-			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL || symbol->upvalue.target_variable->symbol_type == SYM_ENV);
+			assert(symbol->upvalue.target_variable->symbol_type == SYM_LOCAL ||
+			       symbol->upvalue.target_variable->symbol_type == SYM_ENV);
 			if (sym == symbol->upvalue.target_variable) {
 				return false;
 			}
@@ -301,6 +305,10 @@ static struct lua_symbol *search_for_variable(struct parser_state *parser, const
 static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_node *current_function,
 				       struct ast_node *var_function, struct lua_symbol *symbol)
 {
+	// NOTE: var_function may be NULL in the case of _ENV
+	// This is okay as it means we go up the whole call stack in that case
+	assert(symbol->symbol_type == SYM_LOCAL || symbol->symbol_type == SYM_ENV);
+	assert(symbol->symbol_type == SYM_ENV && var_function == NULL || var_function != NULL);
 	assert(current_function != var_function);
 	while (current_function && current_function != var_function) {
 		bool added = add_upvalue_in_function(parser, current_function, symbol);
@@ -312,28 +320,35 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
 }
 
 /**
- * Adds an upvalue for _ENV. 
+ * Adds an upvalue for _ENV.
  */
 static void add_upvalue_for_ENV(struct parser_state *parser)
 {
-	// We have to check whether we need to add upvalue for _ENV
 	bool is_local = false;
-	struct lua_symbol *env = search_for_variable(parser, parser->container->_ENV, &is_local);
-	if (env == NULL) {
-		// Create special upvalue symbol _ENV - so that upvalues can reference it
-		struct lua_symbol *env = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
-		env->symbol_type = SYM_ENV;
-		env->variable.var_name = parser->container->_ENV;
-		env->variable.block = NULL;
-		set_type(&env->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
-		// First time we encounter the global _ENV we add as upvalue
-		add_upvalue_in_levels_upto(parser, parser->current_function, NULL, env);
-	} else if (env->symbol_type == SYM_UPVALUE && env->upvalue.target_function != parser->current_function) {
+	struct lua_symbol *symbol = search_for_variable(parser, parser->container->_ENV, &is_local);
+	if (symbol == NULL) {
+		// No definition of _ENV found
+		// Create special symbol for _ENV - so that upvalues can reference it
+		// Note that this symbol is not added to any scope, however upvalue created below will reference it
+		symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+		symbol->symbol_type = SYM_ENV;
+		symbol->variable.var_name = parser->container->_ENV;
+		symbol->variable.block = NULL;
+		set_type(&symbol->variable.value_type, RAVI_TTABLE); // _ENV is by default a table
+		// Create an upvalue for _ENV
+		add_upvalue_in_levels_upto(parser, parser->current_function, NULL, symbol);
+	} else if (!is_local && symbol->symbol_type == SYM_LOCAL) {
+		// If _ENV occurred as a local symbol in a parent function then we
+		// need to construct an upvalue. Lua requires that the upvalue be
+		// added to all functions in the tree up to the function where the local
+		// is defined.
+		add_upvalue_in_levels_upto(parser, parser->current_function, symbol->variable.block->function, symbol);
+	} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
 		// We found an upvalue but it is not at the same level
 		// Ensure all levels have the upvalue
 		// Note that if the upvalue refers to special _ENV symbol then target function will be NULL
-		add_upvalue_in_levels_upto(parser, parser->current_function, env->upvalue.target_function,
-					   env->upvalue.target_variable);
+		add_upvalue_in_levels_upto(parser, parser->current_function, symbol->upvalue.target_function,
+					   symbol->upvalue.target_variable);
 	}
 }
 
@@ -357,7 +372,8 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 						   symbol);
 			// TODO Following search could be avoided if above returned the symbol
 			symbol = search_upvalue_in_function(parser->current_function, varname);
-		} else if (symbol->symbol_type == SYM_UPVALUE && symbol->upvalue.target_function != parser->current_function) {
+		} else if (symbol->symbol_type == SYM_UPVALUE &&
+			   symbol->upvalue.target_function != parser->current_function) {
 			// We found an upvalue but it is not at the same level
 			// Ensure all levels have the upvalue
 			// Note that if the uvalue refers to special _ENV symbol then target function will be NULL
@@ -376,7 +392,11 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 		// We don't add globals to any scope so that they are
 		// always looked up
 		symbol = global;
-		add_upvalue_for_ENV(parser); // Since we have a global reference we need to add upvalue for _ENV
+		// Since we have a global reference we need to add upvalue for _ENV
+		// At the parser level we do not try to model that the global reference will be
+		// resolved by _ENV[name] - we leave that to the code generator to decide.
+		// However adding an upvalue later is hard so we do it here.
+		add_upvalue_for_ENV(parser);
 	}
 	struct ast_node *symbol_expr = allocate_expr_ast_node(parser, EXPR_SYMBOL);
 	symbol_expr->symbol_expr.type = symbol->variable.value_type;
@@ -477,7 +497,7 @@ static struct ast_node *parse_field(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	/* field -> listfield | recfield */
 	switch (ls->t.token) {
-	case TOK_NAME: {				/* may be 'listfield' or 'recfield' */
+	case TOK_NAME: {			/* may be 'listfield' or 'recfield' */
 		if (raviX_lookahead(ls) != '=') /* expression? */
 			return parse_listfield(parser);
 		else
@@ -496,7 +516,7 @@ static struct ast_node *parse_field(struct parser_state *parser)
 	return NULL;
 }
 
-static struct ast_node* has_function_call(struct ast_node *expr)
+static struct ast_node *has_function_call(struct ast_node *expr)
 {
 	if (!expr)
 		return NULL;
@@ -504,13 +524,12 @@ static struct ast_node* has_function_call(struct ast_node *expr)
 		return expr;
 	else if (expr->type == EXPR_SUFFIXED) {
 		if (expr->suffixed_expr.suffix_list) {
-			return has_function_call((struct ast_node *) ptrlist_last((struct ptr_list *) expr->suffixed_expr.suffix_list));
-		}
-		else {
+			return has_function_call(
+			    (struct ast_node *)ptrlist_last((struct ptr_list *)expr->suffixed_expr.suffix_list));
+		} else {
 			return has_function_call(expr->suffixed_expr.primary_expr);
 		}
-	}
-	else {
+	} else {
 		return NULL;
 	}
 }
@@ -520,14 +539,14 @@ static struct ast_node* has_function_call(struct ast_node *expr)
  */
 static void set_multireturn(struct parser_state *parser, struct ast_node_list *expr_list, bool in_table_constructor)
 {
-	struct ast_node *last_expr = (struct ast_node *) ptrlist_last((struct ptr_list *) expr_list);
+	struct ast_node *last_expr = (struct ast_node *)ptrlist_last((struct ptr_list *)expr_list);
 	if (!last_expr)
 		return;
 	if (in_table_constructor) {
-		if (last_expr->type == EXPR_TABLE_ELEMENT_ASSIGN && last_expr->table_elem_assign_expr.key_expr == NULL) {
+		if (last_expr->type == EXPR_TABLE_ELEMENT_ASSIGN &&
+		    last_expr->table_elem_assign_expr.key_expr == NULL) {
 			last_expr = last_expr->table_elem_assign_expr.value_expr;
-		}
-		else {
+		} else {
 			return;
 		}
 	}
@@ -658,7 +677,7 @@ static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_
 		do {
 			switch (ls->t.token) {
 			case TOK_NAME: { /* param -> NAME */
-					/* RAVI change - add type */
+					 /* RAVI change - add type */
 				struct lua_symbol *symbol = parse_local_variable_declaration(parser);
 				symbol->variable.function_parameter = 1;
 				add_symbol(parser->container, list, symbol);
@@ -1234,9 +1253,9 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 	stmt->for_stmt.expr_list = NULL;
 	stmt->for_stmt.for_body = NULL;
 	stmt->for_stmt.for_statement_list = NULL;
-	stmt->for_stmt.for_scope = new_scope(parser);	// For the loop variables
-	raviX_next(ls);			   /* skip 'for' */
-	varname = check_name_and_next(ls); /* first variable name */
+	stmt->for_stmt.for_scope = new_scope(parser); // For the loop variables
+	raviX_next(ls);				      /* skip 'for' */
+	varname = check_name_and_next(ls);	      /* first variable name */
 	switch (ls->t.token) {
 	case '=':
 		stmt->type = STMT_FOR_NUM;
@@ -1261,7 +1280,8 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 	struct lexer_state *ls = parser->ls;
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
-	struct ast_node *test_then_block = allocate_ast_node(parser, STMT_TEST_THEN);				       // This is not an AST node on its own
+	struct ast_node *test_then_block =
+	    allocate_ast_node(parser, STMT_TEST_THEN);			       // This is not an AST node on its own
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;
@@ -1330,11 +1350,11 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
 static void limit_function_call_results(struct parser_state *parser, int num_lhs, struct ast_node_list *expr_list)
 {
 	// FIXME probably doesn't handle var arg case
-	struct ast_node *last_expr = (struct ast_node *) ptrlist_last((struct ptr_list *) expr_list);
+	struct ast_node *last_expr = (struct ast_node *)ptrlist_last((struct ptr_list *)expr_list);
 	struct ast_node *call_expr = has_function_call(last_expr);
 	if (!call_expr)
 		return;
-	int num_expr = ptrlist_size((const struct ptr_list *) expr_list);
+	int num_expr = ptrlist_size((const struct ptr_list *)expr_list);
 	if (num_expr < num_lhs) {
 		call_expr->function_call_expr.num_results = (num_lhs - num_expr) + 1;
 	}
@@ -1493,8 +1513,8 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 		stmt = parse_function_statement(parser, line);
 		break;
 	}
-	case TOK_local: {		       /* stat -> localstat */
-		raviX_next(ls);		       /* skip LOCAL */
+	case TOK_local: {			/* stat -> localstat */
+		raviX_next(ls);			/* skip LOCAL */
 		if (testnext(ls, TOK_function)) /* local function? */
 			stmt = parse_local_function_statement(parser);
 		else
@@ -1511,7 +1531,7 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 		stmt = parse_return_statement(parser);
 		break;
 	}
-	case TOK_break:	/* stat -> breakstat */
+	case TOK_break:	 /* stat -> breakstat */
 	case TOK_goto: { /* stat -> 'goto' NAME */
 		stmt = parse_goto_statment(parser);
 		break;
@@ -1722,4 +1742,3 @@ void raviX_destroy_compiler(struct compiler_state *container)
 	}
 	free(container);
 }
-

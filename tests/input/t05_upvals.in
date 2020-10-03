@@ -50,3 +50,6 @@ local function z(p1,p2)
                     return x * y end
 	end
 end
+#
+local _ENV = {}; return function() x = 1 end
+#
