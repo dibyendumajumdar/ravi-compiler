@@ -894,11 +894,14 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 {
 	struct lua_symbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
+		assert(sym->variable.env);
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
-		struct pseudo *operand = allocate_symbol_pseudo(proc, sym, 0); // no register actually
+		struct pseudo *operand_varname = allocate_symbol_pseudo(proc, sym, 0); // no register actually
+		struct pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
 		struct instruction *insn = allocate_instruction(proc, op_loadglobal);
 		target->insn = insn;
-		add_instruction_operand(proc, insn, operand);
+		add_instruction_operand(proc, insn, operand_env);
+		add_instruction_operand(proc, insn, operand_varname);
 		add_instruction_target(proc, insn, target);
 		add_instruction(proc, insn);
 		return target;
@@ -996,11 +999,19 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 static void convert_loadglobal_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
 					ravitype_t value_type)
 {
-	remove_instruction(insn->block, insn);
+	assert(insn->opcode == op_loadglobal);
+	remove_instruction(insn->block, insn); // remove the instruction from its original block
 	insn->opcode = op_storeglobal;
-	add_instruction_operand(proc, insn, value_pseudo);
+	// Remove the targets
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target, false);
+	struct pseudo *pseudo;
+	// Move the loadglobal operands to target
+	FOR_EACH_PTR(insn->operands, pseudo) { add_instruction_target(proc, insn, pseudo); }
+	END_FOR_EACH_PTR(pseudo);
+	ptrlist_remove_all((struct ptr_list **)&insn->operands);
+	// Add new operand
+	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
 
