@@ -648,7 +648,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, ";\n");
 }
 
-static void emit_varname(struct pseudo *pseudo, buffer_t *mb)
+static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
@@ -675,6 +675,11 @@ static void initfn(struct function *fn, struct proc *proc, struct Ravi_CompilerI
 	raviX_buffer_add_string(&fn->prologue, "StkId base = ci->u.l.base;\n");
 	emit_vars("lua_Integer", int_var_prefix, &proc->temp_int_pseudos, &fn->prologue);
 	emit_vars("lua_Number", flt_var_prefix, &proc->temp_flt_pseudos, &fn->prologue);
+	// Following are temp dummy regs
+	raviX_buffer_add_string(&fn->prologue, "TValue ival; settt_(&ival, LUA_TNUMINT);\n");
+	raviX_buffer_add_string(&fn->prologue, "TValue fval; settt_(&fval, LUA_TNUMFLT);\n");
+	raviX_buffer_add_string(&fn->prologue, "TValue bval; settt_(&bval, LUA_TBOOLEAN);\n");
+	raviX_buffer_add_string(&fn->prologue, "TValue nilval; setnil(&nilval);\n");
 }
 
 static void cleanup(struct function *fn)
@@ -683,7 +688,9 @@ static void cleanup(struct function *fn)
 	raviX_buffer_free(&fn->body);
 }
 
-/* access a pseudo that is on Lua stack or is an upvalue */
+static void emit_reload_base(struct function *fn) { raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n"); }
+
+/* outputs accessor for a pseudo that is on Lua stack or is an upvalue */
 static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
@@ -701,6 +708,37 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 			assert(0);
 			return -1;
 		}
+	} else if (pseudo->type == PSEUDO_CONSTANT) {
+		if (pseudo->constant->type == RAVI_TSTRING) {
+			/* TODO we discard const below as we need to update the string constant but this is not
+			 * nice */
+			unsigned k = fn->api->lua_newStringConstant(fn->api->context, (Proto *)fn->proc->userdata,
+								    (struct string_object *)pseudo->constant->s);
+			raviX_buffer_add_fstring(&fn->body, "K(%d)", k);
+		} else if (pseudo->constant->type == RAVI_TNUMINT) {
+			raviX_buffer_add_fstring(&fn->body, "&ival; ival.value_.i = %lld", pseudo->constant->i);
+		} else if (pseudo->constant->type == RAVI_TNUMFLT) {
+			raviX_buffer_add_fstring(&fn->body, "&fval; fval.value_.n = %g", pseudo->constant->n);
+		} else if (pseudo->constant->type == RAVI_TNIL) {
+			raviX_buffer_add_string(&fn->body, "&nilval");
+		} else if (pseudo->constant->type == RAVI_TBOOLEAN) {
+			raviX_buffer_add_fstring(&fn->body, "&bval; bval.value_.b = %d", (int)pseudo->constant->i);
+		} else {
+			assert(0);
+			return -1;
+		}
+	} else if (pseudo->type == PSEUDO_TEMP_FLT) {
+		raviX_buffer_add_string(&fn->body, "&fval; fval.value_.n = ");
+		emit_varname(pseudo, &fn->body);
+	} else if (pseudo->type == PSEUDO_TEMP_INT) {
+		raviX_buffer_add_string(&fn->body, "&ival; ival.value_.i = ");
+		emit_varname(pseudo, &fn->body);
+	} else if (pseudo->type == PSEUDO_NIL) {
+		raviX_buffer_add_string(&fn->body, "&nilval");
+	} else if (pseudo->type == PSEUDO_TRUE) {
+		raviX_buffer_add_string(&fn->body, "&bval; bval.value_.b = 1");
+	} else if (pseudo->type == PSEUDO_FALSE) {
+		raviX_buffer_add_string(&fn->body, "&bval; bval.value_.b = 0");
 	} else {
 		assert(0);
 		return -1;
@@ -808,12 +846,9 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 			} else if (src->constant->type == RAVI_TNIL) {
 				raviX_buffer_add_string(&fn->body, "setnilvalue(dst_reg);\n");
 			} else if (src->constant->type == RAVI_TSTRING) {
-				/* TODO we discard const below as we need to update the string constant but this is not
-				 * nice */
-				unsigned k =
-				    fn->api->lua_newStringConstant(fn->api->context, (Proto *)fn->proc->userdata,
-								   (struct string_object *)src->constant->s);
-				raviX_buffer_add_fstring(&fn->body, "TValue *src_reg = K(%u);\n", k);
+				raviX_buffer_add_string(&fn->body, "TValue *src_reg = ");
+				emit_reg_accessor(fn, src);
+				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(
 				    &fn->body,
 				    "dst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.gc = src_reg->value_.gc;\n");
@@ -833,18 +868,6 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 	}
 	return 0;
 }
-
-/* dest_value must be TValue * */
-// static void emit_assign(struct function *fn, const char *dest_value, struct pseudo *pseudo)
-//{
-//	if (pseudo->type == PSEUDO_NIL) {
-//		raviX_buffer_add_fstring(&fn->body, "setnilvalue(%s);\n", dest_value);
-//	} else if (pseudo->type == PSEUDO_TRUE) {
-//		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 1);\n", dest_value);
-//	} else if (pseudo->type == PSEUDO_FALSE) {
-//		raviX_buffer_add_fstring(&fn->body, "setbvalue(%s, 0);\n", dest_value);
-//	}
-//}
 
 static int emit_jump(struct function *fn, struct pseudo *pseudo)
 {
@@ -939,6 +962,44 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *env = get_operand(insn, 0);
+	struct pseudo *varname = get_operand(insn, 1);
+	struct pseudo *dst = get_target(insn, 0);
+	assert(varname->type == PSEUDO_CONSTANT);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *env = ");
+	emit_reg_accessor(fn, env);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
+	emit_reg_accessor(fn, varname);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *dst = ");
+	emit_reg_accessor(fn, dst);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_gettable_sskey(L, env, name, dst);\n ");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *env = get_target(insn, 0);
+	struct pseudo *varname = get_target(insn, 1);
+	struct pseudo *src = get_operand(insn, 0);
+	assert(varname->type == PSEUDO_CONSTANT);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *env = ");
+	emit_reg_accessor(fn, env);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
+	emit_reg_accessor(fn, varname);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *src = ");
+	emit_reg_accessor(fn, src);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_settable_sskey(L, env, name, src);\n ");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -954,6 +1015,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 	case op_mov:
 		rc = emit_op_mov(fn, insn);
+		break;
+	case op_loadglobal:
+		rc = emit_op_loadglobal(fn, insn);
+		break;
+	case op_storeglobal:
+		rc = emit_op_storeglobal(fn, insn);
 		break;
 	default:
 		rc = -1;
@@ -994,7 +1061,7 @@ static unsigned compute_max_stack_size(struct Ravi_CompilerInterface *ravi_inter
 {
 	/* max stack size is number of Lua vars plus any temps + some space */
 	/* TODO this is probably incorrect */
-	return proc->local_pseudos.next_reg + proc->temp_pseudos.next_reg + 10;
+	return proc->local_pseudos.next_reg + proc->temp_pseudos.next_reg;
 }
 
 static inline unsigned get_num_params(struct proc *proc)
@@ -1065,12 +1132,70 @@ static void assign_compiled_functions_to_protos(struct Ravi_CompilerInterface *r
 //	}
 //}
 
+static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol *symbol)
+{
+	struct ast_node *this_function = symbol->upvalue.target_function;
+	struct ast_node *parent_function = this_function->function_expr.parent_function;
+	return parent_function;
+}
+
+static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_symbol, bool *in_stack)
+{
+	*in_stack = false;
+	/*
+	 * If the upvalue refers to a local variable in parent proto then idx should contain
+	 * the register for the local variable and instack should be true, else idx should have the index of
+	 * upvalue in parent proto and instack should be false.
+	 */
+	struct lua_symbol *underlying = upvalue_symbol->upvalue.target_variable;
+	if (underlying->symbol_type == SYM_LOCAL) {
+		struct ast_node *local_function = underlying->variable.block->function;
+		struct ast_node *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
+		if (parent_function == local_function) {
+			/* Upvalue is a local in parent function */
+			*in_stack = true;
+			return underlying->variable.pseudo->regnum;
+		}
+	}
+	/* Search for the upvalue in parent function */
+	struct lua_symbol *sym;
+	struct ast_node *this_function = upvalue_symbol->upvalue.target_function;
+	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
+	{
+		if (sym->upvalue.target_variable == upvalue_symbol->upvalue.target_variable) {
+			// Same variable
+			return sym->upvalue.upvalue_index;
+		}
+	}
+	END_FOR_EACH_PTR(sym);
+	assert(0);
+	return 0;
+}
+
+static void register_upvalues(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
+{
+	struct lua_symbol *sym;
+	struct ast_node *this_function = proc->function_expr;
+	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
+	{
+		bool in_stack = false;
+		unsigned idx = get_upvalue_idx(proc, sym, &in_stack);
+		/* discarding const below */
+		ravi_interface->lua_addUpValue(ravi_interface->context, proto,
+					       (struct string_object *)sym->upvalue.target_variable->variable.var_name,
+					       idx, in_stack, sym->upvalue.value_type.type_code,
+					       (struct string_object *)sym->upvalue.value_type.type_name);
+	}
+	END_FOR_EACH_PTR(sym);
+}
+
 /* Create protos for all the procs with the correct relationships. We do this recursively for all the
  * child procs. The top-level proto is precreated by the caller (actually it is precreated on the Ravi side).
  */
 static void create_protos(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
 {
 	proc->userdata = proto;
+	register_upvalues(ravi_interface, proc, proto);
 	struct proc *child_proc;
 	FOR_EACH_PTR(proc->procs, child_proc)
 	{
@@ -1135,8 +1260,6 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	Proto *main_proto = ravi_interface->main_proto;
 	/* We don't support var args yet */
 	// ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
-	/* Add the upvalue for _ENV */
-	ravi_interface->lua_addUpValue(ravi_interface->context, main_proto, envs, 0, 0, RAVI_TANY, NULL);
 	/* Create all the child protos as we will need them to be there for code gen */
 	create_protos(ravi_interface, linearizer->main_proc, main_proto);
 

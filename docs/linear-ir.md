@@ -38,7 +38,7 @@ uniformly represented in an instruction. Following are the possible types:
 
 The instruction set in the intermediate representation is covered here. As each opcode is implemented end to end, it will be added to the list below.
 
-#### op_ret 
+#### `op_ret` 
 
 Returns values to calling function, and sets `L->ci` to parent.
 
@@ -57,7 +57,7 @@ any deferred closures executed. This call may be omitted if no variables in the 
 * The `L->ci` must be set to the parent of the current function.
 * TBC For compatibility with Lua/ravi, if the number of expected results was `-1` then we should set `L->top` to just past the last result copied, else restore the `L-top` to the previous callers `ci->top`.
 
-### op_mov
+### `op_mov`
 
 Copies a value from one location to another
 
@@ -70,7 +70,7 @@ Copies a value from one location to another
 
 * The move operation deals with scalar quantities, table/array store/loads are handled by different operators.
 
-### op_br
+### `op_br`
 
 Branches unconditionally to the target block
 
@@ -81,7 +81,7 @@ Branches unconditionally to the target block
     <dd>1 target block</dd>
 </dl>
 
-### op_cbr
+### `op_cbr`
 
 Branches conditionally to one of two blocks.
 
@@ -90,4 +90,40 @@ Branches conditionally to one of two blocks.
     <dd>The condition pseudo to be tested for truth</dd>
     <dt>targets</dt>
     <dd>Two block pseudos, the first is the target for true condition and second for false condition</dd>
+</dl>
+
+### `op_loadglobal`
+
+The `op_loadglobal` opcode is used to retrieve a value from the `_ENV` table. By default Lua
+provides an up-value in the main chunk that references the `_ENV` table. But users can defined
+a local variable that overrides the default.
+
+The `op_loadglobal` is akin to loading a value from a table, where the key is always a 
+string constant and the table is usually an up-value.
+
+<dl>
+    <dt>operand</dt>
+    <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
+    <dt>operand</dt>
+    <dd>A string constant representing the name of the global variable</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `op_storeglobal`
+
+The `op_storeglobal` opcode is used to save a value to the `_ENV` table. By default Lua
+provides an up-value in the main chunk that references the `_ENV` table. But users can defined
+a local variable that overrides the default.
+
+The `op_storeglobal` is akin to saving a value to a table, where the key is always a 
+string constant and the table is usually an up-value.
+
+<dl>
+    <dt>operand</dt>
+    <dd>Value to store</dd>
+    <dt>target</dt>
+    <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
+    <dt>target</dt>
+    <dd>A string constant representing the name of the global variable</dd>
 </dl>

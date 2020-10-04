@@ -896,7 +896,8 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
-		struct pseudo *operand_varname = allocate_symbol_pseudo(proc, sym, 0); // no register actually
+		const struct constant *constant = allocate_string_constant(proc, sym->variable.var_name);
+		struct pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		struct pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
 		struct instruction *insn = allocate_instruction(proc, op_loadglobal);
 		target->insn = insn;
