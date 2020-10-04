@@ -679,7 +679,7 @@ static void initfn(struct function *fn, struct proc *proc, struct Ravi_CompilerI
 	raviX_buffer_add_string(&fn->prologue, "TValue ival; settt_(&ival, LUA_TNUMINT);\n");
 	raviX_buffer_add_string(&fn->prologue, "TValue fval; settt_(&fval, LUA_TNUMFLT);\n");
 	raviX_buffer_add_string(&fn->prologue, "TValue bval; settt_(&bval, LUA_TBOOLEAN);\n");
-	raviX_buffer_add_string(&fn->prologue, "TValue nilval; setnil(&nilval);\n");
+	raviX_buffer_add_string(&fn->prologue, "TValue nilval; setnilvalue(&nilval);\n");
 }
 
 static void cleanup(struct function *fn)
