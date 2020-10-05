@@ -1240,7 +1240,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	BR {L1}
+	RET {L1}
 L1 (exit)
 return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'
 function()
@@ -2553,7 +2553,7 @@ define Proc%1
 L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
@@ -2579,7 +2579,7 @@ L5
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L6
-	BR {L1}
+	RET {L1}
 function x() local a=1; function y() return function() return a end end; end
 function()
 --upvalues  _ENV*
@@ -2643,7 +2643,7 @@ define Proc%1
 L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
@@ -2651,7 +2651,7 @@ L0 (entry)
 	CLOSURE {Proc%3} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'y' Ks(1)}
 	CLOSE {local(a, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%3
 L0 (entry)
@@ -2790,7 +2790,7 @@ L0 (entry)
 L1 (exit)
 define Proc%2
 L0 (entry)
-	BR {L1}
+	RET {L1}
 L1 (exit)
 return @number 54.4
 function()
@@ -3188,7 +3188,7 @@ L3
 L4
 	RET {false} {L1}
 L5
-	BR {L1}
+	RET {L1}
 if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end
 function()
   if
@@ -3278,7 +3278,7 @@ L7
 L8
 	RET {5 Kint(3)} {L1}
 L9
-	BR {L1}
+	RET {L1}
 if 1 == 1 then return 'hi' end
 function()
   if
@@ -3314,7 +3314,7 @@ L2
 L3
 	RET {'hi' Ks(1)} {L1}
 L4
-	BR {L1}
+	RET {L1}
 if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end end
 function()
   if
@@ -3383,7 +3383,7 @@ L3
 L4
 	BR {L6}
 L5
-	BR {L1}
+	RET {L1}
 L6
 	LIii {6 Kint(3), 7 Kint(4)} {T(1)}
 	CBR {T(1)} {L7, L8}
@@ -3458,7 +3458,7 @@ L4
 L5
 	RET {4 Kint(5)} {L1}
 L6
-	BR {L1}
+	RET {L1}
 return 1 and 2
 function()
   return
@@ -3981,7 +3981,7 @@ end
 define Proc%1
 L0 (entry)
 	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x = 1, 2
 function()
@@ -4021,7 +4021,7 @@ end
 define Proc%1
 L0 (entry)
 	STOREGLOBAL {2 Kint(2)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x[1] = 1
 function()
@@ -4072,7 +4072,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	PUTik {T(0), 1 Kint(1), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x[1] = b
 function()
@@ -4132,7 +4132,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(2)}
 	PUTik {T(0), 1 Kint(1), T(2)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x[1][1] = b
 function()
@@ -4203,7 +4203,7 @@ L0 (entry)
 	GETik {T(0), 1 Kint(1)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}
 	PUTik {T(1), 1 Kint(1), T(3)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x()
 function()
@@ -4246,7 +4246,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	CALL {T(0)} {T(0..), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x()[1]
 function()
@@ -4300,7 +4300,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	CALL {T(0)} {T(0), 1 Kint(1)}
 	GETik {T(0), 1 Kint(1)} {T(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x()[1](a,b)
 function()
@@ -4387,7 +4387,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(2)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(3)} {T(3)}
 	CALL {T(1), T(2), T(3)} {T(1..), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x,y = 1,2
 function()
@@ -4440,7 +4440,7 @@ define Proc%1
 L0 (entry)
 	STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {1 Kint(2)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x,y = f()
 function()
@@ -4511,7 +4511,7 @@ L0 (entry)
 	CALL {T(2)} {T(2..), 2 Kint(3)}
 	STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(2[2..])} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x[1],y[1],c,d = 1,z()
 function()
@@ -4642,7 +4642,7 @@ L0 (entry)
 	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(3)}
 	PUTik {T(2), 1 Kint(1), T(6[6..])}
 	PUTik {T(0), 1 Kint(1), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x[1][2],y[1],c,d = 1,z()
 function()
@@ -4784,7 +4784,7 @@ L0 (entry)
 	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(4)}
 	PUTik {T(3), 1 Kint(1), T(7[7..])}
 	PUTik {T(1), 2 Kint(2), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x,y = y,x
 function()
@@ -4855,7 +4855,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(3)}
 	STOREGLOBAL {T(3)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(2)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x,y,z = z,y,x
 function()
@@ -4952,7 +4952,7 @@ L0 (entry)
 	STOREGLOBAL {T(5)} {Upval(_ENV), 'z' Ks(2)}
 	STOREGLOBAL {T(4)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(3)} {Upval(_ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 i = 3; i, a[i] = i+1, 20
 function()
@@ -5072,7 +5072,7 @@ L0 (entry)
 	ADD {T(4), 1 Kint(3)} {T(5)}
 	PUT {T(1), T(2), 20 Kint(4)}
 	STOREGLOBAL {T(5)} {Upval(_ENV), 'i' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 x(y(a[10],5,z()))[1] = 9
 function()
@@ -5212,7 +5212,7 @@ L0 (entry)
 	CALL {T(1), T(3), 5 Kint(4), T(4..)} {T(1..), -1 Kint(6)}
 	CALL {T(0), T(1..)} {T(0), 1 Kint(7)}
 	PUTik {T(0), 1 Kint(7), 9 Kint(8)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local i = 0
 function()
@@ -5234,7 +5234,7 @@ end
 define Proc%1
 L0 (entry)
 	MOV {0 Kint(0)} {local(i, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local i, j = 1, 2
 function()
@@ -5265,7 +5265,7 @@ define Proc%1
 L0 (entry)
 	MOV {2 Kint(1)} {local(j, 1)}
 	MOV {1 Kint(0)} {local(i, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local a = a
 function()
@@ -5298,7 +5298,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(0)} {T(0)}
 	MOV {T(0)} {local(a, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local a = b
 function()
@@ -5331,7 +5331,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(0)} {T(0)}
 	MOV {T(0)} {local(a, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local a, b = x, y
 function()
@@ -5382,7 +5382,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}
 	MOV {T(1)} {local(b, 1)}
 	MOV {T(0)} {local(a, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 local a: integer return a+3
 function()
@@ -5832,7 +5832,7 @@ L0 (entry)
 	LEN {local(t, 0)} {T(0)}
 	TOINT {T(0)}
 	MOVi {T(0)} {local(i, 1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 ::L1:: a = 1; goto L1; return
 function()
@@ -5981,7 +5981,7 @@ L3
 	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
 	BR {L2}
 L4
-	BR {L1}
+	RET {L1}
 goto l1; do ::l1:: end
 function()
   goto l1
@@ -6407,7 +6407,7 @@ L17
 L18
 	BR {L9}
 L19
-	BR {L1}
+	RET {L1}
 L20
 	BR {L18}
 L21
@@ -6510,7 +6510,7 @@ L3
 	MOV {T(0)} {local(a, 0)}
 	BR {L2}
 L4
-	BR {L1}
+	RET {L1}
 return function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
                   goto L2; ::L1:: end
 function()
@@ -6635,7 +6635,7 @@ L4
 	MOV {T(2)} {local(a, 0)}
 	BR {L0}
 L5
-	BR {L1}
+	RET {L1}
 L6
 	BR {L4}
 L7
@@ -6736,11 +6736,11 @@ L0 (entry)
 	CALL {T(2)} {T(2..), -1 Kint(2)}
 	TPUTik {T(1), 1 Kint(0), T(2..)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%3
 L0 (entry)
-	BR {L1}
+	RET {L1}
 L1 (exit)
 return function ()
     local sum 
@@ -8607,7 +8607,7 @@ L4
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}
 	EQ {local(x, 0), 13 Kint(3)} {T(1)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
-	BR {L1}
+	RET {L1}
 L5
 	BR {L2}
 L6
@@ -8701,7 +8701,7 @@ L5
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L6
-	BR {L1}
+	RET {L1}
 for i=10,1,-1 do print(i) end
 function()
 --locals  i
@@ -8802,7 +8802,7 @@ L5
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}
 	BR {L2}
 L6
-	BR {L1}
+	RET {L1}
 while true do print('forever') end
 function()
 --upvalues  _ENV*
@@ -8861,7 +8861,7 @@ L3
 	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
 	BR {L2}
 L4
-	BR {L1}
+	RET {L1}
 repeat print('forever') brek until true
 function()
 --upvalues  _ENV*
@@ -8939,7 +8939,7 @@ L3
 	LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}
 	BR {L2}
 L4
-	BR {L1}
+	RET {L1}
 repeat print('forever') break until true return
 function()
 --upvalues  _ENV*
@@ -9313,7 +9313,7 @@ L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'Message' Ks(0)}
 	CLOSE {local(msgs, 0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
@@ -9335,7 +9335,7 @@ L3
 	PUT {Upval(1, Proc%1, msgs), T(4), T(6[6..])}
 	BR {L4}
 L4
-	BR {L1}
+	RET {L1}
 _soft = rawget(_G, "_soft") or false
 Z[1][2] = false or true
 local _g
@@ -9595,7 +9595,7 @@ L6
 	BR {L7}
 L7
 	PUTsk {T(4), 'name' Ks(8), T(6)}
-	BR {L1}
+	RET {L1}
 L8
 	MOV {'Dibyendu' Ks(9)} {T(7)}
 	BR {L9}
@@ -9631,13 +9631,13 @@ define Proc%1
 L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'foo' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
 	TOIARRAY {local(bar, 0)}
 	TOFARRAY {local(zee, 1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 function foo(bar: number, zee: string) end
 function()
@@ -9668,13 +9668,13 @@ define Proc%1
 L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'foo' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
 	TOFLT {local(bar, 0)}
 	TOSTRING {local(zee, 1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 function foo(bar: closure, zee: My.User.Type) end
 function()
@@ -9705,13 +9705,13 @@ define Proc%1
 L0 (entry)
 	CLOSURE {Proc%2} {T(1)}
 	STOREGLOBAL {T(1)} {Upval(_ENV), 'foo' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 define Proc%2
 L0 (entry)
 	TOCLOSURE {local(bar, 0)}
 	TOTYPE {'My.User.Type' Ks(0)} {local(zee, 1)}
-	BR {L1}
+	RET {L1}
 L1 (exit)
 return (f())
 function()
@@ -9920,5 +9920,5 @@ L1 (exit)
 define Proc%2
 L0 (entry)
 	STOREGLOBAL {1 Kint(1)} {Upval(0, Proc%1, _ENV), 'x' Ks(0)}
-	BR {L1}
+	RET {L1}
 L1 (exit)

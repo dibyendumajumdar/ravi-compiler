@@ -1436,9 +1436,6 @@ static void linearize_return(struct proc *proc, struct ast_node *node)
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
 	add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	add_instruction(proc, insn);
-	// FIXME add edge to exit block
-	// FIXME terminate block
-	// FIXME free all temps
 }
 
 /* A block is considered terminated if the last instruction is
@@ -2224,7 +2221,10 @@ static void linearize_function(struct linearizer_state *linearizer)
 	linearize_statement_list(proc, func_expr->function_expr.function_statement_list);
 	end_scope(linearizer, proc);
 	if (!is_block_terminated(proc->current_bb)) {
-		instruct_br(proc, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
+		//instruct_br(proc, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
+		struct instruction *insn = allocate_instruction(proc, op_ret);
+		add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
+		add_instruction(proc, insn);
 	}
 }
 
