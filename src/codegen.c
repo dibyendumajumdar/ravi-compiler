@@ -690,15 +690,81 @@ static void cleanup(struct function *fn)
 
 static void emit_reload_base(struct function *fn) { raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n"); }
 
+static inline unsigned num_locals(struct proc *proc) { return proc->local_pseudos.next_reg; }
+
+static inline unsigned num_temps(struct proc *proc) { return proc->temp_pseudos.next_reg; }
+
+static unsigned compute_max_stack_size(struct proc *proc)
+{
+	/* max stack size is number of Lua vars plus any temps + some space */
+	/* TODO this is probably incorrect */
+	return num_locals(proc) + num_temps(proc);
+}
+
+static unsigned compute_register(struct function *fn, struct pseudo *pseudo)
+{
+	switch (pseudo->type) {
+	case PSEUDO_TEMP_ANY:
+	case PSEUDO_RANGE: // Compute starting register
+	case PSEUDO_RANGE_SELECT:
+		// All temps start after the locals
+		return pseudo->regnum + num_locals(fn->proc);
+	case PSEUDO_SYMBOL:
+		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
+			return pseudo->regnum;
+		}
+	default:
+		assert(false);
+		return (unsigned)-1;
+	}
+}
+
+// Check if two pseudos point to the same register
+// note we cannot easily check PSEUDO_LUASTACK type because there may
+// be var args between CI->func and base. So stackbase may not be base-1 always.
+static bool refers_to_same_register(struct function *fn, struct pseudo *src, struct pseudo *dst)
+{
+	static bool reg_pseudos[] = {
+	    [PSEUDO_SYMBOL] = true,    /* An object of type lua_symbol representing local var or upvalue */
+	    [PSEUDO_TEMP_FLT] = false, /* A floating point temp - may also be used for locals that don't escape */
+	    [PSEUDO_TEMP_INT] = false, /* An integer temp - may also be used for locals that don't escape */
+	    [PSEUDO_TEMP_ANY] = true,  /* A temp of any type - will always be on Lua stack */
+	    [PSEUDO_CONSTANT] = false, /* A literal value */
+	    [PSEUDO_PROC] = false,     /* A proc / function */
+	    [PSEUDO_NIL] = false,
+	    [PSEUDO_TRUE] = false,
+	    [PSEUDO_FALSE] = false,
+	    [PSEUDO_BLOCK] = false,	  /* Points to a basic block, used as targets for jumps */
+	    [PSEUDO_RANGE] = true,	  /* Represents a range of registers from a certain starting register */
+	    [PSEUDO_RANGE_SELECT] = true, /* Picks a certain register from a range */
+	    /* TODO we need a type for var args */
+	    [PSEUDO_LUASTACK] = false /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
+	};
+	if (!reg_pseudos[src->type] || !reg_pseudos[dst->type])
+		return false;
+	if (src->type == PSEUDO_SYMBOL && dst->type != PSEUDO_SYMBOL)
+		// a temp reg can never equate local reg
+		return false;
+	if (src->type == PSEUDO_SYMBOL && dst->type == PSEUDO_SYMBOL) {
+		if (src->symbol->symbol_type != SYM_LOCAL || dst->symbol->symbol_type != SYM_LOCAL) {
+			return false;
+		}
+	}
+	return compute_register(fn, src) == compute_register(fn, dst);
+}
+
 /* outputs accessor for a pseudo that is on Lua stack or is an upvalue */
 static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
 		// Note pseudo->stackidx is relative to ci->func
+		// But ci->func is not always base-1 because of var args
+		// Therefore we need a different way to compute these
 		raviX_buffer_add_fstring(&fn->body, "S(%d)", pseudo->stackidx);
-	} else if (pseudo->type == PSEUDO_TEMP_ANY) {
+	} else if (pseudo->type == PSEUDO_TEMP_ANY || pseudo->type == PSEUDO_RANGE ||
+		   pseudo->type == PSEUDO_RANGE_SELECT) {
 		// Note we put all temps on Lua stack after the locals
-		raviX_buffer_add_fstring(&fn->body, "R(%d)", pseudo->regnum + fn->proc->local_pseudos.next_reg);
+		raviX_buffer_add_fstring(&fn->body, "R(%d)", compute_register(fn, pseudo));
 	} else if (pseudo->type == PSEUDO_SYMBOL) {
 		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
 			raviX_buffer_add_fstring(&fn->body, "R(%d)", pseudo->regnum);
@@ -805,13 +871,17 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 		emit_move_inttemp(fn, src, dst);
 	} else if (dst->type == PSEUDO_TEMP_ANY || dst->type == PSEUDO_SYMBOL || dst->type == PSEUDO_LUASTACK) {
 		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
-			raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
-			emit_reg_accessor(fn, src);
-			raviX_buffer_add_string(&fn->body, ";\nTValue *dst_reg = ");
-			emit_reg_accessor(fn, dst);
-			// FIXME - check value assignment approach
-			raviX_buffer_add_string(
-			    &fn->body, ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
+			// Only emit a move if we are not referencing the same register
+			if (!refers_to_same_register(fn, src, dst)) {
+				raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
+				emit_reg_accessor(fn, src);
+				raviX_buffer_add_string(&fn->body, ";\nTValue *dst_reg = ");
+				emit_reg_accessor(fn, dst);
+				// FIXME - check value assignment approach
+				raviX_buffer_add_string(
+				    &fn->body,
+				    ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
+			}
 		} else if (src->type == PSEUDO_TEMP_INT) {
 			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst);
@@ -1008,7 +1078,7 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 // call. However in a JIT case each JIT function is a different call
 // so we need to take care of the behaviour differences between
 // OP_CALL and external calls
-//static void emit_op_call(struct function *fn, int A, int B, int C, int pc) {
+// static void emit_op_call(struct function *fn, int A, int B, int C, int pc) {
 //	int nresults = C - 1;
 //	if (B != 0) {
 //		membuff_add_fstring(&fn->body, "L->top = R(%d);\n", A + B);
@@ -1048,9 +1118,45 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 // last argument first.
 static int emit_op_call(struct function *fn, struct instruction *insn)
 {
-
+	assert(get_num_targets(insn) == 2);
+	unsigned int n = get_num_operands(insn);
+	unsigned target_register = get_target(insn, 0)->regnum;
+	// int nresults = get_target(insn, 1)->constant->i;
+	// TODO do not emit when source and dest are same
+	if (n > 1) {
+		struct pseudo *last_arg = get_operand(insn, n - 1);
+		if (last_arg->type == PSEUDO_RANGE) {
+			if (last_arg->regnum != (target_register + n - 1)) {
+				raviX_buffer_add_string(&fn->body, "{\n");
+				raviX_buffer_add_string(&fn->body, " TValue *src = ");
+				emit_reg_accessor(fn, last_arg);
+				raviX_buffer_add_string(&fn->body, ";\n");
+				raviX_buffer_add_string(&fn->body, " TValue *dest = ");
+				struct pseudo tmp;
+				tmp.type = PSEUDO_TEMP_ANY;
+				tmp.regnum = target_register + n - 1;
+				emit_reg_accessor(fn, &tmp);
+				raviX_buffer_add_string(&fn->body, ";\n");
+				raviX_buffer_add_string(&fn->body, " if (src < dest) {\n");
+				raviX_buffer_add_string(&fn->body, "   while (src < L->top) {\n");
+				raviX_buffer_add_string(&fn->body, "     *dest = *src;\n");
+				raviX_buffer_add_string(&fn->body, "     src++;\n");
+				raviX_buffer_add_string(&fn->body, "     dest++;\n");
+				raviX_buffer_add_string(&fn->body, "   }\n");
+				raviX_buffer_add_string(&fn->body, " }\n");
+				raviX_buffer_add_string(&fn->body, "}\n");
+			}
+			n--;
+		}
+	}
+	for (unsigned j = 0; j < n; j++) {
+		struct pseudo tmp;
+		tmp.type = PSEUDO_TEMP_ANY;
+		tmp.regnum = target_register + j;
+		emit_move(fn, get_operand(insn, j), &tmp);
+	}
+	return 0;
 }
-
 
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
@@ -1074,6 +1180,9 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_storeglobal:
 		rc = emit_op_storeglobal(fn, insn);
 		break;
+//	case op_call:
+//		rc = emit_op_call(fn, insn);
+//		break;
 	default:
 		rc = -1;
 	}
@@ -1109,13 +1218,6 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 	return rc;
 }
 
-static unsigned compute_max_stack_size(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc)
-{
-	/* max stack size is number of Lua vars plus any temps + some space */
-	/* TODO this is probably incorrect */
-	return proc->local_pseudos.next_reg + proc->temp_pseudos.next_reg;
-}
-
 static inline unsigned get_num_params(struct proc *proc)
 {
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
@@ -1129,7 +1231,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 	initfn(&fn, proc, ravi_interface);
 
 	ravi_interface->lua_setMaxStackSize(ravi_interface->context, (Proto *)proc->userdata,
-					    compute_max_stack_size(ravi_interface, proc));
+					    compute_max_stack_size(proc));
 	ravi_interface->lua_setNumParams(ravi_interface->context, (Proto *)proc->userdata, get_num_params(proc));
 
 	struct basic_block *bb;
