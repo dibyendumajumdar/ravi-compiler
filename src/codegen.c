@@ -1000,6 +1000,58 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+// Ravi JIT
+// Handle OP_CALL
+// Note that Lua assumes that functions called via OP_CALL
+// are Lua functions and secondly that once OP_CALL completes the
+// current function will continue within the same luaV_execute()
+// call. However in a JIT case each JIT function is a different call
+// so we need to take care of the behaviour differences between
+// OP_CALL and external calls
+//static void emit_op_call(struct function *fn, int A, int B, int C, int pc) {
+//	int nresults = C - 1;
+//	if (B != 0) {
+//		membuff_add_fstring(&fn->body, "L->top = R(%d);\n", A + B);
+//	}
+//	emit_reg(fn, "ra", A);
+//	emit_update_savedpc(fn, pc);
+//	membuff_add_fstring(&fn->body, "result = luaD_precall(L, ra, %d, 1);\n", nresults);
+//	membuff_add_string(&fn->body, "if (result) {\n");
+//	membuff_add_fstring(&fn->body, " if (result == 1 && %d >= 0)\n", nresults);
+//	membuff_add_string(&fn->body, "  L->top = ci->top;\n");
+//	membuff_add_string(&fn->body, "}\n");
+//	membuff_add_string(&fn->body, "else {  /* Lua function */\n");
+//	membuff_add_string(&fn->body, " result = luaV_execute(L);\n");
+//	membuff_add_string(&fn->body, " if (result) L->top = ci->top;\n");
+//	membuff_add_string(&fn->body, "}\n");
+//	membuff_add_string(&fn->body, "base = ci->u.l.base;\n");
+//}
+
+// From implementation point of view the main work is copy the registers to the
+// right place. If we assume that at any time there is a 'fixed' stack size for the
+// functions regular variables and temps and that when we call functions, we need
+// to put the function followed by arguments on top of this 'fixed' stack.
+// However the complication is that some of the arguments of the function may come
+// from a previous function call and therefore may be occupying the same space!
+// For example:
+// local x = f()
+// g(x, h())
+// Here the return values from h() will be on the stack above the fixed stack space
+// and g() expects x, followed by all the return values from h().
+// But the nature of the byte code execution is that the return values of h()
+// will be at the top of the fixed stack and will have offsets less than  the
+// parameter positions of g() because when we call g() we will at least have the
+// function value at the position of the first result from h(). Suppose the h() return values
+// are at stack[10], stack[11], stack[12], etc.
+// Then when we call g() we will put stack[10] = g, stack[11] = x,
+// and stack[12] = stack[10], etc. To do this correctly we need to copy the
+// last argument first.
+static int emit_op_call(struct function *fn, struct instruction *insn)
+{
+
+}
+
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;

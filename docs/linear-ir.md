@@ -127,3 +127,21 @@ string constant and the table is usually an up-value.
     <dt>target</dt>
     <dd>A string constant representing the name of the global variable</dd>
 </dl>
+
+### `op_call`
+
+The `op_call` opcode is used to invoke a function.
+
+<dl>
+    <dt>operands</dt>
+    <dd>The first operand is the value that holds the function to be called.
+    This is followed by function arguments.
+    </dd>
+    <dt>target</dt>
+    <dd>The first target is the register where results will be placed. This
+    ia also where the function value / argeuments will be placed prior to
+    invoking the function.</dd>
+    <dt>target</dt>
+    <dd>The second value is the number of results the caller is expecting.
+    If this is -1 then caller wants all results.</dd>
+</dl>
