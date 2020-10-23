@@ -701,7 +701,7 @@ static unsigned compute_max_stack_size(struct proc *proc)
 	return num_locals(proc) + num_temps(proc);
 }
 
-static unsigned compute_register(struct function *fn, struct pseudo *pseudo)
+static unsigned compute_register(struct function *fn, const struct pseudo *pseudo)
 {
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_ANY:
@@ -1070,33 +1070,6 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-// Ravi JIT
-// Handle OP_CALL
-// Note that Lua assumes that functions called via OP_CALL
-// are Lua functions and secondly that once OP_CALL completes the
-// current function will continue within the same luaV_execute()
-// call. However in a JIT case each JIT function is a different call
-// so we need to take care of the behaviour differences between
-// OP_CALL and external calls
-// static void emit_op_call(struct function *fn, int A, int B, int C, int pc) {
-//	int nresults = C - 1;
-//	if (B != 0) {
-//		membuff_add_fstring(&fn->body, "L->top = R(%d);\n", A + B);
-//	}
-//	emit_reg(fn, "ra", A);
-//	emit_update_savedpc(fn, pc);
-//	membuff_add_fstring(&fn->body, "result = luaD_precall(L, ra, %d, 1);\n", nresults);
-//	membuff_add_string(&fn->body, "if (result) {\n");
-//	membuff_add_fstring(&fn->body, " if (result == 1 && %d >= 0)\n", nresults);
-//	membuff_add_string(&fn->body, "  L->top = ci->top;\n");
-//	membuff_add_string(&fn->body, "}\n");
-//	membuff_add_string(&fn->body, "else {  /* Lua function */\n");
-//	membuff_add_string(&fn->body, " result = luaV_execute(L);\n");
-//	membuff_add_string(&fn->body, " if (result) L->top = ci->top;\n");
-//	membuff_add_string(&fn->body, "}\n");
-//	membuff_add_string(&fn->body, "base = ci->u.l.base;\n");
-//}
-
 // From implementation point of view the main work is copy the registers to the
 // right place. If we assume that at any time there is a 'fixed' stack size for the
 // functions regular variables and temps and that when we call functions, we need
@@ -1120,41 +1093,63 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 {
 	assert(get_num_targets(insn) == 2);
 	unsigned int n = get_num_operands(insn);
+	// target register is where results should end up after the call
+	// so it also tells us where we need to place the new frame
+	// Note that this is typically a range starting at a register
 	unsigned target_register = get_target(insn, 0)->regnum;
-	// int nresults = get_target(insn, 1)->constant->i;
-	// TODO do not emit when source and dest are same
+	// Number of values expected by the caller
+	// If -1 it means all available values
+	int nresults = (int) get_target(insn, 1)->constant->i;
 	if (n > 1) {
+		// We have function arguments (as n=0 is the function itself)
 		struct pseudo *last_arg = get_operand(insn, n - 1);
 		if (last_arg->type == PSEUDO_RANGE) {
-			if (last_arg->regnum != (target_register + n - 1)) {
+			// If last argument is a range that tells us that we need
+			// to copy all available values from the register to L->top
+			// But first check whether copy is necessary
+			// suppose n = 2
+			// then,
+			// target_register[0] will have function
+			// target_register[1] will have arg 1
+			unsigned copy_to = target_register + n - 1;
+			if (last_arg->regnum != copy_to) {
 				raviX_buffer_add_string(&fn->body, "{\n");
 				raviX_buffer_add_string(&fn->body, " TValue *src = ");
 				emit_reg_accessor(fn, last_arg);
 				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(&fn->body, " TValue *dest = ");
-				struct pseudo tmp;
-				tmp.type = PSEUDO_TEMP_ANY;
-				tmp.regnum = target_register + n - 1;
+				struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = copy_to};
 				emit_reg_accessor(fn, &tmp);
 				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(&fn->body, " if (src < dest) {\n");
 				raviX_buffer_add_string(&fn->body, "   while (src < L->top) {\n");
-				raviX_buffer_add_string(&fn->body, "     *dest = *src;\n");
+				raviX_buffer_add_string(&fn->body, "     *dest = *src;\n"); // FIXME - not efficient in MIR
 				raviX_buffer_add_string(&fn->body, "     src++;\n");
 				raviX_buffer_add_string(&fn->body, "     dest++;\n");
 				raviX_buffer_add_string(&fn->body, "   }\n");
 				raviX_buffer_add_string(&fn->body, " }\n");
 				raviX_buffer_add_string(&fn->body, "}\n");
 			}
-			n--;
+			n--; // discard the last arg
 		}
 	}
-	for (unsigned j = 0; j < n; j++) {
-		struct pseudo tmp;
-		tmp.type = PSEUDO_TEMP_ANY;
-		tmp.regnum = target_register + j;
+	for (int j = n-1; j >= 0; j--) {
+		struct pseudo tmp = { .type = PSEUDO_TEMP_ANY, .regnum = target_register + j };
 		emit_move(fn, get_operand(insn, j), &tmp);
 	}
+	raviX_buffer_add_string(&fn->body, "{\n TValue *ra = ");
+	emit_reg_accessor(fn, get_target(insn, 0));
+	raviX_buffer_add_fstring(&fn->body, "\n int result = luaD_precall(L, ra, %d, 1);\n", nresults);
+	raviX_buffer_add_string(&fn->body, " if (result) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  if (result == 1 && %d >= 0)\n", nresults);
+	raviX_buffer_add_string(&fn->body, "   L->top = ci->top;\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	raviX_buffer_add_string(&fn->body, " else {  /* Lua function */\n");
+	raviX_buffer_add_string(&fn->body, "  result = luaV_execute(L);\n");
+	raviX_buffer_add_string(&fn->body, "  if (result) L->top = ci->top;\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	raviX_buffer_add_string(&fn->body, " base = ci->u.l.base;\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
 }
 
@@ -1180,9 +1175,9 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_storeglobal:
 		rc = emit_op_storeglobal(fn, insn);
 		break;
-//	case op_call:
-//		rc = emit_op_call(fn, insn);
-//		break;
+	case op_call:
+		rc = emit_op_call(fn, insn);
+		break;
 	default:
 		rc = -1;
 	}
