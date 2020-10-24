@@ -1,8 +1,10 @@
 return
 function()
+--upvalues  _ENV*
   return
 end
 function()
+--upvalues  _ENV*
   return
 end
 define Proc%1
@@ -11,10 +13,12 @@ L0 (entry)
 L1 (exit)
 return 1
 function()
+--upvalues  _ENV*
   return
     1
 end
 function()
+--upvalues  _ENV*
   return
     1
 end
@@ -24,6 +28,7 @@ L0 (entry)
 L1 (exit)
 return 42, 4.2, true, 'hello'
 function()
+--upvalues  _ENV*
   return
     42
    ,
@@ -34,6 +39,7 @@ function()
     'hello'
 end
 function()
+--upvalues  _ENV*
   return
     42
    ,
@@ -73,6 +79,7 @@ L0 (entry)
 L1 (exit)
 return 1+2
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -81,6 +88,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      1
@@ -95,6 +103,7 @@ L0 (entry)
 L1 (exit)
 return 2^3-5*4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -111,6 +120,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      --[binary expr start] number
@@ -135,6 +145,7 @@ L0 (entry)
 L1 (exit)
 return 1+1
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -143,6 +154,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      1
@@ -157,6 +169,7 @@ L0 (entry)
 L1 (exit)
 return 1+1+1
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -169,6 +182,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      --[binary expr start] integer
@@ -188,6 +202,7 @@ L0 (entry)
 L1 (exit)
 return 2-3/5*4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      2
@@ -204,6 +219,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      2
@@ -228,6 +244,7 @@ L0 (entry)
 L1 (exit)
 return 4.2//5
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      4.2000000000000002
@@ -236,6 +253,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      4.2000000000000002
@@ -250,10 +268,12 @@ L0 (entry)
 L1 (exit)
 return 0.0
 function()
+--upvalues  _ENV*
   return
     0.0000000000000000
 end
 function()
+--upvalues  _ENV*
   return
     0.0000000000000000
 end
@@ -263,10 +283,12 @@ L0 (entry)
 L1 (exit)
 return 0
 function()
+--upvalues  _ENV*
   return
     0
 end
 function()
+--upvalues  _ENV*
   return
     0
 end
@@ -276,6 +298,7 @@ L0 (entry)
 L1 (exit)
 return -0//1
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[unary expr start] any
@@ -287,6 +310,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      --[unary expr start] integer
@@ -305,6 +329,7 @@ L0 (entry)
 L1 (exit)
 return 3^-1
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      3
@@ -316,6 +341,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      3
@@ -334,6 +360,7 @@ L0 (entry)
 L1 (exit)
 return (1 + 1)^(50 + 50)
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -358,6 +385,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      --[suffixed expr start] integer
@@ -390,6 +418,7 @@ L0 (entry)
 L1 (exit)
 return (-2)^(31 - 2)
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -413,6 +442,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      --[suffixed expr start] integer
@@ -444,6 +474,7 @@ L0 (entry)
 L1 (exit)
 return (-3^0 + 5) // 3.0
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -467,6 +498,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] number
@@ -499,6 +531,7 @@ L0 (entry)
 L1 (exit)
 return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      240.0000000000000000
@@ -515,6 +548,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      240.0000000000000000
@@ -539,6 +573,7 @@ L0 (entry)
 L1 (exit)
 return ~(~0xFF0 | 0xFF0)
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     ~
@@ -557,6 +592,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     ~
@@ -583,6 +619,7 @@ L0 (entry)
 L1 (exit)
 return ~~-100024.0
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     ~
@@ -596,6 +633,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     ~
@@ -617,6 +655,7 @@ L0 (entry)
 L1 (exit)
 return ((100 << 6) << -4) >> 2
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -644,6 +683,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] integer
      --[suffixed expr start] integer
@@ -680,6 +720,7 @@ L0 (entry)
 L1 (exit)
 return 2^3^2 == 2^(3^2)
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -708,6 +749,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] number
@@ -746,6 +788,7 @@ L0 (entry)
 L1 (exit)
 return 2^3*4 == (2^3)*4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -774,6 +817,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] number
@@ -812,6 +856,7 @@ L0 (entry)
 L1 (exit)
 return 2.0^-2 == 1/4 and -2^- -2 == - - -4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -861,6 +906,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] boolean
@@ -933,6 +979,7 @@ L3
 	RET {T(0)} {L1}
 return not nil and 2 and not(2>3 or 3<2)
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -967,6 +1014,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1028,6 +1076,7 @@ L7
 	BR {L3}
 return -3-1-5 == 0+0-9
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1055,6 +1104,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] integer
@@ -1093,6 +1143,7 @@ L0 (entry)
 L1 (exit)
 return -2^2 == -4 and (-2)^2 == 4 and 2*2-3-1 == 0
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1150,6 +1201,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1235,8 +1287,10 @@ L5
 	CBR {T(0)} {L2, L3}
 
 function()
+--upvalues  _ENV*
 end
 function()
+--upvalues  _ENV*
 end
 define Proc%1
 L0 (entry)
@@ -1244,6 +1298,7 @@ L0 (entry)
 L1 (exit)
 return 2*1+3/3 == 3 and 1+2 .. 3*1 == '33'
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1284,6 +1339,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] boolean
@@ -1325,6 +1381,7 @@ function()
 end
 return not(2+1 > 3*1) and 'a'..'b' > 'a'
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[unary expr start] any
@@ -1360,6 +1417,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[unary expr start] any
@@ -1396,6 +1454,7 @@ function()
 end
 return '7' .. 3 << 1 == 146
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1412,6 +1471,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1429,6 +1489,7 @@ function()
 end
 return 10 >> 1 .. '9' == 0
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1445,6 +1506,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1462,6 +1524,7 @@ function()
 end
 return 10 | 1 .. '9' == 27
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1478,6 +1541,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1495,6 +1559,7 @@ function()
 end
 return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1515,6 +1580,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] integer
@@ -1544,6 +1610,7 @@ L0 (entry)
 L1 (exit)
 return 0xFD & 0xAA ~ 0xCC | 0xF0 == 0xF4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1564,6 +1631,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] integer
@@ -1593,6 +1661,7 @@ L0 (entry)
 L1 (exit)
 return 0xF0 & 0x0F + 1 == 0x10
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1609,6 +1678,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] boolean
      --[binary expr start] integer
@@ -1633,6 +1703,7 @@ L0 (entry)
 L1 (exit)
 return 3^4//2^3//5 == 2
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1657,6 +1728,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -1691,6 +1763,7 @@ L0 (entry)
 L1 (exit)
 return not ((true or false) and nil)
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     not
@@ -1714,6 +1787,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     not
@@ -1755,6 +1829,7 @@ L5
 	CBR {T(0)} {L2, L3}
 return true or false and nil
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      true
@@ -1767,6 +1842,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      true
@@ -1796,6 +1872,7 @@ L5
 	BR {L3}
 return (((1 or false) and true) or false) == true
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -1828,6 +1905,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -1884,6 +1962,7 @@ L7
 	CBR {T(1)} {L4, L5}
 return (((nil and true) or false) and true) == false
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -1916,6 +1995,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[suffixed expr start] any
@@ -1972,6 +2052,7 @@ L7
 	CBR {T(1)} {L5, L4}
 return -(1 or 2) == -1 and (1 and 2)+(-1.25 or -4) == 0.75
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2028,6 +2109,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2256,6 +2338,7 @@ L7
 	BR {L3}
 return ((2<3) or 1) == true and (2<3 and 4) == 4
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2300,6 +2383,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -2664,6 +2748,7 @@ L0 (entry)
 L1 (exit)
 return @integer 1
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @integer
@@ -2671,6 +2756,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] integer
     @integer
@@ -2683,6 +2769,7 @@ L0 (entry)
 L1 (exit)
 return @string 'hello'
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @string
@@ -2690,6 +2777,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] string
     @string
@@ -2702,6 +2790,7 @@ L0 (entry)
 L1 (exit)
 return @table {}
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @table
@@ -2710,6 +2799,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] table
     @table
@@ -2724,6 +2814,7 @@ L0 (entry)
 L1 (exit)
 return @integer[] {}
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @integer[]
@@ -2732,6 +2823,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] integer[]
     @integer[]
@@ -2746,6 +2838,7 @@ L0 (entry)
 L1 (exit)
 return @number[] {}
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @number[]
@@ -2754,6 +2847,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] number[]
     @number[]
@@ -2768,6 +2862,7 @@ L0 (entry)
 L1 (exit)
 return @closure function() end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @closure
@@ -2776,6 +2871,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] closure
     @closure
@@ -2794,6 +2890,7 @@ L0 (entry)
 L1 (exit)
 return @number 54.4
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @number
@@ -2801,6 +2898,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] number
     @number
@@ -2844,6 +2942,7 @@ L0 (entry)
 L1 (exit)
 return {1,2,3}
 function()
+--upvalues  _ENV*
   return
     { --[table constructor start] table
       --[indexed assign start] integer
@@ -2866,6 +2965,7 @@ function()
     } --[table constructor end]
 end
 function()
+--upvalues  _ENV*
   return
     { --[table constructor start] table
       --[indexed assign start] integer
@@ -2999,6 +3099,7 @@ L0 (entry)
 L1 (exit)
 return @integer[]{[1] = 5.5, [2] = 4}
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @integer[]
@@ -3032,6 +3133,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] integer[]
     @integer[]
@@ -3073,6 +3175,7 @@ L0 (entry)
 L1 (exit)
 return @number[] {[1] = 4, [2] = 5.4}
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] any
     @number[]
@@ -3106,6 +3209,7 @@ function()
     --[unary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[unary expr start] number[]
     @number[]
@@ -3147,6 +3251,7 @@ L0 (entry)
 L1 (exit)
 if 1 == 1 then return true else return false end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] any
     1
@@ -3162,6 +3267,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] boolean
     1
@@ -3191,6 +3297,7 @@ L5
 	RET {L1}
 if 1 ~= 1 then return 0 elseif 1 < 2 then return 1 elseif 1 < 2 then return 2 else return 5 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] any
     1
@@ -3224,6 +3331,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] boolean
     1
@@ -3281,6 +3389,7 @@ L9
 	RET {L1}
 if 1 == 1 then return 'hi' end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] any
     1
@@ -3293,6 +3402,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] boolean
     1
@@ -3317,6 +3427,7 @@ L4
 	RET {L1}
 if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] any
     --[binary expr start] any
@@ -3344,6 +3455,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] boolean
     --[binary expr start] integer
@@ -3393,6 +3505,7 @@ L8
 	BR {L5}
 if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] any
     --[binary expr start] any
@@ -3418,6 +3531,7 @@ function()
   end
 end
 function()
+--upvalues  _ENV*
   if
    --[binary expr start] boolean
     --[binary expr start] integer
@@ -3461,6 +3575,7 @@ L6
 	RET {L1}
 return 1 and 2
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -3469,6 +3584,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -3488,6 +3604,7 @@ L3
 	RET {T(0)} {L1}
 return 3 and 4 and 5
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -3500,6 +3617,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -3529,6 +3647,7 @@ L5
 	CBR {T(0)} {L2, L3}
 return 1 or 2
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -3537,6 +3656,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      1
@@ -3556,6 +3676,7 @@ L3
 	RET {T(0)} {L1}
 return 3 or 4 or 5
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -3568,6 +3689,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -5217,6 +5339,7 @@ L1 (exit)
 local i = 0
 function()
 --locals  i
+--upvalues  _ENV*
   local
   --[symbols]
     i --local symbol any 
@@ -5225,6 +5348,7 @@ function()
 end
 function()
 --locals  i
+--upvalues  _ENV*
   local
   --[symbols]
     i --local symbol any 
@@ -5239,6 +5363,7 @@ L1 (exit)
 local i, j = 1, 2
 function()
 --locals  i, j
+--upvalues  _ENV*
   local
   --[symbols]
     i --local symbol any 
@@ -5251,6 +5376,7 @@ function()
 end
 function()
 --locals  i, j
+--upvalues  _ENV*
   local
   --[symbols]
     i --local symbol any 
@@ -5387,6 +5513,7 @@ L1 (exit)
 local a: integer return a+3
 function()
 --locals  a
+--upvalues  _ENV*
   local
   --[symbols]
     a --local symbol integer 
@@ -5403,6 +5530,7 @@ function()
 end
 function()
 --locals  a
+--upvalues  _ENV*
   local
   --[symbols]
     a --local symbol integer 
@@ -5489,6 +5617,7 @@ L1 (exit)
 local t: integer[]; return t[0]
 function()
 --locals  t
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5508,6 +5637,7 @@ function()
 end
 function()
 --locals  t
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5629,6 +5759,7 @@ L1 (exit)
 local t: integer[] if (t[1] == 5) then return true end return false
 function()
 --locals  t
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5662,6 +5793,7 @@ function()
 end
 function()
 --locals  t
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5708,6 +5840,7 @@ L4
 local t: table local len: integer = #t return len
 function()
 --locals  t, len
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol table 
@@ -5732,6 +5865,7 @@ function()
 end
 function()
 --locals  t, len
+--upvalues  _ENV*
   local
   --[symbols]
     t --local symbol table 
@@ -5763,6 +5897,7 @@ L0 (entry)
 L1 (exit)
 return function(t: table, i: integer) i = #t end
 function()
+--upvalues  _ENV*
   return
     function(
       t --local symbol table 
@@ -5792,6 +5927,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function(
       t --local symbol table 
@@ -5984,12 +6120,14 @@ L4
 	RET {L1}
 goto l1; do ::l1:: end
 function()
+--upvalues  _ENV*
   goto l1
   do
     ::l1::
   end
 end
 function()
+--upvalues  _ENV*
   goto l1
   do
     ::l1::
@@ -6015,6 +6153,7 @@ return function()
 	return y, z
 end
 function()
+--upvalues  _ENV*
   return
     function()
     --locals  a, y, a, z
@@ -6077,6 +6216,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function()
     --locals  a, y, a, z
@@ -6182,6 +6322,7 @@ return function (a, b, c, d, e)
     ::l1:: ::l2:: ::l3:: ::l4::
 end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6271,6 +6412,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6414,6 +6556,7 @@ L21
 	BR {L18}
 return function (a) while a < 10 do a = a + 1 end end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6454,6 +6597,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6514,6 +6658,7 @@ L4
 return function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
                   goto L2; ::L1:: end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6565,6 +6710,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function(
       a --local symbol any 
@@ -6753,6 +6899,7 @@ return function ()
     return sum
 end
 function()
+--upvalues  _ENV*
   return
     function()
     --locals  sum, j, k
@@ -6836,6 +6983,7 @@ function()
     end
 end
 function()
+--upvalues  _ENV*
   return
     function()
     --locals  sum, j, k
@@ -7857,6 +8005,7 @@ L16
 	BR {L7}
 return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -7975,6 +8124,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -8120,6 +8270,7 @@ L1 (exit)
 return -3%5 == 2 and -3+5 == 2
 
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -8150,6 +8301,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] boolean
@@ -8198,6 +8350,7 @@ L3
 return -((2.0^8 + -(-1)) % 8)/2 * 4 - 3
 
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -8247,6 +8400,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] number
      --[binary expr start] number
@@ -8311,6 +8465,7 @@ L1 (exit)
 return -((2^8 + -(-1)) % 8)//2 * 4 - 3
 
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -8360,6 +8515,7 @@ function()
     --[binary expr end]
 end
 function()
+--upvalues  _ENV*
   return
     --[binary expr start] any
      --[binary expr start] any
@@ -9008,6 +9164,7 @@ L5
 for i =1,10 do if i == 2 then break end end return
 function()
 --locals  i
+--upvalues  _ENV*
   for
     i --local symbol any 
   =
@@ -9033,6 +9190,7 @@ function()
 end
 function()
 --locals  i
+--upvalues  _ENV*
   for
     i --local symbol integer 
   =
@@ -9862,6 +10020,7 @@ L1 (exit)
 local _ENV = {}; return function() x = 1 end
 function()
 --locals  _ENV
+--upvalues  _ENV*
   local
   --[symbols]
     _ENV --local symbol any 
@@ -9887,6 +10046,7 @@ function()
 end
 function()
 --locals  _ENV
+--upvalues  _ENV*
   local
   --[symbols]
     _ENV --local symbol any 
