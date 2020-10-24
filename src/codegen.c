@@ -1114,32 +1114,43 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 			unsigned copy_to = target_register + n - 1;
 			if (last_arg->regnum != copy_to) {
 				raviX_buffer_add_string(&fn->body, "{\n");
-				raviX_buffer_add_string(&fn->body, " TValue *src = ");
+				raviX_buffer_add_string(&fn->body, " TValue *src_base = ");
 				emit_reg_accessor(fn, last_arg);
 				raviX_buffer_add_string(&fn->body, ";\n");
-				raviX_buffer_add_string(&fn->body, " TValue *dest = ");
+				raviX_buffer_add_string(&fn->body, " TValue *dest_base = ");
 				struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = copy_to};
 				emit_reg_accessor(fn, &tmp);
-				raviX_buffer_add_string(&fn->body, ";\n");
-				raviX_buffer_add_string(&fn->body, " if (src < dest) {\n");
-				raviX_buffer_add_string(&fn->body, "   while (src < L->top) {\n");
-				raviX_buffer_add_string(&fn->body, "     *dest = *src;\n"); // FIXME - not efficient in MIR
-				raviX_buffer_add_string(&fn->body, "     src++;\n");
-				raviX_buffer_add_string(&fn->body, "     dest++;\n");
-				raviX_buffer_add_string(&fn->body, "   }\n");
+				raviX_buffer_add_string(&fn->body, ";\n TValue *src = L->top-1;\n");
+				raviX_buffer_add_string(&fn->body, " L->top = dest_base + (L->top-src_base);\n");
+				raviX_buffer_add_string(&fn->body, " TValue *dest = L->top-1;\n");
+				raviX_buffer_add_string(&fn->body, " while (src >= src_base) {\n");
+				raviX_buffer_add_string(&fn->body, "  dest->tt_ = src->tt_; dest->value_.gc = src->value_.gc;\n");
+				raviX_buffer_add_string(&fn->body, "  src--;\n");
+				raviX_buffer_add_string(&fn->body, "  dest--;\n");
 				raviX_buffer_add_string(&fn->body, " }\n");
 				raviX_buffer_add_string(&fn->body, "}\n");
 			}
+			else {
+				// L->top stays where it is ...
+			}
 			n--; // discard the last arg
 		}
+		else {
+			// L->top must be just past the last arg
+			raviX_buffer_add_string(&fn->body, " L->top = ");
+			emit_reg_accessor(fn, get_target(insn, 0));
+			raviX_buffer_add_fstring(&fn->body, " + %d;\n", n);
+		}
 	}
+	// Copy the rest of the args
 	for (int j = n-1; j >= 0; j--) {
 		struct pseudo tmp = { .type = PSEUDO_TEMP_ANY, .regnum = target_register + j };
 		emit_move(fn, get_operand(insn, j), &tmp);
 	}
+	// Call the function
 	raviX_buffer_add_string(&fn->body, "{\n TValue *ra = ");
 	emit_reg_accessor(fn, get_target(insn, 0));
-	raviX_buffer_add_fstring(&fn->body, "\n int result = luaD_precall(L, ra, %d, 1);\n", nresults);
+	raviX_buffer_add_fstring(&fn->body, ";\n int result = luaD_precall(L, ra, %d, 1);\n", nresults);
 	raviX_buffer_add_string(&fn->body, " if (result) {\n");
 	raviX_buffer_add_fstring(&fn->body, "  if (result == 1 && %d >= 0)\n", nresults);
 	raviX_buffer_add_string(&fn->body, "   L->top = ci->top;\n");
