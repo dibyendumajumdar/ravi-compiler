@@ -1639,6 +1639,7 @@ static void parse_lua_chunk(struct parser_state *parser)
 	raviX_next(parser->ls);					 /* read first token */
 	parser->container->main_function = new_function(parser); /* vararg function wrapper */
 	parser->container->main_function->function_expr.is_vararg = true;
+	add_upvalue_for_ENV(parser);
 	parse_statement_list(parser, &parser->container->main_function->function_expr.function_statement_list);
 	end_function(parser);
 	assert(parser->current_function == NULL);
