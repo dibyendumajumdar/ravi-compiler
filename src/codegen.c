@@ -921,14 +921,14 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(
 				    &fn->body,
-				    "dst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.gc = src_reg->value_.gc;\n");
+				    "dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;\n");
 			} else {
 				assert(0);
 				return -1;
 			}
 			raviX_buffer_add_string(&fn->body, "}\n");
 		} else {
-			/* range pesudos not supported yet */
+			/* range pseudos not supported yet */
 			assert(0);
 			return -1;
 		}
