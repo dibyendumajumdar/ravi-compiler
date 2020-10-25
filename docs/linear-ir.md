@@ -95,15 +95,15 @@ Branches conditionally to one of two blocks.
 ### `op_loadglobal`
 
 The `op_loadglobal` opcode is used to retrieve a value from the `_ENV` table. By default Lua
-provides an up-value in the main chunk that references the `_ENV` table. But users can defined
-a local variable that overrides the default.
+provides an up-value in the main chunk that references the `_ENV` table. But users can define
+a local `_ENV` variable that overrides the default.
 
 The `op_loadglobal` is akin to loading a value from a table, where the key is always a 
 string constant and the table is usually an up-value.
 
 <dl>
     <dt>operand[0]</dt>
-    <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
+    <dd>The symbol representing <code>_ENV</code> - may be an up-value or a local</dd>
     <dt>operand[1]</dt>
     <dd>A string constant representing the name of the global variable</dd>
     <dt>target</dt>
@@ -113,8 +113,8 @@ string constant and the table is usually an up-value.
 ### `op_storeglobal`
 
 The `op_storeglobal` opcode is used to save a value to the `_ENV` table. By default Lua
-provides an up-value in the main chunk that references the `_ENV` table. But users can defined
-a local variable that overrides the default.
+provides an up-value in the main chunk that references the `_ENV` table. But users can define
+a local `_ENV` variable that overrides the default.
 
 The `op_storeglobal` is akin to saving a value to a table, where the key is always a 
 string constant and the table is usually an up-value.
@@ -123,7 +123,7 @@ string constant and the table is usually an up-value.
     <dt>operand</dt>
     <dd>Value to store</dd>
     <dt>target[0]</dt>
-    <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
+    <dd>The symbol representing <code>_ENV</code> - may be an up-value or a local</dd>
     <dt>target[1]</dt>
     <dd>A string constant representing the name of the global variable</dd>
 </dl>
@@ -135,7 +135,7 @@ The `op_call` opcode is used to invoke a function.
 <dl>
     <dt>operands[]</dt>
     <dd>The first operand is the function to be called.
-    This is followed by function arguments. The last argument may be a `PSEUDO_RANGE`.
+    This is followed by function arguments. The last argument may be a <code>PSEUDO_RANGE</code>.
     </dd>
     <dt>target[0]</dt>
     <dd>The register where results will be placed. This
