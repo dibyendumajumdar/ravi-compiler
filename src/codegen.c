@@ -1004,7 +1004,7 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, " result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
 	int n = get_num_operands(insn);
 	if (n > 0) {
-		struct pseudo *last_operand = get_operand(insn, n-1);
+		struct pseudo *last_operand = get_operand(insn, n - 1);
 		/* the last operand might be a range pseudo */
 		if (last_operand->type == PSEUDO_RANGE) {
 			raviX_buffer_add_string(&fn->body, " if (wanted == -1) {\n");
@@ -1012,10 +1012,9 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 			struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = last_operand->regnum};
 			emit_reg_accessor(fn, &tmp);
 			raviX_buffer_add_string(&fn->body, " ;\n");
-			raviX_buffer_add_fstring(&fn->body, "  wanted = (L->top - start_vararg) + %d;\n", n-1);
+			raviX_buffer_add_fstring(&fn->body, "  wanted = (L->top - start_vararg) + %d;\n", n - 1);
 			raviX_buffer_add_string(&fn->body, " }\n");
-		}
-		else {
+		} else {
 			raviX_buffer_add_fstring(&fn->body, " if (wanted == -1) wanted = %d;\n", n);
 		}
 	}
@@ -1033,18 +1032,18 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 			raviX_buffer_add_string(&fn->body, " }\n");
 			raviX_buffer_add_fstring(&fn->body, " j++;\n");
 			i++;
-		}
-		else {
+		} else {
 			/* copy values starting at the range to L->top */
 			// raviX_buffer_add_fstring(&fn->body, " j = %d;\n", i);
 			raviX_buffer_add_fstring(&fn->body, " {\n int reg = %d;\n", pseudo->regnum);
-			raviX_buffer_add_string(&fn->body,  "  while (j < wanted) {\n");
-			raviX_buffer_add_string(&fn->body,  "   TValue *dest_reg = S(j);\n");
-			raviX_buffer_add_string(&fn->body,  "   TValue *src_reg = R(reg);\n");
-			raviX_buffer_add_string(&fn->body,  "   dest_reg->tt_ = src_reg->tt_; dest_reg->value_.gc = src_reg->value_.gc;\n");
-			raviX_buffer_add_string(&fn->body,  "   j++, reg++;\n");
-			raviX_buffer_add_string(&fn->body,  "  }\n");
-			raviX_buffer_add_string(&fn->body,  " }\n");
+			raviX_buffer_add_string(&fn->body, "  while (j < wanted) {\n");
+			raviX_buffer_add_string(&fn->body, "   TValue *dest_reg = S(j);\n");
+			raviX_buffer_add_string(&fn->body, "   TValue *src_reg = R(reg);\n");
+			raviX_buffer_add_string(
+			    &fn->body, "   dest_reg->tt_ = src_reg->tt_; dest_reg->value_.gc = src_reg->value_.gc;\n");
+			raviX_buffer_add_string(&fn->body, "   j++, reg++;\n");
+			raviX_buffer_add_string(&fn->body, "  }\n");
+			raviX_buffer_add_string(&fn->body, " }\n");
 		}
 	}
 	END_FOR_EACH_PTR(pseudo);
@@ -1130,7 +1129,7 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 	unsigned target_register = get_target(insn, 0)->regnum;
 	// Number of values expected by the caller
 	// If -1 it means all available values
-	int nresults = (int) get_target(insn, 1)->constant->i;
+	int nresults = (int)get_target(insn, 1)->constant->i;
 	if (n > 1) {
 		// We have function arguments (as n=0 is the function itself)
 		struct pseudo *last_arg = get_operand(insn, n - 1);
@@ -1155,18 +1154,17 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 				raviX_buffer_add_string(&fn->body, " L->top = dest_base + (L->top-src_base);\n");
 				raviX_buffer_add_string(&fn->body, " TValue *dest = L->top-1;\n");
 				raviX_buffer_add_string(&fn->body, " while (src >= src_base) {\n");
-				raviX_buffer_add_string(&fn->body, "  dest->tt_ = src->tt_; dest->value_.gc = src->value_.gc;\n");
+				raviX_buffer_add_string(&fn->body,
+							"  dest->tt_ = src->tt_; dest->value_.gc = src->value_.gc;\n");
 				raviX_buffer_add_string(&fn->body, "  src--;\n");
 				raviX_buffer_add_string(&fn->body, "  dest--;\n");
 				raviX_buffer_add_string(&fn->body, " }\n");
 				raviX_buffer_add_string(&fn->body, "}\n");
-			}
-			else {
+			} else {
 				// L->top stays where it is ...
 			}
 			n--; // discard the last arg
-		}
-		else {
+		} else {
 			// L->top must be just past the last arg
 			raviX_buffer_add_string(&fn->body, " L->top = ");
 			emit_reg_accessor(fn, get_target(insn, 0));
@@ -1174,8 +1172,8 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 		}
 	}
 	// Copy the rest of the args
-	for (int j = n-1; j >= 0; j--) {
-		struct pseudo tmp = { .type = PSEUDO_TEMP_ANY, .regnum = target_register + j };
+	for (int j = n - 1; j >= 0; j--) {
+		struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = target_register + j};
 		emit_move(fn, get_operand(insn, j), &tmp);
 	}
 	// Call the function
