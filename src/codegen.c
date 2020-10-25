@@ -547,6 +547,7 @@ static const char Lua_header[] =
     "extern void luaF_close (lua_State *L, StkId level);\n"
 #endif
     "extern int luaD_poscall (lua_State *L, CallInfo *ci, StkId firstResult, int nres);\n"
+    "extern void luaD_growstack (lua_State *L, int n);\n"
     "extern int luaV_equalobj(lua_State *L, const TValue *t1, const TValue *t2);\n"
     "extern int luaV_lessthan(lua_State *L, const TValue *l, const TValue *r);\n"
     "extern int luaV_lessequal(lua_State *L, const TValue *l, const TValue *r);\n"
@@ -590,6 +591,9 @@ static const char Lua_header[] =
     "#define R(i) (base + i)\n"
     "#define K(i) (k + i)\n"
     "#define S(i) (stackbase + i)\n"
+    "#define stackoverflow(L, n) (((int)(L->top - L->stack) + (n) + 5) >= L->stacksize)\n"
+	"#define savestack(L,p)		((char *)(p) - (char *)L->stack)\n"
+	"#define restorestack(L,n)	((TValue *)((char *)L->stack + (n)))\n"
     "#define tonumberns(o,n) \\\n"
     "	(ttisfloat(o) ? ((n) = fltvalue(o), 1) : \\\n"
     "	(ttisinteger(o) ? ((n) = cast_num(ivalue(o)), 1) : 0))\n"
@@ -1163,6 +1167,9 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 	// Number of values expected by the caller
 	// If -1 it means all available values
 	int nresults = (int)get_target(insn, 1)->constant->i;
+	// I think it is okay to just use n as the check because if L->top was set
+	// then n will be on top of that 
+	raviX_buffer_add_fstring(&fn->body, " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n+1, n+1);
 	if (n > 1) {
 		// We have function arguments (as n=0 is the function itself)
 		struct pseudo *last_arg = get_operand(insn, n - 1);
