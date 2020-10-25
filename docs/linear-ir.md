@@ -143,15 +143,13 @@ The `op_call` opcode is used to invoke a function.
     invoking the function.</dd>
     <dt>target[1]</dt>
     <dd>The second value is the number of results the caller is expecting.
-    If this is -1 then caller wants all results.</dd>
+    If this is <tt>-1</tt> then caller wants all results.</dd>
 </dl>
 
-If the caller supplied `-1` as number of results then `op_call` needs to determine
-the number of values to return by inspecting `L->top` - the number of values to return will#
+* If the caller supplied `-1` as number of results then `op_call` needs to determine
+the number of values to return by inspecting `L->top` - the number of values to return will
 be the difference between `L->top` and register at `target[0]`.
-
-Before calling a function, `op_call` needs to ensure that `L->top` is set to just past
+* Before calling a function, `op_call` needs to ensure that `L->top` is set to just past
 the last argument as `luaD_precall()` uses this to determine the number of arguments.
-
-`op_call` copies the function and arguments to the right place and then 
+* `op_call` copies the function and arguments to the right place and then 
 invokes `luaD_precall()` to handle the actual function call.
