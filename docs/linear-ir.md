@@ -1,7 +1,6 @@
 # Linear IR
 
-The compiler generates an intermediate representation. Thid document describes the
-IR.
+The compiler generates an intermediate representation (IR). This document describes the IR.
 
 The code for each function is translated to linear IR. Each function is represented as a `proc`.
 Each `proc` has a set of `basic blocks` - there are two distinguished basic blocks, the `entry` block and the
@@ -12,9 +11,9 @@ Each basic block consists of a sequence of `instruction`s and ends with a branch
 ## Representation of Instructions
 
 Instructions are uniformly represented as follows. Each instruction has an op code. Each instruction has a list of operands and a list of targets.
-Conceptually the targets represent the output of the instruction, wheras operands are the input, although sometimes the interpretation may be different.
+Conceptually the targets represent the output of the instruction, whereas operands are the input, although sometimes the interpretation may be different.
 
-Intruction operands and targets are represented via a `pseudo` type. This is a union type that allows various different types of objects to be
+Instruction operands and targets are represented via a `pseudo` type. This is a union type that allows various different types of objects to be
 uniformly represented in an instruction. Following are the possible types:
 
 <dl>
@@ -43,7 +42,7 @@ The instruction set in the intermediate representation is covered here. As each 
 Returns values to calling function, and sets `L->ci` to parent.
 
 <dl>
-    <dt>operands</dt>
+    <dt>operands[]</dt>
     <dd>0 or more pseudos representing values to be returned</dd>
     <dt>target</dt>
     <dd>The block to which we should jump to. Note that all returns jump to the exit block</dd>
@@ -54,8 +53,9 @@ The `op_ret` instruction must perform some housekeeping.
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
 any deferred closures executed. This call may be omitted if no variables in the proc including child procs escaped.
 * Next it must copy the return values to the stack, results must be placed at `ci->func` and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
+* The last operand might be a `PSEUDO_RANGE`, in which case `op_ret` must inspect `L->top` to determine the number of values to copy. 
 * The `L->ci` must be set to the parent of the current function.
-* TBC For compatibility with Lua/ravi, if the number of expected results was `-1` then we should set `L->top` to just past the last result copied, else restore the `L-top` to the previous callers `ci->top`.
+* `op_ret` sets `L-top` to just past the return values on the stack.
 
 ### `op_mov`
 
@@ -102,9 +102,9 @@ The `op_loadglobal` is akin to loading a value from a table, where the key is al
 string constant and the table is usually an up-value.
 
 <dl>
-    <dt>operand</dt>
+    <dt>operand[0]</dt>
     <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
-    <dt>operand</dt>
+    <dt>operand[1]</dt>
     <dd>A string constant representing the name of the global variable</dd>
     <dt>target</dt>
     <dd>Always a register pseudo - may be local or temporary register</dd>
@@ -122,9 +122,9 @@ string constant and the table is usually an up-value.
 <dl>
     <dt>operand</dt>
     <dd>Value to store</dd>
-    <dt>target</dt>
+    <dt>target[0]</dt>
     <dd>The symbol representing `_ENV` - may be an up-value or a local</dd>
-    <dt>target</dt>
+    <dt>target[1]</dt>
     <dd>A string constant representing the name of the global variable</dd>
 </dl>
 
@@ -133,15 +133,25 @@ string constant and the table is usually an up-value.
 The `op_call` opcode is used to invoke a function.
 
 <dl>
-    <dt>operands</dt>
-    <dd>The first operand is the value that holds the function to be called.
-    This is followed by function arguments.
+    <dt>operands[]</dt>
+    <dd>The first operand is the function to be called.
+    This is followed by function arguments. The last argument may be a `PSEUDO_RANGE`.
     </dd>
-    <dt>target</dt>
-    <dd>The first target is the register where results will be placed. This
-    ia also where the function value / argeuments will be placed prior to
+    <dt>target[0]</dt>
+    <dd>The register where results will be placed. This
+    ia also where the function value / arguments will be placed prior to
     invoking the function.</dd>
-    <dt>target</dt>
+    <dt>target[1]</dt>
     <dd>The second value is the number of results the caller is expecting.
     If this is -1 then caller wants all results.</dd>
 </dl>
+
+If the caller supplied `-1` as number of results then `op_call` needs to determine
+the number of values to return by inspecting `L->top` - the number of values to return will#
+be the difference between `L->top` and register at `target[0]`.
+
+Before calling a function, `op_call` needs to ensure that `L->top` is set to just past
+the last argument as `luaD_precall()` uses this to determine the number of arguments.
+
+`op_call` copies the function and arguments to the right place and then 
+invokes `luaD_precall()` to handle the actual function call.
