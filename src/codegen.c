@@ -18,7 +18,7 @@
 
 static const char Lua_header[] =
     //"typedef __SIZE_TYPE__ size_t;\n"
-    "typedef long long size_t;\n"
+    "typedef unsigned long long size_t;\n"
     "typedef long long ptrdiff_t;\n"
     "typedef long long intptr_t;\n"
     "typedef long long int64_t;\n"
@@ -999,34 +999,65 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 	/* Results are copied to stack position given by ci->func and above.
 	 * stackbase is set here so S(n) refers to (stackbase+n)
 	 */
-	raviX_buffer_add_string(&fn->body, "TValue *stackbase = ci->func;\n");
-	raviX_buffer_add_string(&fn->body, "int wanted = ci->nresults;\n");
-	raviX_buffer_add_string(&fn->body, "result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
-	/* FIXME following is not exactly correct as the last operand could have a range pseudo to TOS */
-	raviX_buffer_add_fstring(&fn->body, "if (wanted == -1) wanted = %d;\n", get_num_operands(insn));
+	raviX_buffer_add_string(&fn->body, " TValue *stackbase = ci->func;\n");
+	raviX_buffer_add_string(&fn->body, " int wanted = ci->nresults;\n");
+	raviX_buffer_add_string(&fn->body, " result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
+	int n = get_num_operands(insn);
+	if (n > 0) {
+		struct pseudo *last_operand = get_operand(insn, n-1);
+		/* the last operand might be a range pseudo */
+		if (last_operand->type == PSEUDO_RANGE) {
+			raviX_buffer_add_string(&fn->body, " if (wanted == -1) {\n");
+			raviX_buffer_add_string(&fn->body, "  TValue *start_vararg = ");
+			struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = last_operand->regnum};
+			emit_reg_accessor(fn, &tmp);
+			raviX_buffer_add_string(&fn->body, " ;\n");
+			raviX_buffer_add_fstring(&fn->body, "  wanted = (L->top - start_vararg) + %d;\n", n-1);
+			raviX_buffer_add_string(&fn->body, " }\n");
+		}
+		else {
+			raviX_buffer_add_fstring(&fn->body, " if (wanted == -1) wanted = %d;\n", n);
+		}
+	}
 	struct pseudo *pseudo;
 	int i = 0;
+	raviX_buffer_add_string(&fn->body, " int j = 0;\n");
 	FOR_EACH_PTR(insn->operands, pseudo)
 	{
-		struct pseudo dummy_dest = {.type = PSEUDO_LUASTACK, .stackidx = i}; /* will go to stackbase[i] */
-		raviX_buffer_add_fstring(&fn->body, "if (%d < wanted) {\n", i);
-		/* FIXME last argument might be a range pseudo */
-		emit_move(fn, pseudo, &dummy_dest);
-		raviX_buffer_add_string(&fn->body, "}\n");
-		i++;
+		if (pseudo->type != PSEUDO_RANGE) {
+			struct pseudo dummy_dest = {.type = PSEUDO_LUASTACK,
+						    .stackidx = i}; /* will go to stackbase[i] */
+			raviX_buffer_add_fstring(&fn->body, " if (%d < wanted) {\n", i);
+			/* FIXME last argument might be a range pseudo */
+			emit_move(fn, pseudo, &dummy_dest);
+			raviX_buffer_add_string(&fn->body, " }\n");
+			raviX_buffer_add_fstring(&fn->body, " j++;\n");
+			i++;
+		}
+		else {
+			/* copy values starting at the range to L->top */
+			// raviX_buffer_add_fstring(&fn->body, " j = %d;\n", i);
+			raviX_buffer_add_fstring(&fn->body, " {\n int reg = %d;\n", pseudo->regnum);
+			raviX_buffer_add_string(&fn->body,  "  while (j < wanted) {\n");
+			raviX_buffer_add_string(&fn->body,  "   TValue *dest_reg = S(j);\n");
+			raviX_buffer_add_string(&fn->body,  "   TValue *src_reg = R(reg);\n");
+			raviX_buffer_add_string(&fn->body,  "   dest_reg->tt_ = src_reg->tt_; dest_reg->value_.gc = src_reg->value_.gc;\n");
+			raviX_buffer_add_string(&fn->body,  "   j++, reg++;\n");
+			raviX_buffer_add_string(&fn->body,  "  }\n");
+			raviX_buffer_add_string(&fn->body,  " }\n");
+		}
 	}
 	END_FOR_EACH_PTR(pseudo);
-	raviX_buffer_add_fstring(&fn->body, "if (%d < wanted) {\nint j = %d;\n", i, i);
-	raviX_buffer_add_string(&fn->body, "while (j < wanted) {\n");
+	/* Set any excess results to nil */
+	raviX_buffer_add_string(&fn->body, " while (j < wanted) {\n");
 	{
-		raviX_buffer_add_string(&fn->body, "setnilvalue(S(j));\n");
-		raviX_buffer_add_string(&fn->body, "j++;\n");
+		raviX_buffer_add_string(&fn->body, "  setnilvalue(S(j));\n");
+		raviX_buffer_add_string(&fn->body, "  j++;\n");
 	}
-	raviX_buffer_add_string(&fn->body, "}\n");
-	raviX_buffer_add_string(&fn->body, "}\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
 	/* FIXME the rule for L->top needs to be checked */
-	raviX_buffer_add_string(&fn->body, "L->top = S(0) + wanted;\n");
-	raviX_buffer_add_string(&fn->body, "L->ci = ci->previous;\n");
+	raviX_buffer_add_string(&fn->body, " L->top = S(0) + wanted;\n");
+	raviX_buffer_add_string(&fn->body, " L->ci = ci->previous;\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	emit_jump(fn, get_target(insn, 0));
 	return 0;
