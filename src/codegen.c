@@ -9,8 +9,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#define GOTO_ON_ERROR 1
-
 /*
  * Only 64-bits supported right now
  * Following must be kept in sync with changes in the actual header files
@@ -610,16 +608,36 @@ struct function {
 /* readonly statics */
 static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
-static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
+//static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
 }
 
+static inline struct pseudo *get_first_operand(struct instruction *insn)
+{
+	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->operands);
+}
+
+static inline struct pseudo *get_last_operand(struct instruction *insn)
+{
+	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->operands);
+}
+
 static inline struct pseudo *get_target(struct instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+}
+
+static inline struct pseudo *get_first_target(struct instruction *insn)
+{
+	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->targets);
+}
+
+static inline struct pseudo *get_last_target(struct instruction *insn)
+{
+	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->targets);
 }
 
 static inline unsigned get_num_operands(struct instruction *insn)
@@ -632,6 +650,9 @@ static inline unsigned get_num_targets(struct instruction *insn)
 	return ptrlist_size((const struct ptr_list *)insn->targets);
 }
 
+/**
+ * Helper to generate a list of primitive C variables representing temp int/float values.
+ */
 static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, buffer_t *mb)
 {
 	if (gen->next_reg == 0)
@@ -701,7 +722,11 @@ static unsigned compute_max_stack_size(struct proc *proc)
 	return num_locals(proc) + num_temps(proc);
 }
 
-static unsigned compute_register(struct function *fn, const struct pseudo *pseudo)
+/**
+ * Computes the register offset from base. Input pseudo must be a local variable,
+ * or temp register or range register (on Lua stack)
+ */
+static unsigned compute_register_from_base(struct function *fn, const struct pseudo *pseudo)
 {
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_ANY:
@@ -713,6 +738,7 @@ static unsigned compute_register(struct function *fn, const struct pseudo *pseud
 		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
 			return pseudo->regnum;
 		}
+		// fallthrough
 	default:
 		assert(false);
 		return (unsigned)-1;
@@ -738,19 +764,23 @@ static bool refers_to_same_register(struct function *fn, struct pseudo *src, str
 	    [PSEUDO_RANGE] = true,	  /* Represents a range of registers from a certain starting register */
 	    [PSEUDO_RANGE_SELECT] = true, /* Picks a certain register from a range */
 	    /* TODO we need a type for var args */
-	    [PSEUDO_LUASTACK] = false /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
+	    [PSEUDO_LUASTACK] = true /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
 	};
 	if (!reg_pseudos[src->type] || !reg_pseudos[dst->type])
 		return false;
+	if (src->type == PSEUDO_LUASTACK || dst->type == PSEUDO_LUASTACK) {
+		return src->type == dst->type && src->stackidx == dst->stackidx;
+	}
 	if (src->type == PSEUDO_SYMBOL && dst->type != PSEUDO_SYMBOL)
 		// a temp reg can never equate local reg
 		return false;
 	if (src->type == PSEUDO_SYMBOL && dst->type == PSEUDO_SYMBOL) {
+		// up-values are not registers
 		if (src->symbol->symbol_type != SYM_LOCAL || dst->symbol->symbol_type != SYM_LOCAL) {
 			return false;
 		}
 	}
-	return compute_register(fn, src) == compute_register(fn, dst);
+	return compute_register_from_base(fn, src) == compute_register_from_base(fn, dst);
 }
 
 /* outputs accessor for a pseudo that is on Lua stack or is an upvalue */
@@ -763,14 +793,15 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 		raviX_buffer_add_fstring(&fn->body, "S(%d)", pseudo->stackidx);
 	} else if (pseudo->type == PSEUDO_TEMP_ANY || pseudo->type == PSEUDO_RANGE ||
 		   pseudo->type == PSEUDO_RANGE_SELECT) {
-		// Note we put all temps on Lua stack after the locals
-		raviX_buffer_add_fstring(&fn->body, "R(%d)", compute_register(fn, pseudo));
+		// we put all temps on Lua stack after the locals
+		raviX_buffer_add_fstring(&fn->body, "R(%d)", compute_register_from_base(fn, pseudo));
 	} else if (pseudo->type == PSEUDO_SYMBOL) {
 		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
 			raviX_buffer_add_fstring(&fn->body, "R(%d)", pseudo->regnum);
 		} else if (pseudo->symbol->symbol_type == SYM_UPVALUE) {
 			raviX_buffer_add_fstring(&fn->body, "cl->upvals[%d]->v", pseudo->regnum);
 		} else {
+			fn->api->error_message(fn->api->context, "Unexpected pseudo symbol type");
 			assert(0);
 			return -1;
 		}
@@ -790,6 +821,7 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 		} else if (pseudo->constant->type == RAVI_TBOOLEAN) {
 			raviX_buffer_add_fstring(&fn->body, "&bval; bval.value_.b = %d", (int)pseudo->constant->i);
 		} else {
+			fn->api->error_message(fn->api->context, "Unexpected pseudo constant type");
 			assert(0);
 			return -1;
 		}
@@ -806,6 +838,7 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 	} else if (pseudo->type == PSEUDO_FALSE) {
 		raviX_buffer_add_string(&fn->body, "&bval; bval.value_.b = 0");
 	} else {
+		fn->api->error_message(fn->api->context, "Unexpected pseudo type");
 		assert(0);
 		return -1;
 	}
@@ -1307,19 +1340,6 @@ static void assign_compiled_functions_to_protos(struct Ravi_CompilerInterface *r
 	FOR_EACH_PTR(proc->procs, childproc) { assign_compiled_functions_to_protos(ravi_interface, childproc, module); }
 	END_FOR_EACH_PTR(childproc);
 }
-
-// static void add_constants(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
-//{
-//	struct set_entry *entry;
-//	set_foreach(proc->constants, entry) {
-//		struct constant *c = (struct constant *) entry->key;
-//		if (c->type == RAVI_TSTRING) {
-//			/* We only care about string constants because int and floats are inlined in generated code */
-//			/* Add the string constant to the proto's constant table */
-//			ravi_interface->lua_newStringConstant(ravi_interface->context, proto, c->s);
-//		}
-//	}
-//}
 
 static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol *symbol)
 {
