@@ -1907,7 +1907,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	instruct_cbr(proc, step_positive, L2, L3);
 
 	start_block(proc, L2);
-	create_binary_instruction(proc, op_leii, limit_pseudo, index_var_pseudo, stop_pseudo);
+	create_binary_instruction(proc, op_ltii, limit_pseudo, index_var_pseudo, stop_pseudo);
 	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
 
 	start_block(proc, L3);
