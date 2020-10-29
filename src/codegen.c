@@ -666,11 +666,11 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 			raviX_buffer_add_fstring(mb, "%s ", type);
 		}
 		if (i > 0) {
-			raviX_buffer_add_string(mb, ", ");
+			raviX_buffer_add_string(mb, " = 0, ");
 		}
 		raviX_buffer_add_fstring(mb, "%s%d", prefix, i);
 	}
-	raviX_buffer_add_string(mb, ";\n");
+	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
 static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
@@ -878,7 +878,7 @@ static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pse
 static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
 {
 	if (src->type == PSEUDO_CONSTANT) {
-		if (src->constant->type == RAVI_TNUMFLT) {
+		if (src->constant->type == RAVI_TNUMINT) {
 			emit_varname(dst, &fn->body);
 			raviX_buffer_add_fstring(&fn->body, " = %lld;\n", src->constant->i);
 		} else {
@@ -1233,6 +1233,66 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static void emit_i_name_or_constant(struct function *fn, struct pseudo *pseudo)
+{
+	if (pseudo->type == PSEUDO_CONSTANT) {
+		if (pseudo->constant->type == RAVI_TNUMINT) {
+			raviX_buffer_add_fstring(&fn->body, "%lld", pseudo->constant->i);
+		} else if (pseudo->constant->type == RAVI_TNUMFLT) {
+			raviX_buffer_add_fstring(&fn->body, " = %.16g", pseudo->constant->n);
+		} else {
+			assert(0);
+		}
+	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT) {
+		emit_varname(pseudo, &fn->body);
+	} else {
+		assert(0);
+	}
+}
+
+static int emit_comp_ii(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{ ");
+	struct pseudo *target = get_target(insn, 0);
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+	}
+	else {
+		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
+		emit_reg_accessor(fn, target);
+		raviX_buffer_add_string(&fn->body, "; setivalue(dst_reg, ");
+	}
+	const char *oper = NULL;
+	switch (insn->opcode) {
+	case op_eqii:
+	case op_eqff:
+		oper = "==";
+		break;
+	case op_ltii:
+	case op_ltff:
+		oper = "<";
+		break;
+	case op_leii:
+	case op_leff:
+		oper = "<=";
+		break;
+	default:
+		assert(0);
+		return -1;
+	}
+	emit_i_name_or_constant(fn, get_operand(insn, 0));
+	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
+	emit_i_name_or_constant(fn, get_operand(insn, 1));
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+		raviX_buffer_add_string(&fn->body, "; }\n");
+	}
+	else {
+		raviX_buffer_add_string(&fn->body, "); }\n");
+	}
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1258,6 +1318,52 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_call:
 		rc = emit_op_call(fn, insn);
 		break;
+
+//	case 	op_addff:
+//	case	    op_subff:
+//	case	    op_mulff:
+//	case	    op_divff:
+
+//	case	    op_addii:
+//	case	    op_subii:
+//	case	    op_mulii:
+//	case	    op_divii:
+//	case	    op_bandii:
+//	case	    op_borii:
+//	case	    op_bxorii:
+//	case	    op_shlii:
+//	case	    op_shrii:
+
+	case op_eqii:
+	case op_ltii:
+	case op_leii:
+	case op_eqff:
+	case op_ltff:
+	case op_leff:
+		return emit_comp_ii(fn, insn);
+
+		//	case	op_addfi:
+//	case	    op_subfi:
+//	case	    op_mulfi:
+//	case	    op_divfi:
+
+//	case	    op_subif:
+//	case	    op_divif:
+
+//	case	    op_sub:
+//	case	    op_mul:
+//	case	    op_div:
+//	case	    op_idiv:
+//	case	    op_band:
+//	case	    op_bor:
+//	case	    op_bxor:
+//	case	    op_shl:
+//	case	    op_shr:
+
+//	case	    op_eq:
+//	case	    op_lt:
+//	case	    op_le:
+
 	default:
 		rc = -1;
 	}
