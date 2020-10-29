@@ -1075,6 +1075,9 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 			raviX_buffer_add_fstring(&fn->body, " if (wanted == -1) wanted = %d;\n", n);
 		}
 	}
+	else {
+		raviX_buffer_add_string(&fn->body, " if (wanted == -1) wanted = 0;\n");
+	}
 	struct pseudo *pseudo;
 	int i = 0;
 	raviX_buffer_add_string(&fn->body, " int j = 0;\n");
