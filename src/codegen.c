@@ -673,12 +673,16 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
-static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
+static void
+emit_varname(const struct pseudo *pseudo, buffer_t *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
 	} else if (pseudo->type == PSEUDO_TEMP_FLT) {
 		raviX_buffer_add_fstring(mb, "%s%d", flt_var_prefix, pseudo->regnum);
+	} else {
+		fprintf(stderr, "Unexpected pseudo type %d\n", pseudo->type);
+		assert(0);
 	}
 }
 
@@ -861,6 +865,11 @@ static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pse
 			assert(0);
 			return -1;
 		}
+	} else if (src->type == PSEUDO_TEMP_FLT) {
+		emit_varname(dst, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+		emit_varname(src, &fn->body);
+		raviX_buffer_add_string(&fn->body, ";\n");
 	} else if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
 		raviX_buffer_add_string(&fn->body, "{\nTValue *reg = ");
 		emit_reg_accessor(fn, src);
@@ -886,6 +895,11 @@ static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pse
 			assert(0);
 			return -1;
 		}
+	} else if (src->type == PSEUDO_TEMP_INT) {
+		emit_varname(dst, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+		emit_varname(src, &fn->body);
+		raviX_buffer_add_string(&fn->body, ";\n");
 	} else if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
 		raviX_buffer_add_string(&fn->body, "{\nTValue *reg = ");
 		emit_reg_accessor(fn, src);
@@ -989,9 +1003,15 @@ static int emit_op_cbr(struct function *fn, struct instruction *insn)
 	struct pseudo *cond_pseudo = get_operand(insn, 0);
 	if (cond_pseudo->type == PSEUDO_FALSE || cond_pseudo->type == PSEUDO_NIL) {
 		emit_jump(fn, get_target(insn, 1));
-	} else if (cond_pseudo->type == PSEUDO_TRUE || cond_pseudo->type == PSEUDO_CONSTANT ||
-		   cond_pseudo->type == PSEUDO_TEMP_FLT || cond_pseudo->type == PSEUDO_TEMP_INT) {
+	} else if (cond_pseudo->type == PSEUDO_TRUE || cond_pseudo->type == PSEUDO_CONSTANT) {
 		emit_jump(fn, get_target(insn, 0));
+	} else if (cond_pseudo->type == PSEUDO_TEMP_FLT || cond_pseudo->type == PSEUDO_TEMP_INT) {
+		raviX_buffer_add_string(&fn->body, "{");
+		raviX_buffer_add_string(&fn->body, " if (");
+		emit_varname(cond_pseudo, &fn->body);
+		raviX_buffer_add_fstring(&fn->body, " != 0) goto L%d;", get_target(insn, 0)->block->index);
+		raviX_buffer_add_fstring(&fn->body, " else goto L%d; ", get_target(insn, 1)->block->index);
+		raviX_buffer_add_string(&fn->body, "}\n");
 	} else if (cond_pseudo->type == PSEUDO_TEMP_ANY || cond_pseudo->type == PSEUDO_SYMBOL) {
 		raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
 		emit_reg_accessor(fn, cond_pseudo);
@@ -1014,7 +1034,7 @@ static int emit_op_br(struct function *fn, struct instruction *insn)
 
 static int emit_op_mov(struct function *fn, struct instruction *insn)
 {
-	assert(insn->opcode == op_mov);
+	assert(insn->opcode == op_mov || insn->opcode == op_movi);
 	return emit_move(fn, get_operand(insn, 0), get_target(insn, 0));
 }
 
@@ -1293,6 +1313,71 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_bin_ii(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{ ");
+	struct pseudo *target = get_target(insn, 0);
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+	} else {
+		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
+		emit_reg_accessor(fn, target);
+		if (insn->opcode == op_addff || insn->opcode == op_subff || insn->opcode == op_mulff ||
+		    insn->opcode == op_divff) {
+			raviX_buffer_add_string(&fn->body, "; setfltvalue(dst_reg, ");
+		} else {
+			raviX_buffer_add_string(&fn->body, "; setivalue(dst_reg, ");
+		}
+	}
+	const char *oper = NULL;
+	switch (insn->opcode) {
+	case op_addff:
+	case op_addii:
+		oper = "+";
+		break;
+
+	case op_subff:
+	case op_subii:
+		oper = "-";
+		break;
+
+	case op_mulff:
+	case op_mulii:
+		oper = "*";
+		break;
+
+	case op_divff:
+	case op_divii:
+		oper = "/";
+		break;
+
+	case op_bandii:
+		oper = "&";
+		break;
+
+	case op_borii:
+		oper = "|";
+		break;
+
+	case op_bxorii:
+		oper = "^";
+		break;
+	default:
+		assert(0);
+		return -1;
+	}
+	emit_i_name_or_constant(fn, get_operand(insn, 0));
+	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
+	emit_i_name_or_constant(fn, get_operand(insn, 1));
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+		raviX_buffer_add_string(&fn->body, "; }\n");
+	} else {
+		raviX_buffer_add_string(&fn->body, "); }\n");
+	}
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1307,6 +1392,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_cbr(fn, insn);
 		break;
 	case op_mov:
+	case op_movi:
 		rc = emit_op_mov(fn, insn);
 		break;
 	case op_loadglobal:
@@ -1319,19 +1405,22 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_call(fn, insn);
 		break;
 
-//	case 	op_addff:
-//	case	    op_subff:
-//	case	    op_mulff:
-//	case	    op_divff:
+	case op_addff:
+	case op_subff:
+	case op_mulff:
+	case op_divff:
 
-//	case	    op_addii:
-//	case	    op_subii:
-//	case	    op_mulii:
-//	case	    op_divii:
-//	case	    op_bandii:
-//	case	    op_borii:
-//	case	    op_bxorii:
-//	case	    op_shlii:
+	case op_addii:
+	case op_subii:
+	case op_mulii:
+	case op_divii:
+	case op_bandii:
+	case op_borii:
+	case op_bxorii:
+		rc = emit_bin_ii(fn, insn);
+		break;
+
+		//	case	    op_shlii:
 //	case	    op_shrii:
 
 	case op_eqii:
@@ -1340,7 +1429,8 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_eqff:
 	case op_ltff:
 	case op_leff:
-		return emit_comp_ii(fn, insn);
+		rc = emit_comp_ii(fn, insn);
+		break;
 
 		//	case	op_addfi:
 //	case	    op_subfi:
