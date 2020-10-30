@@ -1284,7 +1284,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	else {
 		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
 		emit_reg_accessor(fn, target);
-		raviX_buffer_add_string(&fn->body, "; setivalue(dst_reg, ");
+		raviX_buffer_add_string(&fn->body, "; setbvalue(dst_reg, ");
 	}
 	const char *oper = NULL;
 	switch (insn->opcode) {
