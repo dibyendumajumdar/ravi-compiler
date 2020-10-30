@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 project(RaviCompiler VERSION 0.0.1 LANGUAGES C)
 
+option(ASAN "Controls whether address sanitizer should be enabled" OFF)
+
 set(PUBLIC_HEADERS
     include/ravi_compiler.h
     include/ravi_api.h)
@@ -64,11 +66,13 @@ endif()
 include(CheckCCompilerFlag)
 if (NOT MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=return-type")
-    set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
-    check_c_compiler_flag("-fsanitize=address" COMPILER_ASAN_SUPPORTED)
-    if (COMPILER_ASAN_SUPPORTED AND NOT CMAKE_C_FLAGS_DEBUG MATCHES "-fsanitize=address")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
-    endif()
+    if (ASAN)
+        set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
+        check_c_compiler_flag("-fsanitize=address" COMPILER_ASAN_SUPPORTED)
+        if (COMPILER_ASAN_SUPPORTED AND NOT CMAKE_C_FLAGS_DEBUG MATCHES "-fsanitize=address")
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+        endif ()
+    endif ()
 endif()
 
 include(GNUInstallDirs)
