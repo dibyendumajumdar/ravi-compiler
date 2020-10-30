@@ -1127,13 +1127,13 @@ static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
 	struct pseudo *dst = get_target(insn, 0);
 	assert(varname->type == PSEUDO_CONSTANT);
 	raviX_buffer_add_string(&fn->body, "{\n");
-	raviX_buffer_add_string(&fn->body, " TValue *env = ");
+	raviX_buffer_add_string(&fn->body, " TValue *tab = ");
 	emit_reg_accessor(fn, env);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
 	emit_reg_accessor(fn, varname);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *dst = ");
 	emit_reg_accessor(fn, dst);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_gettable_sskey(L, env, name, dst);\n ");
+	raviX_buffer_add_string(&fn->body, ";\n raviV_gettable_sskey(L, tab, name, dst);\n ");
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1146,13 +1146,13 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	struct pseudo *src = get_operand(insn, 0);
 	assert(varname->type == PSEUDO_CONSTANT);
 	raviX_buffer_add_string(&fn->body, "{\n");
-	raviX_buffer_add_string(&fn->body, " TValue *env = ");
+	raviX_buffer_add_string(&fn->body, " TValue *tab = ");
 	emit_reg_accessor(fn, env);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
 	emit_reg_accessor(fn, varname);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *src = ");
 	emit_reg_accessor(fn, src);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_settable_sskey(L, env, name, src);\n ");
+	raviX_buffer_add_string(&fn->body, ";\n raviV_settable_sskey(L, tab, name, src);\n ");
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1396,9 +1396,11 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_mov(fn, insn);
 		break;
 	case op_loadglobal:
+	case op_get_skey:
 		rc = emit_op_loadglobal(fn, insn);
 		break;
 	case op_storeglobal:
+	case op_put_skey:
 		rc = emit_op_storeglobal(fn, insn);
 		break;
 	case op_call:
