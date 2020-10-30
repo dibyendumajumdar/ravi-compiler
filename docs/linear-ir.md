@@ -143,7 +143,7 @@ The `op_call` opcode is used to invoke a function.
     invoking the function.</dd>
     <dt>target[1]</dt>
     <dd>The second value is the number of results the caller is expecting.
-    If this is <tt>-1</tt> then caller wants all results.</dd>
+    If this is <code>-1</code> then caller wants all results.</dd>
 </dl>
 
 * If the caller supplied `-1` as number of results then `op_call` needs to determine
@@ -153,3 +153,19 @@ be the difference between `L->top` and register at `target[0]`.
 the last argument as `luaD_precall()` uses this to determine the number of arguments.
 * `op_call` copies the function and arguments to the right place and then 
 invokes `luaD_precall()` to handle the actual function call.
+
+### Comparion operators
+
+A number of comparison operators are used in the linear IR. These are listed below:
+
+* `op_eq` - compares two Lua stack values for `==`
+* `op_eqii` - compares two C stack integers
+* `op_eqff` - compares two C stack floats
+* `op_lt` - compares two Lua stack values for `<`
+* `op_ltii` - compares two C stack integers 
+* `op_ltff` - compares two C stack floats 
+* `op_le` - compares two Lua stack values for `<=`
+* `op_leii` - compares two C stack integers 
+* `op_leff` - compares two C stack floats 
+
+
