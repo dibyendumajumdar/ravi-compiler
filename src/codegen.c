@@ -592,8 +592,8 @@ static const char Lua_header[] =
     "#define K(i) (k + i)\n"
     "#define S(i) (stackbase + i)\n"
     "#define stackoverflow(L, n) (((int)(L->top - L->stack) + (n) + 5) >= L->stacksize)\n"
-	"#define savestack(L,p)		((char *)(p) - (char *)L->stack)\n"
-	"#define restorestack(L,n)	((TValue *)((char *)L->stack + (n)))\n"
+    "#define savestack(L,p)		((char *)(p) - (char *)L->stack)\n"
+    "#define restorestack(L,n)	((TValue *)((char *)L->stack + (n)))\n"
     "#define tonumberns(o,n) \\\n"
     "	(ttisfloat(o) ? ((n) = fltvalue(o), 1) : \\\n"
     "	(ttisinteger(o) ? ((n) = cast_num(ivalue(o)), 1) : 0))\n"
@@ -612,7 +612,7 @@ struct function {
 /* readonly statics */
 static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
-//static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
+// static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
 {
@@ -673,8 +673,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
-static void
-emit_varname(const struct pseudo *pseudo, buffer_t *mb)
+static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
@@ -1074,8 +1073,7 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 		} else {
 			raviX_buffer_add_fstring(&fn->body, " if (wanted == -1) wanted = %d;\n", n);
 		}
-	}
-	else {
+	} else {
 		raviX_buffer_add_string(&fn->body, " if (wanted == -1) wanted = 0;\n");
 	}
 	struct pseudo *pseudo;
@@ -1191,8 +1189,9 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 	// If -1 it means all available values
 	int nresults = (int)get_target(insn, 1)->constant->i;
 	// I think it is okay to just use n as the check because if L->top was set
-	// then n will be on top of that 
-	raviX_buffer_add_fstring(&fn->body, " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n+1, n+1);
+	// then n will be on top of that
+	raviX_buffer_add_fstring(
+	    &fn->body, " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n + 1, n + 1);
 	if (n > 1) {
 		// We have function arguments (as n=0 is the function itself)
 		struct pseudo *last_arg = get_operand(insn, n - 1);
@@ -1280,8 +1279,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
-	}
-	else {
+	} else {
 		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
 		emit_reg_accessor(fn, target);
 		raviX_buffer_add_string(&fn->body, "; setbvalue(dst_reg, ");
@@ -1309,8 +1307,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	emit_i_name_or_constant(fn, get_operand(insn, 1));
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_string(&fn->body, "; }\n");
-	}
-	else {
+	} else {
 		raviX_buffer_add_string(&fn->body, "); }\n");
 	}
 	return 0;
@@ -1424,7 +1421,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 
 		//	case	    op_shlii:
-//	case	    op_shrii:
+		//	case	    op_shrii:
 
 	case op_eqii:
 	case op_ltii:
@@ -1436,26 +1433,26 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 
 		//	case	op_addfi:
-//	case	    op_subfi:
-//	case	    op_mulfi:
-//	case	    op_divfi:
+		//	case	    op_subfi:
+		//	case	    op_mulfi:
+		//	case	    op_divfi:
 
-//	case	    op_subif:
-//	case	    op_divif:
+		//	case	    op_subif:
+		//	case	    op_divif:
 
-//	case	    op_sub:
-//	case	    op_mul:
-//	case	    op_div:
-//	case	    op_idiv:
-//	case	    op_band:
-//	case	    op_bor:
-//	case	    op_bxor:
-//	case	    op_shl:
-//	case	    op_shr:
+		//	case	    op_sub:
+		//	case	    op_mul:
+		//	case	    op_div:
+		//	case	    op_idiv:
+		//	case	    op_band:
+		//	case	    op_bor:
+		//	case	    op_bxor:
+		//	case	    op_shl:
+		//	case	    op_shr:
 
-//	case	    op_eq:
-//	case	    op_lt:
-//	case	    op_le:
+		//	case	    op_eq:
+		//	case	    op_lt:
+		//	case	    op_le:
 
 	default:
 		rc = -1;
