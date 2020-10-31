@@ -308,7 +308,7 @@ static void add_upvalue_in_levels_upto(struct parser_state *parser, struct ast_n
 	// NOTE: var_function may be NULL in the case of _ENV
 	// This is okay as it means we go up the whole call stack in that case
 	assert(symbol->symbol_type == SYM_LOCAL || symbol->symbol_type == SYM_ENV);
-	assert(symbol->symbol_type == SYM_ENV && var_function == NULL || var_function != NULL);
+	assert((symbol->symbol_type == SYM_ENV && var_function == NULL) || var_function != NULL);
 	assert(current_function != var_function);
 	while (current_function && current_function != var_function) {
 		bool added = add_upvalue_in_function(parser, current_function, symbol);
