@@ -1481,12 +1481,30 @@ static int emit_op_iaput_ival(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_toiarray(struct function *fn, struct instruction *insn) {
+static int emit_op_totype(struct function *fn, struct instruction *insn)
+{
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, get_first_target(insn));
-	raviX_buffer_add_string(&fn->body, ";\n if (!ttisiarray(ra)) {\n");
-	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_array_expected);
+	if (insn->opcode == op_toiarray) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisiarray(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_array_expected);
+	} else if (insn->opcode == op_tofarray) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisfarray(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_array_expected);
+	} else if (insn->opcode == op_totable) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisLtable(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_table_expected);
+	} else if (insn->opcode == op_toclosure) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisclosure(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_closure_expected);
+	} else if (insn->opcode == op_tostring) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisstring(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_string_expected);
+	} else {
+		assert(0);
+		return -1;
+	}
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n}\n");
 	return 0;
@@ -1503,23 +1521,13 @@ static int emit_op_newtable(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
-static int emit_op_newiarray(struct function *fn, struct instruction *insn) {
+static int emit_op_newarray(struct function *fn, struct instruction *insn) {
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, target_pseudo);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_op_newarrayint(L, ci, ra);\n");
-	emit_reload_base(fn);
-	raviX_buffer_add_string(&fn->body, "}\n");
-	return 0;
-}
-
-static int emit_op_newfarray(struct function *fn, struct instruction *insn) {
-	struct pseudo *target_pseudo = get_first_target(insn);
-	raviX_buffer_add_string(&fn->body, "{\n");
-	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
-	emit_reg_accessor(fn, target_pseudo);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_op_newarrayfloat(L, ci, ra);\n");
+	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, ci, ra);\n",
+				 insn->opcode == op_newfarray ? "raviV_op_newarrayfloat" : "raviV_op_newarrayint");
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1640,7 +1648,11 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 
 	case op_toiarray:
-		rc = emit_op_toiarray(fn, insn);
+	case op_tofarray:
+	case op_totable:
+	case op_tostring:
+	case op_toclosure:
+		rc = emit_op_totype(fn, insn);
 		break;
 
 	case op_closure:
@@ -1652,11 +1664,11 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 
 	case op_newiarray:
-		rc = emit_op_newiarray(fn, insn);
+		rc = emit_op_newarray(fn, insn);
 		break;
 
 	case op_newfarray:
-		rc = emit_op_newfarray(fn, insn);
+		rc = emit_op_newarray(fn, insn);
 		break;
 
 	default:
