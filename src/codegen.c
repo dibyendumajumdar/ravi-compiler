@@ -614,6 +614,26 @@ static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
 // static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
+enum errorcode {
+	Error_integer_expected,
+	Error_number_expected,
+	Error_integer_array_expected,
+	Error_number_array_expected,
+	Error_table_expected,
+	Error_upval_needs_integer,
+	Error_upval_needs_number,
+	Error_upval_needs_integer_array,
+	Error_upval_needs_number_array,
+	Error_upval_needs_table,
+	Error_for_limit_must_be_number,
+	Error_for_step_must_be_number,
+	Error_for_initial_value_must_be_number,
+	Error_array_out_of_bounds,
+	Error_string_expected,
+	Error_closure_expected,
+	Error_type_mismatch,
+};
+
 static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
@@ -1577,6 +1597,9 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 	}
 	rc = output_instructions(fn, bb->insns);
 	if (bb->index == EXIT_BLOCK) {
+		raviX_buffer_add_string(&fn->body, "return result;\n");
+		raviX_buffer_add_string(&fn->body, "Lraise_error:\n");
+		raviX_buffer_add_string(&fn->body, "raise_error(L, error_code); /* does not return */\n");
 		raviX_buffer_add_string(&fn->body, "return result;\n");
 	}
 	return rc;
