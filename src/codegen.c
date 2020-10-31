@@ -1492,6 +1492,39 @@ static int emit_op_toiarray(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
+static int emit_op_newtable(struct function *fn, struct instruction *insn) {
+	struct pseudo *target_pseudo = get_first_target(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, target_pseudo);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_op_newtable(L, ci, ra, 0, 0);\n");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_newiarray(struct function *fn, struct instruction *insn) {
+	struct pseudo *target_pseudo = get_first_target(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, target_pseudo);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_op_newarrayint(L, ci, ra);\n");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_newfarray(struct function *fn, struct instruction *insn) {
+	struct pseudo *target_pseudo = get_first_target(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, target_pseudo);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_op_newarrayfloat(L, ci, ra);\n");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int emit_op_closure(struct function *fn, struct instruction *insn) {
 	struct pseudo *closure_pseudo = get_first_operand(insn);
 	struct pseudo *target_pseudo = get_first_target(insn);
@@ -1612,6 +1645,18 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 
 	case op_closure:
 		rc = emit_op_closure(fn, insn);
+		break;
+
+	case op_newtable:
+		rc = emit_op_newtable(fn, insn);
+		break;
+
+	case op_newiarray:
+		rc = emit_op_newiarray(fn, insn);
+		break;
+
+	case op_newfarray:
+		rc = emit_op_newfarray(fn, insn);
 		break;
 
 	default:
