@@ -940,7 +940,7 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 	} else if (dst->type == PSEUDO_TEMP_INT) {
 		emit_move_inttemp(fn, src, dst);
 	} else if (dst->type == PSEUDO_TEMP_ANY || dst->type == PSEUDO_SYMBOL || dst->type == PSEUDO_LUASTACK) {
-		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL) {
+		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_RANGE_SELECT) {
 			// Only emit a move if we are not referencing the same register
 			if (!refers_to_same_register(fn, src, dst)) {
 				raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
@@ -1416,7 +1416,7 @@ static int emit_op_iaget_ikey(struct function *fn, struct instruction *insn)
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, ";\n");
-	raviX_buffer_add_string(&fn->body, " lua_Integer *iptr = (lua_Integer *)t->data;\n ");
+	raviX_buffer_add_string(&fn->body, " lua_Integer *iptr = (lua_Integer *)arr->data;\n ");
 	if (dst->type == PSEUDO_TEMP_INT) {
 		emit_varname(dst, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = iptr[ukey];\n");
@@ -1450,8 +1450,8 @@ static int emit_op_iaput_ival(struct function *fn, struct instruction *insn)
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, ";\n");
-	raviX_buffer_add_string(&fn->body, " lua_Integer *iptr = (lua_Integer *)t->data;\n ");
-	raviX_buffer_add_string(&fn->body, "if (ukey < (lua_Unsigned)(t->len)) {\n");
+	raviX_buffer_add_string(&fn->body, " lua_Integer *iptr = (lua_Integer *)arr->data;\n ");
+	raviX_buffer_add_string(&fn->body, "if (ukey < (lua_Unsigned)(arr->len)) {\n");
 	raviX_buffer_add_string(&fn->body, " iptr[ukey] = ");
 	if (src->type == PSEUDO_TEMP_INT) {
 		emit_varname(src, &fn->body);
@@ -1466,29 +1466,57 @@ static int emit_op_iaput_ival(struct function *fn, struct instruction *insn)
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, ";\n} else {\n");
-	raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, t, ukey, ");
+	raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, arr, ukey, ");
 	if (src->type == PSEUDO_TEMP_INT) {
 		emit_varname(src, &fn->body);
 	} else if (src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_LUASTACK) {
-		raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, t, ukey, ivalue(");
+		raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, arr, ukey, ivalue(");
 		emit_reg_accessor(fn, src);
 		raviX_buffer_add_string(&fn->body, ")");
 	} else if (src->type == PSEUDO_CONSTANT) {
 		raviX_buffer_add_fstring(&fn->body, "%lld", src->constant->i);
 	}
 	raviX_buffer_add_string(&fn->body, ");\n");
-	raviX_buffer_add_string(&fn->body, "}\n");
+	raviX_buffer_add_string(&fn->body, "}\n}\n");
 	return 0;
 }
 
 static int emit_op_toiarray(struct function *fn, struct instruction *insn) {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
-	emit_reg_accessor(fn, get_first_operand(insn));
+	emit_reg_accessor(fn, get_first_target(insn));
 	raviX_buffer_add_string(&fn->body, ";\n if (!ttisiarray(ra)) {\n");
 	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_array_expected);
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n}\n");
+	return 0;
+}
+
+static int emit_op_closure(struct function *fn, struct instruction *insn) {
+	struct pseudo *closure_pseudo = get_first_operand(insn);
+	struct pseudo *target_pseudo = get_first_target(insn);
+
+	assert(closure_pseudo->type == PSEUDO_PROC);
+	struct proc *proc = closure_pseudo->proc;
+	struct proc *parent_proc = proc->parent;
+	struct proc *cursor;
+	int parent_index = -1;
+	int i = 0;
+	FOR_EACH_PTR(parent_proc->procs, cursor) {
+		if (cursor->id == proc->id) {
+			assert(cursor == proc);
+			parent_index = i;
+			break;
+		}
+		i++;
+	} END_FOR_EACH_PTR(cursor);
+	if (parent_index == -1) {
+		assert(0);
+		return -1;
+	}
+	unsigned reg = compute_register_from_base(fn, target_pseudo);
+	raviX_buffer_add_fstring(&fn->body, "raviV_op_closure(L, ci, cl, %d, %d);\n", reg, parent_index);
+	emit_reload_base(fn);
 	return 0;
 }
 
@@ -1580,6 +1608,10 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 
 	case op_toiarray:
 		rc = emit_op_toiarray(fn, insn);
+		break;
+
+	case op_closure:
+		rc = emit_op_closure(fn, insn);
 		break;
 
 	default:
