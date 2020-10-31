@@ -991,8 +991,8 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 	}
 
 	struct instruction *insn = allocate_instruction(proc, op);
-	add_instruction_operand(proc, insn, table);
-	add_instruction_operand(proc, insn, index_pseudo);
+	add_instruction_target(proc, insn, table);
+	add_instruction_target(proc, insn, index_pseudo);
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
@@ -1052,9 +1052,16 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 	}
 	remove_instruction(insn->block, insn);
 	insn->opcode = putop;
-	add_instruction_operand(proc, insn, value_pseudo);
+	// Remove target
 	struct pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target, false);
+	struct pseudo *pseudo;
+	// Move the get operands to put target (table, key)
+	FOR_EACH_PTR(insn->operands, pseudo) { add_instruction_target(proc, insn, pseudo); }
+	END_FOR_EACH_PTR(pseudo);
+	ptrlist_remove_all((struct ptr_list **)&insn->operands);
+	// Add new operand
+	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
 

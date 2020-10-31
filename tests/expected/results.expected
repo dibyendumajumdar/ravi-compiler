@@ -2990,9 +2990,9 @@ end
 define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
-	TPUTik {T(0), 1 Kint(0), 1 Kint(0)}
-	TPUTik {T(0), 2 Kint(1), 2 Kint(1)}
-	TPUTik {T(0), 3 Kint(2), 3 Kint(2)}
+	TPUTik {1 Kint(0)} {T(0), 1 Kint(0)}
+	TPUTik {2 Kint(1)} {T(0), 2 Kint(1)}
+	TPUTik {3 Kint(2)} {T(0), 3 Kint(2)}
 	RET {T(0)} {L1}
 L1 (exit)
 return {[1] = a}
@@ -3044,7 +3044,7 @@ define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(1)}
-	TPUTik {T(0), 1 Kint(0), T(1)}
+	TPUTik {T(1)} {T(0), 1 Kint(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return {a = b}
@@ -3094,7 +3094,7 @@ define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(1)} {T(1)}
-	TPUTsk {T(0), 'a' Ks(0), T(1)}
+	TPUTsk {T(1)} {T(0), 'a' Ks(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return @integer[]{[1] = 5.5, [2] = 4}
@@ -3169,8 +3169,8 @@ end
 define Proc%1
 L0 (entry)
 	NEWIARRAY {T(0)}
-	IAPUT {T(0), 1 Kint(0), 5.500000000000 Kflt(1)}
-	IAPUTiv {T(0), 2 Kint(2), 4 Kint(3)}
+	IAPUT {5.500000000000 Kflt(1)} {T(0), 1 Kint(0)}
+	IAPUTiv {4 Kint(3)} {T(0), 2 Kint(2)}
 	RET {T(0)} {L1}
 L1 (exit)
 return @number[] {[1] = 4, [2] = 5.4}
@@ -3245,8 +3245,8 @@ end
 define Proc%1
 L0 (entry)
 	NEWFARRAY {T(0)}
-	FAPUT {T(0), 1 Kint(0), 4 Kint(1)}
-	FAPUTfv {T(0), 2 Kint(2), 5.400000000000 Kflt(3)}
+	FAPUT {4 Kint(1)} {T(0), 1 Kint(0)}
+	FAPUTfv {5.400000000000 Kflt(3)} {T(0), 2 Kint(2)}
 	RET {T(0)} {L1}
 L1 (exit)
 if 1 == 1 then return true else return false end
@@ -4193,7 +4193,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	PUTik {T(0), 1 Kint(1), 1 Kint(1)}
+	PUTik {1 Kint(1)} {T(0), 1 Kint(1)}
 	RET {L1}
 L1 (exit)
 x[1] = b
@@ -4253,7 +4253,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(2)}
-	PUTik {T(0), 1 Kint(1), T(2)}
+	PUTik {T(2)} {T(0), 1 Kint(1)}
 	RET {L1}
 L1 (exit)
 x[1][1] = b
@@ -4324,7 +4324,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	GETik {T(0), 1 Kint(1)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}
-	PUTik {T(1), 1 Kint(1), T(3)}
+	PUTik {T(3)} {T(1), 1 Kint(1)}
 	RET {L1}
 L1 (exit)
 x()
@@ -4762,8 +4762,8 @@ L0 (entry)
 	CALL {T(6)} {T(6..), 3 Kint(6)}
 	STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(4)}
 	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(3)}
-	PUTik {T(2), 1 Kint(1), T(6[6..])}
-	PUTik {T(0), 1 Kint(1), 1 Kint(1)}
+	PUTik {T(6[6..])} {T(2), 1 Kint(1)}
+	PUTik {1 Kint(1)} {T(0), 1 Kint(1)}
 	RET {L1}
 L1 (exit)
 x[1][2],y[1],c,d = 1,z()
@@ -4904,8 +4904,8 @@ L0 (entry)
 	CALL {T(7)} {T(7..), 3 Kint(7)}
 	STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(5)}
 	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(4)}
-	PUTik {T(3), 1 Kint(1), T(7[7..])}
-	PUTik {T(1), 2 Kint(2), 1 Kint(1)}
+	PUTik {T(7[7..])} {T(3), 1 Kint(1)}
+	PUTik {1 Kint(1)} {T(1), 2 Kint(2)}
 	RET {L1}
 L1 (exit)
 x,y = y,x
@@ -5192,7 +5192,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(4)}
 	ADD {T(4), 1 Kint(3)} {T(5)}
-	PUT {T(1), T(2), 20 Kint(4)}
+	PUT {20 Kint(4)} {T(1), T(2)}
 	STOREGLOBAL {T(5)} {Upval(_ENV), 'i' Ks(0)}
 	RET {L1}
 L1 (exit)
@@ -5333,7 +5333,7 @@ L0 (entry)
 	CALL {T(4)} {T(4..), -1 Kint(6)}
 	CALL {T(1), T(3), 5 Kint(4), T(4..)} {T(1..), -1 Kint(6)}
 	CALL {T(0), T(1..)} {T(0), 1 Kint(7)}
-	PUTik {T(0), 1 Kint(7), 9 Kint(8)}
+	PUTik {9 Kint(8)} {T(0), 1 Kint(7)}
 	RET {L1}
 L1 (exit)
 local i = 0
@@ -6880,7 +6880,7 @@ L0 (entry)
 	NEWTABLE {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(1)} {T(2)}
 	CALL {T(2)} {T(2..), -1 Kint(2)}
-	TPUTik {T(1), 1 Kint(0), T(2..)}
+	TPUTik {T(2..)} {T(1), 1 Kint(0)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
@@ -7948,7 +7948,7 @@ L5
 	CALL {T(7), Tint(2), 0.000000000000 Kflt(7)} {T(7..), 1 Kint(1)}
 	TOFARRAY {T(7[7..])}
 	MOV {T(7[7..])} {local(xi, 4)}
-	TPUTik {local(x, 2), Tint(3), local(xi, 4)}
+	TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}
 	MOV {1 Kint(1)} {Tint(10)}
 	MOV {Tint(2)} {Tint(11)}
 	MOV {1 Kint(1)} {Tint(12)}
@@ -8001,7 +8001,7 @@ L15
 	MOVf {Tflt(2)} {Tflt(0)}
 	BR {L12}
 L16
-	FAPUTfv {local(xi, 4), Tint(9), Tflt(0)}
+	FAPUTfv {Tflt(0)} {local(xi, 4), Tint(9)}
 	BR {L7}
 return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)
 function()
@@ -9490,7 +9490,7 @@ L3
 	GETsk {T(5), 'sub' Ks(4)} {T(6)}
 	UNMi {3 Kint(5)} {Tint(0)}
 	CALL {T(6), local(m, 0), 3 Kint(5), Tint(0)} {T(6..), 1 Kint(2)}
-	PUT {Upval(1, Proc%1, msgs), T(4), T(6[6..])}
+	PUT {T(6[6..])} {Upval(1, Proc%1, msgs), T(4)}
 	BR {L4}
 L4
 	RET {L1}
@@ -9741,7 +9741,7 @@ L4
 	MOV {true} {T(3)}
 	BR {L5}
 L5
-	PUTik {T(0), 2 Kint(5), T(3)}
+	PUTik {T(3)} {T(0), 2 Kint(5)}
 	LOADGLOBAL {Upval(_ENV), 'r' Ks(6)} {T(3)}
 	CALL {T(3)} {T(3), 1 Kint(3)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(7)} {T(2)}
@@ -9752,7 +9752,7 @@ L6
 	MOV {'majumdar' Ks(10)} {T(6)}
 	BR {L7}
 L7
-	PUTsk {T(4), 'name' Ks(8), T(6)}
+	PUTsk {T(6)} {T(4), 'name' Ks(8)}
 	RET {L1}
 L8
 	MOV {'Dibyendu' Ks(9)} {T(7)}
@@ -10010,7 +10010,7 @@ L0 (entry)
 	NEWTABLE {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'g' Ks(1)} {T(1)}
 	CALL {T(1)} {T(1..), -1 Kint(2)}
-	TPUTik {T(0), 1 Kint(0), T(1..)}
+	TPUTik {T(1..)} {T(0), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(3)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'g' Ks(1)} {T(2)}
 	CALL {T(2)} {T(2..), -1 Kint(2)}
