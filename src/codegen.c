@@ -1378,7 +1378,7 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_IAGET_ik(struct function *fn, struct instruction *insn)
+static int emit_op_iaget_ikey(struct function *fn, struct instruction *insn)
 {
 	struct pseudo *arr = get_operand(insn, 0);
 	struct pseudo *key = get_operand(insn, 1);
@@ -1408,6 +1408,55 @@ static int emit_IAGET_ik(struct function *fn, struct instruction *insn)
 		assert(0);
 		return -1;
 	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_iaput_ival(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *arr = get_target(insn, 0);
+	struct pseudo *key = get_target(insn, 1);
+	struct pseudo *src = get_operand(insn, 0);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " RaviArray *arr = arrvalue(");
+	emit_reg_accessor(fn, arr);
+	raviX_buffer_add_string(&fn->body, ");\n lua_Unsigned ukey = (lua_Unsigned) ");
+	if (key->type == PSEUDO_CONSTANT) {
+		raviX_buffer_add_fstring(&fn->body, "%lld", key->constant->i);
+	} else if (key->type == PSEUDO_TEMP_INT) {
+		emit_varname(key, &fn->body);
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " lua_Integer *iptr = (lua_Integer *)t->data;\n ");
+	raviX_buffer_add_string(&fn->body, "if (ukey < (lua_Unsigned)(t->len)) {\n");
+	raviX_buffer_add_string(&fn->body, " iptr[ukey] = ");
+	if (src->type == PSEUDO_TEMP_INT) {
+		emit_varname(src, &fn->body);
+	} else if (src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_LUASTACK) {
+		raviX_buffer_add_string(&fn->body, "ivalue(");
+		emit_reg_accessor(fn, src);
+		raviX_buffer_add_string(&fn->body, ")");
+	} else if (src->type == PSEUDO_CONSTANT) {
+		raviX_buffer_add_fstring(&fn->body, "%lld", src->constant->i);
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, ";\n} else {\n");
+	raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, t, ukey, ");
+	if (src->type == PSEUDO_TEMP_INT) {
+		emit_varname(src, &fn->body);
+	} else if (src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_LUASTACK) {
+		raviX_buffer_add_fstring(&fn->body, " raviH_set_int(L, t, ukey, ivalue(");
+		emit_reg_accessor(fn, src);
+		raviX_buffer_add_string(&fn->body, ")");
+	} else if (src->type == PSEUDO_CONSTANT) {
+		raviX_buffer_add_fstring(&fn->body, "%lld", src->constant->i);
+	}
+	raviX_buffer_add_string(&fn->body, ");\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
 }
@@ -1491,7 +1540,11 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		//	case	    op_le:
 
 	case op_iaget_ikey:
-		rc = emit_IAGET_ik(fn, insn);
+		rc = emit_op_iaget_ikey(fn, insn);
+		break;
+
+	case op_iaput_ival:
+		rc = emit_op_iaput_ival(fn, insn);
 		break;
 
 	default:
