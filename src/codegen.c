@@ -1481,6 +1481,17 @@ static int emit_op_iaput_ival(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_toiarray(struct function *fn, struct instruction *insn) {
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_operand(insn));
+	raviX_buffer_add_string(&fn->body, ";\n if (!ttisiarray(ra)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_array_expected);
+	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, " }\n}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1567,7 +1578,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_iaput_ival(fn, insn);
 		break;
 
+	case op_toiarray:
+		rc = emit_op_toiarray(fn, insn);
+		break;
+
 	default:
+		fprintf(stderr, "Usupported opcode %s\n", raviX_opcode_name(insn->opcode));
 		rc = -1;
 	}
 	return rc;
