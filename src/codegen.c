@@ -1510,6 +1510,26 @@ static int emit_op_totype(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_tousertype(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *typename = get_first_operand(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_target(insn));
+	raviX_buffer_add_string(&fn->body, ";\n if (!ttisnil(ra)) {\n");
+	raviX_buffer_add_string(&fn->body, "  TValue *rb = ");
+	emit_reg_accessor(fn, typename);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body,
+				"  if (!ttisshrstring(rb) || !raviV_check_usertype(L, tsvalue(rb), ra)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, "  }\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int emit_op_newtable(struct function *fn, struct instruction *insn) {
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
@@ -1653,6 +1673,10 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_tostring:
 	case op_toclosure:
 		rc = emit_op_totype(fn, insn);
+		break;
+
+	case op_totype:
+		rc = emit_op_tousertype(fn, insn);
 		break;
 
 	case op_closure:
