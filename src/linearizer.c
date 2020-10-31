@@ -876,7 +876,6 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	struct proc *curproc = proc->linearizer->current_proc;
 	struct proc *newproc = allocate_proc(proc->linearizer, expr);
 	set_current_proc(proc->linearizer, newproc);
-	// printf("linearizing function\n");
 	linearize_function(proc->linearizer);
 	set_current_proc(proc->linearizer, curproc); // restore the proc
 	ravitype_t target_type = expr->function_expr.type.type_code;
@@ -2343,6 +2342,10 @@ static void output_pseudo_list(struct pseudo_list *list, buffer_t *mb)
 	}
 	END_FOR_EACH_PTR(pseudo)
 	raviX_buffer_add_string(mb, "}");
+}
+
+const char *raviX_opcode_name(unsigned int opcode) {
+	return op_codenames[opcode];
 }
 
 static void output_instruction(struct instruction *insn, buffer_t *mb, const char *prefix, const char *suffix)
