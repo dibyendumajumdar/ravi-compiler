@@ -1414,6 +1414,11 @@ static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
 		raviX_buffer_add_fstring(&fn->body, "%lld", key->constant->i);
 	} else if (key->type == PSEUDO_TEMP_INT) {
 		emit_varname(key, &fn->body);
+	} else if (key->type == PSEUDO_SYMBOL) {
+		// this must be an integer
+		raviX_buffer_add_string(&fn->body, "ivalue(");
+		emit_reg_accessor(fn, key);
+		raviX_buffer_add_string(&fn->body, ")");
 	} else {
 		assert(0);
 		return -1;
@@ -1453,6 +1458,11 @@ static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
 		raviX_buffer_add_fstring(&fn->body, "%lld", key->constant->i);
 	} else if (key->type == PSEUDO_TEMP_INT) {
 		emit_varname(key, &fn->body);
+	} else if (key->type == PSEUDO_SYMBOL) {
+		// this must be an integer
+		raviX_buffer_add_string(&fn->body, "ivalue(");
+		emit_reg_accessor(fn, key);
+		raviX_buffer_add_string(&fn->body, ")");
 	} else {
 		assert(0);
 		return -1;
@@ -1519,10 +1529,28 @@ static int emit_op_totype(struct function *fn, struct instruction *insn)
 	} else if (insn->opcode == op_tostring) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisstring(ra)) {\n");
 		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_string_expected);
+	} else if (insn->opcode == op_toint) {
+		raviX_buffer_add_string(&fn->body, ";\n if (!ttisinteger(ra)) {\n");
+		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_expected);
 	} else {
 		assert(0);
 		return -1;
 	}
+	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, " }\n}\n");
+	return 0;
+}
+
+static int emit_op_toflt(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_target(insn));
+	raviX_buffer_add_string(&fn->body, ";\n lua_Number n = 0;\n");
+	raviX_buffer_add_string(&fn->body, " if (ttisnumber(ra)) { n = (ttisinteger(ra) ? (double) ivalue(ra) : "
+					   "fltvalue(ra)); setfltvalue(ra, n); }\n");
+	raviX_buffer_add_string(&fn->body, " else {\n");
+	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_expected);
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n}\n");
 	return 0;
@@ -1692,7 +1720,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_totable:
 	case op_tostring:
 	case op_toclosure:
+	case op_toint:
 		rc = emit_op_totype(fn, insn);
+		break;
+
+	case op_toflt:
+		rc = emit_op_toflt(fn, insn);
 		break;
 
 	case op_totype:
@@ -1928,7 +1961,7 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
 
-	struct string_object *envs = raviX_create_string(linearizer->ast_container, "_ENV", 4);
+	raviX_create_string(linearizer->ast_container, "_ENV", 4);
 
 	/* Add the common header portion */
 	raviX_buffer_add_string(mb, Lua_header);
