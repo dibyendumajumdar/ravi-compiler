@@ -1142,6 +1142,12 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 
 static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
 {
+	const char *fname = "luaV_gettable";
+	if (insn->opcode == op_tget_ikey) {
+		fname = "raviV_gettable_i";
+	} else if (insn->opcode == op_tget_skey) {
+		fname = "raviV_gettable_sskey";
+	}
 	struct pseudo *env = get_operand(insn, 0);
 	struct pseudo *varname = get_operand(insn, 1);
 	struct pseudo *dst = get_target(insn, 0);
@@ -1153,7 +1159,7 @@ static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
 	emit_reg_accessor(fn, varname);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *dst = ");
 	emit_reg_accessor(fn, dst);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_gettable_sskey(L, tab, name, dst);\n ");
+	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, name, dst);\n ", fname);
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1161,6 +1167,15 @@ static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
 
 static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 {
+	// FIXME what happens if key and value are both constants
+	// Our pseudo reg will break I think
+	const char *fname = "luaV_settable";
+	if (insn->opcode == op_tput_ikey) {
+		fname = "raviV_settable_i";
+	}
+	else if (insn->opcode == op_tput_skey) {
+		fname = "raviV_settable_sskey";
+	}
 	struct pseudo *env = get_target(insn, 0);
 	struct pseudo *varname = get_target(insn, 1);
 	struct pseudo *src = get_operand(insn, 0);
@@ -1172,7 +1187,7 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	emit_reg_accessor(fn, varname);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *src = ");
 	emit_reg_accessor(fn, src);
-	raviX_buffer_add_string(&fn->body, ";\n raviV_settable_sskey(L, tab, name, src);\n ");
+	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, name, src);\n ", fname);
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1645,11 +1660,19 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_mov(fn, insn);
 		break;
 	case op_loadglobal:
+	case op_get:
 	case op_get_skey:
+	case op_get_ikey:
+	case op_tget_skey:
+	case op_tget_ikey:
 		rc = emit_op_loadglobal(fn, insn);
 		break;
 	case op_storeglobal:
+	case op_put:
 	case op_put_skey:
+	case op_put_ikey:
+	case op_tput_skey:
+	case op_tput_ikey:
 		rc = emit_op_storeglobal(fn, insn);
 		break;
 	case op_call:
