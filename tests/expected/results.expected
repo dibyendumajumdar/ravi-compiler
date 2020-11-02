@@ -2644,25 +2644,21 @@ L0 (entry)
 	MOV {1 Kint(0)} {Tint(1)}
 	MOV {10 Kint(1)} {Tint(2)}
 	MOV {1 Kint(0)} {Tint(3)}
-	LIii {0 Kint(2), Tint(3)} {Tint(4)}
 	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
 	ADDii {Tint(1), Tint(3)} {Tint(1)}
-	CBR {Tint(4)} {L3, L4}
+	BR {L3}
 L3
-	LIii {Tint(2), Tint(1)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
+	LIii {Tint(2), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L5, L4}
 L4
-	LIii {Tint(1), Tint(2)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
-L5
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
-L6
+L5
 	RET {L1}
 function x() local a=1; function y() return function() return a end end; end
 function()
@@ -7076,47 +7072,39 @@ L0 (entry)
 	MOV {1 Kint(0)} {Tint(1)}
 	MOV {500 Kint(1)} {Tint(2)}
 	MOV {1 Kint(0)} {Tint(3)}
-	LIii {0 Kint(2), Tint(3)} {Tint(4)}
 	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
 	ADDii {Tint(1), Tint(3)} {Tint(1)}
-	CBR {Tint(4)} {L3, L4}
+	BR {L3}
 L3
-	LIii {Tint(2), Tint(1)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
+	LIii {Tint(2), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L5, L4}
 L4
-	LIii {Tint(1), Tint(2)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
-L5
 	MOV {Tint(1)} {Tint(0)}
-	MOV {0.000000000000 Kflt(3)} {local(sum, 0)}
-	MOV {1 Kint(0)} {Tint(7)}
-	MOV {10000 Kint(4)} {Tint(8)}
-	MOV {1 Kint(0)} {Tint(9)}
-	LIii {0 Kint(2), Tint(9)} {Tint(10)}
-	SUBii {Tint(7), Tint(9)} {Tint(7)}
-	BR {L7}
-L6
+	MOV {0.000000000000 Kflt(2)} {local(sum, 0)}
+	MOV {1 Kint(0)} {Tint(6)}
+	MOV {10000 Kint(3)} {Tint(7)}
+	MOV {1 Kint(0)} {Tint(8)}
+	SUBii {Tint(6), Tint(8)} {Tint(6)}
+	BR {L6}
+L5
 	RET {local(sum, 0)} {L1}
+L6
+	ADDii {Tint(6), Tint(8)} {Tint(6)}
+	BR {L7}
 L7
-	ADDii {Tint(7), Tint(9)} {Tint(7)}
-	CBR {Tint(10)} {L8, L9}
+	LIii {Tint(7), Tint(6)} {Tint(9)}
+	CBR {Tint(9)} {L9, L8}
 L8
-	LIii {Tint(8), Tint(7)} {Tint(11)}
-	CBR {Tint(11)} {L11, L10}
-L9
-	LIii {Tint(7), Tint(8)} {Tint(11)}
-	CBR {Tint(11)} {L11, L10}
-L10
-	MOV {Tint(7)} {Tint(6)}
-	MULii {Tint(6), Tint(6)} {Tint(12)}
-	DIVfi {1.000000000000 Kflt(5), Tint(12)} {Tflt(0)}
+	MOV {Tint(6)} {Tint(5)}
+	MULii {Tint(5), Tint(5)} {Tint(10)}
+	DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
-	BR {L7}
-L11
+	BR {L6}
+L9
 	BR {L2}
 function matmul(a: table, b: table)
   	assert(@integer(#a[1]) == #b);
@@ -7928,81 +7916,69 @@ L0 (entry)
 	MOV {1 Kint(1)} {Tint(4)}
 	MOV {Tint(0)} {Tint(5)}
 	MOV {1 Kint(1)} {Tint(6)}
-	LIii {0 Kint(4), Tint(6)} {Tint(7)}
 	SUBii {Tint(4), Tint(6)} {Tint(4)}
 	BR {L2}
 L1 (exit)
 L2
 	ADDii {Tint(4), Tint(6)} {Tint(4)}
-	CBR {Tint(7)} {L3, L4}
+	BR {L3}
 L3
-	LIii {Tint(5), Tint(4)} {Tint(8)}
-	CBR {Tint(8)} {L6, L5}
+	LIii {Tint(5), Tint(4)} {Tint(7)}
+	CBR {Tint(7)} {L5, L4}
 L4
-	LIii {Tint(4), Tint(5)} {Tint(8)}
-	CBR {Tint(8)} {L6, L5}
-L5
 	MOV {Tint(4)} {Tint(3)}
-	LOADGLOBAL {Upval(_ENV), 'table' Ks(5)} {T(6)}
-	GETsk {T(6), 'numarray' Ks(6)} {T(7)}
-	CALL {T(7), Tint(2), 0.000000000000 Kflt(7)} {T(7..), 1 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(4)} {T(6)}
+	GETsk {T(6), 'numarray' Ks(5)} {T(7)}
+	CALL {T(7), Tint(2), 0.000000000000 Kflt(6)} {T(7..), 1 Kint(1)}
 	TOFARRAY {T(7[7..])}
 	MOV {T(7[7..])} {local(xi, 4)}
 	TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}
-	MOV {1 Kint(1)} {Tint(10)}
-	MOV {Tint(2)} {Tint(11)}
-	MOV {1 Kint(1)} {Tint(12)}
-	LIii {0 Kint(4), Tint(12)} {Tint(13)}
-	SUBii {Tint(10), Tint(12)} {Tint(10)}
-	BR {L7}
-L6
+	MOV {1 Kint(1)} {Tint(9)}
+	MOV {Tint(2)} {Tint(10)}
+	MOV {1 Kint(1)} {Tint(11)}
+	SUBii {Tint(9), Tint(11)} {Tint(9)}
+	BR {L6}
+L5
 	RET {local(x, 2)} {L1}
+L6
+	ADDii {Tint(9), Tint(11)} {Tint(9)}
+	BR {L7}
 L7
-	ADDii {Tint(10), Tint(12)} {Tint(10)}
-	CBR {Tint(13)} {L8, L9}
+	LIii {Tint(10), Tint(9)} {Tint(12)}
+	CBR {Tint(12)} {L9, L8}
 L8
-	LIii {Tint(11), Tint(10)} {Tint(14)}
-	CBR {Tint(14)} {L11, L10}
-L9
-	LIii {Tint(10), Tint(11)} {Tint(14)}
-	CBR {Tint(14)} {L11, L10}
-L10
-	MOV {Tint(10)} {Tint(9)}
+	MOV {Tint(9)} {Tint(8)}
 	TGETik {local(a, 0), Tint(3)} {T(8)}
 	TOFARRAY {T(8)}
-	TGETik {local(c, 3), Tint(9)} {T(9)}
+	TGETik {local(c, 3), Tint(8)} {T(9)}
 	TOFARRAY {T(9)}
 	MOV {T(9)} {local(cj, 6)}
 	MOV {T(8)} {local(ai, 5)}
-	MOVf {0.000000000000 Kflt(7)} {Tflt(0)}
+	MOVf {0.000000000000 Kflt(6)} {Tflt(0)}
+	MOV {1 Kint(1)} {Tint(14)}
+	MOV {Tint(1)} {Tint(15)}
 	MOV {1 Kint(1)} {Tint(16)}
-	MOV {Tint(1)} {Tint(17)}
-	MOV {1 Kint(1)} {Tint(18)}
-	LIii {0 Kint(4), Tint(18)} {Tint(19)}
-	SUBii {Tint(16), Tint(18)} {Tint(16)}
-	BR {L12}
-L11
+	SUBii {Tint(14), Tint(16)} {Tint(14)}
+	BR {L10}
+L9
 	BR {L2}
+L10
+	ADDii {Tint(14), Tint(16)} {Tint(14)}
+	BR {L11}
+L11
+	LIii {Tint(15), Tint(14)} {Tint(17)}
+	CBR {Tint(17)} {L13, L12}
 L12
-	ADDii {Tint(16), Tint(18)} {Tint(16)}
-	CBR {Tint(19)} {L13, L14}
-L13
-	LIii {Tint(17), Tint(16)} {Tint(20)}
-	CBR {Tint(20)} {L16, L15}
-L14
-	LIii {Tint(16), Tint(17)} {Tint(20)}
-	CBR {Tint(20)} {L16, L15}
-L15
-	MOV {Tint(16)} {Tint(15)}
-	FAGETik {local(ai, 5), Tint(15)} {Tflt(1)}
-	FAGETik {local(cj, 6), Tint(15)} {Tflt(2)}
+	MOV {Tint(14)} {Tint(13)}
+	FAGETik {local(ai, 5), Tint(13)} {Tflt(1)}
+	FAGETik {local(cj, 6), Tint(13)} {Tflt(2)}
 	MULff {Tflt(1), Tflt(2)} {Tflt(3)}
 	ADDff {Tflt(0), Tflt(3)} {Tflt(2)}
 	MOVf {Tflt(2)} {Tflt(0)}
-	BR {L12}
-L16
-	FAPUTfv {Tflt(0)} {local(xi, 4), Tint(9)}
-	BR {L7}
+	BR {L10}
+L13
+	FAPUTfv {Tflt(0)} {local(xi, 4), Tint(8)}
+	BR {L6}
 return -3+4*5//2^3^2//9+4%10/3 == (-3)+(((4*5)//(2^(3^2)))//9)+((4%10)/3)
 function()
 --upvalues  _ENV*
@@ -8838,25 +8814,21 @@ L0 (entry)
 	MOV {1 Kint(0)} {Tint(1)}
 	MOV {10 Kint(1)} {Tint(2)}
 	MOV {1 Kint(0)} {Tint(3)}
-	LIii {0 Kint(2), Tint(3)} {Tint(4)}
 	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
 	ADDii {Tint(1), Tint(3)} {Tint(1)}
-	CBR {Tint(4)} {L3, L4}
+	BR {L3}
 L3
-	LIii {Tint(2), Tint(1)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
+	LIii {Tint(2), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L5, L4}
 L4
-	LIii {Tint(1), Tint(2)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
-L5
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
-L6
+L5
 	RET {L1}
 for i=10,1,-1 do print(i) end
 function()
@@ -9219,33 +9191,29 @@ L0 (entry)
 	MOV {1 Kint(0)} {Tint(1)}
 	MOV {10 Kint(1)} {Tint(2)}
 	MOV {1 Kint(0)} {Tint(3)}
-	LIii {0 Kint(2), Tint(3)} {Tint(4)}
 	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
 	ADDii {Tint(1), Tint(3)} {Tint(1)}
-	CBR {Tint(4)} {L3, L4}
+	BR {L3}
 L3
-	LIii {Tint(2), Tint(1)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
+	LIii {Tint(2), Tint(1)} {Tint(4)}
+	CBR {Tint(4)} {L5, L4}
 L4
-	LIii {Tint(1), Tint(2)} {Tint(5)}
-	CBR {Tint(5)} {L6, L5}
-L5
 	MOV {Tint(1)} {Tint(0)}
-	BR {L7}
-L6
-	RET {L1}
-L7
-	EQii {Tint(0), 2 Kint(3)} {T(0)}
-	CBR {T(0)} {L8, L9}
-L8
 	BR {L6}
-L9
+L5
+	RET {L1}
+L6
+	EQii {Tint(0), 2 Kint(2)} {T(0)}
+	CBR {T(0)} {L7, L8}
+L7
+	BR {L5}
+L8
 	BR {L2}
-L10
-	BR {L9}
+L9
+	BR {L8}
 local msgs = {}
 function Message (m)
   if not _nomsg then

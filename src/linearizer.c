@@ -1838,28 +1838,172 @@ Lbody:
 
 Lend:
 
+Above is the general case
+
+When we know the increment to be negative or positive we can simplify.
+Example for positive case
+
+	var = var - step
+	goto L1
+L1:
+	var = var + step;
+ 	goto L2
+L2:
+	stop = var > limit
+	if stop goto Lend
+		else goto Lbody
+Lbody:
+	set local symbol in for loop to var
+	do body
+	goto L1;
+Lend:
+
+Negative case
+
+	var = var - step
+	goto L1
+L1:
+	var = var + step;
+	goto L3;
+L3:
+	stop = var < limit
+	if stop goto Lend
+		else goto Lbody
+Lbody:
+	set local symbol in for loop to var
+	do body
+	goto L1;
+Lend:
+
 
 */
 //clang-format on
-static void linearize_for_num_statement(struct proc *proc, struct ast_node *node)
-{
-	assert(node->type == STMT_FOR_NUM);
-	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
-	/* For now we only allow integer expressions */
-	struct ast_node *expr;
-	FOR_EACH_PTR(node->for_stmt.expr_list, expr)
-	{
-		if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
-			handle_error(proc->linearizer->ast_container,
-				     "Only for loops with integer expressions currently supported");
-		}
-	}
-	END_FOR_EACH_PTR(expr)
+static void linearize_for_num_statement_positivestep(struct proc *proc, struct ast_node *node)
+{
+	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
 	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
 	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
 	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	struct lua_symbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
+
+	if (index_var_expr == NULL || limit_expr == NULL) {
+		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
+	}
+	struct pseudo *t = linearize_expression(proc, index_var_expr);
+	if (t->type == PSEUDO_RANGE) {
+		convert_range_to_temp(t); // Only accept one result
+	}
+	struct pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, op_mov, index_var_pseudo, t);
+
+	t = linearize_expression(proc, limit_expr);
+	if (t->type == PSEUDO_RANGE) {
+		convert_range_to_temp(t); // Only accept one result
+	}
+	struct pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, op_mov, limit_pseudo, t);
+
+	if (step_expr == NULL)
+		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
+	else {
+		t = linearize_expression(proc, step_expr);
+		if (t->type == PSEUDO_RANGE) {
+			convert_range_to_temp(t); // Only accept one result
+		}
+	}
+	struct pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	instruct_move(proc, op_mov, step_pseudo, t);
+
+	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
+
+	struct basic_block *L1 = create_block(proc);
+	struct basic_block *L2 = create_block(proc);
+	struct basic_block *Lbody = create_block(proc);
+	struct basic_block *Lend = create_block(proc);
+	struct basic_block *previous_break_target = proc->current_break_target;
+	struct block_scope *previous_break_scope = proc->current_break_scope;
+	proc->current_break_target = Lend;
+	proc->current_break_scope = proc->current_scope;
+
+	start_block(proc, L1);
+	create_binary_instruction(proc, op_addii, index_var_pseudo, step_pseudo, index_var_pseudo);
+	instruct_br(proc, allocate_block_pseudo(proc, L2));
+
+	start_block(proc, L2);
+	create_binary_instruction(proc, op_ltii, limit_pseudo, index_var_pseudo, stop_pseudo);
+	instruct_cbr(proc, stop_pseudo, Lend, Lbody);
+
+	start_block(proc, Lbody);
+	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo);
+
+	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
+	linearize_statement_list(proc, node->for_stmt.for_statement_list);
+	end_scope(proc->linearizer, proc);
+
+	/* If the fornum block has escaped local vars then we need to close */
+	if (proc->current_break_scope->need_close) {
+		/* Note we put close instruction in current basic block */
+		instruct_close(proc, proc->current_bb, proc->current_break_scope);
+	}
+	instruct_br(proc, allocate_block_pseudo(proc, L1));
+
+	end_scope(proc->linearizer, proc);
+
+	free_temp_pseudo(proc, stop_pseudo, false);
+	free_temp_pseudo(proc, step_pseudo, false);
+	free_temp_pseudo(proc, limit_pseudo, false);
+	free_temp_pseudo(proc, index_var_pseudo, false);
+
+	start_block(proc, Lend);
+
+	proc->current_break_target = previous_break_target;
+	proc->current_break_scope = previous_break_scope;
+}
+
+static void linearize_for_num_statement(struct proc *proc, struct ast_node *node)
+{
+	assert(node->type == STMT_FOR_NUM);
+
+	/* For now we only allow integer expressions */
+	struct ast_node *expr;
+	FOR_EACH_PTR(node->for_stmt.expr_list, expr)
+		{
+			if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
+				handle_error(proc->linearizer->ast_container,
+					     "Only for loops with integer expressions currently supported");
+			}
+		}
+	END_FOR_EACH_PTR(expr)
+
+	/* Check if we can optimize */
+	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	{
+		bool step_known_positive = false;
+//		bool step_known_negative = false;
+		if (step_expr == NULL) {
+			step_known_positive = true;
+		} else if (step_expr->type == EXPR_LITERAL) {
+			if (step_expr->literal_expr.type.type_code == RAVI_TNUMINT) {
+				if (step_expr->literal_expr.u.i > 0)
+					step_known_positive = true;
+//				else if (step_expr->literal_expr.u.i < 0)
+//					step_known_negative = true;
+			}
+		}
+		if (step_known_positive) {
+			linearize_for_num_statement_positivestep(proc, node);
+			return;
+		}
+	}
+
+	/* Default case where we do not know if step is negative or positive */
+	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
+
+	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
 	struct lua_symbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
