@@ -810,7 +810,12 @@ static bool refers_to_same_register(struct function *fn, struct pseudo *src, str
 	return compute_register_from_base(fn, src) == compute_register_from_base(fn, dst);
 }
 
-/* outputs accessor for a pseudo that is on Lua stack or is an upvalue */
+/* 
+Outputs accessor for a pseudo so that the accessor is always of type
+TValue *. Thus for constants, we need to use a temp stack variable of type TValue.
+The issue is what happens if we need two values at the same time and both are constants
+of the same type. This is where the discriminator comes in - to help differentiate.
+*/
 static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
@@ -1290,13 +1295,16 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static void emit_i_name_or_constant(struct function *fn, struct pseudo *pseudo)
+/*
+* Output a C stack variable representing int/float value or constant
+*/
+static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_CONSTANT) {
 		if (pseudo->constant->type == RAVI_TNUMINT) {
 			raviX_buffer_add_fstring(&fn->body, "%lld", pseudo->constant->i);
 		} else if (pseudo->constant->type == RAVI_TNUMFLT) {
-			raviX_buffer_add_fstring(&fn->body, " = %.16g", pseudo->constant->n);
+			raviX_buffer_add_fstring(&fn->body, "%.16g", pseudo->constant->n);
 		} else {
 			assert(0);
 		}
@@ -1337,9 +1345,9 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 		assert(0);
 		return -1;
 	}
-	emit_i_name_or_constant(fn, get_operand(insn, 0));
+	emit_varname_or_constant(fn, get_operand(insn, 0));
 	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
-	emit_i_name_or_constant(fn, get_operand(insn, 1));
+	emit_varname_or_constant(fn, get_operand(insn, 1));
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_string(&fn->body, "; }\n");
 	} else {
@@ -1402,9 +1410,9 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 		assert(0);
 		return -1;
 	}
-	emit_i_name_or_constant(fn, get_operand(insn, 0));
+	emit_varname_or_constant(fn, get_operand(insn, 0));
 	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
-	emit_i_name_or_constant(fn, get_operand(insn, 1));
+	emit_varname_or_constant(fn, get_operand(insn, 1));
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
 		raviX_buffer_add_string(&fn->body, "; }\n");
 	} else {
