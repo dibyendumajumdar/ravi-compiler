@@ -1684,6 +1684,21 @@ static int emit_op_closure(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
+static int emit_op_close(struct function *fn, struct instruction *insn) {
+	struct pseudo *pseudo = get_first_operand(insn);
+	raviX_buffer_add_string(&fn->body, "{\n TValue *clsvar = ");
+	emit_reg_accessor(fn, pseudo, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+#ifdef RAVI_DEFER_STATEMENT
+	raviX_buffer_add_string(&fn->body, " luaF_close(L, clsvar, LUA_OK);\n");
+	emit_reload_base(fn);
+#else
+	raviX_buffer_add_string(&fn->body, " luaF_close(L, clsvar);\n");
+#endif
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1814,8 +1829,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_newarray(fn, insn);
 		break;
 
+	case op_close:
+		rc = emit_op_close(fn, insn);
+		break;
+
 	default:
-		fprintf(stderr, "Usupported opcode %s\n", raviX_opcode_name(insn->opcode));
+		fprintf(stderr, "Unsupported opcode %s\n", raviX_opcode_name(insn->opcode));
 		rc = -1;
 	}
 	return rc;
