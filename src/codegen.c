@@ -1709,6 +1709,26 @@ static int emit_op_close(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
+static int emit_op_len(struct function *fn, struct instruction *insn) {
+	struct pseudo *obj = get_first_operand(insn);
+	struct pseudo *target = get_first_target(insn);
+
+	if (target->type == PSEUDO_TEMP_INT) {
+		assert(0);
+		return -1;
+	}
+	else {
+		raviX_buffer_add_string(&fn->body, "{\n TValue *len = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, ";\n TValue *obj = ");
+		emit_reg_accessor(fn, obj, 0);
+		raviX_buffer_add_string(&fn->body, ";\n luaV_objlen(L, len, obj);\n");
+		emit_reload_base(fn);
+		raviX_buffer_add_string(&fn->body, "}\n");
+	}
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1841,6 +1861,10 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 
 	case op_close:
 		rc = emit_op_close(fn, insn);
+		break;
+
+	case op_len:
+		rc = emit_op_len(fn, insn);
 		break;
 
 	default:
