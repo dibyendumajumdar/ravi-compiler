@@ -1465,6 +1465,93 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_bin_fi(struct function *fn, struct instruction *insn)
+{
+	// FIXME - needs to also work with typed function params
+	raviX_buffer_add_string(&fn->body, "{ ");
+	struct pseudo *target = get_target(insn, 0);
+	if (target->type == PSEUDO_TEMP_FLT) {
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+	} else {
+		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, "; setfltvalue(dst_reg, ");
+	}
+	const char *oper = NULL;
+	switch (insn->opcode) {
+	case op_addfi:
+		oper = "+";
+		break;
+
+	case op_subfi:
+		oper = "-";
+		break;
+
+	case op_mulfi:
+		oper = "*";
+		break;
+
+	case op_divfi:
+		oper = "/";
+		break;
+
+	default:
+		assert(0);
+		return -1;
+	}
+	emit_varname_or_constant(fn, get_operand(insn, 0));
+	raviX_buffer_add_fstring(&fn->body, " %s ((lua_Number)(", oper);
+	emit_varname_or_constant(fn, get_operand(insn, 1));
+	raviX_buffer_add_string(&fn->body, "))");
+	if (target->type == PSEUDO_TEMP_FLT) {
+		raviX_buffer_add_string(&fn->body, "; }\n");
+	} else {
+		raviX_buffer_add_string(&fn->body, "); }\n");
+	}
+	return 0;
+}
+
+static int emit_bin_if(struct function *fn, struct instruction *insn)
+{
+	// FIXME - needs to also work with typed function params
+	raviX_buffer_add_string(&fn->body, "{ ");
+	struct pseudo *target = get_target(insn, 0);
+	if (target->type == PSEUDO_TEMP_FLT) {
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+	} else {
+		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, "; setfltvalue(dst_reg, ");
+	}
+	const char *oper = NULL;
+	switch (insn->opcode) {
+	case op_subif:
+		oper = "-";
+		break;
+
+	case op_divif:
+		oper = "/";
+		break;
+
+	default:
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "((lua_Number)(");
+	emit_varname_or_constant(fn, get_operand(insn, 0));
+	raviX_buffer_add_fstring(&fn->body, ")) %s ", oper);
+	emit_varname_or_constant(fn, get_operand(insn, 1));
+	if (target->type == PSEUDO_TEMP_FLT) {
+		raviX_buffer_add_string(&fn->body, "; }\n");
+	} else {
+		raviX_buffer_add_string(&fn->body, "); }\n");
+	}
+	return 0;
+}
+
+
 static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
 {
 	const char *array_type = insn->opcode == op_iaget_ikey ? "lua_Integer *" : "lua_Number *";
@@ -1836,13 +1923,17 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_comp_ii(fn, insn);
 		break;
 
-		//	case	op_addfi:
-		//	case	    op_subfi:
-		//	case	    op_mulfi:
-		//	case	    op_divfi:
+	case op_addfi:
+	case op_subfi:
+	case op_mulfi:
+	case op_divfi:
+		rc = emit_bin_fi(fn, insn);
+		break;
 
-		//	case	    op_subif:
-		//	case	    op_divif:
+	case op_subif:
+	case op_divif:
+		rc = emit_bin_if(fn, insn);
+		break;
 
 		//	case	    op_sub:
 		//	case	    op_mul:
