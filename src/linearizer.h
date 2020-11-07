@@ -128,6 +128,7 @@ enum pseudo_type {
 	PSEUDO_SYMBOL, /* An object of type lua_symbol representing local var or upvalue */
 	PSEUDO_TEMP_FLT, /* A floating point temp - may also be used for locals that don't escape */
 	PSEUDO_TEMP_INT, /* An integer temp - may also be used for locals that don't escape */
+	PSEUDO_TEMP_BOOL, /* An integer temp but restricted to 1 and 0 */
 	PSEUDO_TEMP_ANY, /* A temp of any type - will always be on Lua stack */
 	PSEUDO_CONSTANT, /* A literal value */
 	PSEUDO_PROC, /* A proc / function */

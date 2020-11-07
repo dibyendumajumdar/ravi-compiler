@@ -337,8 +337,9 @@ static struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 		pseudo_type = PSEUDO_TEMP_FLT;
 		break;
 	case RAVI_TNUMINT:
+	case RAVI_TBOOLEAN:
 		gen = &proc->temp_int_pseudos;
-		pseudo_type = PSEUDO_TEMP_INT;
+		pseudo_type = type == RAVI_TNUMINT ? PSEUDO_TEMP_INT: PSEUDO_TEMP_BOOL;
 		break;
 	default:
 		gen = &proc->temp_pseudos;
@@ -391,6 +392,7 @@ static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free
 		gen = &proc->temp_flt_pseudos;
 		break;
 	case PSEUDO_TEMP_INT:
+	case PSEUDO_TEMP_BOOL:
 		gen = &proc->temp_int_pseudos;
 		break;
 	case PSEUDO_RANGE:
@@ -1916,7 +1918,7 @@ static void linearize_for_num_statement_positivestep(struct proc *proc, struct a
 	struct pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	instruct_move(proc, op_mov, step_pseudo, t);
 
-	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
 
 	struct basic_block *L1 = create_block(proc);
@@ -2035,11 +2037,11 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	struct pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
 	instruct_move(proc, op_mov, step_pseudo, t);
 
-	struct pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
 	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
 				  step_pseudo, step_positive);
 
-	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
 
 	struct basic_block *L1 = create_block(proc);
@@ -2343,7 +2345,7 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 				// printf("Free register %d for local %s\n", (int)pseudo->regnum, getstr(sym->var.var_name));
 				free_register(proc, &proc->local_pseudos, pseudo->regnum);
 			}
-			else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT) {
+			else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT || pseudo->type == PSEUDO_TEMP_BOOL) {
 				assert(sym == pseudo->temp_for_local);
 				free_temp_pseudo(proc, sym->variable.pseudo, true);
 			}
@@ -2398,6 +2400,9 @@ static void output_pseudo(struct pseudo *pseudo, buffer_t *mb)
 	} break;
 	case PSEUDO_TEMP_INT:
 		raviX_buffer_add_fstring(mb, "Tint(%d)", pseudo->regnum);
+		break;
+	case PSEUDO_TEMP_BOOL:
+		raviX_buffer_add_fstring(mb, "Tbool(%d)", pseudo->regnum);
 		break;
 	case PSEUDO_TEMP_FLT:
 		raviX_buffer_add_fstring(mb, "Tflt(%d)", pseudo->regnum);

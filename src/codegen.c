@@ -695,7 +695,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 
 static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
 {
-	if (pseudo->type == PSEUDO_TEMP_INT) {
+	if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
 	} else if (pseudo->type == PSEUDO_TEMP_FLT) {
 		raviX_buffer_add_fstring(mb, "%s%d", flt_var_prefix, pseudo->regnum);
@@ -785,6 +785,7 @@ static bool refers_to_same_register(struct function *fn, struct pseudo *src, str
 	    [PSEUDO_SYMBOL] = true,    /* An object of type lua_symbol representing local var or upvalue */
 	    [PSEUDO_TEMP_FLT] = false, /* A floating point temp - may also be used for locals that don't escape */
 	    [PSEUDO_TEMP_INT] = false, /* An integer temp - may also be used for locals that don't escape */
+	    [PSEUDO_TEMP_BOOL] = false, /* An (bool) integer temp - may also be used for locals that don't escape */
 	    [PSEUDO_TEMP_ANY] = true,  /* A temp of any type - will always be on Lua stack */
 	    [PSEUDO_CONSTANT] = false, /* A literal value */
 	    [PSEUDO_PROC] = false,     /* A proc / function */
@@ -873,6 +874,9 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo, u
 		raviX_buffer_add_fstring(&fn->body, "&bval%u; bval%u.value_.b = 1", discriminator, discriminator);
 	} else if (pseudo->type == PSEUDO_FALSE) {
 		raviX_buffer_add_fstring(&fn->body, "&bval%u; bval%u.value_.b = 0", discriminator, discriminator);
+	} else if (pseudo->type == PSEUDO_TEMP_BOOL) {
+		raviX_buffer_add_fstring(&fn->body, "&bval%u; bval%u.value_.b = ", discriminator, discriminator);
+		emit_varname(pseudo, &fn->body);
 	} else {
 		fn->api->error_message(fn->api->context, "Unexpected pseudo type");
 		assert(0);
@@ -923,7 +927,7 @@ static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pse
 			assert(0);
 			return -1;
 		}
-	} else if (src->type == PSEUDO_TEMP_INT) {
+	} else if (src->type == PSEUDO_TEMP_INT || src->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(dst, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
 		emit_varname(src, &fn->body);
@@ -946,7 +950,7 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 {
 	if (dst->type == PSEUDO_TEMP_FLT) {
 		emit_move_flttemp(fn, src, dst);
-	} else if (dst->type == PSEUDO_TEMP_INT) {
+	} else if (dst->type == PSEUDO_TEMP_INT || dst->type == PSEUDO_TEMP_BOOL) {
 		emit_move_inttemp(fn, src, dst);
 	} else if (dst->type == PSEUDO_TEMP_ANY || dst->type == PSEUDO_SYMBOL || dst->type == PSEUDO_LUASTACK) {
 		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_RANGE_SELECT) {
@@ -978,6 +982,12 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 			emit_reg_accessor(fn, dst, 0);
 			raviX_buffer_add_fstring(&fn->body, ";\nsetbvalue(dst_reg, %d);\n}\n",
 						 src->type == PSEUDO_TRUE ? 1 : 0);
+		} else if (src->type == PSEUDO_TEMP_BOOL) {
+			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			emit_reg_accessor(fn, dst, 0);
+			raviX_buffer_add_string(&fn->body, ";\nsetbvalue(dst_reg, ");
+			emit_varname(src, &fn->body);
+			raviX_buffer_add_string(&fn->body, ");\n}\n");
 		} else if (src->type == PSEUDO_NIL) {
 			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
@@ -1033,7 +1043,7 @@ static int emit_op_cbr(struct function *fn, struct instruction *insn)
 		emit_jump(fn, get_target(insn, 1));
 	} else if (cond_pseudo->type == PSEUDO_TRUE || cond_pseudo->type == PSEUDO_CONSTANT) {
 		emit_jump(fn, get_target(insn, 0));
-	} else if (cond_pseudo->type == PSEUDO_TEMP_FLT || cond_pseudo->type == PSEUDO_TEMP_INT) {
+	} else if (cond_pseudo->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_string(&fn->body, "{");
 		raviX_buffer_add_string(&fn->body, " if (");
 		emit_varname(cond_pseudo, &fn->body);
@@ -1320,7 +1330,7 @@ static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 		} else {
 			assert(0);
 		}
-	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT) {
+	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL || pseudo->type == PSEUDO_TEMP_FLT) {
 		emit_varname(pseudo, &fn->body);
 	} else if (pseudo->type == PSEUDO_SYMBOL) {
 		ravitype_t typecode = RAVI_TANY;
@@ -1352,7 +1362,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{ ");
 	struct pseudo *target = get_target(insn, 0);
-	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+	if (target->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
 	} else {
@@ -1381,7 +1391,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	emit_varname_or_constant(fn, get_operand(insn, 0));
 	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
 	emit_varname_or_constant(fn, get_operand(insn, 1));
-	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+	if (target->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_string(&fn->body, "; }\n");
 	} else {
 		raviX_buffer_add_string(&fn->body, "); }\n");
@@ -1394,7 +1404,7 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
 	struct pseudo *target = get_target(insn, 0);
-	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
 	} else {
@@ -1447,7 +1457,7 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	emit_varname_or_constant(fn, get_operand(insn, 0));
 	raviX_buffer_add_fstring(&fn->body, " %s ", oper);
 	emit_varname_or_constant(fn, get_operand(insn, 1));
-	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_string(&fn->body, "; }\n");
 	} else {
 		raviX_buffer_add_string(&fn->body, "); }\n");
