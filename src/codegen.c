@@ -1322,6 +1322,27 @@ static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 		}
 	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_FLT) {
 		emit_varname(pseudo, &fn->body);
+	} else if (pseudo->type == PSEUDO_SYMBOL) {
+		ravitype_t typecode = RAVI_TANY;
+		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
+			typecode = pseudo->symbol->variable.value_type.type_code;
+		}
+		else if (pseudo->symbol->symbol_type == SYM_UPVALUE) {
+			typecode = pseudo->symbol->upvalue.value_type.type_code;
+		}
+		if (typecode == RAVI_TNUMFLT) {
+			raviX_buffer_add_string(&fn->body, "fltvalue(");
+			emit_reg_accessor(fn, pseudo, 0);
+			raviX_buffer_add_string(&fn->body, ")");
+		}
+		else if (typecode == RAVI_TNUMINT) {
+			raviX_buffer_add_string(&fn->body, "ivalue(");
+			emit_reg_accessor(fn, pseudo, 0);
+			raviX_buffer_add_string(&fn->body, ")");
+		}
+		else {
+			assert(0);
+		}
 	} else {
 		assert(0);
 	}
