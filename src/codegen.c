@@ -1062,7 +1062,7 @@ static int emit_op_br(struct function *fn, struct instruction *insn)
 
 static int emit_op_mov(struct function *fn, struct instruction *insn)
 {
-	assert(insn->opcode == op_mov || insn->opcode == op_movi);
+	assert(insn->opcode == op_mov || insn->opcode == op_movi || insn->opcode == op_movf);
 	return emit_move(fn, get_operand(insn, 0), get_target(insn, 0));
 }
 
@@ -1677,6 +1677,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 	case op_mov:
 	case op_movi:
+	case op_movf:
 		rc = emit_op_mov(fn, insn);
 		break;
 	case op_loadglobal:
