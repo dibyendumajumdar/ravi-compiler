@@ -1547,7 +1547,7 @@ static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
 	}
 	raviX_buffer_add_string(&fn->body, ";\n} else {\n");
 	raviX_buffer_add_fstring(&fn->body, " %s(L, arr, ukey, ", setterfunc);
-	if (src->type == PSEUDO_TEMP_INT) {
+	if (src->type == type) {
 		emit_varname(src, &fn->body);
 	} else if (src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_LUASTACK) {
 		raviX_buffer_add_fstring(&fn->body, "%s(", getterfunc);
