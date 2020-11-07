@@ -1729,6 +1729,48 @@ static int emit_op_len(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
+static int emit_generic_comp(struct function *fn, struct instruction *insn)
+{
+	const char *oper = "==";
+	if (insn->opcode == op_lt) {
+		oper = "<";
+	} else if (insn->opcode == op_le) {
+		oper = "<=";
+	}
+	const char *comparison_function =
+	    (insn->opcode == op_eq) ? "luaV_equalobj" : ((insn->opcode == op_lt) ? "luaV_lessthan" : "luaV_lessequal");
+	raviX_buffer_add_string(&fn->body, "{\n int result = 0;\n");
+	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+	emit_reg_accessor(fn, get_operand(insn, 0), 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *rc = ");
+	emit_reg_accessor(fn, get_operand(insn, 1), 1);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " if (ttisinteger(rb) && ttisinteger(rc))\n");
+	raviX_buffer_add_fstring(&fn->body, "  result = (ivalue(rb) %s ivalue(rc));\n", oper);
+	raviX_buffer_add_string(&fn->body, " else {\n");
+	raviX_buffer_add_fstring(&fn->body, "  result = %s(L, rb, rc);\n  ", comparison_function);
+	// Reload pointer to base as the call to luaV_equalobj() may
+	// have invoked a Lua function and as a result the stack may have
+	// been reallocated - so the previous base pointer could be stale
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, " }\n");
+	struct pseudo *target = get_first_target(insn);
+	if (target->type == PSEUDO_TEMP_ANY) {
+		raviX_buffer_add_string(&fn->body, " setbvalue(");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, ", result != 0);\n");
+	} else if (target->type == PSEUDO_TEMP_BOOL) {
+		raviX_buffer_add_string(&fn->body, " ");
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = result != 0;\n");
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1812,9 +1854,11 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		//	case	    op_shl:
 		//	case	    op_shr:
 
-		//	case	    op_eq:
-		//	case	    op_lt:
-		//	case	    op_le:
+	case op_eq:
+	case op_lt:
+	case op_le:
+		rc = emit_generic_comp(fn, insn);
+		break;
 
 	case op_iaget_ikey:
 	case op_faget_ikey:
