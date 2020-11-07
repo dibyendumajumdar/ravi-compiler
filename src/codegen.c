@@ -1370,6 +1370,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 
 static int emit_bin_ii(struct function *fn, struct instruction *insn)
 {
+	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
 	struct pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT) {
