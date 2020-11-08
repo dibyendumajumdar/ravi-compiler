@@ -121,25 +121,25 @@ enum opcode {
 };
 
 /*
-* The IR instructions use operands and targets of type structu pseudo, which 
+* The IR instructions use operands and targets of type pseudo, which
 * is a way of referencing several different types of objects.
 */
 enum pseudo_type {
-	PSEUDO_SYMBOL, /* An object of type lua_symbol representing local var or upvalue */
-	PSEUDO_TEMP_FLT, /* A floating point temp - may also be used for locals that don't escape */
-	PSEUDO_TEMP_INT, /* An integer temp - may also be used for locals that don't escape */
-	PSEUDO_TEMP_BOOL, /* An integer temp but restricted to 1 and 0 */
-	PSEUDO_TEMP_ANY, /* A temp of any type - will always be on Lua stack */
+	PSEUDO_SYMBOL, /* An object of type lua_symbol representing local var or upvalue, always refers to Lua stack relative to 'base' */
+	PSEUDO_TEMP_FLT, /* A floating point temp - may also be used for locals that don't escape - refers to C var */
+	PSEUDO_TEMP_INT, /* An integer temp - may also be used for locals that don't escape - refers to C var */
+	PSEUDO_TEMP_BOOL, /* An integer temp but restricted to 1 and 0  - refers to C var, shares the virtual C stack with PSEUDO_TEMP_INT */
+	PSEUDO_TEMP_ANY, /* A temp of any type - will always be on Lua stack relative to 'base' */
 	PSEUDO_CONSTANT, /* A literal value */
 	PSEUDO_PROC, /* A proc / function */
-	PSEUDO_NIL, 
-	PSEUDO_TRUE,
-	PSEUDO_FALSE,
+	PSEUDO_NIL, /* Literal */
+	PSEUDO_TRUE, /* Literal */
+	PSEUDO_FALSE, /* Literal */
 	PSEUDO_BLOCK, /* Points to a basic block, used as targets for jumps */
-	PSEUDO_RANGE, /* Represents a range of registers from a certain starting register */
-	PSEUDO_RANGE_SELECT, /* Picks a certain register from a range */
+	PSEUDO_RANGE, /* Represents a range of registers from a certain starting register on Lua stack relative to 'base' */
+	PSEUDO_RANGE_SELECT, /* Picks a certain register from a range, resolves to register on Lua stack, relative to 'base' */
 	/* TODO we need a type for var args */
-	PSEUDO_LUASTACK /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
+	PSEUDO_LUASTACK /* Specifies a Lua stack position - not used by linearizer - for use by codegen. This is relative to CI->func rather than 'base' */
 };
 
 /* pseudo represents a pseudo (virtual) register */
