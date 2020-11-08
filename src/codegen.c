@@ -2013,13 +2013,21 @@ static int output_instructions(struct function *fn, struct instruction_list *lis
 {
 	struct instruction *insn;
 	int rc = 0;
+	int count = 0;
 	FOR_EACH_PTR(list, insn)
 	{
 		rc = output_instruction(fn, insn);
 		if (rc != 0)
 			break;
+		count++;
 	}
 	END_FOR_EACH_PTR(insn)
+	if (count == 0) {
+		// FIXME empty block - should not happen - check opt that removes unreachable blocks
+		// FIXME remove workaround below once fixed
+		//assert(0);
+		raviX_buffer_add_string(&fn->body, ";\n");
+	}
 	return rc;
 }
 
