@@ -749,10 +749,13 @@ static inline unsigned num_locals(struct proc *proc) { return proc->local_pseudo
 
 static inline unsigned num_temps(struct proc *proc) { return proc->temp_pseudos.next_reg; }
 
+/*
+ * Max stack size is number of Lua vars and any temps that live on Lua stack during execution.
+ * Note that this is the number of slots that is known to the compiler - at runtime additional
+ * stack space may be needed when making function calls - that is not accounted for here.
+ */
 static unsigned compute_max_stack_size(struct proc *proc)
 {
-	/* max stack size is number of Lua vars plus any temps + some space */
-	/* TODO this is probably incorrect */
 	return num_locals(proc) + num_temps(proc);
 }
 
@@ -2118,16 +2121,18 @@ static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol 
 	return parent_function;
 }
 
+/*
+ * Returns an index for the up-value as required by Lua/Ravi runtime.
+ * If the upvalue refers to a local variable in parent proto then idx should contain
+ * the register for the local variable and instack should be true, else idx should have the index of
+ * upvalue in parent proto and instack should be false.
+ */
 static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_symbol, bool *in_stack)
 {
 	*in_stack = false;
-	/*
-	 * If the upvalue refers to a local variable in parent proto then idx should contain
-	 * the register for the local variable and instack should be true, else idx should have the index of
-	 * upvalue in parent proto and instack should be false.
-	 */
 	struct lua_symbol *underlying = upvalue_symbol->upvalue.target_variable;
 	if (underlying->symbol_type == SYM_LOCAL) {
+		/* Upvalue is in the stack of parent ? */
 		struct ast_node *local_function = underlying->variable.block->function;
 		struct ast_node *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
 		if (parent_function == local_function) {
@@ -2151,6 +2156,9 @@ static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_sy
 	return 0;
 }
 
+/**
+ * Registers the upvalues required by a function
+ */
 static void register_upvalues(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
 {
 	struct lua_symbol *sym;
@@ -2159,7 +2167,7 @@ static void register_upvalues(struct Ravi_CompilerInterface *ravi_interface, str
 	{
 		bool in_stack = false;
 		unsigned idx = get_upvalue_idx(proc, sym, &in_stack);
-		/* discarding const below */
+		/* discarding const below - the api needs non-const so that it can attach userdata */
 		ravi_interface->lua_addUpValue(ravi_interface->context, proto,
 					       (struct string_object *)sym->upvalue.target_variable->variable.var_name,
 					       idx, in_stack, sym->upvalue.value_type.type_code,
@@ -2169,7 +2177,7 @@ static void register_upvalues(struct Ravi_CompilerInterface *ravi_interface, str
 }
 
 /* Create protos for all the procs with the correct relationships. We do this recursively for all the
- * child procs. The top-level proto is precreated by the caller (actually it is precreated on the Ravi side).
+ * child procs. The top-level proto is pre-created by the caller (actually it is pre-created on the Ravi side).
  */
 static void create_protos(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, Proto *proto)
 {
@@ -2233,12 +2241,13 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	raviX_create_string(linearizer->ast_container, "_ENV", 4);
 
 	/* Add the common header portion */
+	// FIXME we need a way to customise this for 32-bit vs 64-bit
 	raviX_buffer_add_string(mb, Lua_header);
 
-	/* Create protos for each proc we will compile */
 	Proto *main_proto = ravi_interface->main_proto;
 	/* We don't support var args yet */
 	// ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
+
 	/* Create all the child protos as we will need them to be there for code gen */
 	create_protos(ravi_interface, linearizer->main_proc, main_proto);
 
