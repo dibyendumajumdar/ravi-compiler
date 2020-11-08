@@ -168,7 +168,7 @@ struct instruction {
 /* Basic block */
 struct basic_block {
 	nodeId_t index; /* The index of the block is a key to enable retrieving the block from its container */
-	struct instruction_list *insns;
+	struct instruction_list *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 

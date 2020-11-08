@@ -672,6 +672,11 @@ static inline unsigned get_num_targets(struct instruction *insn)
 	return ptrlist_size((const struct ptr_list *)insn->targets);
 }
 
+static inline unsigned get_num_instructions(struct basic_block *bb)
+{
+	return ptrlist_size((const struct ptr_list *)bb->insns);
+}
+
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
  */
@@ -2014,26 +2019,27 @@ static int output_instructions(struct function *fn, struct instruction_list *lis
 {
 	struct instruction *insn;
 	int rc = 0;
-	int count = 0;
 	FOR_EACH_PTR(list, insn)
 	{
 		rc = output_instruction(fn, insn);
 		if (rc != 0)
 			break;
-		count++;
 	}
 	END_FOR_EACH_PTR(insn)
-	if (count == 0) {
-		// FIXME empty block - should not happen - check opt that removes unreachable blocks
-		// FIXME remove workaround below once fixed
-		// assert(0);
-		raviX_buffer_add_string(&fn->body, ";\n");
-	}
 	return rc;
+}
+
+static inline bool is_block_deleted(struct basic_block *bb)
+{
+	return bb->index != ENTRY_BLOCK && bb->index != EXIT_BLOCK && get_num_instructions(bb) == 0;
+	// block was logically deleted if it has got zero instructions and
+	// it isn't the entry/exit block.
 }
 
 static int output_basic_block(struct function *fn, struct basic_block *bb)
 {
+	if (is_block_deleted(bb))
+		return 0;
 	int rc = 0;
 	raviX_buffer_add_fstring(&fn->body, "L%d:\n", bb->index);
 	if (bb->index == ENTRY_BLOCK) {
@@ -2042,10 +2048,10 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 	}
 	rc = output_instructions(fn, bb->insns);
 	if (bb->index == EXIT_BLOCK) {
-		raviX_buffer_add_string(&fn->body, "return result;\n");
+		raviX_buffer_add_string(&fn->body, " return result;\n");
 		raviX_buffer_add_string(&fn->body, "Lraise_error:\n");
-		raviX_buffer_add_string(&fn->body, "raise_error(L, error_code); /* does not return */\n");
-		raviX_buffer_add_string(&fn->body, "return result;\n");
+		raviX_buffer_add_string(&fn->body, " raise_error(L, error_code); /* does not return */\n");
+		raviX_buffer_add_string(&fn->body, " return result;\n");
 	}
 	return rc;
 }
