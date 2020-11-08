@@ -186,22 +186,42 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 </TABLE>>];
 L4 -> L1
 }
-goto l1; do ::l1:: end
 
 function()
 --upvalues  _ENV*
-  goto l1
-  do
-    ::l1::
-  end
 end
 function()
 --upvalues  _ENV*
-  goto l1
-  do
-    ::l1::
-  end
 end
+define Proc%1
+L0 (entry)
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+
+function()
+--upvalues  _ENV*
+end
+function()
+--upvalues  _ENV*
+end
+define Proc%1
+L0 (entry)
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
 return function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
                   goto L2; ::L1:: end
 
