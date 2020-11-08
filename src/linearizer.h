@@ -117,7 +117,8 @@ enum opcode {
 	op_faget,
 	op_faget_ikey,
 	op_storeglobal,
-	op_close
+	op_close,
+	op_string_concat
 };
 
 /*

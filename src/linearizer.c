@@ -788,6 +788,9 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 	case BINOPR_POW:
 		targetop = op_pow;
 		break;
+	case BINOPR_CONCAT:
+		targetop = op_string_concat;
+		break;
 	default: {
 		char err[100];
 		snprintf(err, sizeof err, "unexpected binary op %s", raviX_get_binary_opr_str(op));
@@ -2481,7 +2484,7 @@ static const char *op_codenames[] = {
     "PUTik",	  "PUTsk",  "TPUT", "TPUTik", "TPUTsk",	    "IAPUT",	 "IAPUTiv",   "FAPUT",	   "FAPUTfv",
     "CBR",	  "BR",	    "MOV",  "MOVi",   "MOVif",	    "MOVf",	 "MOVfi",     "CALL",	   "GET",
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
-    "STOREGLOBAL", "CLOSE"};
+    "STOREGLOBAL", "CLOSE", "STRCONCAT"};
 
 static void output_pseudo_list(struct pseudo_list *list, buffer_t *mb)
 {
