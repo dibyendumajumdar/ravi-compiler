@@ -4,7 +4,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 
 #include <parser.h>
 
-static const char *type_name(ravitype_t tt)
+const char *raviX_get_type_name(ravitype_t tt)
 {
 	switch (tt) {
 	case RAVI_TANY:
@@ -58,7 +58,7 @@ static void printf_buf(buffer_t *buf, const char *format, ...)
 				const struct string_object *s = type->type_name;
 				raviX_buffer_add_string(buf, s->str);
 			} else {
-				raviX_buffer_add_string(buf, type_name(type->type_code));
+				raviX_buffer_add_string(buf, raviX_get_type_name(type->type_code));
 			}
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 's') { /* const char * */
@@ -120,22 +120,22 @@ static void print_symbol(buffer_t *buf, struct lua_symbol *sym, int level)
 	switch (sym->symbol_type) {
 	case SYM_ENV: {
 		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "_ENV",
-			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
+			   raviX_get_type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
 		break;
 	}
 	case SYM_GLOBAL: {
 		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "global symbol",
-			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
+			   raviX_get_type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
 		break;
 	}
 	case SYM_LOCAL: {
 		printf_buf(buf, "%p%t %c %s %s\n", level, sym->variable.var_name, "local symbol",
-			   type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
+			   raviX_get_type_name(sym->variable.value_type.type_code), get_as_str(sym->variable.value_type.type_name));
 		break;
 	}
 	case SYM_UPVALUE: {
 		printf_buf(buf, "%p%t %c %s %s\n", level, sym->upvalue.target_variable->variable.var_name, "upvalue",
-			   type_name(sym->upvalue.target_variable->variable.value_type.type_code),
+			   raviX_get_type_name(sym->upvalue.target_variable->variable.value_type.type_code),
 			   get_as_str(sym->upvalue.target_variable->variable.value_type.type_name));
 		break;
 	}
@@ -197,7 +197,7 @@ static void print_symbol_names(buffer_t *buf, struct lua_symbol_list *list)
 	END_FOR_EACH_PTR(node);
 }
 
-static const char *get_unary_opr_str(UnaryOperatorType op)
+const char *raviX_get_unary_opr_str(UnaryOperatorType op)
 {
 	switch (op) {
 	case UNOPR_NOT:
@@ -229,7 +229,7 @@ static const char *get_unary_opr_str(UnaryOperatorType op)
 	}
 }
 
-static const char *get_binary_opr_str(BinaryOperatorType op)
+const char *raviX_get_binary_opr_str(BinaryOperatorType op)
 {
 	switch (op) {
 	case BINOPR_ADD:
@@ -454,14 +454,14 @@ void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level)
 	case EXPR_BINARY: {
 		printf_buf(buf, "%p%c %T\n", level, "[binary expr start]", &node->binary_expr.type);
 		raviX_print_ast_node(buf, node->binary_expr.expr_left, level + 1);
-		printf_buf(buf, "%p%s\n", level, get_binary_opr_str(node->binary_expr.binary_op));
+		printf_buf(buf, "%p%s\n", level, raviX_get_binary_opr_str(node->binary_expr.binary_op));
 		raviX_print_ast_node(buf, node->binary_expr.expr_right, level + 1);
 		printf_buf(buf, "%p%c\n", level, "[binary expr end]");
 		break;
 	}
 	case EXPR_UNARY: {
 		printf_buf(buf, "%p%c %T\n", level, "[unary expr start]", &node->unary_expr.type);
-		printf_buf(buf, "%p%s\n", level, get_unary_opr_str(node->unary_expr.unary_op));
+		printf_buf(buf, "%p%s\n", level, raviX_get_unary_opr_str(node->unary_expr.unary_op));
 		raviX_print_ast_node(buf, node->unary_expr.expr, level + 1);
 		printf_buf(buf, "%p%c\n", level, "[unary expr end]");
 		break;

@@ -372,6 +372,7 @@ struct parser_state {
 };
 
 void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level); /* output the AST structure recursively */
+const char *raviX_get_type_name(ravitype_t tt);
 
 int raviX_ast_simplify(struct compiler_state* container);
 

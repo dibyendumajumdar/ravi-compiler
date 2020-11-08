@@ -590,9 +590,12 @@ static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_nod
 	case UNOPR_BNOT:
 		targetop = op_bnot;
 		break;
-	default:
-		handle_error(proc->linearizer->ast_container, "unexpected unary op");
+	default: {
+		char err[100];
+		snprintf(err, sizeof err, "unexpected unary op %s", raviX_get_unary_opr_str(op));
+		handle_error(proc->linearizer->ast_container, err);
 		break;
+	}
 	}
 	if (targetop == op_nop) {
 		return subexpr;
@@ -785,10 +788,13 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 	case BINOPR_POW:
 		targetop = op_pow;
 		break;
-	default:
-		handle_error(proc->linearizer->ast_container, "unexpected binary op");
+	default: {
+		char err[100];
+		snprintf(err, sizeof err, "unexpected binary op %s", raviX_get_binary_opr_str(op));
+		handle_error(proc->linearizer->ast_container, err);
 		targetop = op_nop;
 		break;
+	}
 	}
 
 	ravitype_t t1 = e1->common_expr.type.type_code;

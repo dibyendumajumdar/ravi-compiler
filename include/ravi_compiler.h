@@ -535,6 +535,9 @@ RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *sy
 #define FORMAT_ATTR(pos)
 #endif
 
+RAVICOMP_EXPORT const char *raviX_get_unary_opr_str(UnaryOperatorType op);
+RAVICOMP_EXPORT const char *raviX_get_binary_opr_str(BinaryOperatorType op);
+
 RAVICOMP_EXPORT void raviX_buffer_init(buffer_t *mb, size_t initial_size);
 RAVICOMP_EXPORT void raviX_buffer_resize(buffer_t *mb, size_t new_size);
 RAVICOMP_EXPORT void raviX_buffer_reserve(buffer_t *mb, size_t n);
