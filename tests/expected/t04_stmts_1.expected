@@ -1,0 +1,2387 @@
+::L1:: a = 1; goto L1; return
+
+function()
+--upvalues  _ENV*
+  ::L1::
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto L1
+  return
+end
+function()
+--upvalues  _ENV*
+  ::L1::
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        a --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto L1
+  return
+end
+define Proc%1
+L0 (entry)
+	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'a' Ks(0)}
+	BR {L0}
+L1 (exit)
+L2
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'a' Ks(0)}</TD></TR>
+<TR><TD>BR {L0}</TD></TR>
+</TABLE>>];
+L0 -> L0
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L2 -> L1
+}
+::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1
+
+function()
+--upvalues  _ENV*
+  ::l1::
+  do
+    goto l1
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       1
+     --[expression list end]
+    --[expression statement end]
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       2
+     --[expression list end]
+    --[expression statement end]
+  end
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto l1
+end
+function()
+--upvalues  _ENV*
+  ::l1::
+  do
+    goto l1
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       1
+     --[expression list end]
+    --[expression statement end]
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       2
+     --[expression list end]
+    --[expression statement end]
+  end
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        y --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     1
+   --[expression list end]
+  --[expression statement end]
+  goto l1
+end
+define Proc%1
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'z' Ks(2)}
+	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'y' Ks(4)}
+	BR {L0}
+L3
+	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
+	BR {L2}
+L4
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'z' Ks(2)}</TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'y' Ks(4)}</TD></TR>
+<TR><TD>BR {L0}</TD></TR>
+</TABLE>>];
+L2 -> L0
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L3 -> L2
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+goto l1; do ::l1:: end
+
+function()
+--upvalues  _ENV*
+  goto l1
+  do
+    ::l1::
+  end
+end
+function()
+--upvalues  _ENV*
+  goto l1
+  do
+    ::l1::
+  end
+end
+return function (a) ::L2:: if not(a < 10) then goto L1 end; a = a + 1;
+                  goto L2; ::L1:: end
+
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+    )
+    --locals  a
+      ::L2::
+      if
+       --[unary expr start] any
+       not
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+              a --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+          <
+           10
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       --[unary expr end]
+      then
+        goto L1
+      end
+      --[expression statement start]
+       --[var list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            a --local symbol any 
+          --[primary end]
+         --[suffixed expr end]
+       = --[var list end]
+       --[expression list start]
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             a --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         +
+          1
+         --[binary expr end]
+       --[expression list end]
+      --[expression statement end]
+      goto L2
+      ::L1::
+    end
+end
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+    )
+    --locals  a
+      ::L2::
+      if
+       --[unary expr start] any
+       not
+        --[suffixed expr start] any
+         --[primary start] any
+          --[binary expr start] any
+           --[suffixed expr start] any
+            --[primary start] any
+              a --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+          <
+           10
+          --[binary expr end]
+         --[primary end]
+        --[suffixed expr end]
+       --[unary expr end]
+      then
+        goto L1
+      end
+      --[expression statement start]
+       --[var list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            a --local symbol any 
+          --[primary end]
+         --[suffixed expr end]
+       = --[var list end]
+       --[expression list start]
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             a --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         +
+          1
+         --[binary expr end]
+       --[expression list end]
+      --[expression statement end]
+      goto L2
+      ::L1::
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	LT {local(a, 0), 10 Kint(0)} {T(0)}
+	NOT {T(0)} {T(1)}
+	CBR {T(1)} {L3, L4}
+L3
+	BR {L5}
+L4
+	ADD {local(a, 0), 1 Kint(1)} {T(2)}
+	MOV {T(2)} {local(a, 0)}
+	BR {L0}
+L5
+	RET {L1}
+L6
+	BR {L4}
+L7
+	BR {L5}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>NOT {T(0)} {T(1)}</TD></TR>
+<TR><TD>CBR {T(1)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>BR {L5}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(a, 0)}</TD></TR>
+<TR><TD>BR {L0}</TD></TR>
+</TABLE>>];
+L4 -> L0
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L6 -> L4
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>BR {L5}</TD></TR>
+</TABLE>>];
+L7 -> L5
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>NOT {T(0)} {T(1)}</TD></TR>
+<TR><TD>CBR {T(1)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>BR {L5}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(a, 0)}</TD></TR>
+<TR><TD>BR {L0}</TD></TR>
+</TABLE>>];
+L4 -> L0
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L6 -> L4
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>BR {L5}</TD></TR>
+</TABLE>>];
+L7 -> L5
+}
+}
+for i=1,10 do print(i) end
+
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol any 
+  =
+    1
+   ,
+    10
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol integer 
+  =
+    1
+   ,
+    10
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] integer
+               --[primary start] integer
+                 i --local symbol integer 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(1)}
+	MOV {10 Kint(1)} {Tint(2)}
+	MOV {1 Kint(0)} {Tint(3)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L3}
+L3
+	LIii {Tint(2), Tint(1)} {Tbool(4)}
+	CBR {Tbool(4)} {L5, L4}
+L4
+	MOV {Tint(1)} {Tint(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
+	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
+	BR {L2}
+L5
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {10 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L4 -> L2
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+}
+for i=10,1,-1 do print(i) end
+
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol any 
+  =
+    10
+   ,
+    1
+   ,
+    --[unary expr start] any
+    -
+     1
+    --[unary expr end]
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol integer 
+  =
+    10
+   ,
+    1
+   ,
+    --[unary expr start] integer
+    -
+     1
+    --[unary expr end]
+  do
+     --[expression statement start]
+      --[expression list start]
+        --[suffixed expr start] any
+         --[primary start] any
+           print --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] integer
+               --[primary start] integer
+                 i --local symbol integer 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      --[expression list end]
+     --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	MOV {10 Kint(0)} {Tint(1)}
+	MOV {1 Kint(1)} {Tint(2)}
+	UNMi {1 Kint(1)} {Tint(3)}
+	MOV {Tint(3)} {Tint(4)}
+	LIii {0 Kint(2), Tint(4)} {Tbool(5)}
+	SUBii {Tint(1), Tint(4)} {Tint(1)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(1), Tint(4)} {Tint(1)}
+	CBR {Tbool(5)} {L3, L4}
+L3
+	LIii {Tint(2), Tint(1)} {Tbool(6)}
+	CBR {Tbool(6)} {L6, L5}
+L4
+	LIii {Tint(1), Tint(2)} {Tbool(6)}
+	CBR {Tbool(6)} {L6, L5}
+L5
+	MOV {Tint(1)} {Tint(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}
+	CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}
+	BR {L2}
+L6
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {10 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>UNMi {1 Kint(1)} {Tint(3)}</TD></TR>
+<TR><TD>MOV {Tint(3)} {Tint(4)}</TD></TR>
+<TR><TD>LIii {0 Kint(2), Tint(4)} {Tbool(5)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(6)}</TD></TR>
+<TR><TD>CBR {Tbool(6)} {L6, L5}</TD></TR>
+</TABLE>>];
+L3 -> L6
+L3 -> L5
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>LIii {Tint(1), Tint(2)} {Tbool(6)}</TD></TR>
+<TR><TD>CBR {Tbool(6)} {L6, L5}</TD></TR>
+</TABLE>>];
+L4 -> L6
+L4 -> L5
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L5 -> L2
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L6 -> L1
+}
+while true do print('forever') end
+
+function()
+--upvalues  _ENV*
+  while
+   true
+  do
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+function()
+--upvalues  _ENV*
+  while
+   true
+  do
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	CBR {true} {L3, L4}
+L3
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	BR {L2}
+L4
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>CBR {true} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L3 -> L2
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+repeat print('forever') brek until true
+
+function()
+--upvalues  _ENV*
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          brek --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  until
+   true
+  --[repeat end]
+end
+function()
+--upvalues  _ENV*
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          brek --global symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  until
+   true
+  --[repeat end]
+end
+define Proc%1
+L0 (entry)
+	BR {L3}
+L1 (exit)
+L2
+	CBR {true} {L3, L4}
+L3
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}
+	BR {L2}
+L4
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L0 -> L3
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>CBR {true} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L3 -> L2
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+repeat print('forever') break until true return
+
+function()
+--upvalues  _ENV*
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto break
+  until
+   true
+  --[repeat end]
+  return
+end
+function()
+--upvalues  _ENV*
+  repeat
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          print --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             'forever'
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto break
+  until
+   true
+  --[repeat end]
+  return
+end
+define Proc%1
+L0 (entry)
+	BR {L3}
+L1 (exit)
+L2
+	CBR {true} {L3, L4}
+L3
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	BR {L4}
+L4
+	RET {L1}
+L5
+	BR {L2}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L0 -> L3
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>CBR {true} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L5 -> L2
+}
+for i =1,10 do if i == 2 then break end end return
+
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol any 
+  =
+    1
+   ,
+    10
+  do
+     if
+      --[binary expr start] any
+       --[suffixed expr start] any
+        --[primary start] any
+          i --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+      ==
+       2
+      --[binary expr end]
+     then
+       goto break
+     end
+  end
+  return
+end
+function()
+--locals  i
+--upvalues  _ENV*
+  for
+    i --local symbol integer 
+  =
+    1
+   ,
+    10
+  do
+     if
+      --[binary expr start] boolean
+       --[suffixed expr start] integer
+        --[primary start] integer
+          i --local symbol integer 
+        --[primary end]
+       --[suffixed expr end]
+      ==
+       2
+      --[binary expr end]
+     then
+       goto break
+     end
+  end
+  return
+end
+define Proc%1
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(1)}
+	MOV {10 Kint(1)} {Tint(2)}
+	MOV {1 Kint(0)} {Tint(3)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L3}
+L3
+	LIii {Tint(2), Tint(1)} {Tbool(4)}
+	CBR {Tbool(4)} {L5, L4}
+L4
+	MOV {Tint(1)} {Tint(0)}
+	BR {L6}
+L5
+	RET {L1}
+L6
+	EQii {Tint(0), 2 Kint(2)} {Tbool(5)}
+	CBR {Tbool(5)} {L7, L8}
+L7
+	BR {L5}
+L8
+	BR {L2}
+L9
+	BR {L8}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {10 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>BR {L6}</TD></TR>
+</TABLE>>];
+L4 -> L6
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>EQii {Tint(0), 2 Kint(2)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L7, L8}</TD></TR>
+</TABLE>>];
+L6 -> L7
+L6 -> L8
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>BR {L5}</TD></TR>
+</TABLE>>];
+L7 -> L5
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L8 -> L2
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L8}</TD></TR>
+</TABLE>>];
+L9 -> L8
+}
+return function (a) while a < 10 do a = a + 1 end end
+
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+    )
+    --locals  a
+      while
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       <
+        10
+       --[binary expr end]
+      do
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              a --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               a --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           +
+            1
+           --[binary expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    end
+end
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+    )
+    --locals  a
+      while
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       <
+        10
+       --[binary expr end]
+      do
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              a --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               a --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           +
+            1
+           --[binary expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	LT {local(a, 0), 10 Kint(0)} {T(0)}
+	CBR {T(0)} {L3, L4}
+L3
+	ADD {local(a, 0), 1 Kint(1)} {T(0)}
+	MOV {T(0)} {local(a, 0)}
+	BR {L2}
+L4
+	RET {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(a, 0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L3 -> L2
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(a, 0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L3 -> L2
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+}
+return function (a, b, c, d, e)
+    if a == b then goto l1
+    elseif a == c then goto l2
+    elseif a == d then goto l2
+    else if a == e then goto l3
+        else goto l3
+        end
+    end
+    ::l1:: ::l2:: ::l3:: ::l4::
+end
+
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+     ,
+      b --local symbol any 
+     ,
+      c --local symbol any 
+     ,
+      d --local symbol any 
+     ,
+      e --local symbol any 
+    )
+    --locals  a, b, c, d, e
+      if
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           b --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l1
+      elseif
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           c --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l2
+      elseif
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           d --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l2
+      else
+        if
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             a --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         ==
+          --[suffixed expr start] any
+           --[primary start] any
+             e --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        then
+          goto l3
+        else
+          goto l3
+        end
+      end
+      ::l1::
+      ::l2::
+      ::l3::
+      ::l4::
+    end
+end
+function()
+--upvalues  _ENV*
+  return
+    function(
+      a --local symbol any 
+     ,
+      b --local symbol any 
+     ,
+      c --local symbol any 
+     ,
+      d --local symbol any 
+     ,
+      e --local symbol any 
+    )
+    --locals  a, b, c, d, e
+      if
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           b --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l1
+      elseif
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           c --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l2
+      elseif
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           a --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       ==
+        --[suffixed expr start] any
+         --[primary start] any
+           d --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+        goto l2
+      else
+        if
+         --[binary expr start] any
+          --[suffixed expr start] any
+           --[primary start] any
+             a --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         ==
+          --[suffixed expr start] any
+           --[primary start] any
+             e --local symbol any 
+           --[primary end]
+          --[suffixed expr end]
+         --[binary expr end]
+        then
+          goto l3
+        else
+          goto l3
+        end
+      end
+      ::l1::
+      ::l2::
+      ::l3::
+      ::l4::
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	EQ {local(a, 0), local(b, 1)} {T(0)}
+	CBR {T(0)} {L5, L3}
+L3
+	EQ {local(a, 0), local(c, 2)} {T(1)}
+	CBR {T(1)} {L6, L4}
+L4
+	EQ {local(a, 0), local(d, 3)} {T(2)}
+	CBR {T(2)} {L7, L8}
+L5
+	BR {L10}
+L6
+	BR {L12}
+L7
+	BR {L12}
+L8
+	BR {L15}
+L9
+	BR {L10}
+L10
+	BR {L12}
+L11
+	BR {L9}
+L12
+	BR {L19}
+L13
+	BR {L9}
+L14
+	BR {L9}
+L15
+	EQ {local(a, 0), local(e, 4)} {T(3)}
+	CBR {T(3)} {L16, L17}
+L16
+	BR {L19}
+L17
+	BR {L19}
+L18
+	BR {L9}
+L19
+	RET {L1}
+L20
+	BR {L18}
+L21
+	BR {L18}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(b, 1)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L5, L3}</TD></TR>
+</TABLE>>];
+L2 -> L5
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(c, 2)} {T(1)}</TD></TR>
+<TR><TD>CBR {T(1)} {L6, L4}</TD></TR>
+</TABLE>>];
+L3 -> L6
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(d, 3)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L7, L8}</TD></TR>
+</TABLE>>];
+L4 -> L7
+L4 -> L8
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>BR {L10}</TD></TR>
+</TABLE>>];
+L5 -> L10
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L6 -> L12
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L7 -> L12
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>BR {L15}</TD></TR>
+</TABLE>>];
+L8 -> L15
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L10}</TD></TR>
+</TABLE>>];
+L9 -> L10
+L10 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L10</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L10 -> L12
+L11 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L11</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L11 -> L9
+L12 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L12</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L12 -> L19
+L13 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L13</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L13 -> L9
+L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L14</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L14 -> L9
+L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L15</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
+<TR><TD>CBR {T(3)} {L16, L17}</TD></TR>
+</TABLE>>];
+L15 -> L16
+L15 -> L17
+L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L16</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L16 -> L19
+L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L17</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L17 -> L19
+L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L18</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L18 -> L9
+L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L19</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L19 -> L1
+L20 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L20</B></TD></TR>
+<TR><TD>BR {L18}</TD></TR>
+</TABLE>>];
+L20 -> L18
+L21 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L21</B></TD></TR>
+<TR><TD>BR {L18}</TD></TR>
+</TABLE>>];
+L21 -> L18
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(b, 1)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L5, L3}</TD></TR>
+</TABLE>>];
+L2 -> L5
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(c, 2)} {T(1)}</TD></TR>
+<TR><TD>CBR {T(1)} {L6, L4}</TD></TR>
+</TABLE>>];
+L3 -> L6
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(d, 3)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L7, L8}</TD></TR>
+</TABLE>>];
+L4 -> L7
+L4 -> L8
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>BR {L10}</TD></TR>
+</TABLE>>];
+L5 -> L10
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L6 -> L12
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L7 -> L12
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>BR {L15}</TD></TR>
+</TABLE>>];
+L8 -> L15
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L10}</TD></TR>
+</TABLE>>];
+L9 -> L10
+L10 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L10</B></TD></TR>
+<TR><TD>BR {L12}</TD></TR>
+</TABLE>>];
+L10 -> L12
+L11 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L11</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L11 -> L9
+L12 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L12</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L12 -> L19
+L13 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L13</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L13 -> L9
+L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L14</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L14 -> L9
+L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L15</B></TD></TR>
+<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
+<TR><TD>CBR {T(3)} {L16, L17}</TD></TR>
+</TABLE>>];
+L15 -> L16
+L15 -> L17
+L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L16</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L16 -> L19
+L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L17</B></TD></TR>
+<TR><TD>BR {L19}</TD></TR>
+</TABLE>>];
+L17 -> L19
+L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L18</B></TD></TR>
+<TR><TD>BR {L9}</TD></TR>
+</TABLE>>];
+L18 -> L9
+L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L19</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L19 -> L1
+L20 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L20</B></TD></TR>
+<TR><TD>BR {L18}</TD></TR>
+</TABLE>>];
+L20 -> L18
+L21 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L21</B></TD></TR>
+<TR><TD>BR {L18}</TD></TR>
+</TABLE>>];
+L21 -> L18
+}
+}
+return function ()
+    local sum
+    for j = 1,500 do
+        sum = 0.0
+        for k = 1,10000 do
+            sum = sum + 1.0/(k*k)
+        end
+    end
+    return sum
+end
+
+function()
+--upvalues  _ENV*
+  return
+    function()
+    --locals  sum, j, k
+      local
+      --[symbols]
+        sum --local symbol any 
+      for
+        j --local symbol any 
+      =
+        1
+       ,
+        500
+      do
+         --[expression statement start]
+          --[var list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               sum --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+          = --[var list end]
+          --[expression list start]
+            0.0000000000000000
+          --[expression list end]
+         --[expression statement end]
+         for
+           k --local symbol any 
+         =
+           1
+          ,
+           10000
+         do
+            --[expression statement start]
+             --[var list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  sum --local symbol any 
+                --[primary end]
+               --[suffixed expr end]
+             = --[var list end]
+             --[expression list start]
+               --[binary expr start] any
+                --[suffixed expr start] any
+                 --[primary start] any
+                   sum --local symbol any 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[binary expr start] any
+                 1.0000000000000000
+                /
+                 --[suffixed expr start] any
+                  --[primary start] any
+                   --[binary expr start] any
+                    --[suffixed expr start] any
+                     --[primary start] any
+                       k --local symbol any 
+                     --[primary end]
+                    --[suffixed expr end]
+                   *
+                    --[suffixed expr start] any
+                     --[primary start] any
+                       k --local symbol any 
+                     --[primary end]
+                    --[suffixed expr end]
+                   --[binary expr end]
+                  --[primary end]
+                 --[suffixed expr end]
+                --[binary expr end]
+               --[binary expr end]
+             --[expression list end]
+            --[expression statement end]
+         end
+      end
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           sum --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+end
+function()
+--upvalues  _ENV*
+  return
+    function()
+    --locals  sum, j, k
+      local
+      --[symbols]
+        sum --local symbol any 
+      for
+        j --local symbol integer 
+      =
+        1
+       ,
+        500
+      do
+         --[expression statement start]
+          --[var list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               sum --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+          = --[var list end]
+          --[expression list start]
+            0.0000000000000000
+          --[expression list end]
+         --[expression statement end]
+         for
+           k --local symbol integer 
+         =
+           1
+          ,
+           10000
+         do
+            --[expression statement start]
+             --[var list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  sum --local symbol any 
+                --[primary end]
+               --[suffixed expr end]
+             = --[var list end]
+             --[expression list start]
+               --[binary expr start] any
+                --[suffixed expr start] any
+                 --[primary start] any
+                   sum --local symbol any 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[binary expr start] number
+                 1.0000000000000000
+                /
+                 --[suffixed expr start] integer
+                  --[primary start] integer
+                   --[binary expr start] integer
+                    --[suffixed expr start] integer
+                     --[primary start] integer
+                       k --local symbol integer 
+                     --[primary end]
+                    --[suffixed expr end]
+                   *
+                    --[suffixed expr start] integer
+                     --[primary start] integer
+                       k --local symbol integer 
+                     --[primary end]
+                    --[suffixed expr end]
+                   --[binary expr end]
+                  --[primary end]
+                 --[suffixed expr end]
+                --[binary expr end]
+               --[binary expr end]
+             --[expression list end]
+            --[expression statement end]
+         end
+      end
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           sum --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	MOV {1 Kint(0)} {Tint(1)}
+	MOV {500 Kint(1)} {Tint(2)}
+	MOV {1 Kint(0)} {Tint(3)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
+	BR {L3}
+L3
+	LIii {Tint(2), Tint(1)} {Tbool(4)}
+	CBR {Tbool(4)} {L5, L4}
+L4
+	MOV {Tint(1)} {Tint(0)}
+	MOV {0.000000000000 Kflt(2)} {local(sum, 0)}
+	MOV {1 Kint(0)} {Tint(6)}
+	MOV {10000 Kint(3)} {Tint(7)}
+	MOV {1 Kint(0)} {Tint(8)}
+	SUBii {Tint(6), Tint(8)} {Tint(6)}
+	BR {L6}
+L5
+	RET {local(sum, 0)} {L1}
+L6
+	ADDii {Tint(6), Tint(8)} {Tint(6)}
+	BR {L7}
+L7
+	LIii {Tint(7), Tint(6)} {Tbool(9)}
+	CBR {Tbool(9)} {L9, L8}
+L8
+	MOV {Tint(6)} {Tint(5)}
+	MULii {Tint(5), Tint(5)} {Tint(10)}
+	DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}
+	ADD {local(sum, 0), Tflt(0)} {T(0)}
+	MOV {T(0)} {local(sum, 0)}
+	BR {L6}
+L9
+	BR {L2}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {500 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>MOV {0.000000000000 Kflt(2)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
+<TR><TD>MOV {10000 Kint(3)} {Tint(7)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
+<TR><TD>SUBii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
+<TR><TD>BR {L6}</TD></TR>
+</TABLE>>];
+L4 -> L6
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(sum, 0)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>ADDii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
+<TR><TD>BR {L7}</TD></TR>
+</TABLE>>];
+L6 -> L7
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>LIii {Tint(7), Tint(6)} {Tbool(9)}</TD></TR>
+<TR><TD>CBR {Tbool(9)} {L9, L8}</TD></TR>
+</TABLE>>];
+L7 -> L9
+L7 -> L8
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
+<TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
+<TR><TD>DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
+<TR><TD>BR {L6}</TD></TR>
+</TABLE>>];
+L8 -> L6
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L9 -> L2
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {500 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>MOV {0.000000000000 Kflt(2)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
+<TR><TD>MOV {10000 Kint(3)} {Tint(7)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
+<TR><TD>SUBii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
+<TR><TD>BR {L6}</TD></TR>
+</TABLE>>];
+L4 -> L6
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(sum, 0)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>ADDii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
+<TR><TD>BR {L7}</TD></TR>
+</TABLE>>];
+L6 -> L7
+L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L7</B></TD></TR>
+<TR><TD>LIii {Tint(7), Tint(6)} {Tbool(9)}</TD></TR>
+<TR><TD>CBR {Tbool(9)} {L9, L8}</TD></TR>
+</TABLE>>];
+L7 -> L9
+L7 -> L8
+L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L8</B></TD></TR>
+<TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
+<TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
+<TR><TD>DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
+<TR><TD>BR {L6}</TD></TR>
+</TABLE>>];
+L8 -> L6
+L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L9</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L9 -> L2
+}
+}
+local x
+do
+  local y = 12
+  goto l1
+  ::l2:: x = x + 1; goto l3
+  ::l1:: x = y; goto l2
+end
+::l3:: ::l3_1:: assert(x == 13)
+
+function()
+--locals  x, y
+--upvalues  _ENV*
+  local
+  --[symbols]
+    x --local symbol any 
+  do
+    local
+    --[symbols]
+      y --local symbol any 
+    --[expressions]
+      12
+    goto l1
+    ::l2::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           x --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       +
+        1
+       --[binary expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l3
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          y --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l2
+  end
+  ::l3::
+  ::l3_1::
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               x --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ==
+            13
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+--locals  x, y
+--upvalues  _ENV*
+  local
+  --[symbols]
+    x --local symbol any 
+  do
+    local
+    --[symbols]
+      y --local symbol any 
+    --[expressions]
+      12
+    goto l1
+    ::l2::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           x --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       +
+        1
+       --[binary expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l3
+    ::l1::
+    --[expression statement start]
+     --[var list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     = --[var list end]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          y --local symbol any 
+        --[primary end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+    goto l2
+  end
+  ::l3::
+  ::l3_1::
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            --[suffixed expr start] any
+             --[primary start] any
+               x --local symbol any 
+             --[primary end]
+            --[suffixed expr end]
+           ==
+            13
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+define Proc%1
+L0 (entry)
+	MOV {12 Kint(0)} {local(y, 1)}
+	BR {L2}
+L1 (exit)
+L2
+	MOV {local(y, 1)} {local(x, 0)}
+	BR {L3}
+L3
+	ADD {local(x, 0), 1 Kint(1)} {T(0)}
+	MOV {T(0)} {local(x, 0)}
+	BR {L4}
+L4
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}
+	EQ {local(x, 0), 13 Kint(3)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
+	RET {L1}
+L5
+	BR {L2}
+L6
+	BR {L4}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {12 Kint(0)} {local(y, 1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>MOV {local(y, 1)} {local(x, 0)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>ADD {local(x, 0), 1 Kint(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}</TD></TR>
+<TR><TD>EQ {local(x, 0), 13 Kint(3)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L5 -> L2
+L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L6</B></TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L6 -> L4
+}
+
+
+function()
+--upvalues  _ENV*
+end
+function()
+--upvalues  _ENV*
+end
+define Proc%1
+L0 (entry)
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
