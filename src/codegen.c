@@ -15,20 +15,18 @@
  */
 
 static const char Lua_header[] =
-    //"typedef __SIZE_TYPE__ size_t;\n"
-    "typedef unsigned long long size_t;\n"
-    "typedef long long ptrdiff_t;\n"
-    "typedef long long intptr_t;\n"
-    "typedef long long int64_t;\n"
-    "typedef unsigned long long uint64_t;\n"
-    "typedef int int32_t;\n"
-    "typedef unsigned int uint32_t;\n"
-    "typedef short int16_t;\n"
-    "typedef unsigned short uint16_t;\n"
-    "typedef char int8_t;\n"
-    "typedef unsigned char uint8_t;\n"
+    "typedef __SIZE_TYPE__ size_t;\n"
+    "typedef __PTRDIFF_TYPE__ ptrdiff_t;\n"
+    "typedef __INTPTR_TYPE__ intptr_t;\n"
+    "typedef __INT64_TYPE__ int64_t;\n"
+    "typedef __UINT64_TYPE__ uint64_t;\n"
+    "typedef __INT32_TYPE__ int32_t;\n"
+    "typedef __UINT32_TYPE__ uint32_t;\n"
+    "typedef __INT16_TYPE__ int16_t;\n"
+    "typedef __UINT16_TYPE__ uint16_t;\n"
+    "typedef __INT8_TYPE__ int8_t;\n"
+    "typedef __UINT8_TYPE__ uint8_t;\n"
     "typedef size_t lu_mem;\n"
-    "typedef ptrdiff_t l_mem;\n"
     "typedef unsigned char lu_byte;\n"
     "typedef uint16_t LuaType;\n"
     "#define NULL ((void *)0)\n"
@@ -782,13 +780,13 @@ static unsigned compute_register_from_base(struct function *fn, const struct pse
 static bool refers_to_same_register(struct function *fn, struct pseudo *src, struct pseudo *dst)
 {
 	static bool reg_pseudos[] = {
-	    [PSEUDO_SYMBOL] = true,    /* An object of type lua_symbol representing local var or upvalue */
-	    [PSEUDO_TEMP_FLT] = false, /* A floating point temp - may also be used for locals that don't escape */
-	    [PSEUDO_TEMP_INT] = false, /* An integer temp - may also be used for locals that don't escape */
+	    [PSEUDO_SYMBOL] = true,	/* An object of type lua_symbol representing local var or upvalue */
+	    [PSEUDO_TEMP_FLT] = false,	/* A floating point temp - may also be used for locals that don't escape */
+	    [PSEUDO_TEMP_INT] = false,	/* An integer temp - may also be used for locals that don't escape */
 	    [PSEUDO_TEMP_BOOL] = false, /* An (bool) integer temp - may also be used for locals that don't escape */
-	    [PSEUDO_TEMP_ANY] = true,  /* A temp of any type - will always be on Lua stack */
-	    [PSEUDO_CONSTANT] = false, /* A literal value */
-	    [PSEUDO_PROC] = false,     /* A proc / function */
+	    [PSEUDO_TEMP_ANY] = true,	/* A temp of any type - will always be on Lua stack */
+	    [PSEUDO_CONSTANT] = false,	/* A literal value */
+	    [PSEUDO_PROC] = false,	/* A proc / function */
 	    [PSEUDO_NIL] = false,
 	    [PSEUDO_TRUE] = false,
 	    [PSEUDO_FALSE] = false,
@@ -815,7 +813,7 @@ static bool refers_to_same_register(struct function *fn, struct pseudo *src, str
 	return compute_register_from_base(fn, src) == compute_register_from_base(fn, dst);
 }
 
-/* 
+/*
 Outputs accessor for a pseudo so that the accessor is always of type
 TValue *. Thus for constants, we need to use a temp stack variable of type TValue.
 The issue is what happens if we need two values at the same time and both are constants
@@ -850,13 +848,16 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo, u
 								    (struct string_object *)pseudo->constant->s);
 			raviX_buffer_add_fstring(&fn->body, "K(%d)", k);
 		} else if (pseudo->constant->type == RAVI_TNUMINT) {
-			raviX_buffer_add_fstring(&fn->body, "&ival%u; ival%u.value_.i = %lld", discriminator, discriminator, pseudo->constant->i);
+			raviX_buffer_add_fstring(&fn->body, "&ival%u; ival%u.value_.i = %lld", discriminator,
+						 discriminator, pseudo->constant->i);
 		} else if (pseudo->constant->type == RAVI_TNUMFLT) {
-			raviX_buffer_add_fstring(&fn->body, "&fval%u; fval%u.value_.n = %g", discriminator, discriminator, pseudo->constant->n);
+			raviX_buffer_add_fstring(&fn->body, "&fval%u; fval%u.value_.n = %g", discriminator,
+						 discriminator, pseudo->constant->n);
 		} else if (pseudo->constant->type == RAVI_TNIL) {
 			raviX_buffer_add_string(&fn->body, "&nilval");
 		} else if (pseudo->constant->type == RAVI_TBOOLEAN) {
-			raviX_buffer_add_fstring(&fn->body, "&bval%u; bval%u.value_.b = %d", discriminator, discriminator, (int)pseudo->constant->i);
+			raviX_buffer_add_fstring(&fn->body, "&bval%u; bval%u.value_.b = %d", discriminator,
+						 discriminator, (int)pseudo->constant->i);
 		} else {
 			fn->api->error_message(fn->api->context, "Unexpected pseudo constant type");
 			assert(0);
@@ -953,7 +954,8 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 	} else if (dst->type == PSEUDO_TEMP_INT || dst->type == PSEUDO_TEMP_BOOL) {
 		emit_move_inttemp(fn, src, dst);
 	} else if (dst->type == PSEUDO_TEMP_ANY || dst->type == PSEUDO_SYMBOL || dst->type == PSEUDO_LUASTACK) {
-		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL || src->type == PSEUDO_RANGE_SELECT) {
+		if (src->type == PSEUDO_LUASTACK || src->type == PSEUDO_TEMP_ANY || src->type == PSEUDO_SYMBOL ||
+		    src->type == PSEUDO_RANGE_SELECT) {
 			// Only emit a move if we are not referencing the same register
 			if (!refers_to_same_register(fn, src, dst)) {
 				raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
@@ -1195,8 +1197,7 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	const char *fname = "luaV_settable";
 	if (insn->opcode == op_tput_ikey) {
 		fname = "raviV_settable_i";
-	}
-	else if (insn->opcode == op_tput_skey) {
+	} else if (insn->opcode == op_tput_skey) {
 		fname = "raviV_settable_sskey";
 	}
 	struct pseudo *env = get_target(insn, 0);
@@ -1318,8 +1319,8 @@ static int emit_op_call(struct function *fn, struct instruction *insn)
 }
 
 /*
-* Output a C stack variable representing int/float value or constant
-*/
+ * Output a C stack variable representing int/float value or constant
+ */
 static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_CONSTANT) {
@@ -1330,27 +1331,25 @@ static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 		} else {
 			assert(0);
 		}
-	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL || pseudo->type == PSEUDO_TEMP_FLT) {
+	} else if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL ||
+		   pseudo->type == PSEUDO_TEMP_FLT) {
 		emit_varname(pseudo, &fn->body);
 	} else if (pseudo->type == PSEUDO_SYMBOL) {
 		ravitype_t typecode = RAVI_TANY;
 		if (pseudo->symbol->symbol_type == SYM_LOCAL) {
 			typecode = pseudo->symbol->variable.value_type.type_code;
-		}
-		else if (pseudo->symbol->symbol_type == SYM_UPVALUE) {
+		} else if (pseudo->symbol->symbol_type == SYM_UPVALUE) {
 			typecode = pseudo->symbol->upvalue.value_type.type_code;
 		}
 		if (typecode == RAVI_TNUMFLT) {
 			raviX_buffer_add_string(&fn->body, "fltvalue(");
 			emit_reg_accessor(fn, pseudo, 0);
 			raviX_buffer_add_string(&fn->body, ")");
-		}
-		else if (typecode == RAVI_TNUMINT) {
+		} else if (typecode == RAVI_TNUMINT) {
 			raviX_buffer_add_string(&fn->body, "ivalue(");
 			emit_reg_accessor(fn, pseudo, 0);
 			raviX_buffer_add_string(&fn->body, ")");
-		}
-		else {
+		} else {
 			assert(0);
 		}
 	} else {
@@ -1551,7 +1550,6 @@ static int emit_bin_if(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-
 static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
 {
 	const char *array_type = insn->opcode == op_iaget_ikey ? "lua_Integer *" : "lua_Number *";
@@ -1578,8 +1576,7 @@ static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, ";\n");
-	raviX_buffer_add_fstring(&fn->body, " %siptr = (%s)arr->data;\n ",
-				 array_type, array_type);
+	raviX_buffer_add_fstring(&fn->body, " %siptr = (%s)arr->data;\n ", array_type, array_type);
 	if (dst->type == type) {
 		emit_varname(dst, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = iptr[ukey];\n");
@@ -1634,8 +1631,7 @@ static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
 	} else if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMINT) {
 			raviX_buffer_add_fstring(&fn->body, "%lld", src->constant->i);
-		}
-		else {
+		} else {
 			raviX_buffer_add_fstring(&fn->body, "%g", src->constant->n);
 		}
 	} else {
@@ -1653,8 +1649,7 @@ static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
 	} else if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMINT) {
 			raviX_buffer_add_fstring(&fn->body, "%lld", src->constant->i);
-		}
-		else {
+		} else {
 			raviX_buffer_add_fstring(&fn->body, "%g", src->constant->n);
 		}
 	}
@@ -1730,7 +1725,8 @@ static int emit_op_tousertype(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_newtable(struct function *fn, struct instruction *insn) {
+static int emit_op_newtable(struct function *fn, struct instruction *insn)
+{
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -1741,7 +1737,8 @@ static int emit_op_newtable(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
-static int emit_op_newarray(struct function *fn, struct instruction *insn) {
+static int emit_op_newarray(struct function *fn, struct instruction *insn)
+{
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -1753,7 +1750,8 @@ static int emit_op_newarray(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
-static int emit_op_closure(struct function *fn, struct instruction *insn) {
+static int emit_op_closure(struct function *fn, struct instruction *insn)
+{
 	struct pseudo *closure_pseudo = get_first_operand(insn);
 	struct pseudo *target_pseudo = get_first_target(insn);
 
@@ -1763,14 +1761,16 @@ static int emit_op_closure(struct function *fn, struct instruction *insn) {
 	struct proc *cursor;
 	int parent_index = -1;
 	int i = 0;
-	FOR_EACH_PTR(parent_proc->procs, cursor) {
+	FOR_EACH_PTR(parent_proc->procs, cursor)
+	{
 		if (cursor->id == proc->id) {
 			assert(cursor == proc);
 			parent_index = i;
 			break;
 		}
 		i++;
-	} END_FOR_EACH_PTR(cursor);
+	}
+	END_FOR_EACH_PTR(cursor);
 	if (parent_index == -1) {
 		assert(0);
 		return -1;
@@ -1781,7 +1781,8 @@ static int emit_op_closure(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
-static int emit_op_close(struct function *fn, struct instruction *insn) {
+static int emit_op_close(struct function *fn, struct instruction *insn)
+{
 	struct pseudo *pseudo = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n TValue *clsvar = ");
 	emit_reg_accessor(fn, pseudo, 0);
@@ -1796,15 +1797,15 @@ static int emit_op_close(struct function *fn, struct instruction *insn) {
 	return 0;
 }
 
-static int emit_op_len(struct function *fn, struct instruction *insn) {
+static int emit_op_len(struct function *fn, struct instruction *insn)
+{
 	struct pseudo *obj = get_first_operand(insn);
 	struct pseudo *target = get_first_target(insn);
 
 	if (target->type == PSEUDO_TEMP_INT) {
 		assert(0);
 		return -1;
-	}
-	else {
+	} else {
 		raviX_buffer_add_string(&fn->body, "{\n TValue *len = ");
 		emit_reg_accessor(fn, target, 0);
 		raviX_buffer_add_string(&fn->body, ";\n TValue *obj = ");
@@ -2025,7 +2026,7 @@ static int output_instructions(struct function *fn, struct instruction_list *lis
 	if (count == 0) {
 		// FIXME empty block - should not happen - check opt that removes unreachable blocks
 		// FIXME remove workaround below once fixed
-		//assert(0);
+		// assert(0);
 		raviX_buffer_add_string(&fn->body, ";\n");
 	}
 	return rc;
