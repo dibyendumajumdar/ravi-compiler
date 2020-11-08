@@ -11,6 +11,7 @@
 * `dominator.c` - implementation of dominator tree calculation - this is not used yet
 * `dataflow_framework.c` - a framework for calculating dataflow equations - not used yet
 * `opt_unusedcode.c` - a simple optimization pass that deletes unreachable basic blocks
+* `codegen.c` - responsible for generating C code from the linear IR
 
 ## Utilities
 
