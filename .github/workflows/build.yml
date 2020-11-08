@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ master, env ]
+    branches: [ master ]
 
 env:
     # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -43,6 +43,7 @@ jobs:
       shell: bash
       run: |
          cd tests
+         sh truntests.sh ${{runner.workspace}}/build/trun
          sh runtests.sh ${{runner.workspace}}/build/tparse
          sh runtparse.sh ${{runner.workspace}}/build/taskwalk
 
