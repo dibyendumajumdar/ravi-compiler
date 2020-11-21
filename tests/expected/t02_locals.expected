@@ -333,7 +333,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}
-	DIVii {Tint(0), 5 Kint(1)} {Tflt(0)}
+	DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}
 	GET {T(0), Tflt(0)} {T(1)}
 	RET {T(1)} {L1}
 L1 (exit)
@@ -341,7 +341,7 @@ digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>DIVii {Tint(0), 5 Kint(1)} {Tflt(0)}</TD></TR>
+<TR><TD>DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}</TD></TR>
 <TR><TD>GET {T(0), Tflt(0)} {T(1)}</TD></TR>
 <TR><TD>RET {T(1)} {L1}</TD></TR>
 </TABLE>>];
@@ -702,7 +702,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'rawget' Ks(1)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), '_G' Ks(2)} {T(3)}
-	CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(3)}
+	CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(0)}
 	MOV {T(2..)} {T(1)}
 	CBR {T(1)} {L3, L2}
 L1 (exit)
@@ -711,29 +711,29 @@ L2
 	BR {L3}
 L3
 	STOREGLOBAL {T(1)} {Upval(_ENV), '_soft' Ks(0)}
-	LOADGLOBAL {Upval(_ENV), 'Z' Ks(4)} {T(1)}
-	GETik {T(1), 1 Kint(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'Z' Ks(3)} {T(1)}
+	GETik {T(1), 1 Kint(0)} {T(0)}
 	MOV {false} {T(3)}
 	CBR {T(3)} {L5, L4}
 L4
 	MOV {true} {T(3)}
 	BR {L5}
 L5
-	PUTik {T(3)} {T(0), 2 Kint(5)}
-	LOADGLOBAL {Upval(_ENV), 'r' Ks(6)} {T(3)}
-	CALL {T(3)} {T(3), 1 Kint(3)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(7)} {T(2)}
+	PUTik {T(3)} {T(0), 2 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}
+	CALL {T(3)} {T(3), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}
 	GET {T(3), T(2)} {T(4)}
 	MOV {local(_g, 0)} {T(7)}
 	CBR {T(7)} {L8, L9}
 L6
-	MOV {'majumdar' Ks(10)} {T(6)}
+	MOV {'majumdar' Ks(8)} {T(6)}
 	BR {L7}
 L7
-	PUTsk {T(6)} {T(4), 'name' Ks(8)}
+	PUTsk {T(6)} {T(4), 'name' Ks(6)}
 	RET {L1}
 L8
-	MOV {'Dibyendu' Ks(9)} {T(7)}
+	MOV {'Dibyendu' Ks(7)} {T(7)}
 	BR {L9}
 L9
 	MOV {T(7)} {T(6)}
@@ -743,7 +743,7 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'rawget' Ks(1)} {T(2)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), '_G' Ks(2)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(3)}</TD></TR>
+<TR><TD>CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(0)}</TD></TR>
 <TR><TD>MOV {T(2..)} {T(1)}</TD></TR>
 <TR><TD>CBR {T(1)} {L3, L2}</TD></TR>
 </TABLE>>];
@@ -758,8 +758,8 @@ L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>STOREGLOBAL {T(1)} {Upval(_ENV), '_soft' Ks(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'Z' Ks(4)} {T(1)}</TD></TR>
-<TR><TD>GETik {T(1), 1 Kint(3)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'Z' Ks(3)} {T(1)}</TD></TR>
+<TR><TD>GETik {T(1), 1 Kint(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {false} {T(3)}</TD></TR>
 <TR><TD>CBR {T(3)} {L5, L4}</TD></TR>
 </TABLE>>];
@@ -773,10 +773,10 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L4 -> L5
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
-<TR><TD>PUTik {T(3)} {T(0), 2 Kint(5)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'r' Ks(6)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(3)} {T(3), 1 Kint(3)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(7)} {T(2)}</TD></TR>
+<TR><TD>PUTik {T(3)} {T(0), 2 Kint(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(3)} {T(3), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}</TD></TR>
 <TR><TD>GET {T(3), T(2)} {T(4)}</TD></TR>
 <TR><TD>MOV {local(_g, 0)} {T(7)}</TD></TR>
 <TR><TD>CBR {T(7)} {L8, L9}</TD></TR>
@@ -785,19 +785,19 @@ L5 -> L8
 L5 -> L9
 L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L6</B></TD></TR>
-<TR><TD>MOV {'majumdar' Ks(10)} {T(6)}</TD></TR>
+<TR><TD>MOV {'majumdar' Ks(8)} {T(6)}</TD></TR>
 <TR><TD>BR {L7}</TD></TR>
 </TABLE>>];
 L6 -> L7
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>PUTsk {T(6)} {T(4), 'name' Ks(8)}</TD></TR>
+<TR><TD>PUTsk {T(6)} {T(4), 'name' Ks(6)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L7 -> L1
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
-<TR><TD>MOV {'Dibyendu' Ks(9)} {T(7)}</TD></TR>
+<TR><TD>MOV {'Dibyendu' Ks(7)} {T(7)}</TD></TR>
 <TR><TD>BR {L9}</TD></TR>
 </TABLE>>];
 L8 -> L9

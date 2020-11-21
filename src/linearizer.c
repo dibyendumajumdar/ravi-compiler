@@ -167,7 +167,24 @@ static const struct constant *add_constant(struct proc *proc, const struct const
 {
 	struct set_entry *entry = set_search(proc->constants, c);
 	if (entry == NULL) {
-		int reg = proc->num_constants++;
+		int reg = 0;
+		/* Assign each type of constant a different range so that if backend
+		 * doesn't need to emit the regnum for a particular type it can do so.
+		 * If backend needs to emit all constants then 2 of the 3 ranges can
+		 * easily adjusted.
+		 */
+		switch(c->type) {
+		case RAVI_TNUMINT:
+			reg = proc->num_intconstants++;
+			break;
+		case RAVI_TNUMFLT:
+			reg = proc->num_fltconstants++;
+			break;
+		default:
+			assert(c->type == RAVI_TSTRING);
+			reg = proc->num_strconstants++;
+			break;
+		}
 		struct constant *c1 = raviX_allocator_allocate(&proc->linearizer->constant_allocator, 0);
 		assert(c1); // FIXME
 		memcpy(c1, c, sizeof(struct constant));

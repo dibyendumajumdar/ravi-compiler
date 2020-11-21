@@ -38,7 +38,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'a' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'a' Ks(0)}
 	BR {L0}
 L1 (exit)
 L2
@@ -46,7 +46,7 @@ L2
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'a' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'a' Ks(0)}</TD></TR>
 <TR><TD>BR {L0}</TD></TR>
 </TABLE>>];
 L0 -> L0
@@ -153,11 +153,11 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'z' Ks(2)}
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'y' Ks(4)}
+	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'z' Ks(1)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'y' Ks(2)}
 	BR {L0}
 L3
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
 	BR {L2}
 L4
 	RET {L1}
@@ -169,14 +169,14 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'z' Ks(2)}</TD></TR>
-<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'y' Ks(4)}</TD></TR>
+<TR><TD>STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'z' Ks(1)}</TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'y' Ks(2)}</TD></TR>
 <TR><TD>BR {L0}</TD></TR>
 </TABLE>>];
 L2 -> L0
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L3 -> L2
@@ -528,7 +528,7 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L5
@@ -559,7 +559,7 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
@@ -667,7 +667,7 @@ L4
 	CBR {Tbool(6)} {L6, L5}
 L5
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}
 	BR {L2}
 L6
@@ -708,7 +708,7 @@ L4 -> L5
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
@@ -775,7 +775,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L4
 	RET {L1}
@@ -794,7 +794,7 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L3 -> L2
@@ -878,8 +878,8 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
-	LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(1)}
 	BR {L2}
 L4
 	RET {L1}
@@ -898,8 +898,8 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L3 -> L2
@@ -969,7 +969,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L4}
 L4
 	RET {L1}
@@ -990,7 +990,7 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4
@@ -1988,9 +1988,9 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	MOV {0.000000000000 Kflt(2)} {local(sum, 0)}
+	MOV {0.000000000000 Kflt(0)} {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(6)}
-	MOV {10000 Kint(3)} {Tint(7)}
+	MOV {10000 Kint(2)} {Tint(7)}
 	MOV {1 Kint(0)} {Tint(8)}
 	SUBii {Tint(6), Tint(8)} {Tint(6)}
 	BR {L6}
@@ -2005,7 +2005,7 @@ L7
 L8
 	MOV {Tint(6)} {Tint(5)}
 	MULii {Tint(5), Tint(5)} {Tint(10)}
-	DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}
+	DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
 	BR {L6}
@@ -2044,9 +2044,9 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>MOV {0.000000000000 Kflt(2)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {0.000000000000 Kflt(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
-<TR><TD>MOV {10000 Kint(3)} {Tint(7)}</TD></TR>
+<TR><TD>MOV {10000 Kint(2)} {Tint(7)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
 <TR><TD>SUBii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -2074,7 +2074,7 @@ L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
 <TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
-<TR><TD>DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
 <TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -2112,9 +2112,9 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>MOV {0.000000000000 Kflt(2)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {0.000000000000 Kflt(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
-<TR><TD>MOV {10000 Kint(3)} {Tint(7)}</TD></TR>
+<TR><TD>MOV {10000 Kint(2)} {Tint(7)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
 <TR><TD>SUBii {Tint(6), Tint(8)} {Tint(6)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -2142,7 +2142,7 @@ L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
 <TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
-<TR><TD>DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
 <TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -2339,8 +2339,8 @@ L3
 	MOV {T(0)} {local(x, 0)}
 	BR {L4}
 L4
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}
-	EQ {local(x, 0), 13 Kint(3)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	EQ {local(x, 0), 13 Kint(2)} {T(1)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L5
@@ -2369,8 +2369,8 @@ L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}</TD></TR>
-<TR><TD>EQ {local(x, 0), 13 Kint(3)} {T(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>EQ {local(x, 0), 13 Kint(2)} {T(1)}</TD></TR>
 <TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];

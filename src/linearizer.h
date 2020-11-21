@@ -180,8 +180,9 @@ struct pseudo_generator {
 };
 
 struct constant {
-	uint8_t type;
-	uint16_t index; /* index number starting from 0 assigned to each constant - acts like a reg num */
+	uint8_t type;	/* ravitype_t RAVI_TNUMINT, RAVI_TNUMFLT or RAVI_TSTRING */
+	uint16_t index; /* index number starting from 0 assigned to each constant - acts like a reg num.
+			 * Each type will be assigned separate range */
 	union {
 		lua_Integer i;
 		lua_Number n;
@@ -209,7 +210,9 @@ struct proc {
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
 	struct pseudo_generator temp_pseudos;	  /* All other temporaries */
 	struct set *constants;			  /* constants used by this proc */
-	unsigned num_constants;
+	uint16_t num_intconstants;
+	uint16_t num_fltconstants;
+	uint16_t num_strconstants;
 	struct graph *cfg;  /* place holder for control flow graph; the linearizer does not create this */
 	char funcname[30]; /* Each proc needs a name inside a module - name is a short string */
 	void *userdata; /* For use by code generator */

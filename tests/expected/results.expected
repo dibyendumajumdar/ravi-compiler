@@ -51,7 +51,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	RET {42 Kint(0), 4.200000000000 Kflt(1), true, 'hello' Ks(2)} {L1}
+	RET {42 Kint(0), 4.200000000000 Kflt(0), true, 'hello' Ks(0)} {L1}
 L1 (exit)
 return a
 function()
@@ -263,7 +263,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	IDIV {4.200000000000 Kflt(0), 5 Kint(1)} {T(0)}
+	IDIV {4.200000000000 Kflt(0), 5 Kint(0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0.0
@@ -526,7 +526,7 @@ L0 (entry)
 	POW {3 Kint(0), 0 Kint(1)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
 	ADDfi {Tflt(1), 5 Kint(2)} {Tflt(2)}
-	IDIV {Tflt(2), 3.000000000000 Kflt(3)} {T(0)}
+	IDIV {Tflt(2), 3.000000000000 Kflt(0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD
@@ -566,7 +566,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	BANDii {170 Kint(2), 253 Kint(3)} {Tint(0)}
+	BANDii {170 Kint(0), 253 Kint(1)} {Tint(0)}
 	BXOR {204.000000000000 Kflt(1), Tint(0)} {Tint(1)}
 	BOR {240.000000000000 Kflt(0), Tint(1)} {Tint(0)}
 	RET {Tint(0)} {L1}
@@ -957,19 +957,19 @@ function()
 end
 define Proc%1
 L0 (entry)
-	UNMi {2 Kint(1)} {Tint(0)}
+	UNMi {2 Kint(0)} {Tint(0)}
 	POW {2.000000000000 Kflt(0), Tint(0)} {Tflt(0)}
-	DIVii {1 Kint(2), 4 Kint(3)} {Tflt(1)}
+	DIVii {1 Kint(1), 4 Kint(2)} {Tflt(1)}
 	EQff {Tflt(0), Tflt(1)} {Tbool(0)}
 	MOV {Tbool(0)} {T(0)}
 	CBR {T(0)} {L2, L3}
 L1 (exit)
 L2
-	UNMi {2 Kint(1)} {Tint(0)}
+	UNMi {2 Kint(0)} {Tint(0)}
 	UNMi {Tint(0)} {Tint(1)}
-	POW {2 Kint(1), Tint(1)} {Tflt(1)}
+	POW {2 Kint(0), Tint(1)} {Tflt(1)}
 	UNMf {Tflt(1)} {Tflt(0)}
-	UNMi {4 Kint(3)} {Tint(1)}
+	UNMi {4 Kint(2)} {Tint(1)}
 	UNMi {Tint(1)} {Tint(2)}
 	UNMi {Tint(2)} {Tint(3)}
 	EQ {Tflt(0), Tint(3)} {Tbool(4)}
@@ -1392,7 +1392,7 @@ L2
 	ADDii {1 Kint(1), 2 Kint(0)} {Tint(0)}
 	MULii {3 Kint(2), 1 Kint(1)} {Tint(1)}
 	STRCONCAT {Tint(0), Tint(1)} {T(1)}
-	EQ {T(1), '33' Ks(3)} {T(2)}
+	EQ {T(1), '33' Ks(0)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
 L3
@@ -1480,8 +1480,8 @@ L0 (entry)
 	CBR {T(0)} {L2, L3}
 L1 (exit)
 L2
-	STRCONCAT {'a' Ks(3), 'b' Ks(4)} {T(1)}
-	LT {'a' Ks(3), T(1)} {T(2)}
+	STRCONCAT {'a' Ks(0), 'b' Ks(1)} {T(1)}
+	LT {'a' Ks(0), T(1)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
 L3
@@ -1523,9 +1523,9 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {'7' Ks(0), 3 Kint(1)} {T(0)}
-	SHL {T(0), 1 Kint(2)} {T(1)}
-	EQ {T(1), 146 Kint(3)} {T(0)}
+	STRCONCAT {'7' Ks(0), 3 Kint(0)} {T(0)}
+	SHL {T(0), 1 Kint(1)} {T(1)}
+	EQ {T(1), 146 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 10 >> 1 .. '9' == 0
@@ -1565,9 +1565,9 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {1 Kint(1), '9' Ks(2)} {T(0)}
+	STRCONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
 	SHR {10 Kint(0), T(0)} {T(1)}
-	EQ {T(1), 0 Kint(3)} {T(0)}
+	EQ {T(1), 0 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 10 | 1 .. '9' == 27
@@ -1607,9 +1607,9 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {1 Kint(1), '9' Ks(2)} {T(0)}
+	STRCONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
 	BOR {10 Kint(0), T(0)} {T(1)}
-	EQ {T(1), 27 Kint(3)} {T(0)}
+	EQ {T(1), 27 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0xF0 | 0xCC ~ 0xAA & 0xFD == 0xF4
@@ -2243,16 +2243,16 @@ L6
 	MOV {2 Kint(1)} {T(3)}
 	BR {L7}
 L7
-	UNMf {1.250000000000 Kflt(2)} {Tflt(0)}
+	UNMf {1.250000000000 Kflt(0)} {Tflt(0)}
 	MOV {Tflt(0)} {T(2)}
 	CBR {T(2)} {L9, L8}
 L8
-	UNMi {4 Kint(3)} {Tint(0)}
+	UNMi {4 Kint(2)} {Tint(0)}
 	MOV {Tint(0)} {T(2)}
 	BR {L9}
 L9
 	ADD {T(3), T(2)} {T(4)}
-	EQ {T(4), 0.750000000000 Kflt(4)} {T(2)}
+	EQ {T(4), 0.750000000000 Kflt(1)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
 return (b or a)+1 == 2 and (10 or a)+1 == 11
@@ -2369,7 +2369,7 @@ L0 (entry)
 	CBR {T(1)} {L5, L4}
 L1 (exit)
 L2
-	MOV {10 Kint(4)} {T(1)}
+	MOV {10 Kint(2)} {T(1)}
 	CBR {T(1)} {L7, L6}
 L3
 	RET {T(0)} {L1}
@@ -2378,8 +2378,8 @@ L4
 	MOV {T(2)} {T(1)}
 	BR {L5}
 L5
-	ADD {T(1), 1 Kint(2)} {T(2)}
-	EQ {T(2), 2 Kint(3)} {T(1)}
+	ADD {T(1), 1 Kint(0)} {T(2)}
+	EQ {T(2), 2 Kint(1)} {T(1)}
 	MOV {T(1)} {T(0)}
 	CBR {T(0)} {L2, L3}
 L6
@@ -2387,8 +2387,8 @@ L6
 	MOV {T(2)} {T(1)}
 	BR {L7}
 L7
-	ADD {T(1), 1 Kint(2)} {T(2)}
-	EQ {T(2), 11 Kint(5)} {T(1)}
+	ADD {T(1), 1 Kint(0)} {T(2)}
+	EQ {T(2), 11 Kint(3)} {T(1)}
 	MOV {T(1)} {T(0)}
 	BR {L3}
 return ((2<3) or 1) == true and (2<3 and 4) == 4
@@ -2601,7 +2601,7 @@ L0 (entry)
 L1 (exit)
 L2
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}
-	EQ {T(1), 2 Kint(2)} {T(4)}
+	EQ {T(1), 2 Kint(0)} {T(4)}
 	MOV {T(4)} {T(0)}
 	BR {L3}
 L3
@@ -2710,7 +2710,7 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L5
@@ -2784,7 +2784,7 @@ define Proc%2
 L0 (entry)
 	MOV {1 Kint(0)} {local(a, 0)}
 	CLOSURE {Proc%3} {T(1)}
-	STOREGLOBAL {T(1)} {Upval(_ENV), 'y' Ks(1)}
+	STOREGLOBAL {T(1)} {Upval(_ENV), 'y' Ks(0)}
 	CLOSE {local(a, 0)}
 	RET {L1}
 L1 (exit)
@@ -3094,7 +3094,7 @@ end
 define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(0)} {T(1)}
 	TPUTik {T(1)} {T(0), 1 Kint(0)}
 	RET {T(0)} {L1}
 L1 (exit)
@@ -3220,8 +3220,8 @@ end
 define Proc%1
 L0 (entry)
 	NEWIARRAY {T(0)}
-	IAPUT {5.500000000000 Kflt(1)} {T(0), 1 Kint(0)}
-	IAPUTiv {4 Kint(3)} {T(0), 2 Kint(2)}
+	IAPUT {5.500000000000 Kflt(0)} {T(0), 1 Kint(0)}
+	IAPUTiv {4 Kint(2)} {T(0), 2 Kint(1)}
 	RET {T(0)} {L1}
 L1 (exit)
 return @number[] {[1] = 4, [2] = 5.4}
@@ -3297,7 +3297,7 @@ define Proc%1
 L0 (entry)
 	NEWFARRAY {T(0)}
 	FAPUT {4 Kint(1)} {T(0), 1 Kint(0)}
-	FAPUTfv {5.400000000000 Kflt(3)} {T(0), 2 Kint(2)}
+	FAPUTfv {5.400000000000 Kflt(0)} {T(0), 2 Kint(2)}
 	RET {T(0)} {L1}
 L1 (exit)
 if 1 == 1 then return true else return false end
@@ -3473,7 +3473,7 @@ L2
 	EQii {1 Kint(0), 1 Kint(0)} {Tbool(0)}
 	CBR {Tbool(0)} {L3, L4}
 L3
-	RET {'hi' Ks(1)} {L1}
+	RET {'hi' Ks(0)} {L1}
 L4
 	RET {L1}
 if 5 + 5 == 10 then return 'got it' else if 6 < 7 then return 4 end end
@@ -3542,16 +3542,16 @@ L2
 	EQii {Tint(0), 10 Kint(1)} {Tbool(1)}
 	CBR {Tbool(1)} {L3, L4}
 L3
-	RET {'got it' Ks(2)} {L1}
+	RET {'got it' Ks(0)} {L1}
 L4
 	BR {L6}
 L5
 	RET {L1}
 L6
-	LIii {6 Kint(3), 7 Kint(4)} {Tbool(0)}
+	LIii {6 Kint(2), 7 Kint(3)} {Tbool(0)}
 	CBR {Tbool(0)} {L7, L8}
 L7
-	RET {4 Kint(5)} {L1}
+	RET {4 Kint(4)} {L1}
 L8
 	BR {L5}
 if 5 + 5 == 10 then return 'got it' elseif 6 < 7 then return 4 end
@@ -3619,9 +3619,9 @@ L3
 	LIii {6 Kint(2), 7 Kint(3)} {Tbool(0)}
 	CBR {Tbool(0)} {L5, L6}
 L4
-	RET {'got it' Ks(4)} {L1}
+	RET {'got it' Ks(0)} {L1}
 L5
-	RET {4 Kint(5)} {L1}
+	RET {4 Kint(4)} {L1}
 L6
 	RET {L1}
 return 1 and 2
@@ -3804,7 +3804,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
 	RET {T(1)} {L1}
 L1 (exit)
 return x()
@@ -3841,7 +3841,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0..), -1 Kint(1)}
+	CALL {T(0)} {T(0..), -1 Kint(0)}
 	RET {T(0..)} {L1}
 L1 (exit)
 return x[1]()
@@ -3888,8 +3888,8 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	CALL {T(1)} {T(1..), -1 Kint(2)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	CALL {T(1)} {T(1..), -1 Kint(1)}
 	RET {T(1..)} {L1}
 L1 (exit)
 return x[1]:name()
@@ -3936,9 +3936,9 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	GETsk {T(1), 'name' Ks(2)} {T(2)}
-	CALL {T(2), T(1)} {T(2..), -1 Kint(3)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	GETsk {T(1), 'name' Ks(1)} {T(2)}
+	CALL {T(2), T(1)} {T(2..), -1 Kint(1)}
 	RET {T(2..)} {L1}
 L1 (exit)
 return x[1]:name(1,2)
@@ -3991,9 +3991,9 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	GETsk {T(1), 'name' Ks(2)} {T(2)}
-	CALL {T(2), T(1), 1 Kint(1), 2 Kint(3)} {T(2..), -1 Kint(4)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	GETsk {T(1), 'name' Ks(1)} {T(2)}
+	CALL {T(2), T(1), 1 Kint(0), 2 Kint(1)} {T(2..), -1 Kint(2)}
 	RET {T(2..)} {L1}
 L1 (exit)
 return x(), y()
@@ -4054,9 +4054,9 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0), 1 Kint(1)}
-	LOADGLOBAL {Upval(_ENV), 'y' Ks(2)} {T(1)}
-	CALL {T(1)} {T(1..), -1 Kint(3)}
+	CALL {T(0)} {T(0), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}
+	CALL {T(1)} {T(1..), -1 Kint(1)}
 	RET {T(0), T(1..)} {L1}
 L1 (exit)
 return y(x())
@@ -4116,8 +4116,8 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(1)} {T(1)}
-	CALL {T(1)} {T(1..), -1 Kint(2)}
-	CALL {T(0), T(1..)} {T(0..), -1 Kint(2)}
+	CALL {T(1)} {T(1..), -1 Kint(0)}
+	CALL {T(0), T(1..)} {T(0..), -1 Kint(0)}
 	RET {T(0..)} {L1}
 L1 (exit)
 x = 1
@@ -4153,7 +4153,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
 	RET {L1}
 L1 (exit)
 x = 1, 2
@@ -4193,7 +4193,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {2 Kint(2)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
 	RET {L1}
 L1 (exit)
 x[1] = 1
@@ -4244,7 +4244,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	PUTik {1 Kint(1)} {T(0), 1 Kint(1)}
+	PUTik {1 Kint(0)} {T(0), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x[1] = b
@@ -4303,8 +4303,8 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(2)}
-	PUTik {T(2)} {T(0), 1 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'b' Ks(1)} {T(2)}
+	PUTik {T(2)} {T(0), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x[1][1] = b
@@ -4373,9 +4373,9 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}
-	PUTik {T(3)} {T(1), 1 Kint(1)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'b' Ks(1)} {T(3)}
+	PUTik {T(3)} {T(1), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x()
@@ -4418,7 +4418,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0..), 1 Kint(1)}
+	CALL {T(0)} {T(0..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x()[1]
@@ -4471,8 +4471,8 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0), 1 Kint(1)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
+	CALL {T(0)} {T(0), 1 Kint(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
 	RET {L1}
 L1 (exit)
 x()[1](a,b)
@@ -4555,11 +4555,11 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0), 1 Kint(1)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(2)} {T(2)}
-	LOADGLOBAL {Upval(_ENV), 'b' Ks(3)} {T(3)}
-	CALL {T(1), T(2), T(3)} {T(1..), 1 Kint(1)}
+	CALL {T(0)} {T(0), 1 Kint(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(2)}
+	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}
+	CALL {T(1), T(2), T(3)} {T(1..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x,y = 1,2
@@ -4611,8 +4611,8 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'y' Ks(1)}
-	STOREGLOBAL {1 Kint(2)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'y' Ks(1)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
 	RET {L1}
 L1 (exit)
 x,y = f()
@@ -4681,7 +4681,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(2)} {T(2)}
-	CALL {T(2)} {T(2..), 2 Kint(3)}
+	CALL {T(2)} {T(2..), 2 Kint(0)}
 	STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(2[2..])} {Upval(_ENV), 'x' Ks(0)}
 	RET {L1}
@@ -4808,13 +4808,13 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	LOADGLOBAL {Upval(_ENV), 'y' Ks(2)} {T(2)}
-	LOADGLOBAL {Upval(_ENV), 'z' Ks(5)} {T(6)}
-	CALL {T(6)} {T(6..), 3 Kint(6)}
-	STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(4)}
-	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(3)}
-	PUTik {T(6[6..])} {T(2), 1 Kint(1)}
-	PUTik {1 Kint(1)} {T(0), 1 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(2)}
+	LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(6)}
+	CALL {T(6)} {T(6..), 3 Kint(1)}
+	STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(3)}
+	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(2)}
+	PUTik {T(6[6..])} {T(2), 1 Kint(0)}
+	PUTik {1 Kint(0)} {T(0), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 x[1][2],y[1],c,d = 1,z()
@@ -4949,14 +4949,14 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'y' Ks(3)} {T(3)}
-	LOADGLOBAL {Upval(_ENV), 'z' Ks(6)} {T(7)}
-	CALL {T(7)} {T(7..), 3 Kint(7)}
-	STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(5)}
-	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(4)}
-	PUTik {T(7[7..])} {T(3), 1 Kint(1)}
-	PUTik {1 Kint(1)} {T(1), 2 Kint(2)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(3)}
+	LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(7)}
+	CALL {T(7)} {T(7..), 3 Kint(2)}
+	STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(3)}
+	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(2)}
+	PUTik {T(7[7..])} {T(3), 1 Kint(0)}
+	PUTik {1 Kint(0)} {T(1), 2 Kint(1)}
 	RET {L1}
 L1 (exit)
 x,y = y,x
@@ -5238,12 +5238,12 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {3 Kint(1)} {Upval(_ENV), 'i' Ks(0)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(2)} {T(1)}
+	STOREGLOBAL {3 Kint(0)} {Upval(_ENV), 'i' Ks(0)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(4)}
-	ADD {T(4), 1 Kint(3)} {T(5)}
-	PUT {20 Kint(4)} {T(1), T(2)}
+	ADD {T(4), 1 Kint(1)} {T(5)}
+	PUT {20 Kint(2)} {T(1), T(2)}
 	STOREGLOBAL {T(5)} {Upval(_ENV), 'i' Ks(0)}
 	RET {L1}
 L1 (exit)
@@ -5379,12 +5379,12 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(2)} {T(2)}
-	GETik {T(2), 10 Kint(3)} {T(3)}
-	LOADGLOBAL {Upval(_ENV), 'z' Ks(5)} {T(4)}
-	CALL {T(4)} {T(4..), -1 Kint(6)}
-	CALL {T(1), T(3), 5 Kint(4), T(4..)} {T(1..), -1 Kint(6)}
-	CALL {T(0), T(1..)} {T(0), 1 Kint(7)}
-	PUTik {9 Kint(8)} {T(0), 1 Kint(7)}
+	GETik {T(2), 10 Kint(0)} {T(3)}
+	LOADGLOBAL {Upval(_ENV), 'z' Ks(3)} {T(4)}
+	CALL {T(4)} {T(4..), -1 Kint(2)}
+	CALL {T(1), T(3), 5 Kint(1), T(4..)} {T(1..), -1 Kint(2)}
+	CALL {T(0), T(1..)} {T(0), 1 Kint(3)}
+	PUTik {9 Kint(4)} {T(0), 1 Kint(3)}
 	RET {L1}
 L1 (exit)
 local i = 0
@@ -5661,7 +5661,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}
-	DIVii {Tint(0), 5 Kint(1)} {Tflt(0)}
+	DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}
 	GET {T(0), Tflt(0)} {T(1)}
 	RET {T(1)} {L1}
 L1 (exit)
@@ -5755,8 +5755,8 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0), 1 Kint(1)}
-	GETik {T(0), 1 Kint(1)} {T(1)}
+	CALL {T(0)} {T(0), 1 Kint(0)}
+	GETik {T(0), 1 Kint(0)} {T(1)}
 	RET {T(1)} {L1}
 L1 (exit)
 return x.y[1]
@@ -5804,7 +5804,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	GETsk {T(0), 'y' Ks(1)} {T(1)}
-	GETik {T(1), 1 Kint(2)} {T(2)}
+	GETik {T(1), 1 Kint(0)} {T(2)}
 	RET {T(2)} {L1}
 L1 (exit)
 local t: integer[] if (t[1] == 5) then return true end return false
@@ -6060,7 +6060,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'a' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'a' Ks(0)}
 	BR {L0}
 L1 (exit)
 L2
@@ -6161,11 +6161,11 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	STOREGLOBAL {2 Kint(3)} {Upval(_ENV), 'z' Ks(2)}
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'y' Ks(4)}
+	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'z' Ks(1)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'y' Ks(2)}
 	BR {L0}
 L3
-	STOREGLOBAL {1 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
 	BR {L2}
 L4
 	RET {L1}
@@ -6929,8 +6929,8 @@ define Proc%2
 L0 (entry)
 	CLOSURE {Proc%3} {T(0)}
 	NEWTABLE {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'f' Ks(1)} {T(2)}
-	CALL {T(2)} {T(2..), -1 Kint(2)}
+	LOADGLOBAL {Upval(_ENV), 'f' Ks(0)} {T(2)}
+	CALL {T(2)} {T(2..), -1 Kint(1)}
 	TPUTik {T(2..)} {T(1), 1 Kint(0)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
 	RET {L1}
@@ -7138,9 +7138,9 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	MOV {0.000000000000 Kflt(2)} {local(sum, 0)}
+	MOV {0.000000000000 Kflt(0)} {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(6)}
-	MOV {10000 Kint(3)} {Tint(7)}
+	MOV {10000 Kint(2)} {Tint(7)}
 	MOV {1 Kint(0)} {Tint(8)}
 	SUBii {Tint(6), Tint(8)} {Tint(6)}
 	BR {L6}
@@ -7155,7 +7155,7 @@ L7
 L8
 	MOV {Tint(6)} {Tint(5)}
 	MULii {Tint(5), Tint(5)} {Tint(10)}
-	DIVfi {1.000000000000 Kflt(4), Tint(10)} {Tflt(0)}
+	DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
 	BR {L6}
@@ -7944,16 +7944,16 @@ L0 (entry)
 	TOTABLE {local(a, 0)}
 	TOTABLE {local(b, 1)}
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
-	TGETik {local(a, 0), 1 Kint(1)} {T(1)}
+	TGETik {local(a, 0), 1 Kint(0)} {T(1)}
 	LEN {T(1)} {T(2)}
 	TOINT {T(2)}
 	LEN {local(b, 1)} {T(3)}
 	EQ {T(2), T(3)} {T(4)}
-	CALL {T(0), T(4)} {T(0..), 1 Kint(1)}
+	CALL {T(0), T(4)} {T(0..), 1 Kint(0)}
 	LEN {local(a, 0)} {T(4)}
-	TGETik {local(a, 0), 1 Kint(1)} {T(3)}
+	TGETik {local(a, 0), 1 Kint(0)} {T(3)}
 	LEN {T(3)} {T(2)}
-	TGETik {local(b, 1), 1 Kint(1)} {T(5)}
+	TGETik {local(b, 1), 1 Kint(0)} {T(5)}
 	LEN {T(5)} {T(6)}
 	NEWTABLE {T(7)}
 	MOV {T(7)} {local(x, 2)}
@@ -7963,14 +7963,14 @@ L0 (entry)
 	MOVi {T(2)} {Tint(1)}
 	TOINT {T(4)}
 	MOVi {T(4)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'matrix' Ks(2)} {T(4)}
-	GETsk {T(4), 'T' Ks(3)} {T(2)}
-	CALL {T(2), local(b, 1)} {T(2..), 1 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(4)}
+	GETsk {T(4), 'T' Ks(2)} {T(2)}
+	CALL {T(2), local(b, 1)} {T(2..), 1 Kint(0)}
 	TOTABLE {T(2[2..])}
 	MOV {T(2[2..])} {local(c, 3)}
-	MOV {1 Kint(1)} {Tint(4)}
+	MOV {1 Kint(0)} {Tint(4)}
 	MOV {Tint(0)} {Tint(5)}
-	MOV {1 Kint(1)} {Tint(6)}
+	MOV {1 Kint(0)} {Tint(6)}
 	SUBii {Tint(4), Tint(6)} {Tint(4)}
 	BR {L2}
 L1 (exit)
@@ -7982,15 +7982,15 @@ L3
 	CBR {Tbool(7)} {L5, L4}
 L4
 	MOV {Tint(4)} {Tint(3)}
-	LOADGLOBAL {Upval(_ENV), 'table' Ks(4)} {T(6)}
-	GETsk {T(6), 'numarray' Ks(5)} {T(7)}
-	CALL {T(7), Tint(2), 0.000000000000 Kflt(6)} {T(7..), 1 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(6)}
+	GETsk {T(6), 'numarray' Ks(4)} {T(7)}
+	CALL {T(7), Tint(2), 0.000000000000 Kflt(0)} {T(7..), 1 Kint(0)}
 	TOFARRAY {T(7[7..])}
 	MOV {T(7[7..])} {local(xi, 4)}
 	TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}
-	MOV {1 Kint(1)} {Tint(9)}
+	MOV {1 Kint(0)} {Tint(9)}
 	MOV {Tint(2)} {Tint(10)}
-	MOV {1 Kint(1)} {Tint(11)}
+	MOV {1 Kint(0)} {Tint(11)}
 	SUBii {Tint(9), Tint(11)} {Tint(9)}
 	BR {L6}
 L5
@@ -8009,10 +8009,10 @@ L8
 	TOFARRAY {T(9)}
 	MOV {T(9)} {local(cj, 6)}
 	MOV {T(8)} {local(ai, 5)}
-	MOVf {0.000000000000 Kflt(6)} {Tflt(0)}
-	MOV {1 Kint(1)} {Tint(14)}
+	MOVf {0.000000000000 Kflt(0)} {Tflt(0)}
+	MOV {1 Kint(0)} {Tint(14)}
 	MOV {Tint(1)} {Tint(15)}
-	MOV {1 Kint(1)} {Tint(16)}
+	MOV {1 Kint(0)} {Tint(16)}
 	SUBii {Tint(14), Tint(16)} {Tint(14)}
 	BR {L10}
 L9
@@ -8482,15 +8482,15 @@ function()
 end
 define Proc%1
 L0 (entry)
-	POW {2.000000000000 Kflt(0), 8 Kint(1)} {Tflt(0)}
-	UNMi {1 Kint(2)} {Tint(0)}
+	POW {2.000000000000 Kflt(0), 8 Kint(0)} {Tflt(0)}
+	UNMi {1 Kint(1)} {Tint(0)}
 	UNMi {Tint(0)} {Tint(1)}
 	ADDfi {Tflt(0), Tint(1)} {Tflt(1)}
-	MOD {Tflt(1), 8 Kint(1)} {Tflt(0)}
+	MOD {Tflt(1), 8 Kint(0)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
-	DIVfi {Tflt(1), 2 Kint(3)} {Tflt(2)}
-	MULfi {Tflt(2), 4 Kint(4)} {Tflt(1)}
-	SUBfi {Tflt(1), 3 Kint(5)} {Tflt(2)}
+	DIVfi {Tflt(1), 2 Kint(2)} {Tflt(2)}
+	MULfi {Tflt(2), 4 Kint(3)} {Tflt(1)}
+	SUBfi {Tflt(1), 3 Kint(4)} {Tflt(2)}
 	RET {Tflt(2)} {L1}
 L1 (exit)
 return -((2^8 + -(-1)) % 8)//2 * 4 - 3
@@ -8791,8 +8791,8 @@ L3
 	MOV {T(0)} {local(x, 0)}
 	BR {L4}
 L4
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(2)} {T(0)}
-	EQ {local(x, 0), 13 Kint(3)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	EQ {local(x, 0), 13 Kint(2)} {T(1)}
 	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L5
@@ -8880,7 +8880,7 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L5
@@ -8981,7 +8981,7 @@ L4
 	CBR {Tbool(6)} {L6, L5}
 L5
 	MOV {Tint(1)} {Tint(0)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}
 	BR {L2}
 L6
@@ -9041,7 +9041,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L4
 	RET {L1}
@@ -9118,8 +9118,8 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
-	LOADGLOBAL {Upval(_ENV), 'brek' Ks(3)} {T(1)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(1)}
 	BR {L2}
 L4
 	RET {L1}
@@ -9182,7 +9182,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(2)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L4}
 L4
 	RET {L1}
@@ -9506,13 +9506,13 @@ L2
 	CBR {T(1)} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(2)}
-	CALL {T(2), local(m, 0)} {T(2..), 1 Kint(2)}
+	CALL {T(2), local(m, 0)} {T(2..), 1 Kint(0)}
 	LEN {Upval(1, Proc%1, msgs)} {T(3)}
-	ADD {T(3), 1 Kint(2)} {T(4)}
-	LOADGLOBAL {Upval(_ENV), 'string' Ks(3)} {T(5)}
-	GETsk {T(5), 'sub' Ks(4)} {T(6)}
-	UNMi {3 Kint(5)} {Tint(0)}
-	CALL {T(6), local(m, 0), 3 Kint(5), Tint(0)} {T(6..), 1 Kint(2)}
+	ADD {T(3), 1 Kint(0)} {T(4)}
+	LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(5)}
+	GETsk {T(5), 'sub' Ks(3)} {T(6)}
+	UNMi {3 Kint(1)} {Tint(0)}
+	CALL {T(6), local(m, 0), 3 Kint(1), Tint(0)} {T(6..), 1 Kint(0)}
 	PUT {T(6[6..])} {Upval(1, Proc%1, msgs), T(4)}
 	BR {L4}
 L4
@@ -9747,7 +9747,7 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'rawget' Ks(1)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), '_G' Ks(2)} {T(3)}
-	CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(3)}
+	CALL {T(2), T(3), '_soft' Ks(0)} {T(2..), 1 Kint(0)}
 	MOV {T(2..)} {T(1)}
 	CBR {T(1)} {L3, L2}
 L1 (exit)
@@ -9756,29 +9756,29 @@ L2
 	BR {L3}
 L3
 	STOREGLOBAL {T(1)} {Upval(_ENV), '_soft' Ks(0)}
-	LOADGLOBAL {Upval(_ENV), 'Z' Ks(4)} {T(1)}
-	GETik {T(1), 1 Kint(3)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'Z' Ks(3)} {T(1)}
+	GETik {T(1), 1 Kint(0)} {T(0)}
 	MOV {false} {T(3)}
 	CBR {T(3)} {L5, L4}
 L4
 	MOV {true} {T(3)}
 	BR {L5}
 L5
-	PUTik {T(3)} {T(0), 2 Kint(5)}
-	LOADGLOBAL {Upval(_ENV), 'r' Ks(6)} {T(3)}
-	CALL {T(3)} {T(3), 1 Kint(3)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(7)} {T(2)}
+	PUTik {T(3)} {T(0), 2 Kint(1)}
+	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}
+	CALL {T(3)} {T(3), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}
 	GET {T(3), T(2)} {T(4)}
 	MOV {local(_g, 0)} {T(7)}
 	CBR {T(7)} {L8, L9}
 L6
-	MOV {'majumdar' Ks(10)} {T(6)}
+	MOV {'majumdar' Ks(8)} {T(6)}
 	BR {L7}
 L7
-	PUTsk {T(6)} {T(4), 'name' Ks(8)}
+	PUTsk {T(6)} {T(4), 'name' Ks(6)}
 	RET {L1}
 L8
-	MOV {'Dibyendu' Ks(9)} {T(7)}
+	MOV {'Dibyendu' Ks(7)} {T(7)}
 	BR {L9}
 L9
 	MOV {T(7)} {T(6)}
@@ -9936,7 +9936,7 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(0)} {T(0)}
-	CALL {T(0)} {T(0..), -1 Kint(1)}
+	CALL {T(0)} {T(0..), -1 Kint(0)}
 	RET {T(0[0..])} {L1}
 L1 (exit)
 return {g()}, f(g())
@@ -10031,13 +10031,13 @@ end
 define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
-	LOADGLOBAL {Upval(_ENV), 'g' Ks(1)} {T(1)}
-	CALL {T(1)} {T(1..), -1 Kint(2)}
+	LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}
+	CALL {T(1)} {T(1..), -1 Kint(1)}
 	TPUTik {T(1..)} {T(0), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'f' Ks(3)} {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'g' Ks(1)} {T(2)}
-	CALL {T(2)} {T(2..), -1 Kint(2)}
-	CALL {T(1), T(2..)} {T(1..), -1 Kint(2)}
+	LOADGLOBAL {Upval(_ENV), 'f' Ks(1)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(2)}
+	CALL {T(2)} {T(2..), -1 Kint(1)}
+	CALL {T(1), T(2..)} {T(1..), -1 Kint(1)}
 	RET {T(0), T(1..)} {L1}
 L1 (exit)
 local _ENV = {}; return function() x = 1 end
@@ -10102,6 +10102,6 @@ L0 (entry)
 L1 (exit)
 define Proc%2
 L0 (entry)
-	STOREGLOBAL {1 Kint(1)} {Upval(0, Proc%1, _ENV), 'x' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(0, Proc%1, _ENV), 'x' Ks(0)}
 	RET {L1}
 L1 (exit)
