@@ -138,7 +138,9 @@ struct lua_upvalue_symbol {
 	struct var_type value_type;
 	struct lua_symbol *target_variable;	   /* variable reference */
 	struct ast_node *target_function; /* Where the upvalue lives */
-	uint32_t upvalue_index;	   /* index of the upvalue in function */
+	unsigned upvalue_index : 16,   /* index of the upvalue in the function where this upvalue occurs */
+	    is_in_parent_stack : 1,    /* 1 if yes - populated by code generator only */
+	    parent_upvalue_index : 15; /* if !is_in_parent_stack then upvalue index in parent - populated by code generator only */
 	/*TODO add pseudo ?*/
 };
 /* A symbol is a name recognised in Ravi/Lua code*/

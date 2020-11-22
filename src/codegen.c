@@ -2192,6 +2192,34 @@ static void create_protos(struct Ravi_CompilerInterface *ravi_interface, struct 
 	END_FOR_EACH_PTR(childproc);
 }
 
+/**
+ * Computes upvalue attributes neede by the Lua side
+ */
+static void compute_upvalue_attributes(struct proc *proc)
+{
+	struct lua_symbol *sym;
+	struct ast_node *this_function = proc->function_expr;
+	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
+	{
+		bool in_stack = false;
+		unsigned idx = get_upvalue_idx(proc, sym, &in_stack);
+		sym->upvalue.is_in_parent_stack = in_stack ? 1 : 0;
+		sym->upvalue.parent_upvalue_index = idx; // TODO check overflow?
+	}
+	END_FOR_EACH_PTR(sym);
+}
+
+/*
+ * Preprocess upvalues by populating a couple of attributes needed by the Lua side
+ */
+static void process_upvalues(struct proc *proc)
+{
+	compute_upvalue_attributes(proc);
+	struct proc *child_proc;
+	FOR_EACH_PTR(proc->procs, child_proc) { process_upvalues(child_proc); }
+	END_FOR_EACH_PTR(childproc);
+}
+
 static Proto *stub_newProto(void *context, Proto *parent) { return NULL; }
 static int stub_newStringConstant(void *context, Proto *proto, struct string_object *s) { return 0; }
 static void stub_init_C_compiler(void *context) {}
@@ -2247,6 +2275,9 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	Proto *main_proto = ravi_interface->main_proto;
 	/* We don't support var args yet */
 	// ravi_interface->lua_setVarArg(ravi_interface->context, main_proto);
+
+	/* Compute upvalue attributes */
+	process_upvalues(linearizer->main_proc);
 
 	/* Create all the child protos as we will need them to be there for code gen */
 	create_protos(ravi_interface, linearizer->main_proc, main_proto);
