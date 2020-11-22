@@ -677,6 +677,11 @@ static inline unsigned get_num_instructions(struct basic_block *bb)
 	return ptrlist_size((const struct ptr_list *)bb->insns);
 }
 
+static inline unsigned get_num_childprocs(struct proc *proc)
+{
+	return ptrlist_size((const struct ptr_list *)proc->procs);
+}
+
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
  */
@@ -2064,6 +2069,90 @@ static inline unsigned get_num_params(struct proc *proc)
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
 }
 
+static inline unsigned get_num_upvalues(struct proc *proc)
+{
+	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
+}
+
+static int generate_lua_proc(struct proc *proc, buffer_t *mb)
+{
+	raviX_buffer_add_fstring(mb, " f->ravi_jit.jit_function = %s;\n", proc->funcname);
+	raviX_buffer_add_string(mb, " f->ravi_jit.jit_status = RAVI_JIT_COMPILED;\n");
+	raviX_buffer_add_fstring(mb, " f->numparams = %u;\n", get_num_params(proc));
+	raviX_buffer_add_fstring(mb, " f->is_vararg = 0;\n");
+	raviX_buffer_add_fstring(mb, " f->maxstacksize = %u;\n", compute_max_stack_size(proc));
+	// load constants
+	raviX_buffer_add_fstring(mb, " f->k = luaM_newvector(S->L, %u, TValue);\n", proc->num_strconstants);
+	raviX_buffer_add_fstring(mb, " f->sizek = %u;\n", proc->num_strconstants);
+	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", proc->num_strconstants);
+	raviX_buffer_add_string(mb, " 	setnilvalue(&f->k[i]);\n");
+	raviX_buffer_add_string(mb, " TValue *o;\n");
+	// Load constants
+	struct set_entry *entry;
+	set_foreach(proc->constants, entry)
+	{
+		const struct constant *constant = (struct constant *)entry->key;
+		// We only need to register string constants
+		if (constant->type == RAVI_TSTRING) {
+			raviX_buffer_add_fstring(mb, " o = &f->k[%u];\n", constant->index);
+			if (constant->s->len == 0) {
+				raviX_buffer_add_string(mb, " o = NULL;\n");
+			} else {
+				// FIXME we need to escape chars?
+				raviX_buffer_add_fstring(mb, " setsvalue2n(S->L, o, luaS_newlstr(L, \"%.*s\", %u));\n",
+							 constant->s->len, constant->s->str, constant->s->len);
+			}
+		}
+	}
+	// Load up-values
+	raviX_buffer_add_fstring(mb, " f->upvalues = luaM_newvector(S->L, %u, Upvaldesc);n", get_num_upvalues(proc));
+	raviX_buffer_add_fstring(mb, " f->sizeupvalues = %u;\n", get_num_upvalues(proc));
+	int i = 0;
+	struct lua_symbol *sym;
+	FOR_EACH_PTR(proc->function_expr->function_expr.upvalues, sym)
+	{
+		raviX_buffer_add_fstring(mb, " f->upvalues[%u].instack = %u;\n", i, sym->upvalue.is_in_parent_stack);
+		raviX_buffer_add_fstring(mb, " f->upvalues[%u].idx = %u;\n", i, sym->upvalue.parent_upvalue_index);
+		i++;
+	}
+	END_FOR_EACH_PTR(sym);
+	// LoadProtos(S, f);
+
+	raviX_buffer_add_fstring(mb, " f->p = luaM_newvector(S->L, %u, Proto *);\n", get_num_childprocs(proc));
+	raviX_buffer_add_fstring(mb, " f->sizep = %u;\n", get_num_childprocs(proc));
+	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", get_num_childprocs(proc));
+	raviX_buffer_add_string(mb, "   f->p[i] = NULL;\n");
+	struct proc *childproc;
+	i = 0;
+	FOR_EACH_PTR(proc->procs, childproc)
+	{
+		raviX_buffer_add_fstring(mb, " f->p[%u] = luaF_newproto(S->L);\n", i);
+		raviX_buffer_add_string(mb, "{ \n");
+		raviX_buffer_add_fstring(mb, " Proto *parent = f; f = f->p[%u];\n", i);
+		generate_lua_proc(childproc, mb);
+		raviX_buffer_add_string(mb, " f = parent;\n");
+		raviX_buffer_add_string(mb, "}\n");
+		i++;
+	}
+	END_FOR_EACH_PTR(childproc);
+
+	return 0;
+}
+
+static int generate_lua_closure(struct proc *proc, buffer_t *mb)
+{
+	raviX_buffer_add_string(mb, "LClosure *load_in_lua(lua_State *L) {\n");
+	raviX_buffer_add_fstring(mb, " LClosure *cl = luaF_newLclosure(L, %u);\n", get_num_upvalues(proc));
+	raviX_buffer_add_string(mb, " setclLvalue(L, L->top, cl);\n");
+	raviX_buffer_add_string(mb, " luaD_inctop(L);\n");
+	raviX_buffer_add_string(mb, " cl->p = luaF_newproto(L);\n");
+	raviX_buffer_add_string(mb, " Proto *f = cl->p;\n");
+	generate_lua_proc(proc, mb);
+	raviX_buffer_add_string(mb, " return cl;\n");
+	raviX_buffer_add_string(mb, "}\n");
+	return 0;
+}
+
 /* Generate C code for each proc recursively */
 static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, buffer_t *mb)
 {
@@ -2286,6 +2375,7 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	if (generate_C_code(ravi_interface, linearizer->main_proc, mb) != 0) {
 		return -1;
 	}
+	//generate_lua_closure(linearizer->main_proc, mb);
 	/* Compile the generated code */
 	ravi_interface->init_C_compiler(ravi_interface->context);
 	void *module = ravi_interface->compile_C(ravi_interface->context, mb->buf, mb->pos);
