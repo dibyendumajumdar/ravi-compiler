@@ -728,8 +728,7 @@ static void initfn(struct function *fn, struct proc *proc, struct Ravi_CompilerI
 	snprintf(proc->funcname, sizeof proc->funcname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
 	raviX_buffer_init(&fn->body, 4096);
-	raviX_buffer_add_fstring(&fn->prologue, "extern int %s(lua_State *L);\n", proc->funcname);
-	raviX_buffer_add_fstring(&fn->prologue, "int %s(lua_State *L) {\n", proc->funcname);
+	raviX_buffer_add_fstring(&fn->prologue, "static int %s(lua_State *L) {\n", proc->funcname);
 	raviX_buffer_add_string(&fn->prologue, "int error_code = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "int result = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "CallInfo *ci = L->ci;\n");
@@ -2078,36 +2077,38 @@ static inline unsigned get_num_upvalues(struct proc *proc)
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
 }
 
+/* Generate code for setting up a Lua Proto structure, recursively for each child function */
 static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 {
 	raviX_buffer_add_fstring(mb, " f->ravi_jit.jit_function = %s;\n", proc->funcname);
 	raviX_buffer_add_string(mb, " f->ravi_jit.jit_status = RAVI_JIT_COMPILED;\n");
 	raviX_buffer_add_fstring(mb, " f->numparams = %u;\n", get_num_params(proc));
-	raviX_buffer_add_fstring(mb, " f->is_vararg = 0;\n");
+	raviX_buffer_add_fstring(mb, " f->is_vararg = 0;\n"); // FIXME Var arg not supported yet
 	raviX_buffer_add_fstring(mb, " f->maxstacksize = %u;\n", compute_max_stack_size(proc));
-	// load constants
+
+	// Load constants - we only need to load string constants as integer/floats are coded in
 	raviX_buffer_add_fstring(mb, " f->k = luaM_newvector(L, %u, TValue);\n", proc->num_strconstants);
 	raviX_buffer_add_fstring(mb, " f->sizek = %u;\n", proc->num_strconstants);
 	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", proc->num_strconstants);
-	raviX_buffer_add_string(mb, " 	setnilvalue(&f->k[i]);\n");
-	raviX_buffer_add_string(mb, " TValue *o;\n");
-	// Load constants
+	raviX_buffer_add_string(mb, "  setnilvalue(&f->k[i]);\n"); // Do this in case there is a problem allocating the strings
 	struct set_entry *entry;
 	set_foreach(proc->constants, entry)
 	{
 		const struct constant *constant = (struct constant *)entry->key;
 		// We only need to register string constants
 		if (constant->type == RAVI_TSTRING) {
-			raviX_buffer_add_fstring(mb, " o = &f->k[%u];\n", constant->index);
+			raviX_buffer_add_fstring(mb, " {\n  TValue *o = &f->k[%u];\n", constant->index);
 			if (constant->s->len == 0) {
-				raviX_buffer_add_string(mb, " o = NULL;\n");
+				raviX_buffer_add_string(mb, "  o = NULL;\n");
 			} else {
 				// FIXME we need to escape chars?
-				raviX_buffer_add_fstring(mb, " setsvalue2n(L, o, luaS_newlstr(L, \"%.*s\", %u));\n",
+				raviX_buffer_add_fstring(mb, "  setsvalue2n(L, o, luaS_newlstr(L, \"%.*s\", %u));\n",
 							 constant->s->len, constant->s->str, constant->s->len);
 			}
+			raviX_buffer_add_fstring(mb, " }\n", constant->index);
 		}
 	}
+
 	// Load up-values
 	raviX_buffer_add_fstring(mb, " f->upvalues = luaM_newvector(L, %u, Upvaldesc);\n", get_num_upvalues(proc));
 	raviX_buffer_add_fstring(mb, " f->sizeupvalues = %u;\n", get_num_upvalues(proc));
@@ -2123,32 +2124,36 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 		i++;
 	}
 	END_FOR_EACH_PTR(sym);
-	// LoadProtos(S, f);
 
-	raviX_buffer_add_fstring(mb, " f->p = luaM_newvector(L, %u, Proto *);\n", get_num_childprocs(proc));
-	raviX_buffer_add_fstring(mb, " f->sizep = %u;\n", get_num_childprocs(proc));
-	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", get_num_childprocs(proc));
-	raviX_buffer_add_string(mb, "   f->p[i] = NULL;\n");
-	struct proc *childproc;
-	i = 0;
-	FOR_EACH_PTR(proc->procs, childproc)
-	{
-		raviX_buffer_add_fstring(mb, " f->p[%u] = luaF_newproto(L);\n", i);
-		raviX_buffer_add_string(mb, "{ \n");
-		raviX_buffer_add_fstring(mb, " Proto *parent = f; f = f->p[%u];\n", i);
-		generate_lua_proc(childproc, mb);
-		raviX_buffer_add_string(mb, " f = parent;\n");
-		raviX_buffer_add_string(mb, "}\n");
-		i++;
+	// Load child protos recursively
+	if (get_num_childprocs(proc) > 0) {
+		raviX_buffer_add_fstring(mb, " f->p = luaM_newvector(L, %u, Proto *);\n", get_num_childprocs(proc));
+		raviX_buffer_add_fstring(mb, " f->sizep = %u;\n", get_num_childprocs(proc));
+		raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", get_num_childprocs(proc));
+		raviX_buffer_add_string(mb, "   f->p[i] = NULL;\n");
+		struct proc *childproc;
+		i = 0;
+		FOR_EACH_PTR(proc->procs, childproc)
+		{
+			raviX_buffer_add_fstring(mb, " f->p[%u] = luaF_newproto(L);\n", i);
+			raviX_buffer_add_string(mb, "{ \n");
+			raviX_buffer_add_fstring(mb, " Proto *parent = f; f = f->p[%u];\n", i);
+			generate_lua_proc(childproc, mb);
+			raviX_buffer_add_string(mb, " f = parent;\n");
+			raviX_buffer_add_string(mb, "}\n");
+			i++;
+		}
+		END_FOR_EACH_PTR(childproc);
 	}
-	END_FOR_EACH_PTR(childproc);
-
 	return 0;
 }
 
-static int generate_lua_closure(struct proc *proc, buffer_t *mb)
+/* Generate the equivalent of a luaU_undump such that when called from Lua/Ravi code
+ * it will build the closure encapsulating the Lua chunk.
+ */
+static int generate_lua_closure(struct proc *proc, const char *funcname, buffer_t *mb)
 {
-	raviX_buffer_add_string(mb, "LClosure *load_in_lua(lua_State *L) {\n");
+	raviX_buffer_add_fstring(mb, "LClosure *%s(lua_State *L) {\n", funcname);
 	raviX_buffer_add_fstring(mb, " LClosure *cl = luaF_newLclosure(L, %u);\n", get_num_upvalues(proc));
 	raviX_buffer_add_string(mb, " setclLvalue(L, L->top, cl);\n");
 	raviX_buffer_add_string(mb, " luaD_inctop(L);\n");
@@ -2165,6 +2170,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 {
 	int rc = 0;
 	struct function fn;
+
 	initfn(&fn, proc, ravi_interface);
 
 	struct basic_block *bb;
@@ -2196,8 +2202,8 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 
 static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol *symbol)
 {
-	struct ast_node *this_function = symbol->upvalue.target_function;
-	struct ast_node *parent_function = this_function->function_expr.parent_function;
+	struct ast_node *upvalue_function = symbol->upvalue.target_function;
+	struct ast_node *parent_function = upvalue_function->function_expr.parent_function;
 	return parent_function;
 }
 
@@ -2213,9 +2219,9 @@ static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_sy
 	struct lua_symbol *underlying = upvalue_symbol->upvalue.target_variable;
 	if (underlying->symbol_type == SYM_LOCAL) {
 		/* Upvalue is in the stack of parent ? */
-		struct ast_node *local_function = underlying->variable.block->function;
+		struct ast_node *function_containing_local = underlying->variable.block->function;
 		struct ast_node *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
-		if (parent_function == local_function) {
+		if (parent_function == function_containing_local) {
 			/* Upvalue is a local in parent function */
 			*in_stack = true;
 			return underlying->variable.pseudo->regnum;
@@ -2237,7 +2243,7 @@ static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_sy
 }
 
 /**
- * Computes upvalue attributes neede by the Lua side
+ * Computes upvalue attributes needed by the Lua side
  */
 static void compute_upvalue_attributes(struct proc *proc)
 {
@@ -2256,11 +2262,11 @@ static void compute_upvalue_attributes(struct proc *proc)
 /*
  * Preprocess upvalues by populating a couple of attributes needed by the Lua side
  */
-static void process_upvalues(struct proc *proc)
+static void preprocess_upvalues(struct proc *proc)
 {
 	compute_upvalue_attributes(proc);
 	struct proc *child_proc;
-	FOR_EACH_PTR(proc->procs, child_proc) { process_upvalues(child_proc); }
+	FOR_EACH_PTR(proc->procs, child_proc) { preprocess_upvalues(child_proc); }
 	END_FOR_EACH_PTR(childproc);
 }
 
@@ -2275,6 +2281,7 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {.context = NULL,
 							       .source = NULL,
 							       .source_len = 0,
 							       .generated_code = NULL,
+							       .main_func_name = {"setup"},
 							       .error_message = error_message,
 							       .debug_message = debug_message};
 
@@ -2284,20 +2291,21 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
 
+	// _ENV is the name of the Lua up-value that points to the globals table
 	raviX_create_string(linearizer->ast_container, "_ENV", 4);
 
 	/* Add the common header portion */
 	// FIXME we need a way to customise this for 32-bit vs 64-bit
 	raviX_buffer_add_string(mb, Lua_header);
 
-	/* Compute upvalue attributes */
-	process_upvalues(linearizer->main_proc);
+	/* Preprocess upvalue attributes */
+	preprocess_upvalues(linearizer->main_proc);
 
 	/* Recursively generate C code for procs */
 	if (generate_C_code(ravi_interface, linearizer->main_proc, mb) != 0) {
 		return -1;
 	}
-	generate_lua_closure(linearizer->main_proc, mb);
+	generate_lua_closure(linearizer->main_proc, ravi_interface->main_func_name, mb);
 	return 0;
 }
 

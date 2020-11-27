@@ -11,6 +11,7 @@
 int raviX_compile(struct Ravi_CompilerInterface *compiler_interface)
 {
 	int rc = 0;
+	compiler_interface->generated_code = NULL;
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, compiler_interface->source, compiler_interface->source_len, compiler_interface->source_name);
 	if (rc != 0) {
