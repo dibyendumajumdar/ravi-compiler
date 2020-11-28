@@ -1,7 +1,7 @@
 ![build](https://github.com/dibyendumajumdar/ravi-compiler/workflows/build/badge.svg)
 
 # ravi-compiler
-A compiler for Ravi and Lua.
+A compiler for Ravi and Lua that processes Lua/Ravi source code and generates C code.
 
 ## Goals
 
@@ -24,7 +24,7 @@ The compiler library will consist of distinct modules:
 
 ## Status
 
-* Work in progress - currently working on C code generation from the IR
+* 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 
 ## Documentation
 
@@ -55,6 +55,15 @@ mkdir build
 cd build
 cmake ..
 make 
+```
+
+## Try it out!
+
+The compiler can be run using the `trun` command line utility.
+Example:
+
+```
+trun "return 'hello'"
 ```
 
 ## Testing
