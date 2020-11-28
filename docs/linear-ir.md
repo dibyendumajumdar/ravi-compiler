@@ -20,6 +20,7 @@ uniformly represented in an instruction. Following are the possible types:
     <dt>PSEUDO_SYMBOL</dt><dd>a symbol which can be a variable or up-value</dd>
 	<dt>PSEUDO_TEMP_FLT</dt><dd>a temporary of floating type</dd>
 	<dt>PSEUDO_TEMP_INT</dt><dd>a temporary of integer type</dd>
+	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temp but restricted to 1 and 0  - refers to C var, shares the virtual C stack with PSEUDO_TEMP_INT</dd>
 	<dt>PSEUDO_TEMP_ANY</dt><dd>a temporary of any type, must be on Lua stack</dd>
 	<dt>PSEUDO_CONSTANT</dt><dd>a literal constant</dd>
 	<dt>PSEUDO_PROC</dt><dd>A Lua function</dd>
@@ -29,7 +30,7 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
-	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to ci->func, used by backend for copying results to calling function. Will never be emitted in the IR.</dd>
+	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to `ci->func` rather than `base`, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between `ci->func` and `base`.</dd>
 </dl>
 
 
