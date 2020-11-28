@@ -44,7 +44,7 @@ This project will create a new parser and code generator that is not a replaceme
 
 ## Technology
 
-This project is written in C for maximum portability like Lua. I considered using Rust or D and may eventually port it to one of these languages but for now it is good old C.
+This project is written in C for maximum portability like Lua. It will be translated to Rust at some point - just for fun.
 
 ## Building 
 
