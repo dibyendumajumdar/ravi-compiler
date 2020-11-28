@@ -30,7 +30,7 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
-	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to `ci->func` rather than `base`, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between `ci->func` and `base`.</dd>
+	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to <code>ci->func</code> rather than <code>base</code>, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between <code>ci->func</code> and <code>base</code>.</dd>
 </dl>
 
 
