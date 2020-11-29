@@ -645,13 +645,13 @@ static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct ps
 	return target;
 }
 
-static void instruct_cbr(struct proc *proc, struct pseudo *conditin_pseudo, struct basic_block *true_block,
+static void instruct_cbr(struct proc *proc, struct pseudo *condition_pseudo, struct basic_block *true_block,
 			 struct basic_block *false_block)
 {
 	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
 	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
 	struct instruction *insn = allocate_instruction(proc, op_cbr);
-	add_instruction_operand(proc, insn, conditin_pseudo);
+	add_instruction_operand(proc, insn, condition_pseudo);
 	add_instruction_target(proc, insn, true_pseudo);
 	add_instruction_target(proc, insn, false_pseudo);
 	add_instruction(proc, insn);
