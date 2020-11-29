@@ -127,9 +127,9 @@ with the keyword else this attribute will be -1. The hash value of the string is
 attribute. Note that we need to allow strings that have embedded 0 character hence the length
 is explicit. But all tokens and reserved keywords are expected to be standard C strings.
 */
-struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
+const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
 {
-	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1, .userdata = NULL};
+	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
 	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
@@ -143,7 +143,6 @@ struct string_object *raviX_create_string(struct compiler_state *container, cons
 		new_string->len = len;
 		new_string->hash = temp.hash;
 		new_string->reserved = -1;
-		new_string->userdata = NULL; /* For use by Ravi binding */
 		/* Check if this is a keyword, linear search is okay as we do this only when we first
 		 * encounter a keyword
 		 */

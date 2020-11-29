@@ -96,7 +96,6 @@ struct string_object {
 	int32_t reserved; /* if is this a keyword then token id else -1 */
 	uint32_t hash;	  /* hash value of the string */
 	const char *str;  /* string data */
-	void* userdata; /* For use by host such as Ravi */
 };
 
 /*
@@ -140,7 +139,7 @@ typedef struct {
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
-RAVICOMP_EXPORT struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
+RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
 								uint32_t len);
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
