@@ -20,7 +20,7 @@ extern void raviX_buffer_add_char(buffer_t *mb, char c);
 static inline void raviX_buffer_addc(buffer_t *mb, int c)
 {
 	mb->buf[mb->pos++] = (char)c;
-	assert(mb->pos < mb->allocated_size);
+	assert(mb->pos < mb->capacity);
 }
 static inline void raviX_buffer_remove(buffer_t *mb, int i) { mb->pos -= i; }
 

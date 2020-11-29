@@ -105,20 +105,23 @@ typedef union {
 	lua_Number r;
 	lua_Integer i;
 	const struct string_object *ts;
-} SemInfo; /* semantic information */
+} SemInfo;
 
 typedef struct Token {
-	int token; /* Token value or character value; token values start from FIRST_RESERVED which is 257 */
-	SemInfo seminfo; /* Literal associated with the token, only valid when token is a literal or an identifier, i.e. token is > TOK_EOS */
+	int token; /* Token value or character value; token values start from FIRST_RESERVED which is 257, values < 256
+		      are characters */
+	SemInfo seminfo; /* Literal associated with the token, only valid when token is a literal or an identifier, i.e.
+			    token is > TOK_EOS */
 } Token;
 
 /*
- * Everything below should be treated as readonly
+ * Everything below should be treated as readonly; for efficiency these fields are exposed, however treat them
+ * as fields managed by the lexer.
  */
 typedef struct {
-	int current;	 /* current character (char as int) */
-	int linenumber;	 /* input line counter */
-	int lastline;	 /* line of last token 'consumed' */
+	int current;	 /* current character (char value as int) */
+	int linenumber;	 /* current input line counter */
+	int lastline;	 /* line number of the last token 'consumed' */
 	Token t;	 /* current token, set after call to raviX_next() */
 	Token lookahead; /* look ahead token, set after call to raviX_lookahead() */
 } LexState;
@@ -131,22 +134,22 @@ typedef struct {
  * api calls.
  */
 typedef struct {
-	char *buf;
-	size_t allocated_size;
-	size_t pos;
+	char *buf;	 /* pointer to allocated memory, can be reallocated */
+	size_t capacity; /* allocated size */
+	size_t pos;	 /* current position in the buffer */
 } buffer_t;
 
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
-RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *container, const char *s,
+RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *compiler_state, const char *s,
 								uint32_t len);
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
 RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
 						     size_t buflen, const char *source_name);
-/* Gets the lexer data structure that can be used to access the current token. Note that this is
- * a readonly data structure
+/* Gets the public part of the lexer data structure to allow access the current token. Note that the returned
+ * value should be treated as readonly data structure
  */
 RAVICOMP_EXPORT const LexState *raviX_get_lexer_info(struct lexer_state *ls);
 /* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved
@@ -177,7 +180,8 @@ RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
  *
  * Returns 0 on success, non-zero on failure.
  */
-RAVICOMP_EXPORT int raviX_parse(struct compiler_state *compiler_state, const char *buffer, size_t buflen, const char *name);
+RAVICOMP_EXPORT int raviX_parse(struct compiler_state *compiler_state, const char *buffer, size_t buflen,
+				const char *source_name);
 /* Prints out the AST to the file */
 RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *compiler_state, FILE *fp);
 /* Performs type checks on the AST and annotates types of expressions nad variables where possible.
@@ -200,6 +204,7 @@ RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(struct compiler_s
 RAVICOMP_EXPORT int raviX_ast_linearize(struct linearizer_state *linearizer);
 /* Prints out the content of the linear IR */
 RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp);
+/* Cleanup the linearizer */
 RAVICOMP_EXPORT void raviX_destroy_linearizer(struct linearizer_state *linearizer);
 
 /* utilies */
@@ -233,9 +238,11 @@ typedef enum BinaryOperatorType {
 	BINOPR_NOBINOPR
 } BinaryOperatorType;
 
+RAVICOMP_EXPORT const char *raviX_get_binary_opr_str(BinaryOperatorType op);
+
 /* Unary operators */
 typedef enum UnaryOperatorType {
-	UNOPR_MINUS = BINOPR_NOBINOPR+1,
+	UNOPR_MINUS = BINOPR_NOBINOPR + 1,
 	UNOPR_BNOT,
 	UNOPR_NOT,
 	UNOPR_LEN,
@@ -249,6 +256,8 @@ typedef enum UnaryOperatorType {
 	UNOPR_TO_TYPE,
 	UNOPR_NOUNOPR
 } UnaryOperatorType;
+
+RAVICOMP_EXPORT const char *raviX_get_unary_opr_str(UnaryOperatorType op);
 
 /* Types of AST nodes */
 enum ast_node_type {
@@ -268,14 +277,14 @@ enum ast_node_type {
 	STMT_EXPR, /* Also used for assignment statements */
 	EXPR_LITERAL,
 	EXPR_SYMBOL,
-	EXPR_Y_INDEX,	 /* [] operator */
-	EXPR_FIELD_SELECTOR, /* table field access - '.' or ':' operator */
+	EXPR_Y_INDEX,		   /* [] operator */
+	EXPR_FIELD_SELECTOR,	   /* table field access - '.' or ':' operator */
 	EXPR_TABLE_ELEMENT_ASSIGN, /* table element assignment in table constructor */
 	EXPR_SUFFIXED,
 	EXPR_UNARY,
 	EXPR_BINARY,
-	EXPR_FUNCTION, /* function literal */
-	EXPR_TABLE_LITERAL,	   /* table constructor */
+	EXPR_FUNCTION,	    /* function literal */
+	EXPR_TABLE_LITERAL, /* table constructor */
 	EXPR_FUNCTION_CALL
 };
 
@@ -311,8 +320,8 @@ enum symbol_type {
 	SYM_LOCAL,   /* lua_variable_symbol */
 	SYM_UPVALUE, /* lua_upvalue_symbol */
 	SYM_GLOBAL,  /* lua_variable_symbol, Global symbols are never added to a scope so they are always looked up */
-	SYM_LABEL,    /* lua_label_symbol */
-	SYM_ENV      /* Special symbol type for _ENV */
+	SYM_LABEL,   /* lua_label_symbol */
+	SYM_ENV	     /* Special symbol type for _ENV */
 };
 struct lua_symbol;
 struct lua_upvalue_symbol;
@@ -386,7 +395,7 @@ RAVICOMP_EXPORT void raviX_if_statement_foreach_else_statement(const struct if_s
 RAVICOMP_EXPORT const struct block_scope *raviX_test_then_statement_scope(const struct test_then_statement *statement);
 RAVICOMP_EXPORT void
 raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
-					   void (*callback)(void *userdata, const struct statement *statement));
+					    void (*callback)(void *userdata, const struct statement *statement));
 RAVICOMP_EXPORT const struct expression *
 raviX_test_then_statement_condition(const struct test_then_statement *statement);
 
@@ -412,7 +421,7 @@ RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const struct for
 										 const struct statement *statement));
 
 /* literal expression */
-/* Note: ... value has type RAVI_TVARARGS and no associated SemInfo. */
+/* Note: '...' value has type RAVI_TVARARGS and no associated SemInfo. */
 RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression);
 RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression);
 
@@ -546,8 +555,10 @@ RAVICOMP_EXPORT const struct block_scope *raviX_label_scope(const struct lua_lab
 
 /* upvalue symbol */
 RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol);
-RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol);
-RAVICOMP_EXPORT const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT const struct lua_variable_symbol *
+raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT const struct function_expression *
+raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol);
 RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol);
 
 /* Utilities */
@@ -557,15 +568,12 @@ RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *sy
 #define FORMAT_ATTR(pos)
 #endif
 
-RAVICOMP_EXPORT const char *raviX_get_unary_opr_str(UnaryOperatorType op);
-RAVICOMP_EXPORT const char *raviX_get_binary_opr_str(BinaryOperatorType op);
-
 RAVICOMP_EXPORT void raviX_buffer_init(buffer_t *mb, size_t initial_size);
 RAVICOMP_EXPORT void raviX_buffer_resize(buffer_t *mb, size_t new_size);
 RAVICOMP_EXPORT void raviX_buffer_reserve(buffer_t *mb, size_t n);
 RAVICOMP_EXPORT void raviX_buffer_free(buffer_t *mb);
 static inline char *raviX_buffer_data(const buffer_t *mb) { return mb->buf; }
-static inline size_t raviX_buffer_size(const buffer_t *mb) { return mb->allocated_size; }
+static inline size_t raviX_buffer_size(const buffer_t *mb) { return mb->capacity; }
 static inline size_t raviX_buffer_len(const buffer_t *mb) { return mb->pos; }
 static inline void raviX_buffer_reset(buffer_t *mb) { mb->pos = 0; }
 

@@ -127,16 +127,16 @@ with the keyword else this attribute will be -1. The hash value of the string is
 attribute. Note that we need to allow strings that have embedded 0 character hence the length
 is explicit. But all tokens and reserved keywords are expected to be standard C strings.
 */
-const struct string_object *raviX_create_string(struct compiler_state *container, const char *input, uint32_t len)
+const struct string_object *raviX_create_string(struct compiler_state *compiler_state, const char *input, uint32_t len)
 {
 	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
-	struct set_entry *entry = set_search_pre_hashed(container->strings, temp.hash, &temp);
+	struct set_entry *entry = set_search_pre_hashed(compiler_state->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
 		return (struct string_object *)entry->key;
 	else {
-		struct string_object *new_string = raviX_allocator_allocate(&container->string_object_allocator, 0);
-		char *s = raviX_allocator_allocate(&container->string_allocator, len + 1); /* allow for 0 terminator */
+		struct string_object *new_string = raviX_allocator_allocate(&compiler_state->string_object_allocator, 0);
+		char *s = raviX_allocator_allocate(&compiler_state->string_allocator, len + 1); /* allow for 0 terminator */
 		memcpy(s, input, len);
 		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
 		new_string->str = s;
@@ -154,7 +154,7 @@ const struct string_object *raviX_create_string(struct compiler_state *container
                             }
                         }
 		}
-		set_add_pre_hashed(container->strings, temp.hash, new_string);
+		set_add_pre_hashed(compiler_state->strings, temp.hash, new_string);
 		return new_string;
 	}
 }

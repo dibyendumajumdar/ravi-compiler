@@ -7,15 +7,17 @@
 #include <stdlib.h>
 
 struct Ravi_CompilerInterface {
+	/* ------------------------ Inputs ------------------------------ */
 	void *context; /* Ravi supplied context */
 
 	const char *source; /* Source code to be compiled - managed by Ravi */
 	size_t source_len; /* Size of source code */
 	const char *source_name; /* Name of the source */
 
-	char main_func_name[31]; /* Name of the generated function */
+	char main_func_name[31]; /* Name of the generated function that when called will set up the Lua closure */
 
-	const char* generated_code;  /* Output of the compiler, must be freed by caller */
+	/* ------------------------- Outputs ------------------------------ */
+	const char* generated_code;  /* Output of the compiler, must be freed by caller. */
 
 	/* ------------------------ Debugging and error handling ----------------------------------------- */
 	void (*debug_message)(void *context, const char *filename, long long line, const char *message);

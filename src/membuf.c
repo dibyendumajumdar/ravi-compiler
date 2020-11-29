@@ -31,11 +31,11 @@ void raviX_buffer_init(buffer_t *mb, size_t initial_size)
 	} else
 		mb->buf = NULL;
 	mb->pos = 0;
-	mb->allocated_size = initial_size;
+	mb->capacity = initial_size;
 }
 void raviX_buffer_resize(buffer_t *mb, size_t new_size)
 {
-	if (new_size <= mb->allocated_size)
+	if (new_size <= mb->capacity)
 		return;
 	char *newmem = (char *)realloc(mb->buf, new_size);
 	if (newmem == NULL) {
@@ -43,14 +43,14 @@ void raviX_buffer_resize(buffer_t *mb, size_t new_size)
 		exit(1);
 	}
 	mb->buf = newmem;
-	mb->allocated_size = new_size;
+	mb->capacity = new_size;
 }
 void raviX_buffer_reserve(buffer_t *mb, size_t n)
 {
-	if (mb->allocated_size < mb->pos + n) {
+	if (mb->capacity < mb->pos + n) {
 		size_t new_size = (((mb->pos + n) * 3 + 30) / 2) & ~15;
 		raviX_buffer_resize(mb, new_size);
-		assert(mb->allocated_size > mb->pos + n);
+		assert(mb->capacity > mb->pos + n);
 	}
 }
 void raviX_buffer_free(buffer_t *mb) { free(mb->buf); }
@@ -58,8 +58,8 @@ void raviX_buffer_add_bytes(buffer_t *mb, const char *str, size_t len)
 {
 	size_t required_size = mb->pos + len + 1; /* extra byte for NULL terminator */
 	raviX_buffer_resize(mb, required_size);
-	assert(mb->allocated_size - mb->pos > len);
-	raviX_string_copy(&mb->buf[mb->pos], str, mb->allocated_size - mb->pos);
+	assert(mb->capacity - mb->pos > len);
+	raviX_string_copy(&mb->buf[mb->pos], str, mb->capacity - mb->pos);
 	mb->pos += len;
 }
 void raviX_buffer_add_string(buffer_t *mb, const char *str)
