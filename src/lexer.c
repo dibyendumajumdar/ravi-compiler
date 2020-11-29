@@ -20,20 +20,58 @@ static inline int zgetc(struct lexer_state *z) { return z->n-- > 0 ? cast_uchar(
 static inline void next(struct lexer_state *ls) { ls->current = zgetc(ls); }
 static inline bool currIsNewline(struct lexer_state *ls) { return ls->current == '\n' || ls->current == '\r'; }
 
-#define lua_getlocaledecpoint() (localeconv()->decimal_point[0])
+static inline char lua_getlocaledecpoint() { return localeconv()->decimal_point[0]; }
 
 #define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
-/* ORDER TokenType */
+/*Note: Following array was generated using utils/tokenstr.h */
 static const char *const luaX_tokens[] = {
-#define TKSTR1(name)		#name,
-#define TKSTR2(name, sym)	#sym,
-#define TKSTR3(name, sym)	#sym #sym,
-TKDEF(TKSTR1, TKSTR2, TKSTR3)
-#undef TKSTR1
-#undef TKSTR2
-#undef TKSTR3
+    "and",
+    "break",
+    "do",
+    "else",
+    "elseif",
+    "end",
+    "false",
+    "for",
+    "function",
+    "goto",
+    "if",
+    "in",
+    "local",
+    "defer",
+    "nil",
+    "not",
+    "or",
+    "repeat",
+    "return",
+    "then",
+    "true",
+    "until",
+    "while",
+    "/"
+    "/",
+    "..",
+    "...",
+    "==",
+    ">=",
+    "<=",
+    "~=",
+    "<<",
+    ">>",
+    "::",
+    "@integer",
+    "@number",
+    "@integer[]",
+    "@number[]",
+    "@table",
+    "@string",
+    "@closure",
+    "<eof>",
+    "<number>",
+    "<integer>",
+    "<name>",
+    "<string>",
 };
-
 /* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const struct string_object *s) { return s->reserved; }
 
