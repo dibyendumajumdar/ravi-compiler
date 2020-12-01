@@ -15,6 +15,7 @@
  */
 
 static const char Lua_header[] =
+    "#ifdef __MIRC__\n"
     "typedef __SIZE_TYPE__ size_t;\n"
     "typedef __PTRDIFF_TYPE__ ptrdiff_t;\n"
     "typedef __INTPTR_TYPE__ intptr_t;\n"
@@ -26,10 +27,18 @@ static const char Lua_header[] =
     "typedef __UINT16_TYPE__ uint16_t;\n"
     "typedef __INT8_TYPE__ int8_t;\n"
     "typedef __UINT8_TYPE__ uint8_t;\n"
+    "#define NULL ((void *)0)\n"
+    "#define EXPORT\n"
+    "#else\n"
+    "#include <stddef.h>\n"
+    "#include <stdint.h>\n"
+    "#ifdef _WIN32\n"
+    "#define EXPORT __declspec(dllexport)\n"
+    "#endif\n"
+    "#endif\n"
     "typedef size_t lu_mem;\n"
     "typedef unsigned char lu_byte;\n"
     "typedef uint16_t LuaType;\n"
-    "#define NULL ((void *)0)\n"
     "typedef struct lua_State lua_State;\n"
     "#define LUA_TNONE		(-1)\n"
     "#define LUA_TNIL		0\n"
@@ -569,8 +578,8 @@ static const char Lua_header[] =
     "extern void raviV_op_setupvalai(lua_State *L, LClosure *cl, TValue *ra, int b);\n"
     "extern void raviV_op_setupvalaf(lua_State *L, LClosure *cl, TValue *ra, int b);\n"
     "extern void raviV_op_setupvalt(lua_State *L, LClosure *cl, TValue *ra, int b);\n"
-    "extern void raise_error(lua_State *L, int errorcode);\n"
-    "extern void raise_error_with_info(lua_State *L, int errorcode, const char *info);\n"
+    "extern void raviV_raise_error(lua_State *L, int errorcode);\n"
+    "extern void raviV_raise_error_with_info(lua_State *L, int errorcode, const char *info);\n"
     "extern void luaD_call (lua_State *L, StkId func, int nResults);\n"
     "extern void raviH_set_int(lua_State *L, RaviArray *t, lua_Unsigned key, lua_Integer value);\n"
     "extern void raviH_set_float(lua_State *L, RaviArray *t, lua_Unsigned key, lua_Number value);\n"
@@ -2061,7 +2070,7 @@ static int output_basic_block(struct function *fn, struct basic_block *bb)
 	if (bb->index == EXIT_BLOCK) {
 		raviX_buffer_add_string(&fn->body, " return result;\n");
 		raviX_buffer_add_string(&fn->body, "Lraise_error:\n");
-		raviX_buffer_add_string(&fn->body, " raise_error(L, error_code); /* does not return */\n");
+		raviX_buffer_add_string(&fn->body, " raviV_raise_error(L, error_code); /* does not return */\n");
 		raviX_buffer_add_string(&fn->body, " return result;\n");
 	}
 	return rc;
@@ -2153,7 +2162,7 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
  */
 static int generate_lua_closure(struct proc *proc, const char *funcname, buffer_t *mb)
 {
-	raviX_buffer_add_fstring(mb, "LClosure *%s(lua_State *L) {\n", funcname);
+	raviX_buffer_add_fstring(mb, "EXPORT LClosure *%s(lua_State *L) {\n", funcname);
 	raviX_buffer_add_fstring(mb, " LClosure *cl = luaF_newLclosure(L, %u);\n", get_num_upvalues(proc));
 	raviX_buffer_add_string(mb, " setclLvalue(L, L->top, cl);\n");
 	raviX_buffer_add_string(mb, " luaD_inctop(L);\n");
