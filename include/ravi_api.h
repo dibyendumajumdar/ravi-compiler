@@ -13,6 +13,7 @@ struct Ravi_CompilerInterface {
 	const char *source; /* Source code to be compiled - managed by Ravi */
 	size_t source_len; /* Size of source code */
 	const char *source_name; /* Name of the source */
+	const char *compiler_options; /* flags to be passed to compiler */
 
 	char main_func_name[31]; /* Name of the generated function that when called will set up the Lua closure */
 

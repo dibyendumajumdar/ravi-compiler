@@ -78,7 +78,11 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra)
 	struct allocation_blob *blob = A->blobs_;
 	void *retval;
 
-	assert(size <= A->chunking_);
+	if (size > A->chunking_) {
+		fprintf(stderr, "allocation failure: requested size %lld is larger than maximum chunk size %lld\n",
+			(long long)size, (long long) A->chunking_);
+		exit(1);
+	}
 	/*
 	 * NOTE! The freelist only works with things that are
 	 *  (a) sufficiently aligned
@@ -102,7 +106,7 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra)
 		struct allocation_blob *newblob = (struct allocation_blob *)blob_alloc(chunking);
 		if (!newblob) {
 			fprintf(stderr, "out of memory\n");
-			abort();
+			exit(1);
 		}
 		A->total_bytes += chunking;
 		newblob->next = blob;

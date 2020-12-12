@@ -34,6 +34,8 @@ static const char Lua_header[] =
     "#include <stdint.h>\n"
     "#ifdef _WIN32\n"
     "#define EXPORT __declspec(dllexport)\n"
+    "#else\n"
+    "#define EXPORT\n"
     "#endif\n"
     "#endif\n"
     "typedef size_t lu_mem;\n"
@@ -1186,7 +1188,8 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
+/* Generate code for various types of load table operations */
+static int emit_op_load_table(struct function *fn, struct instruction *insn)
 {
 	const char *fname = "luaV_gettable";
 	if (insn->opcode == op_tget_ikey) {
@@ -1205,17 +1208,18 @@ static int emit_op_loadglobal(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *tab = ");
 	emit_reg_accessor(fn, env, 0);
-	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
+	raviX_buffer_add_string(&fn->body, ";\n TValue *key = ");
 	emit_reg_accessor(fn, varname, 0);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *dst = ");
 	emit_reg_accessor(fn, dst, 1);
-	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, name, dst);\n ", fname);
+	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, key, dst);\n ", fname);
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
 }
 
-static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
+/* Emit code for a variety of store table operations */
+static int emit_op_store_table(struct function *fn, struct instruction *insn)
 {
 	// FIXME what happens if key and value are both constants
 	// Our pseudo reg will break I think
@@ -1236,11 +1240,11 @@ static int emit_op_storeglobal(struct function *fn, struct instruction *insn)
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *tab = ");
 	emit_reg_accessor(fn, env, 0);
-	raviX_buffer_add_string(&fn->body, ";\n TValue *name = ");
+	raviX_buffer_add_string(&fn->body, ";\n TValue *key = ");
 	emit_reg_accessor(fn, varname, 0);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *src = ");
 	emit_reg_accessor(fn, src, 1);
-	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, name, src);\n ", fname);
+	raviX_buffer_add_fstring(&fn->body, ";\n %s(L, tab, key, src);\n ", fname);
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
@@ -1908,7 +1912,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_get_ikey:
 	case op_tget_skey:
 	case op_tget_ikey:
-		rc = emit_op_loadglobal(fn, insn);
+		rc = emit_op_load_table(fn, insn);
 		break;
 	case op_storeglobal:
 	case op_put:
@@ -1916,7 +1920,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_put_ikey:
 	case op_tput_skey:
 	case op_tput_ikey:
-		rc = emit_op_storeglobal(fn, insn);
+		rc = emit_op_store_table(fn, insn);
 		break;
 	case op_call:
 		rc = emit_op_call(fn, insn);
@@ -2114,7 +2118,7 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 				raviX_buffer_add_fstring(mb, "  setsvalue2n(L, o, luaS_newlstr(L, \"%.*s\", %u));\n",
 							 constant->s->len, constant->s->str, constant->s->len);
 			}
-			raviX_buffer_add_fstring(mb, " }\n", constant->index);
+			raviX_buffer_add_string(mb, " }\n");
 		}
 	}
 
@@ -2318,8 +2322,10 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	return 0;
 }
 
-void raviX_generate_C_tofile(struct linearizer_state *linearizer, FILE *fp)
+void raviX_generate_C_tofile(struct linearizer_state *linearizer, const char *mainfunc, FILE *fp)
 {
+	struct Ravi_CompilerInterface *ravi_interface = &stub_compilerInterface;
+	raviX_string_copy(ravi_interface->main_func_name, (mainfunc != NULL ? mainfunc : "setup"), sizeof ravi_interface->main_func_name);
 	buffer_t mb;
 	raviX_buffer_init(&mb, 4096);
 	raviX_generate_C(linearizer, &mb, NULL);

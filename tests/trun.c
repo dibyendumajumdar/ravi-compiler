@@ -3,11 +3,11 @@
 #include "ravi_compiler.h"
 
 #include "allocate.h"
-#include "membuf.h"
-#include "parser.h"
 #include "cfg.h"
-#include "optimizer.h"
 #include "codegen.h"
+#include "membuf.h"
+#include "optimizer.h"
+#include "parser.h"
 
 #include "ptrlist.h"
 #include "tcommon.h"
@@ -25,7 +25,8 @@ struct chunk_data {
 };
 
 /* return next line - i.e. first char following newline */
-static const char* scan_next(const char *cp, const char *endp) {
+static const char *scan_next(const char *cp, const char *endp)
+{
 	if (cp >= endp)
 		return NULL;
 	const char *nextp = strchr(cp, '\n');
@@ -38,19 +39,20 @@ static const char* scan_next(const char *cp, const char *endp) {
 	return nextp;
 }
 
-static void add_chunk(struct chunk_data *chunks, buffer_t * buf)
+static void add_chunk(struct chunk_data *chunks, buffer_t *buf)
 {
 	size_t len = raviX_buffer_len(buf);
-	char *s = raviX_allocator_allocate(&chunks->string_allocator, len+1);
-	raviX_string_copy(s, raviX_buffer_data(buf), len+1);
-	ptrlist_add((struct ptr_list **) &chunks->list, s, &chunks->ptrlist_allocator);
+	char *s = raviX_allocator_allocate(&chunks->string_allocator, len + 1);
+	raviX_string_copy(s, raviX_buffer_data(buf), len + 1);
+	ptrlist_add((struct ptr_list **)&chunks->list, s, &chunks->ptrlist_allocator);
 }
 
 /* Input text is supposed to contain multiple chunks
  * separated by delimiter line.
  * Each chunk will be added as an item in the list
  */
-static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const char *delim) {
+static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const char *delim)
+{
 	buffer_t buf;
 	raviX_buffer_init(&buf, 1024);
 	const char *cp = input;
@@ -66,9 +68,8 @@ static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const 
 			add_chunk(chunks, &buf);
 			count++;
 			raviX_buffer_reset(&buf);
-		}
-		else if (nextp) {
-			 raviX_buffer_add_bytes(&buf, cp, nextp-cp);
+		} else if (nextp) {
+			raviX_buffer_add_bytes(&buf, cp, nextp - cp);
 		}
 	}
 	if (raviX_buffer_len(&buf) > 0) {
@@ -83,7 +84,7 @@ static void init_chunks(struct chunk_data *chunks)
 {
 	raviX_allocator_init(&chunks->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
 			     sizeof(struct ptr_list) * 32);
-	raviX_allocator_init(&chunks->string_allocator, "strings", 0, sizeof(double), 1024);
+	raviX_allocator_init(&chunks->string_allocator, "strings", 0, sizeof(double), 1024 * 1024);
 	chunks->list = NULL;
 }
 
@@ -95,10 +96,15 @@ static void destroy_chunks(struct chunk_data *chunks)
 
 static int do_code(const char *code, const struct arguments *args)
 {
+	int rc = 0;
+
+	if (args->gen_C) {
+		fprintf(stdout, "/*\n");
+	}
 	if (args->codump) {
 		printf("%s\n", code);
 	}
-	int rc = 0;
+
 	struct compiler_state *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
@@ -136,7 +142,8 @@ static int do_code(const char *code, const struct arguments *args)
 		raviX_output_linearizer(linearizer, stdout);
 	}
 	raviX_construct_cfg(linearizer->main_proc);
-	if (args->cfgdump && !args->remove_unreachable_blocks) { // Only dump out final CFG for now as we need it as clean output
+	if (args->cfgdump &&
+	    !args->remove_unreachable_blocks) { // Only dump out final CFG for now as we need it as clean output
 		raviX_output_cfg(linearizer->main_proc, stdout);
 	}
 	if (args->remove_unreachable_blocks) {
@@ -149,13 +156,14 @@ static int do_code(const char *code, const struct arguments *args)
 		}
 	}
 	if (args->gen_C) {
-		raviX_generate_C_tofile(linearizer, stdout);
+		fprintf(stdout, "\n*/\n");
+		raviX_generate_C_tofile(linearizer, args->mainfunc, stdout);
 	}
 
-	L_linend:
+L_linend:
 	raviX_destroy_linearizer(linearizer);
 
-	L_exit:
+L_exit:
 	raviX_destroy_compiler(container);
 
 	return rc;
@@ -169,7 +177,7 @@ int main(int argc, const char *argv[])
 	parse_arguments(&args, argc, argv);
 	init_chunks(&chunks);
 
-	const char* code = NULL;
+	const char *code = NULL;
 	if (args.code) {
 		code = args.code;
 	}
@@ -188,11 +196,13 @@ int main(int argc, const char *argv[])
 	}
 
 	const char *chunk = NULL;
-	FOR_EACH_PTR(chunks.list, chunk) {
+	FOR_EACH_PTR(chunks.list, chunk)
+	{
 		if (do_code(chunk, &args) != 0) {
 			rc = 1;
 		}
-	} END_FOR_EACH_PTR(chunk)
+	}
+	END_FOR_EACH_PTR(chunk)
 
 L_exit:
 	destroy_arguments(&args);

@@ -6,6 +6,6 @@
 #include "linearizer.h"
 
 RAVICOMP_EXPORT int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface);
-RAVICOMP_EXPORT void raviX_generate_C_tofile(struct linearizer_state *linearizer, FILE *fp);
+RAVICOMP_EXPORT void raviX_generate_C_tofile(struct linearizer_state *linearizer, const char *mainfunc, FILE *fp);
 
 #endif
