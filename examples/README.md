@@ -1,6 +1,7 @@
 # Examples
 
 This folder contains examples of code that can be compiled AOT and run via Ravi.
+Note that these examples can also be JIT compiled - for an example of how that works, please see [21_matrixmul.lua](https://github.com/dibyendumajumdar/ravi/blob/master/tests/comptests/inputs/21_matrixmul.lua).
 
 The examples assume that Ravi and Ravi Compiler have been built in parallel folders, and the
 executables are available in `build` folders.
