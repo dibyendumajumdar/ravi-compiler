@@ -776,10 +776,7 @@ static inline unsigned num_temps(struct proc *proc) { return proc->temp_pseudos.
  * Note that this is the number of slots that is known to the compiler - at runtime additional
  * stack space may be needed when making function calls - that is not accounted for here.
  */
-static unsigned compute_max_stack_size(struct proc *proc)
-{
-	return num_locals(proc) + num_temps(proc);
-}
+static unsigned compute_max_stack_size(struct proc *proc) { return num_locals(proc) + num_temps(proc); }
 
 /**
  * Computes the register offset from base. Input pseudo must be a local variable,
@@ -1888,6 +1885,60 @@ static int emit_generic_comp(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_arith(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n");
+	struct pseudo *target = get_target(insn, 0);
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, target, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	const char *oper = NULL;
+	const char *tm = NULL;
+	switch (insn->opcode) {
+	case op_add:
+		oper = "+";
+		tm = "TM_ADD";
+		break;
+
+	case op_sub:
+		oper = "-";
+		tm = "TM_SUB";
+		break;
+
+	case op_mul:
+		oper = "*";
+		tm = "TM_MUL";
+		break;
+
+	default:
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+	emit_reg_accessor(fn, get_operand(insn, 0), 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " TValue *rc = ");
+	emit_reg_accessor(fn, get_operand(insn, 1), 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " lua_Integer i = 0;\n");
+	raviX_buffer_add_string(&fn->body, " lua_Integer ic = 0;\n");
+	raviX_buffer_add_string(&fn->body, " lua_Number n = 0.0;\n");
+	raviX_buffer_add_string(&fn->body, " lua_Number nc = 0.0;\n");
+
+	raviX_buffer_add_string(&fn->body, " if (ttisinteger(rb) && ttisinteger(rc)) {\n");
+	raviX_buffer_add_string(&fn->body, "  i = ivalue(rb);\n");
+	raviX_buffer_add_string(&fn->body, "  ic = ivalue(rc);\n");
+	raviX_buffer_add_fstring(&fn->body, "  setivalue(ra, (i %s ic));\n", oper);
+	raviX_buffer_add_string(&fn->body, " } else if (tonumberns(rb, n) && tonumberns(rc, nc)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  setfltvalue(ra, (n %s nc));\n", oper);
+	raviX_buffer_add_string(&fn->body, " } else {\n");
+	raviX_buffer_add_fstring(&fn->body, "  luaT_trybinTM(L, rb, rc, ra, %s);\n", tm);
+	raviX_buffer_add_string(&fn->body, "  base = ci->u.l.base;\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -1965,8 +2016,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_bin_if(fn, insn);
 		break;
 
-		//	case	    op_sub:
-		//	case	    op_mul:
+	case op_add:
+	case op_sub:
+	case op_mul:
+		rc = emit_op_arith(fn, insn);
+		break;
+
 		//	case	    op_div:
 		//	case	    op_idiv:
 		//	case	    op_band:
@@ -1974,6 +2029,27 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		//	case	    op_bxor:
 		//	case	    op_shl:
 		//	case	    op_shr:
+		// case op_mod:
+		// case op_pow:
+		// case op_unm:
+
+		// case op_unmi:
+		// case op_unmf;
+
+		// case op_leni:
+
+		// case op_not:
+		// case op_bnot:
+
+		// op_tput
+		// op_tget
+
+		// op_iaput
+		// op_faput
+		// op_iaget
+		// op_faget
+
+		// op_string_concat
 
 	case op_eq:
 	case op_lt:
@@ -2103,7 +2179,8 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 	raviX_buffer_add_fstring(mb, " f->k = luaM_newvector(L, %u, TValue);\n", proc->num_strconstants);
 	raviX_buffer_add_fstring(mb, " f->sizek = %u;\n", proc->num_strconstants);
 	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", proc->num_strconstants);
-	raviX_buffer_add_string(mb, "  setnilvalue(&f->k[i]);\n"); // Do this in case there is a problem allocating the strings
+	raviX_buffer_add_string(
+	    mb, "  setnilvalue(&f->k[i]);\n"); // Do this in case there is a problem allocating the strings
 	struct set_entry *entry;
 	set_foreach(proc->constants, entry)
 	{
@@ -2133,7 +2210,8 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].idx = %u;\n", i, sym->upvalue.parent_upvalue_index);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].name = NULL;\n", i);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].usertype = NULL;\n", i);
-		raviX_buffer_add_fstring(mb, " f->upvalues[%u].ravi_type = %d;\n", i, sym->upvalue.value_type.type_code);
+		raviX_buffer_add_fstring(mb, " f->upvalues[%u].ravi_type = %d;\n", i,
+					 sym->upvalue.value_type.type_code);
 		i++;
 	}
 	END_FOR_EACH_PTR(sym);
@@ -2325,7 +2403,8 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 void raviX_generate_C_tofile(struct linearizer_state *linearizer, const char *mainfunc, FILE *fp)
 {
 	struct Ravi_CompilerInterface *ravi_interface = &stub_compilerInterface;
-	raviX_string_copy(ravi_interface->main_func_name, (mainfunc != NULL ? mainfunc : "setup"), sizeof ravi_interface->main_func_name);
+	raviX_string_copy(ravi_interface->main_func_name, (mainfunc != NULL ? mainfunc : "setup"),
+			  sizeof ravi_interface->main_func_name);
 	buffer_t mb;
 	raviX_buffer_init(&mb, 4096);
 	raviX_generate_C(linearizer, &mb, NULL);
