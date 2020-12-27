@@ -650,6 +650,24 @@ enum errorcode {
 	Error_type_mismatch,
 };
 
+// Opcodes used by luaO_arith
+enum {
+	LUA_OPADD = 0, /* ORDER TM, ORDER OP */
+	LUA_OPSUB = 1,
+	LUA_OPMUL = 2,
+	LUA_OPMOD = 3,
+	LUA_OPPOW = 4,
+	LUA_OPDIV = 5,
+	LUA_OPIDIV = 6,
+	LUA_OPBAND = 7,
+	LUA_OPBOR = 8,
+	LUA_OPBXOR = 9,
+	LUA_OPSHL = 10,
+	LUA_OPSHR = 11,
+	LUA_OPUNM = 12,
+	LUA_OPBNOT = 13
+};
+
 static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
@@ -1939,6 +1957,80 @@ static int emit_op_arith(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_not(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_target(insn), 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *rb = ");
+	emit_reg_accessor(fn, get_first_operand(insn), 0);
+	raviX_buffer_add_string(&fn->body, ";\n int result = l_isfalse(rb);\n");
+	raviX_buffer_add_string(&fn->body, " setbvalue(ra, result);\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_bnot(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_target(insn), 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *rb = ");
+	emit_reg_accessor(fn, get_first_operand(insn), 0);
+	raviX_buffer_add_string(&fn->body, ";\n raviV_op_bnot(L, ra, rb);\n");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_binary(struct function *fn, struct instruction *insn)
+{
+	int op = 0;
+	switch (insn->opcode) {
+	case op_div:
+		op = LUA_OPDIV;
+		break;
+	case op_idiv:
+		op = LUA_OPIDIV;
+		break;
+	case op_band:
+		op = LUA_OPBAND;
+		break;
+	case op_bor:
+		op = LUA_OPBOR;
+		break;
+	case op_bxor:
+		op = LUA_OPBXOR;
+		break;
+	case op_shl:
+		op = LUA_OPSHL;
+		break;
+	case op_shr:
+		op = LUA_OPSHR;
+		break;
+	case op_mod:
+		op = LUA_OPMOD;
+		break;
+	case op_pow:
+		op = LUA_OPPOW;
+		break;
+	default:
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, get_first_target(insn), 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *rb = ");
+	emit_reg_accessor(fn, get_operand(insn, 0), 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *rc = ");
+	emit_reg_accessor(fn, get_operand(insn, 1), 1);
+	raviX_buffer_add_fstring(&fn->body, ";\n luaO_arith(L, %d, rb, rc, rb);\n", op);
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -2022,24 +2114,31 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_op_arith(fn, insn);
 		break;
 
-		//	case	    op_div:
-		//	case	    op_idiv:
-		//	case	    op_band:
-		//	case	    op_bor:
-		//	case	    op_bxor:
-		//	case	    op_shl:
-		//	case	    op_shr:
-		// case op_mod:
-		// case op_pow:
+	case op_not:
+		rc = emit_op_not(fn, insn);
+		break;
+
+	case op_bnot:
+		rc = emit_op_bnot(fn, insn);
+		break;
+
+	case op_div:
+	case op_idiv:
+	case op_band:
+	case op_bor:
+	case op_bxor:
+	case op_shl:
+	case op_shr:
+	case op_mod:
+	case op_pow:
+		rc = emit_op_binary(fn, insn);
+
 		// case op_unm:
 
 		// case op_unmi:
 		// case op_unmf;
 
 		// case op_leni:
-
-		// case op_not:
-		// case op_bnot:
 
 		// op_tput
 		// op_tget
