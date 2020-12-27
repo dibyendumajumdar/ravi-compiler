@@ -1983,6 +1983,10 @@ static int emit_op_bnot(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+/*
+ * Following generates code that uses luaO_arith() calls
+ * so not very efficient.
+ */
 static int emit_op_binary(struct function *fn, struct instruction *insn)
 {
 	int op = 0;
@@ -2055,6 +2059,9 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_get_ikey:
 	case op_tget_skey:
 	case op_tget_ikey:
+	case op_tget: /* TODO custom codegen */
+	case op_iaget:
+	case op_faget:
 		rc = emit_op_load_table(fn, insn);
 		break;
 	case op_storeglobal:
@@ -2063,6 +2070,9 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_put_ikey:
 	case op_tput_skey:
 	case op_tput_ikey:
+	case op_tput: /* TODO custom codegen */
+	case op_iaput:
+	case op_faput:
 		rc = emit_op_store_table(fn, insn);
 		break;
 	case op_call:
@@ -2139,14 +2149,6 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		// case op_unmf;
 
 		// case op_leni:
-
-		// op_tput
-		// op_tget
-
-		// op_iaput
-		// op_faput
-		// op_iaget
-		// op_faget
 
 		// op_string_concat
 
