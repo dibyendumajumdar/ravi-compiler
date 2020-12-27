@@ -2035,6 +2035,73 @@ static int emit_op_binary(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_unmi_unmf(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *target = get_first_target(insn);
+	struct pseudo *operand = get_first_operand(insn);
+	int type = insn->opcode == op_unmi ? PSEUDO_TEMP_INT : PSEUDO_TEMP_FLT;
+	const char *setter = insn->opcode == op_unmi ? "setivalue" : "setfltvalue";
+	const char *getter = insn->opcode == op_unmi ? "ivalue" : "fltvalue";
+	raviX_buffer_add_string(&fn->body, "{\n");
+	if (operand->type != type && operand->type != PSEUDO_CONSTANT) {
+		raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+		emit_reg_accessor(fn, operand, 0);
+		raviX_buffer_add_string(&fn->body, ";\n");
+	}
+	if (target->type == type) {
+		raviX_buffer_add_string(&fn->body, " ");
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = -");
+		if (operand->type != type && operand->type != PSEUDO_CONSTANT) {
+			raviX_buffer_add_fstring(&fn->body, "%s(rb)", getter);
+		} else {
+			emit_varname_or_constant(fn, operand);
+		}
+		raviX_buffer_add_string(&fn->body, ";\n");
+	} else if (target->type == PSEUDO_TEMP_ANY || target->type == PSEUDO_SYMBOL ||
+		   target->type == PSEUDO_LUASTACK) {
+		raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_fstring(&fn->body, ";\n %s(ra, ", setter);
+		if (operand->type != type && operand->type != PSEUDO_CONSTANT) {
+			raviX_buffer_add_fstring(&fn->body, "%s(rb)", getter);
+		} else {
+			emit_varname_or_constant(fn, operand);
+		}
+		raviX_buffer_add_string(&fn->body, ");\n");
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_unm(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *target = get_first_target(insn);
+	struct pseudo *operand = get_first_operand(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " lua_Number n = 0.0;\n");
+	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+	emit_reg_accessor(fn, operand, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+	emit_reg_accessor(fn, target, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " if (ttisinteger(rb)) {\n");
+	raviX_buffer_add_string(&fn->body, "  lua_Integer i = ivalue(rb);\n");
+	raviX_buffer_add_string(&fn->body, "  setivalue(ra, intop(-, 0, i));\n");
+	raviX_buffer_add_string(&fn->body, " } else if (tonumberns(rb, n)) {\n");
+	raviX_buffer_add_string(&fn->body, "  setfltvalue(ra, luai_numunm(L, n));\n");
+	raviX_buffer_add_string(&fn->body, " } else {\n");
+	raviX_buffer_add_string(&fn->body, "  luaT_trybinTM(L, rb, rb, ra, TM_UNM);\n");
+	emit_reload_base(fn);
+	raviX_buffer_add_string(&fn->body, " }\n");
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -2053,6 +2120,8 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_movf:
 		rc = emit_op_mov(fn, insn);
 		break;
+	// case op_movfi:
+	// case op_movif:
 	case op_loadglobal:
 	case op_get:
 	case op_get_skey:
@@ -2142,11 +2211,16 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_mod:
 	case op_pow:
 		rc = emit_op_binary(fn, insn);
+		break;
 
-		// case op_unm:
+	case op_unmi:
+	case op_unmf:
+		rc = emit_op_unmi_unmf(fn, insn);
+		break;
 
-		// case op_unmi:
-		// case op_unmf;
+	case op_unm:
+		rc = emit_op_unm(fn, insn);
+		break;
 
 		// case op_leni:
 
