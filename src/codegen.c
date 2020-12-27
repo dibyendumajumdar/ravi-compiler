@@ -2102,6 +2102,66 @@ static int emit_op_unm(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_op_movfi(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *target = get_first_target(insn);
+	struct pseudo *operand = get_first_operand(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+	emit_reg_accessor(fn, operand, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " lua_Integer i = 0;\n");
+	raviX_buffer_add_string(&fn->body, " if (!tointeger(rb, &i)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_expected);
+	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	if (target->type == PSEUDO_TEMP_INT) {
+		raviX_buffer_add_string(&fn->body, " ");
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = i;\n");
+	} else if (target->type == PSEUDO_TEMP_ANY || target->type == PSEUDO_SYMBOL ||
+		   target->type == PSEUDO_LUASTACK) {
+		raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, ";\n setivalue(ra, i);\n");
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
+static int emit_op_movif(struct function *fn, struct instruction *insn)
+{
+	struct pseudo *target = get_first_target(insn);
+	struct pseudo *operand = get_first_operand(insn);
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
+	emit_reg_accessor(fn, operand, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, " lua_Number n = 0.0;\n");
+	raviX_buffer_add_string(&fn->body, " if (!tonumber(rb, &n)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_expected);
+	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, " }\n");
+	if (target->type == PSEUDO_TEMP_FLT) {
+		raviX_buffer_add_string(&fn->body, " ");
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = n;\n");
+	} else if (target->type == PSEUDO_TEMP_ANY || target->type == PSEUDO_SYMBOL ||
+		   target->type == PSEUDO_LUASTACK) {
+		raviX_buffer_add_string(&fn->body, " TValue *ra = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, ";\n setfltvalue(ra, n);\n");
+	} else {
+		assert(0);
+		return -1;
+	}
+	raviX_buffer_add_string(&fn->body, "}\n");
+	return 0;
+}
+
 static int output_instruction(struct function *fn, struct instruction *insn)
 {
 	int rc = 0;
@@ -2120,8 +2180,12 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	case op_movf:
 		rc = emit_op_mov(fn, insn);
 		break;
-	// case op_movfi:
-	// case op_movif:
+	case op_movfi:
+		rc = emit_op_movfi(fn, insn);
+		break;
+	case op_movif:
+		rc = emit_op_movif(fn, insn);
+		break;
 	case op_loadglobal:
 	case op_get:
 	case op_get_skey:
