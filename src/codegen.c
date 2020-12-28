@@ -2062,7 +2062,7 @@ static int emit_op_binary(struct function *fn, struct instruction *insn)
 	emit_reg_accessor(fn, get_operand(insn, 0), 0);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *rc = ");
 	emit_reg_accessor(fn, get_operand(insn, 1), 1);
-	raviX_buffer_add_fstring(&fn->body, ";\n luaO_arith(L, %d, rb, rc, rb);\n", op);
+	raviX_buffer_add_fstring(&fn->body, ";\n luaO_arith(L, %d, rb, rc, ra);\n", op);
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
