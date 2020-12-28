@@ -2266,3 +2266,87 @@ L13 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L13 -> L6
 }
 }
+return #{}
+
+function()
+--upvalues  _ENV*
+  return
+    --[unary expr start] any
+    #
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+function()
+--upvalues  _ENV*
+  return
+    --[unary expr start] any
+    #
+     { --[table constructor start] table
+     } --[table constructor end]
+    --[unary expr end]
+end
+define Proc%1
+L0 (entry)
+	NEWTABLE {T(0)}
+	LEN {T(0)} {T(1)}
+	RET {T(1)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWTABLE {T(0)}</TD></TR>
+<TR><TD>LEN {T(0)} {T(1)}</TD></TR>
+<TR><TD>RET {T(1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+return #(@integer[]{})
+
+function()
+--upvalues  _ENV*
+  return
+    --[unary expr start] any
+    #
+     --[suffixed expr start] any
+      --[primary start] any
+       --[unary expr start] any
+       @integer[]
+        { --[table constructor start] table
+        } --[table constructor end]
+       --[unary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+function()
+--upvalues  _ENV*
+  return
+    --[unary expr start] integer
+    #
+     --[suffixed expr start] integer[]
+      --[primary start] integer[]
+       --[unary expr start] integer[]
+       @integer[]
+        { --[table constructor start] integer[]
+        } --[table constructor end]
+       --[unary expr end]
+      --[primary end]
+     --[suffixed expr end]
+    --[unary expr end]
+end
+define Proc%1
+L0 (entry)
+	NEWIARRAY {T(0)}
+	LENi {T(0)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWIARRAY {T(0)}</TD></TR>
+<TR><TD>LENi {T(0)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}

@@ -935,8 +935,10 @@ static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pse
 		if (src->constant->type == RAVI_TNUMFLT) {
 			emit_varname(dst, &fn->body);
 			raviX_buffer_add_fstring(&fn->body, " = %.16g;\n", src->constant->n);
+		} else if (src->constant->type == RAVI_TNUMINT) {
+			emit_varname(dst, &fn->body);
+			raviX_buffer_add_fstring(&fn->body, " = (lua_Number)%lld;\n", src->constant->i);
 		} else {
-			// FIXME can we have int value?
 			assert(0);
 			return -1;
 		}
@@ -1508,6 +1510,38 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
+static int emit_bitop_ii(struct function *fn, struct instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n ");
+	struct pseudo *target = get_target(insn, 0);
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
+		emit_varname(target, &fn->body);
+		raviX_buffer_add_string(&fn->body, " = ");
+	} else {
+		raviX_buffer_add_string(&fn->body, "TValue *dst_reg = ");
+		emit_reg_accessor(fn, target, 0);
+		raviX_buffer_add_string(&fn->body, "; setivalue(dst_reg, ");
+	}
+	raviX_buffer_add_string(&fn->body, "luaV_shiftl(");
+	emit_varname_or_constant(fn, get_operand(insn, 0));
+	if (insn->opcode == op_shlii)
+		raviX_buffer_add_string(&fn->body, ", ");
+	else if (insn->opcode == op_shrii)
+		raviX_buffer_add_string(&fn->body, ", -");
+	else {
+		assert(0);
+		return -1;
+	}
+	emit_varname_or_constant(fn, get_operand(insn, 1));
+	raviX_buffer_add_string(&fn->body, ")");
+	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
+		raviX_buffer_add_string(&fn->body, ";\n}\n");
+	} else {
+		raviX_buffer_add_string(&fn->body, ");\n}\n");
+	}
+	return 0;
+}
+
 static int emit_bin_fi(struct function *fn, struct instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
@@ -1845,19 +1879,18 @@ static int emit_op_len(struct function *fn, struct instruction *insn)
 {
 	struct pseudo *obj = get_first_operand(insn);
 	struct pseudo *target = get_first_target(insn);
-
+	raviX_buffer_add_string(&fn->body, "{\n TValue *len = ");
+	emit_reg_accessor(fn, target, 0);
+	raviX_buffer_add_string(&fn->body, ";\n TValue *obj = ");
+	emit_reg_accessor(fn, obj, 0);
+	raviX_buffer_add_string(&fn->body, ";\n luaV_objlen(L, len, obj);\n");
+	emit_reload_base(fn);
 	if (target->type == PSEUDO_TEMP_INT) {
-		assert(0);
-		return -1;
-	} else {
-		raviX_buffer_add_string(&fn->body, "{\n TValue *len = ");
-		emit_reg_accessor(fn, target, 0);
-		raviX_buffer_add_string(&fn->body, ";\n TValue *obj = ");
-		emit_reg_accessor(fn, obj, 0);
-		raviX_buffer_add_string(&fn->body, ";\n luaV_objlen(L, len, obj);\n");
-		emit_reload_base(fn);
-		raviX_buffer_add_string(&fn->body, "}\n");
+		raviX_buffer_add_string(&fn->body, " ");
+		emit_varname_or_constant(fn, target);
+		raviX_buffer_add_string(&fn->body, " = ival0.value_.i;\n"); // FIXME use some accessor
 	}
+	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
 }
 
@@ -2227,8 +2260,10 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		rc = emit_bin_ii(fn, insn);
 		break;
 
-		//	case	    op_shlii:
-		//	case	    op_shrii:
+	case op_shlii:
+	case op_shrii:
+		rc = emit_bitop_ii(fn, insn);
+		break;
 
 	case op_eqii:
 	case op_ltii:
@@ -2344,6 +2379,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 		break;
 
 	case op_len:
+	case op_leni:
 		rc = emit_op_len(fn, insn);
 		break;
 

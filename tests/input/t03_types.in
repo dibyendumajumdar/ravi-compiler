@@ -54,3 +54,7 @@ function matmul(a: table, b: table)
   end
 return matmul
 #
+return #{}
+#
+return #(@integer[]{})
+#
