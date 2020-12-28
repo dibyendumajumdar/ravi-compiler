@@ -576,6 +576,7 @@ static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_nod
 			targetop = op_leni;
 		else
 			targetop = op_len;
+		subexpr_type = node->unary_expr.type.type_code;
 		break;
 	case UNOPR_TO_INTEGER:
 		targetop = subexpr_type != RAVI_TNUMINT ? op_toint : op_nop;
