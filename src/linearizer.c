@@ -261,7 +261,7 @@ static inline void remove_instruction(BasicBlock *block, Instruction *insn)
 
 Instruction *raviX_last_instruction(BasicBlock *block)
 {
-	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
+	if (raviX_ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
 	return (Instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
@@ -432,7 +432,7 @@ static Proc *allocate_proc(LinearizerState *linearizer, AstNode *function_expr)
 	assert(function_expr->type == EXPR_FUNCTION);
 	Proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
 	proc->function_expr = function_expr;
-	proc->id = ptrlist_size((struct ptr_list *)linearizer->all_procs)+1; // so that 0 is not assigned
+	proc->id = raviX_ptrlist_size((struct ptr_list *)linearizer->all_procs)+1; // so that 0 is not assigned
 	function_expr->function_expr.proc_id = proc->id;
 	ptrlist_add((struct ptr_list **)&linearizer->all_procs, proc, &linearizer->ptrlist_allocator);
 	if (linearizer->current_proc) {
@@ -1120,7 +1120,7 @@ static Pseudo *linearize_function_call_expression(Proc *proc, AstNode *expr,
 	}
 
 	AstNode *arg;
-	int argc = ptrlist_size((const struct ptr_list *)expr->function_call_expr.arg_list);
+	int argc = raviX_ptrlist_size((const struct ptr_list *)expr->function_call_expr.arg_list);
 	FOR_EACH_PTR(expr->function_call_expr.arg_list, arg)
 	{
 		argc -= 1;
@@ -1287,7 +1287,7 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 {
 	AstNode *expr;
 
-	int ne = ptrlist_size((const struct ptr_list *)expr_list);
+	int ne = raviX_ptrlist_size((const struct ptr_list *)expr_list);
 	struct node_info *valinfo = (struct node_info *)alloca(ne * sizeof(struct node_info));
 	Pseudo *last_val_pseudo = NULL;
 	int i = 0;
@@ -1370,7 +1370,7 @@ static void linearize_expression_statement(Proc *proc, AstNode *node)
 {
 	AstNode *var;
 
-	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
+	int nv = raviX_ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
 	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
 	int i = 0;
 	FOR_EACH_PTR(node->expression_stmt.var_expr_list, var)
@@ -1389,7 +1389,7 @@ static void linearize_local_statement(Proc *proc, AstNode *stmt)
 {
 	LuaSymbol *sym;
 
-	int nv = ptrlist_size((const struct ptr_list *)stmt->local_stmt.var_list);
+	int nv = raviX_ptrlist_size((const struct ptr_list *)stmt->local_stmt.var_list);
 	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
 	int i = 0;
 
@@ -1451,7 +1451,7 @@ static void linearize_expr_list(Proc *proc, AstNodeList *expr_list, Instruction 
 				PseudoList **pseudo_list)
 {
 	AstNode *expr;
-	int ne = ptrlist_size((const struct ptr_list *)expr_list);
+	int ne = raviX_ptrlist_size((const struct ptr_list *)expr_list);
 	FOR_EACH_PTR(expr_list, expr)
 	{
 		ne -= 1;
@@ -1655,7 +1655,7 @@ static void linearize_label_statement(Proc *proc, AstNode *node)
 	else {
 		block = proc->current_bb;
 		/* If the current block is empty then we can use it as the label target */
-		if (ptrlist_size((const struct ptr_list*)block->insns) > 0) {
+		if (raviX_ptrlist_size((const struct ptr_list *)block->insns) > 0) {
 			/* Create new block as label target */
 			block = create_block(proc);
 			start_block(proc, block);

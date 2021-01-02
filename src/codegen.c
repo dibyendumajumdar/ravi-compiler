@@ -700,22 +700,22 @@ static inline Pseudo *get_last_target(Instruction *insn)
 
 static inline unsigned get_num_operands(Instruction *insn)
 {
-	return ptrlist_size((const struct ptr_list *)insn->operands);
+	return raviX_ptrlist_size((const struct ptr_list *)insn->operands);
 }
 
 static inline unsigned get_num_targets(Instruction *insn)
 {
-	return ptrlist_size((const struct ptr_list *)insn->targets);
+	return raviX_ptrlist_size((const struct ptr_list *)insn->targets);
 }
 
 static inline unsigned get_num_instructions(BasicBlock *bb)
 {
-	return ptrlist_size((const struct ptr_list *)bb->insns);
+	return raviX_ptrlist_size((const struct ptr_list *)bb->insns);
 }
 
 static inline unsigned get_num_childprocs(Proc *proc)
 {
-	return ptrlist_size((const struct ptr_list *)proc->procs);
+	return raviX_ptrlist_size((const struct ptr_list *)proc->procs);
 }
 
 /**
@@ -1132,7 +1132,7 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 		raviX_buffer_add_string(&fn->body, "}\n");
 	}
 #else
-	if (ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+	if (raviX_ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
 		raviX_buffer_add_string(&fn->body, "luaF_close(L, base);\n");
 	}
 #endif
@@ -2433,12 +2433,12 @@ static int output_basic_block(struct function *fn, BasicBlock *bb)
 
 static inline unsigned get_num_params(Proc *proc)
 {
-	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
+	return raviX_ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
 }
 
 static inline unsigned get_num_upvalues(Proc *proc)
 {
-	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
+	return raviX_ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
 }
 
 /* Generate code for setting up a Lua Proto structure, recursively for each child function */

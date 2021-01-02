@@ -254,7 +254,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, AstNode *functi
 	upvalue->symbol_type = SYM_UPVALUE;
 	upvalue->upvalue.target_variable = sym;
 	upvalue->upvalue.target_function = function;
-	upvalue->upvalue.upvalue_index = ptrlist_size(
+	upvalue->upvalue.upvalue_index = raviX_ptrlist_size(
 	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
@@ -1357,7 +1357,7 @@ static void limit_function_call_results(struct parser_state *parser, int num_lhs
 	AstNode *call_expr = has_function_call(last_expr);
 	if (!call_expr)
 		return;
-	int num_expr = ptrlist_size((const struct ptr_list *)expr_list);
+	int num_expr = raviX_ptrlist_size((const struct ptr_list *)expr_list);
 	if (num_expr < num_lhs) {
 		call_expr->function_call_expr.num_results = (num_lhs - num_expr) + 1;
 	}
@@ -1447,7 +1447,7 @@ static AstNode *parse_expression_statement(struct parser_state *parser)
 		current_list = NULL;
 		parse_expression_list(parser, &current_list);
 		limit_function_call_results(
-		    parser, ptrlist_size((const struct ptr_list *)stmt->expression_stmt.var_expr_list), current_list);
+		    parser, raviX_ptrlist_size((const struct ptr_list *)stmt->expression_stmt.var_expr_list), current_list);
 	}
 	stmt->expression_stmt.expr_list = current_list;
 	// TODO Check that if not assignment then it is a function call

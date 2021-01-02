@@ -67,7 +67,7 @@ typedef struct PtrListIterator {
 } PtrListIterator;
 
 /* The ptr list */
-extern int ptrlist_size(const struct ptr_list *self);
+extern int raviX_ptrlist_size(const struct ptr_list *self);
 extern void **ptrlist_add(struct ptr_list **self, void *ptr, Allocator *ptr_list_allocator);
 extern void *ptrlist_nth_entry(struct ptr_list *list, unsigned int idx);
 extern void *ptrlist_first(struct ptr_list *list);

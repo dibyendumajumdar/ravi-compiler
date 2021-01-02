@@ -169,14 +169,14 @@ void ptrlist_iter_mark_deleted(PtrListIterator *self)
 	self->__list->rm_++;
 }
 
-int ptrlist_size(const struct ptr_list *head)
+int raviX_ptrlist_size(const struct ptr_list *self)
 {
 	int nr = 0;
-	if (head) {
-		const struct ptr_list *list = head;
+	if (self) {
+		const struct ptr_list *list = self;
 		do {
 			nr += list->nr_ - list->rm_;
-		} while ((list = list->next_) != head);
+		} while ((list = list->next_) != self);
 	}
 	return nr;
 }
