@@ -308,7 +308,7 @@ typedef struct IndexExpression IndexExpression;
 typedef struct UnaryExpression UnaryExpression;
 typedef struct BinaryExpression BinaryExpression;
 typedef struct FunctionExpression FunctionExpression;
-struct table_element_assignment_expression;
+typedef struct TableElementAssignmentExpression TableElementAssignmentExpression;
 struct table_literal_expression;
 struct suffixed_expression;
 struct function_call_expression;
@@ -471,18 +471,18 @@ raviX_function_foreach_upvalue(const FunctionExpression *function_expression, vo
 
 /* table element assignment expression */
 RAVICOMP_EXPORT const struct var_type *
-raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression);
+raviX_table_element_assignment_expression_type(const TableElementAssignmentExpression *expression);
 RAVICOMP_EXPORT const struct expression *
-raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression);
+raviX_table_element_assignment_expression_key(const TableElementAssignmentExpression *expression);
 RAVICOMP_EXPORT const struct expression *
-raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression);
+raviX_table_element_assignment_expression_value(const TableElementAssignmentExpression *expression);
 
 /* table_literal_expression */
 RAVICOMP_EXPORT const struct var_type *
 raviX_table_literal_expression_type(const struct table_literal_expression *expression);
 RAVICOMP_EXPORT void raviX_table_literal_expression_foreach_element(
     const struct table_literal_expression *expression, void *userdata,
-    void (*callback)(void *, const struct table_element_assignment_expression *expr));
+    void (*callback)(void *, const TableElementAssignmentExpression *expr));
 
 /* suffixed_expression */
 RAVICOMP_EXPORT const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expression *expression);
@@ -524,7 +524,7 @@ RAVICOMP_EXPORT const IndexExpression *raviX_index_expression(const struct expre
 RAVICOMP_EXPORT const UnaryExpression *raviX_unary_expression(const struct expression *expr);
 RAVICOMP_EXPORT const BinaryExpression *raviX_binary_expression(const struct expression *expr);
 RAVICOMP_EXPORT const FunctionExpression *raviX_function_expression(const struct expression *expr);
-RAVICOMP_EXPORT const struct table_element_assignment_expression *
+RAVICOMP_EXPORT const TableElementAssignmentExpression *
 raviX_table_element_assignment_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct table_literal_expression *raviX_table_literal_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct suffixed_expression *raviX_suffixed_expression(const struct expression *expr);

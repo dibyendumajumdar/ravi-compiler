@@ -267,7 +267,7 @@ struct FunctionExpression {
 };
 /* Assign values in table constructor */
 /* EXPR_TABLE_ELEMENT_ASSIGN - used in table constructor */
-struct table_element_assignment_expression {
+struct TableElementAssignmentExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
 							else specifies index expression */
@@ -340,7 +340,7 @@ struct ast_node {
 		UnaryExpression unary_expr;
 		BinaryExpression binary_expr;
 		FunctionExpression function_expr; /* a literal expression whose result is a value of type function */
-		struct table_element_assignment_expression table_elem_assign_expr;
+		TableElementAssignmentExpression table_elem_assign_expr;
 		struct table_literal_expression table_expr;
 		struct suffixed_expression suffixed_expr;
 		struct function_call_expression function_call_expr;

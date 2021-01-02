@@ -20,7 +20,7 @@ static inline int zgetc(LexerState *z) { return z->n-- > 0 ? cast_uchar(*z->p++)
 static inline void next(LexerState *ls) { ls->current = zgetc(ls); }
 static inline bool currIsNewline(LexerState *ls) { return ls->current == '\n' || ls->current == '\r'; }
 
-static inline char lua_getlocaledecpoint() { return localeconv()->decimal_point[0]; }
+static inline char lua_getlocaledecpoint(void) { return localeconv()->decimal_point[0]; }
 
 #define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 /*Note: Following array was generated using utils/tokenstr.h */

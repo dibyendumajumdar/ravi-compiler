@@ -173,7 +173,7 @@ const FunctionExpression *raviX_function_expression(const struct expression *exp
 	assert(expr->type == EXPR_FUNCTION);
 	return &n(expr)->function_expr;
 }
-const struct table_element_assignment_expression *
+const TableElementAssignmentExpression *
 raviX_table_element_assignment_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_TABLE_ELEMENT_ASSIGN);
@@ -481,12 +481,12 @@ BinaryOperatorType raviX_binary_expression_operator(const BinaryExpression *expr
 	return expression->binary_op;
 }
 const struct var_type *
-raviX_table_element_assignment_expression_type(const struct table_element_assignment_expression *expression)
+raviX_table_element_assignment_expression_type(const TableElementAssignmentExpression *expression)
 {
 	return &expression->type;
 }
 const struct expression *
-raviX_table_element_assignment_expression_key(const struct table_element_assignment_expression *expression)
+raviX_table_element_assignment_expression_key(const TableElementAssignmentExpression *expression)
 {
 	if (!expression->key_expr)
 		return NULL;
@@ -494,7 +494,7 @@ raviX_table_element_assignment_expression_key(const struct table_element_assignm
 	return (const struct expression *)expression->key_expr;
 }
 const struct expression *
-raviX_table_element_assignment_expression_value(const struct table_element_assignment_expression *expression)
+raviX_table_element_assignment_expression_value(const TableElementAssignmentExpression *expression)
 {
 	assert(expression->value_expr->type >= EXPR_LITERAL && expression->value_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->value_expr;
@@ -505,7 +505,7 @@ const struct var_type *raviX_table_literal_expression_type(const struct table_li
 }
 void raviX_table_literal_expression_foreach_element(
     const struct table_literal_expression *expression, void *userdata,
-    void (*callback)(void *, const struct table_element_assignment_expression *expr))
+    void (*callback)(void *, const TableElementAssignmentExpression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->expr_list, node)

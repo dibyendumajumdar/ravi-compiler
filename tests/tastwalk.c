@@ -79,7 +79,7 @@ static void walk_symbol_expression(void *data, const SymbolExpression *symbol_ex
 
 static void
 walk_table_assignment_expression(void *data,
-				 const struct table_element_assignment_expression *table_element_assignment_expression)
+				 const TableElementAssignmentExpression *table_element_assignment_expression)
 {
 	const struct var_type *type =
 	    raviX_table_element_assignment_expression_type(table_element_assignment_expression);
