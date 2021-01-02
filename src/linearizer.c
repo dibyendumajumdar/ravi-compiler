@@ -57,7 +57,7 @@ static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_temp_pseudo);
  * Allocates a register by reusing a free'd register if possible otherwise
  * allocating a new one
  */
-static inline unsigned allocate_register(struct pseudo_generator *generator)
+static inline unsigned allocate_register(PseudoGenerator *generator)
 {
 	if (generator->free_pos > 0) {
 		return generator->free_regs[--generator->free_pos];
@@ -68,7 +68,7 @@ static inline unsigned allocate_register(struct pseudo_generator *generator)
 /**
  * Puts a register in the free list (must not already have been put there).
  */
-static inline void free_register(Proc *proc, struct pseudo_generator *generator, unsigned reg)
+static inline void free_register(Proc *proc, PseudoGenerator *generator, unsigned reg)
 {
 	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
 		/* TODO proper error handling */
@@ -346,7 +346,7 @@ a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
 */
 static Pseudo *allocate_temp_pseudo(Proc *proc, ravitype_t type)
 {
-	struct pseudo_generator *gen;
+	PseudoGenerator *gen;
 	enum PseudoType pseudo_type;
 	switch (type) {
 	case RAVI_TNUMFLT:
@@ -403,7 +403,7 @@ static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_local)
 	if (!free_local && pseudo->temp_for_local) {
 		return;
 	}
-	struct pseudo_generator *gen;
+	PseudoGenerator *gen;
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
 		gen = &proc->temp_flt_pseudos;

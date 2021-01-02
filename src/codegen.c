@@ -721,7 +721,7 @@ static inline unsigned get_num_childprocs(Proc *proc)
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
  */
-static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, TextBuffer *mb)
+static void emit_vars(const char *type, const char *prefix, PseudoGenerator *gen, TextBuffer *mb)
 {
 	if (gen->next_reg == 0)
 		return;

@@ -173,11 +173,11 @@ struct BasicBlock {
 };
 DECLARE_PTR_LIST(BasicBlockList, BasicBlock);
 
-struct pseudo_generator {
+typedef struct PseudoGenerator {
 	uint8_t next_reg; /* Next register if no free registers, initially 0 */
 	int16_t free_pos; /* number of values in free_regs */
 	uint8_t free_regs[256]; /* list of free registers */
-};
+} PseudoGenerator;
 
 struct Constant {
 	uint8_t type;	/* ravitype_t RAVI_TNUMINT, RAVI_TNUMFLT or RAVI_TSTRING */
@@ -205,10 +205,10 @@ struct Proc {
 	BasicBlock *current_break_target; /* track the current break target, previous target must be saved /
 						     restored in stack discipline */
 	Scope *current_break_scope;  /* as above track the block scope */
-	struct pseudo_generator local_pseudos;	  /* locals */
-	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
-	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
-	struct pseudo_generator temp_pseudos;	  /* All other temporaries */
+	PseudoGenerator local_pseudos;	  /* locals */
+	PseudoGenerator temp_int_pseudos; /* temporaries known to be integer type */
+	PseudoGenerator temp_flt_pseudos; /* temporaries known to be number type */
+	PseudoGenerator temp_pseudos;	  /* All other temporaries */
 	struct set *constants;			  /* constants used by this proc */
 	uint16_t num_intconstants;
 	uint16_t num_fltconstants;
