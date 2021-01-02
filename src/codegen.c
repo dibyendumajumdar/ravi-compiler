@@ -708,7 +708,7 @@ static inline unsigned get_num_targets(Instruction *insn)
 	return ptrlist_size((const struct ptr_list *)insn->targets);
 }
 
-static inline unsigned get_num_instructions(struct basic_block *bb)
+static inline unsigned get_num_instructions(BasicBlock *bb)
 {
 	return ptrlist_size((const struct ptr_list *)bb->insns);
 }
@@ -2404,14 +2404,14 @@ static int output_instructions(struct function *fn, InstructionList *list)
 	return rc;
 }
 
-static inline bool is_block_deleted(struct basic_block *bb)
+static inline bool is_block_deleted(BasicBlock *bb)
 {
 	return bb->index != ENTRY_BLOCK && bb->index != EXIT_BLOCK && get_num_instructions(bb) == 0;
 	// block was logically deleted if it has got zero instructions and
 	// it isn't the entry/exit block.
 }
 
-static int output_basic_block(struct function *fn, struct basic_block *bb)
+static int output_basic_block(struct function *fn, BasicBlock *bb)
 {
 	if (is_block_deleted(bb))
 		return 0;
@@ -2539,7 +2539,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 
 	initfn(&fn, proc, ravi_interface);
 
-	struct basic_block *bb;
+	BasicBlock *bb;
 	for (int i = 0; i < (int)proc->node_count; i++) {
 		bb = proc->nodes[i];
 		rc = output_basic_block(&fn, bb);

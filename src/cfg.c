@@ -13,7 +13,7 @@ int raviX_construct_cfg(struct proc *proc)
 {
 	struct graph *g = raviX_init_graph(ENTRY_BLOCK, EXIT_BLOCK, proc);
 	for (unsigned i = 0; i < proc->node_count; i++) {
-		struct basic_block *block = proc->nodes[i];
+		BasicBlock *block = proc->nodes[i];
 		Instruction *insn = raviX_last_instruction(block);
 		if (insn == NULL)
 			continue;
@@ -53,7 +53,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 	struct node_list *successors = raviX_successors(raviX_graph_node(g, nodeid));
 	if (!successors)
 		return;
-	struct basic_block *block = proc->nodes[nodeid];
+	BasicBlock *block = proc->nodes[nodeid];
 	if (ptrlist_size((const struct ptr_list *) block->insns) > 0) {
 		TextBuffer buf;
 		raviX_buffer_init(&buf, 1024);

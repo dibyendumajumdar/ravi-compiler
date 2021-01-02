@@ -40,14 +40,14 @@ static void handle_error(CompilerState *container, const char *msg)
 }
 
 static struct pseudo *linearize_expression(struct proc *proc, AstNode *expr);
-static struct basic_block *create_block(struct proc *proc);
-static void start_block(struct proc *proc, struct basic_block *bb);
+static BasicBlock *create_block(struct proc *proc);
+static void start_block(struct proc *proc, BasicBlock *bb);
 static void linearize_statement(struct proc *proc, AstNode *node);
 static void linearize_statement_list(struct proc *proc, AstNodeList *list);
 static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope);
 static void end_scope(LinearizerState *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct pseudo *pseudo);
-static bool is_block_terminated(struct basic_block *block);
+static bool is_block_terminated(BasicBlock *block);
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
 static void linearize_function(LinearizerState *linearizer);
 static Instruction *allocate_instruction(struct proc *proc, enum opcode op);
@@ -93,8 +93,8 @@ LinearizerState *raviX_init_linearizer(CompilerState *container)
 			     sizeof(double), sizeof(struct ptr_list) * 64);
 	raviX_allocator_init(&linearizer->pseudo_allocator, "pseudo_allocator", sizeof(struct pseudo), sizeof(double),
 			     sizeof(struct pseudo) * 128);
-	raviX_allocator_init(&linearizer->basic_block_allocator, "basic_block_allocator", sizeof(struct basic_block),
-			     sizeof(double), sizeof(struct basic_block) * 32);
+	raviX_allocator_init(&linearizer->basic_block_allocator, "basic_block_allocator", sizeof(BasicBlock),
+			     sizeof(double), sizeof(BasicBlock) * 32);
 	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(struct proc), sizeof(double),
 			     sizeof(struct proc) * 32);
 	raviX_allocator_init(&linearizer->unsized_allocator, "unsized_allocator", 0, sizeof(double), CHUNK);
@@ -253,13 +253,13 @@ static inline void add_instruction(struct proc *proc, Instruction *insn)
 	insn->block = proc->current_bb;
 }
 
-static inline void remove_instruction(struct basic_block *block, Instruction *insn)
+static inline void remove_instruction(BasicBlock *block, Instruction *insn)
 {
 	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
 	insn->block = NULL;
 }
 
-Instruction *raviX_last_instruction(struct basic_block *block)
+Instruction *raviX_last_instruction(BasicBlock *block)
 {
 	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
@@ -326,7 +326,7 @@ static struct pseudo *allocate_boolean_pseudo(struct proc *proc, bool is_true)
 	return pseudo;
 }
 
-static struct pseudo *allocate_block_pseudo(struct proc *proc, struct basic_block *block)
+static struct pseudo *allocate_block_pseudo(struct proc *proc, BasicBlock *block)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_BLOCK;
@@ -646,8 +646,8 @@ static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct ps
 	return target;
 }
 
-static void instruct_cbr(struct proc *proc, struct pseudo *condition_pseudo, struct basic_block *true_block,
-			 struct basic_block *false_block)
+static void instruct_cbr(struct proc *proc, struct pseudo *condition_pseudo, BasicBlock *true_block,
+			 BasicBlock *false_block)
 {
 	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
 	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
@@ -705,8 +705,8 @@ static struct pseudo *linearize_bool(struct proc *proc, AstNode *node, bool is_a
 	AstNode *e1 = node->binary_expr.expr_left;
 	AstNode *e2 = node->binary_expr.expr_right;
 
-	struct basic_block *first_block = create_block(proc);
-	struct basic_block *end_block = create_block(proc);
+	BasicBlock *first_block = create_block(proc);
+	BasicBlock *end_block = create_block(proc);
 
 	struct pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
 	struct pseudo *operand1 = linearize_expression(proc, e1);
@@ -1475,7 +1475,7 @@ static void linearize_return(struct proc *proc, AstNode *node)
 
 /* A block is considered terminated if the last instruction is
    a return or a branch */
-static bool is_block_terminated(struct basic_block *block)
+static bool is_block_terminated(BasicBlock *block)
 {
 	Instruction *last_insn = raviX_last_instruction(block);
 	if (last_insn == NULL)
@@ -1485,16 +1485,16 @@ static bool is_block_terminated(struct basic_block *block)
 	return false;
 }
 
-static void linearize_test_cond(struct proc *proc, AstNode *node, struct basic_block *true_block,
-				struct basic_block *false_block)
+static void linearize_test_cond(struct proc *proc, AstNode *node, BasicBlock *true_block,
+				BasicBlock *false_block)
 {
 	struct pseudo *condition_pseudo = linearize_expression(proc, node->test_then_block.condition);
 	instruct_cbr(proc, condition_pseudo, true_block, false_block);
 }
 
 /* linearize the 'else if' block */
-static void linearize_test_then(struct proc *proc, AstNode *node, struct basic_block *true_block,
-				struct basic_block *end_block)
+static void linearize_test_then(struct proc *proc, AstNode *node, BasicBlock *true_block,
+				BasicBlock *end_block)
 {
 	start_block(proc, true_block);
 	start_scope(proc->linearizer, proc, node->test_then_block.test_then_scope);
@@ -1558,8 +1558,8 @@ Bend:
 // clang-format on
 static void linearize_if_statement(struct proc *proc, AstNode *ifnode)
 {
-	struct basic_block *end_block = NULL;
-	struct basic_block *else_block = NULL;
+	BasicBlock *end_block = NULL;
+	BasicBlock *else_block = NULL;
 	BasicBlockList *if_blocks = NULL;
 	BasicBlockList *if_true_blocks = NULL;
 	AstNodeList *if_else_stmts = ifnode->if_stmt.if_condition_list;
@@ -1569,14 +1569,14 @@ static void linearize_if_statement(struct proc *proc, AstNode *ifnode)
 	AstNode *this_node;
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
-		struct basic_block *block = create_block(proc);
+		BasicBlock *block = create_block(proc);
 		ptrlist_add((struct ptr_list **)&if_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(this_node)
 
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
-		struct basic_block *block = create_block(proc);
+		BasicBlock *block = create_block(proc);
 		ptrlist_add((struct ptr_list **)&if_true_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(this_node)
@@ -1587,9 +1587,9 @@ static void linearize_if_statement(struct proc *proc, AstNode *ifnode)
 
 	end_block = create_block(proc);
 
-	struct basic_block *true_block = NULL;
-	struct basic_block *false_block = NULL;
-	struct basic_block *block = NULL;
+	BasicBlock *true_block = NULL;
+	BasicBlock *false_block = NULL;
+	BasicBlock *block = NULL;
 
 	{
 		PREPARE_PTR_LIST(if_blocks, block);
@@ -1645,7 +1645,7 @@ encountered a goto statement but we did not know the block then.
 */
 static void linearize_label_statement(struct proc *proc, AstNode *node)
 {
-	struct basic_block* block;
+	BasicBlock* block;
 	if (node->label_stmt.symbol->label.pseudo != NULL) {
 		/* This means the block got created when we saw the goto statement, so we just need to make it current */
 		assert(node->label_stmt.symbol->label.pseudo->block != NULL);
@@ -1714,7 +1714,7 @@ static Scope *find_min_closing_block(Scope *block, Scope *target_block)
  * Checks if a basic block is already closed - for now we check if the last
  * instruction in the block is op_ret, which also handles closing of up-values.
  */
-static bool is_already_closed(struct proc *proc, struct basic_block *block)
+static bool is_already_closed(struct proc *proc, BasicBlock *block)
 {
 	Instruction *last_insn = raviX_last_instruction(block);
 	if (last_insn == NULL)
@@ -1735,12 +1735,12 @@ static bool is_already_closed(struct proc *proc, struct basic_block *block)
  * such as when processing goto or break statemnt where the close instruction must be added to the
  * the goto / break target block.
  */
-static void instruct_close(struct proc *proc, struct basic_block *block, Scope *scope)
+static void instruct_close(struct proc *proc, BasicBlock *block, Scope *scope)
 {
 	if (is_already_closed(proc, block))
 		return;
 	/* temporarily make block current */
-	struct basic_block *prev_current = proc->current_bb;
+	BasicBlock *prev_current = proc->current_bb;
 	proc->current_bb = block;
 
 	LuaSymbol *symbol;
@@ -1948,11 +1948,11 @@ static void linearize_for_num_statement_positivestep(struct proc *proc, AstNode 
 	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
 
-	struct basic_block *L1 = create_block(proc);
-	struct basic_block *L2 = create_block(proc);
-	struct basic_block *Lbody = create_block(proc);
-	struct basic_block *Lend = create_block(proc);
-	struct basic_block *previous_break_target = proc->current_break_target;
+	BasicBlock *L1 = create_block(proc);
+	BasicBlock *L2 = create_block(proc);
+	BasicBlock *Lbody = create_block(proc);
+	BasicBlock *Lend = create_block(proc);
+	BasicBlock *previous_break_target = proc->current_break_target;
 	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = Lend;
 	proc->current_break_scope = proc->current_scope;
@@ -2071,12 +2071,12 @@ static void linearize_for_num_statement(struct proc *proc, AstNode *node)
 	struct pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo);
 
-	struct basic_block *L1 = create_block(proc);
-	struct basic_block *L2 = create_block(proc);
-	struct basic_block *L3 = create_block(proc);
-	struct basic_block *Lbody = create_block(proc);
-	struct basic_block *Lend = create_block(proc);
-	struct basic_block *previous_break_target = proc->current_break_target;
+	BasicBlock *L1 = create_block(proc);
+	BasicBlock *L2 = create_block(proc);
+	BasicBlock *L3 = create_block(proc);
+	BasicBlock *Lbody = create_block(proc);
+	BasicBlock *Lend = create_block(proc);
+	BasicBlock *previous_break_target = proc->current_break_target;
 	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = Lend;
 	proc->current_break_scope = proc->current_scope;
@@ -2123,10 +2123,10 @@ static void linearize_for_num_statement(struct proc *proc, AstNode *node)
 
 static void linearize_while_statment(struct proc *proc, AstNode *node)
 {
-	struct basic_block *test_block = create_block(proc);
-	struct basic_block *body_block = create_block(proc);
-	struct basic_block *end_block = create_block(proc);
-	struct basic_block *previous_break_target = proc->current_break_target;
+	BasicBlock *test_block = create_block(proc);
+	BasicBlock *body_block = create_block(proc);
+	BasicBlock *end_block = create_block(proc);
+	BasicBlock *previous_break_target = proc->current_break_target;
 	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = end_block;
 	proc->current_break_scope = node->while_or_repeat_stmt.loop_scope;
@@ -2267,21 +2267,21 @@ static void linearize_statement(struct proc *proc, AstNode *node)
 /**
  * Creates and initializes a basic block to be an empty block. Returns the new basic block.
  */
-static struct basic_block *create_block(struct proc *proc)
+static BasicBlock *create_block(struct proc *proc)
 {
 	if (proc->node_count >= proc->allocated) {
 		unsigned new_size = proc->allocated + 25;
-		struct basic_block **new_data =
-		    raviX_allocator_allocate(&proc->linearizer->unsized_allocator, new_size * sizeof(struct basic_block *));
+		BasicBlock **new_data =
+		    raviX_allocator_allocate(&proc->linearizer->unsized_allocator, new_size * sizeof(BasicBlock *));
 		assert(new_data != NULL);
 		if (proc->node_count > 0) {
-			memcpy(new_data, proc->nodes, proc->allocated * sizeof(struct basic_block *));
+			memcpy(new_data, proc->nodes, proc->allocated * sizeof(BasicBlock *));
 		}
 		proc->allocated = new_size;
 		proc->nodes = new_data;
 	}
 	assert(proc->node_count < proc->allocated);
-	struct basic_block *new_block = raviX_allocator_allocate(&proc->linearizer->basic_block_allocator, 0);
+	BasicBlock *new_block = raviX_allocator_allocate(&proc->linearizer->basic_block_allocator, 0);
 	/* note that each block must have an index that can be used to access the block as nodes[index] */
 	new_block->index = proc->node_count;
 	proc->nodes[proc->node_count++] = new_block;
@@ -2296,7 +2296,7 @@ static struct basic_block *create_block(struct proc *proc)
  *
  * All future instructions will be added to the end of the new current block
  */
-static void start_block(struct proc *proc, struct basic_block *bb_to_start)
+static void start_block(struct proc *proc, BasicBlock *bb_to_start)
 {
 	// printf("Starting block %d\n", bb_to_start->index);
 	if (proc->current_bb && !is_block_terminated(proc->current_bb)) {
@@ -2312,9 +2312,9 @@ static void start_block(struct proc *proc, struct basic_block *bb_to_start)
 static void initialize_graph(struct proc *proc)
 {
 	assert(proc != NULL);
-	struct basic_block *entry = create_block(proc);
+	BasicBlock *entry = create_block(proc);
 	assert(entry->index == ENTRY_BLOCK);
-	struct basic_block *exit = create_block(proc);
+	BasicBlock *exit = create_block(proc);
 	assert(exit->index == EXIT_BLOCK);
 	start_block(proc, entry);
 }
@@ -2543,7 +2543,7 @@ static void output_instructions(InstructionList *list, TextBuffer *mb, const cha
 	END_FOR_EACH_PTR(insn)
 }
 
-static void output_basic_block(struct proc *proc, struct basic_block *bb, TextBuffer *mb)
+static void output_basic_block(struct proc *proc, BasicBlock *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, "L%d", bb->index);
 	if (bb->index == ENTRY_BLOCK) {
@@ -2556,7 +2556,7 @@ static void output_basic_block(struct proc *proc, struct basic_block *bb, TextBu
 	output_instructions(bb->insns, mb, "\t", "\n");
 }
 
-void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, TextBuffer *mb)
+void raviX_output_basic_block_as_table(struct proc *proc, BasicBlock *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_string(mb, "<TABLE BORDER=\"1\" CELLBORDER=\"0\">\n");
 	raviX_buffer_add_fstring(mb, "<TR><TD><B>L%d</B></TD></TR>\n", bb->index);
@@ -2567,7 +2567,7 @@ void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb
 
 static void output_proc(struct proc *proc, TextBuffer *mb)
 {
-	struct basic_block *bb;
+	BasicBlock *bb;
 	raviX_buffer_add_fstring(mb, "define Proc%%%d\n", proc->id);
 	for (int i = 0; i < (int)proc->node_count; i++) {
 		bb = proc->nodes[i];

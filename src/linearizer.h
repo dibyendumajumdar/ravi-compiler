@@ -14,7 +14,7 @@ Linearizer component is responsible for translating the abstract syntax tree to
 a Linear intermediate representation (IR).
 */
 typedef struct Instruction Instruction;
-struct basic_block;
+typedef struct BasicBlock BasicBlock;
 struct proc;
 struct constant;
 
@@ -152,7 +152,7 @@ struct pseudo {
 		const struct constant *constant; /* PSEUDO_CONSTANT */
 		LuaSymbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
 		struct proc *proc;		 /* PSEUDO_PROC */
-		struct basic_block *block;	 /* PSEUDO_BLOCK */
+		BasicBlock *block;	 /* PSEUDO_BLOCK */
 		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
 		int stackidx; /* PSEUDO_LUASTACK */
 	};
@@ -163,15 +163,15 @@ struct Instruction {
 	unsigned opcode : 8;
 	PseudoList *operands;
 	PseudoList *targets;
-	struct basic_block *block; /* owning block */
+	BasicBlock *block; /* owning block */
 };
 
 /* Basic block */
-struct basic_block {
+struct BasicBlock {
 	nodeId_t index; /* The index of the block is a key to enable retrieving the block from its container */
 	InstructionList *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
 };
-DECLARE_PTR_LIST(BasicBlockList, struct basic_block);
+DECLARE_PTR_LIST(BasicBlockList, BasicBlock);
 
 struct pseudo_generator {
 	uint8_t next_reg; /* Next register if no free registers, initially 0 */
@@ -194,15 +194,15 @@ struct constant {
 struct proc {
 	unsigned node_count;
 	unsigned allocated;
-	struct basic_block **nodes;
+	BasicBlock **nodes;
 	uint32_t id; /* ID for the proc */
 	LinearizerState *linearizer;
 	ProcList *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
 	AstNode *function_expr; /* function ast that we are compiling */
 	Scope *current_scope;
-	struct basic_block *current_bb;
-	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /
+	BasicBlock *current_bb;
+	BasicBlock *current_break_target; /* track the current break target, previous target must be saved /
 						     restored in stack discipline */
 	Scope *current_break_scope;  /* as above track the block scope */
 	struct pseudo_generator local_pseudos;	  /* locals */
@@ -234,9 +234,9 @@ struct LinearizerState {
 };
 
 void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
-void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, TextBuffer *mb);
+void raviX_output_basic_block_as_table(struct proc *proc, BasicBlock *bb, TextBuffer *mb);
 
-Instruction *raviX_last_instruction(struct basic_block *block);
+Instruction *raviX_last_instruction(BasicBlock *block);
 struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg);
 const char *raviX_opcode_name(unsigned int opcode);
 
