@@ -81,7 +81,7 @@ Lretry:
 	return NULL;
 }
 
-void *ptrlist_nth_entry(struct ptr_list *list, unsigned int idx)
+void *raviX_ptrlist_nth_entry(struct ptr_list *list, unsigned int idx)
 {
 	struct ptr_list *head = list;
 	if (!head)

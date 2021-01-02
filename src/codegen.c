@@ -670,7 +670,7 @@ enum {
 
 static inline Pseudo *get_operand(Instruction *insn, unsigned idx)
 {
-	return (Pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
+	return (Pseudo *)raviX_ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
 }
 
 static inline Pseudo *get_first_operand(Instruction *insn)
@@ -685,7 +685,7 @@ static inline Pseudo *get_last_operand(Instruction *insn)
 
 static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 {
-	return (Pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+	return (Pseudo *)raviX_ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
 }
 
 static inline Pseudo *get_first_target(Instruction *insn)

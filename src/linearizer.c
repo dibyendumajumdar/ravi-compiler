@@ -1913,10 +1913,10 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 {
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
-	AstNode *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
-	AstNode *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
-	AstNode *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
-	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
+	AstNode *index_var_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	AstNode *limit_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
+	AstNode *step_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	LuaSymbol *var_sym = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
 		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
@@ -2009,7 +2009,7 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 	END_FOR_EACH_PTR(expr)
 
 	/* Check if we can optimize */
-	AstNode *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	AstNode *step_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
 	{
 		bool step_known_positive = false;
 //		bool step_known_negative = false;
@@ -2032,9 +2032,9 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 	/* Default case where we do not know if step is negative or positive */
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
-	AstNode *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
-	AstNode *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
-	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
+	AstNode *index_var_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	AstNode *limit_expr = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
+	LuaSymbol *var_sym = raviX_ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
 		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
