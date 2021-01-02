@@ -316,7 +316,7 @@ typedef struct FunctionCallExpression FunctionCallExpression;
 typedef struct Scope Scope;
 
 /* Types of symbols */
-enum symbol_type {
+enum SymbolType {
 	SYM_LOCAL,   /* lua_variable_symbol */
 	SYM_UPVALUE, /* lua_upvalue_symbol */
 	SYM_GLOBAL,  /* lua_variable_symbol, Global symbols are never added to a scope so they are always looked up */
@@ -535,7 +535,7 @@ RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope);
 RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
 						void (*callback)(void *userdata, const struct lua_symbol *symbol));
 
-RAVICOMP_EXPORT enum symbol_type raviX_symbol_type(const struct lua_symbol *symbol);
+RAVICOMP_EXPORT enum SymbolType raviX_symbol_type(const struct lua_symbol *symbol);
 /* symbol downcast */
 RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol);
 RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const struct lua_symbol *symbol);

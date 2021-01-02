@@ -574,7 +574,7 @@ RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userda
 	FOR_EACH_PTR(scope->symbol_list, symbol) { callback(userdata, symbol); }
 	END_FOR_EACH_PTR(node)
 }
-enum symbol_type raviX_symbol_type(const struct lua_symbol *symbol) { return symbol->symbol_type; }
+enum SymbolType raviX_symbol_type(const struct lua_symbol *symbol) { return symbol->symbol_type; }
 const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_GLOBAL || symbol->symbol_type == SYM_LOCAL);

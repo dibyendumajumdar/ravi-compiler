@@ -143,7 +143,7 @@ struct lua_upvalue_symbol {
 };
 /* A symbol is a name recognised in Ravi/Lua code*/
 struct lua_symbol {
-	enum symbol_type symbol_type;
+	enum SymbolType symbol_type;
 	union {
 		struct lua_variable_symbol variable;
 		struct lua_label_symbol label;
