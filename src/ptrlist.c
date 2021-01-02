@@ -576,7 +576,7 @@ static struct ptr_list *merge_block_seqs(struct ptr_list *b1, int n, struct ptr_
 	}
 }
 
-void ptrlist_sort(struct ptr_list **plist, void *userdata, int (*cmp)(void *, const void *, const void *))
+void raviX_ptrlist_sort(struct ptr_list **plist, void *userdata, int (*cmp)(void *, const void *, const void *))
 {
 	struct ptr_list *head = *plist, *list = head;
 	int blocks = 1;
@@ -677,9 +677,9 @@ static int test_sort()
 	}
 	if (ptrlist_size(int_list) != N)
 		return 1;
-	ptrlist_sort(&int_list, NULL, int_cmp);
+	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 	// Sort already sorted stuff.
-	ptrlist_sort(&int_list, NULL, int_cmp);
+	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 
 	int *p = NULL;
 	PtrListIterator iter = ptrlist_forward_iterator(int_list);
@@ -706,7 +706,7 @@ static int test_sort()
 		}
 		l2 = l2->next_;
 	} while (l2 != l);
-	ptrlist_sort(&int_list, NULL, int_cmp);
+	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 
 	p = NULL;
 	iter = ptrlist_forward_iterator(int_list);
