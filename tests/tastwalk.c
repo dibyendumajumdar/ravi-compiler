@@ -219,7 +219,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_GOTO: {
-		const struct goto_statement *goto_statement = raviX_goto_statement(statement);
+		const GotoStatement *goto_statement = raviX_goto_statement(statement);
 		if (!raviX_goto_statement_is_break(goto_statement)) {
 			const StringObject *goto_label = raviX_goto_statement_label_name(goto_statement);
 			(void)goto_label;
@@ -242,7 +242,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_LOCAL: {
-		const struct local_statement *local_statement = raviX_local_statement(statement);
+		const LocalStatement *local_statement = raviX_local_statement(statement);
 		raviX_local_statement_foreach_symbol(local_statement, data, walk_variable_symbol);
 		raviX_local_statement_foreach_expression(local_statement, data, walk_expression);
 		break;

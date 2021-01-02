@@ -166,13 +166,13 @@ struct LabelStatement {
 	struct lua_symbol *symbol;
 };
 /* STMT_GOTO */
-struct goto_statement {
+struct GotoStatement {
 	unsigned is_break : 1; /* is this a break statement */
 	const StringObject *name; /* target label, used to resolve the goto destination */
 	struct block_scope* goto_scope;   /* The scope of the goto statement */
 };
 /* STMT_LOCAL local variable declarations */
-struct local_statement {
+struct LocalStatement {
 	struct lua_symbol_list *var_list;
 	struct ast_node_list *expr_list;
 };
@@ -323,8 +323,8 @@ struct ast_node {
 	union {
 		ReturnStatement return_stmt; /*STMT_RETURN */
 		LabelStatement label_stmt; /* STMT_LABEL */
-		struct goto_statement goto_stmt; /* STMT_GOTO */
-		struct local_statement local_stmt; /* STMT_LOCAL local variable declarations */
+		GotoStatement goto_stmt; /* STMT_GOTO */
+		LocalStatement local_stmt; /* STMT_LOCAL local variable declarations */
 		struct expression_statement expression_stmt;
 		struct function_statement function_stmt;
 		struct do_statement do_stmt;

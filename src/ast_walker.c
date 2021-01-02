@@ -97,12 +97,12 @@ const LabelStatement *raviX_label_statement(const Statement *stmt)
 	assert(stmt->type == STMT_LABEL);
 	return &n(stmt)->label_stmt;
 }
-const struct goto_statement *raviX_goto_statement(const Statement *stmt)
+const GotoStatement *raviX_goto_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_GOTO);
 	return &n(stmt)->goto_stmt;
 }
-const struct local_statement *raviX_local_statement(const Statement *stmt)
+const LocalStatement *raviX_local_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_LOCAL);
 	return &n(stmt)->local_stmt;
@@ -217,17 +217,17 @@ const struct block_scope *raviX_label_statement_label_scope(const LabelStatement
 	return statement->symbol->label.block;
 }
 
-const StringObject *raviX_goto_statement_label_name(const struct goto_statement *statement)
+const StringObject *raviX_goto_statement_label_name(const GotoStatement *statement)
 {
 	return statement->name;
 }
-const struct block_scope *raviX_goto_statement_scope(const struct goto_statement *statement)
+const struct block_scope *raviX_goto_statement_scope(const GotoStatement *statement)
 {
 	return statement->goto_scope;
 }
-bool raviX_goto_statement_is_break(const struct goto_statement *statement) { return statement->is_break; }
+bool raviX_goto_statement_is_break(const GotoStatement *statement) { return statement->is_break; }
 
-void raviX_local_statement_foreach_expression(const struct local_statement *statement, void *userdata,
+void raviX_local_statement_foreach_expression(const LocalStatement *statement, void *userdata,
 					      void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;
@@ -238,7 +238,7 @@ void raviX_local_statement_foreach_expression(const struct local_statement *stat
 	}
 	END_FOR_EACH_PTR(node)
 }
-void raviX_local_statement_foreach_symbol(const struct local_statement *statement, void *userdata,
+void raviX_local_statement_foreach_symbol(const LocalStatement *statement, void *userdata,
 					  void (*callback)(void *, const struct lua_variable_symbol *expr))
 {
 	struct lua_symbol *symbol;
