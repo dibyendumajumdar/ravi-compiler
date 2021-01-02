@@ -235,7 +235,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_LABEL: {
-		const struct label_statement *label_statement = raviX_label_statement(statement);
+		const LabelStatement *label_statement = raviX_label_statement(statement);
 		const StringObject *label_name = raviX_label_statement_label_name(label_statement);
 		(void)label_name;
 		walk_scope(data, raviX_label_statement_label_scope(label_statement));
@@ -257,7 +257,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_RETURN: {
-		const struct return_statement *return_statement = raviX_return_statement(statement);
+		const ReturnStatement *return_statement = raviX_return_statement(statement);
 		raviX_return_statement_foreach_expression(return_statement, data, walk_expression);
 		break;
 	}

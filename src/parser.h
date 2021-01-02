@@ -158,11 +158,11 @@ struct block_scope {
 };
 
 /*STMT_RETURN */
-struct return_statement {
+struct ReturnStatement {
 	struct ast_node_list *expr_list;
 };
 /* STMT_LABEL */
-struct label_statement {
+struct LabelStatement {
 	struct lua_symbol *symbol;
 };
 /* STMT_GOTO */
@@ -321,8 +321,8 @@ The ast_node must be aligned with struct expression for expressions, and with St
 struct ast_node {
 	BASE_AST_FIELDS;
 	union {
-		struct return_statement return_stmt; /*STMT_RETURN */
-		struct label_statement label_stmt; /* STMT_LABEL */
+		ReturnStatement return_stmt; /*STMT_RETURN */
+		LabelStatement label_stmt; /* STMT_LABEL */
 		struct goto_statement goto_stmt; /* STMT_GOTO */
 		struct local_statement local_stmt; /* STMT_LOCAL local variable declarations */
 		struct expression_statement expression_stmt;

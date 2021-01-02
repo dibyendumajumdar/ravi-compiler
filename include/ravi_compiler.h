@@ -289,8 +289,8 @@ enum AstNodeType {
 };
 
 typedef struct Statement Statement;
-struct return_statement;
-struct label_statement;
+typedef struct ReturnStatement ReturnStatement;
+typedef struct LabelStatement LabelStatement;
 struct goto_statement;
 struct local_statement;
 struct expression_statement;
@@ -335,12 +335,12 @@ RAVICOMP_EXPORT const struct function_expression *
 raviX_ast_get_main_function(const CompilerState *compiler_state);
 
 /* return statement walking */
-RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const struct return_statement *statement, void *userdata,
+RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const ReturnStatement *statement, void *userdata,
 							       void (*callback)(void *, const struct expression *expr));
 
 /* label statement walking */
-RAVICOMP_EXPORT const StringObject *raviX_label_statement_label_name(const struct label_statement *statement);
-RAVICOMP_EXPORT const struct block_scope *raviX_label_statement_label_scope(const struct label_statement *statement);
+RAVICOMP_EXPORT const StringObject *raviX_label_statement_label_name(const LabelStatement *statement);
+RAVICOMP_EXPORT const struct block_scope *raviX_label_statement_label_scope(const LabelStatement *statement);
 
 /* goto statement walking */
 RAVICOMP_EXPORT const StringObject *raviX_goto_statement_label_name(const struct goto_statement *statement);
@@ -504,8 +504,8 @@ raviX_function_call_expression_foreach_argument(const struct function_call_expre
 
 /* Convert a statement to the correct type */
 RAVICOMP_EXPORT enum AstNodeType raviX_statement_type(const Statement *statement);
-RAVICOMP_EXPORT const struct return_statement *raviX_return_statement(const Statement *stmt);
-RAVICOMP_EXPORT const struct label_statement *raviX_label_statement(const Statement *stmt);
+RAVICOMP_EXPORT const ReturnStatement *raviX_return_statement(const Statement *stmt);
+RAVICOMP_EXPORT const LabelStatement *raviX_label_statement(const Statement *stmt);
 RAVICOMP_EXPORT const struct goto_statement *raviX_goto_statement(const Statement *stmt);
 RAVICOMP_EXPORT const struct local_statement *raviX_local_statement(const Statement *stmt);
 RAVICOMP_EXPORT const struct expression_statement *raviX_expression_statement(const Statement *stmt);

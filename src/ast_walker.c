@@ -87,12 +87,12 @@ const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_
 }
 
 #define n(v) ((struct ast_node *)v)
-const struct return_statement *raviX_return_statement(const Statement *stmt)
+const ReturnStatement *raviX_return_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_RETURN);
 	return &n(stmt)->return_stmt;
 }
-const struct label_statement *raviX_label_statement(const Statement *stmt)
+const LabelStatement *raviX_label_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_LABEL);
 	return &n(stmt)->label_stmt;
@@ -196,7 +196,7 @@ const struct function_call_expression *raviX_function_call_expression(const stru
 }
 #undef n
 
-void raviX_return_statement_foreach_expression(const struct return_statement *statement, void *userdata,
+void raviX_return_statement_foreach_expression(const ReturnStatement *statement, void *userdata,
 					       void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;
@@ -208,11 +208,11 @@ void raviX_return_statement_foreach_expression(const struct return_statement *st
 	END_FOR_EACH_PTR(node)
 }
 
-const StringObject *raviX_label_statement_label_name(const struct label_statement *statement)
+const StringObject *raviX_label_statement_label_name(const LabelStatement *statement)
 {
 	return statement->symbol->label.label_name;
 }
-const struct block_scope *raviX_label_statement_label_scope(const struct label_statement *statement)
+const struct block_scope *raviX_label_statement_label_scope(const LabelStatement *statement)
 {
 	return statement->symbol->label.block;
 }
