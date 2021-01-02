@@ -311,7 +311,7 @@ typedef struct FunctionExpression FunctionExpression;
 typedef struct TableElementAssignmentExpression TableElementAssignmentExpression;
 typedef struct TableLiteralExpression TableLiteralExpression;
 typedef struct SuffixedExpression SuffixedExpression;
-struct function_call_expression;
+typedef struct FunctionCallExpression FunctionCallExpression;
 
 struct block_scope;
 
@@ -494,12 +494,12 @@ RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const SuffixedExpr
 
 /* function call expression */
 RAVICOMP_EXPORT const struct var_type *
-raviX_function_call_expression_type(const struct function_call_expression *expression);
+raviX_function_call_expression_type(const FunctionCallExpression *expression);
 // can return NULL
 RAVICOMP_EXPORT const StringObject *
-raviX_function_call_expression_method_name(const struct function_call_expression *expression);
+raviX_function_call_expression_method_name(const FunctionCallExpression *expression);
 RAVICOMP_EXPORT void
-raviX_function_call_expression_foreach_argument(const struct function_call_expression *expression, void *userdata,
+raviX_function_call_expression_foreach_argument(const FunctionCallExpression *expression, void *userdata,
 						void (*callback)(void *, const struct expression *expr));
 
 /* Convert a statement to the correct type */
@@ -528,7 +528,7 @@ RAVICOMP_EXPORT const TableElementAssignmentExpression *
 raviX_table_element_assignment_expression(const struct expression *expr);
 RAVICOMP_EXPORT const TableLiteralExpression *raviX_table_literal_expression(const struct expression *expr);
 RAVICOMP_EXPORT const SuffixedExpression *raviX_suffixed_expression(const struct expression *expr);
-RAVICOMP_EXPORT const struct function_call_expression *raviX_function_call_expression(const struct expression *expr);
+RAVICOMP_EXPORT const FunctionCallExpression *raviX_function_call_expression(const struct expression *expr);
 
 RAVICOMP_EXPORT const FunctionExpression *raviX_scope_owning_function(const struct block_scope *scope);
 RAVICOMP_EXPORT const struct block_scope *raviX_scope_parent_scope(const struct block_scope *scope);

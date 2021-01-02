@@ -286,7 +286,7 @@ struct SuffixedExpression {
 	struct ast_node *primary_expr;
 	struct ast_node_list *suffix_list;
 };
-struct function_call_expression {
+struct FunctionCallExpression {
 	/* Note that in Ravi the results from a function call must be type asserted during assignment to
 	 * variables. This is not explicit in the AST but is required to ensure that function return
 	 * values do not overwrite the type of the variables in an inconsistent way.
@@ -343,7 +343,7 @@ struct ast_node {
 		TableElementAssignmentExpression table_elem_assign_expr;
 		TableLiteralExpression table_expr;
 		SuffixedExpression suffixed_expr;
-		struct function_call_expression function_call_expr;
+		FunctionCallExpression function_call_expr;
 	};
 };
 #undef BASE_AST_FIELDS

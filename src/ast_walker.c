@@ -189,7 +189,7 @@ const SuffixedExpression *raviX_suffixed_expression(const struct expression *exp
 	assert(expr->type == EXPR_SUFFIXED);
 	return &n(expr)->suffixed_expr;
 }
-const struct function_call_expression *raviX_function_call_expression(const struct expression *expr)
+const FunctionCallExpression *raviX_function_call_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_FUNCTION_CALL);
 	return &n(expr)->function_call_expr;
@@ -537,17 +537,17 @@ void raviX_suffixed_expression_foreach_suffix(const SuffixedExpression *expressi
 	END_FOR_EACH_PTR(node)
 }
 
-const struct var_type *raviX_function_call_expression_type(const struct function_call_expression *expression)
+const struct var_type *raviX_function_call_expression_type(const FunctionCallExpression *expression)
 {
 	return &expression->type;
 }
 // Can return NULL
 const StringObject *
-raviX_function_call_expression_method_name(const struct function_call_expression *expression)
+raviX_function_call_expression_method_name(const FunctionCallExpression *expression)
 {
 	return expression->method_name;
 }
-void raviX_function_call_expression_foreach_argument(const struct function_call_expression *expression, void *userdata,
+void raviX_function_call_expression_foreach_argument(const FunctionCallExpression *expression, void *userdata,
 						     void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;

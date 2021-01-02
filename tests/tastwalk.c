@@ -100,7 +100,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		walk_symbol_expression(data, raviX_symbol_expression(expression));
 		break;
 	case EXPR_FUNCTION_CALL: {
-		const struct function_call_expression *function_call_expression =
+		const FunctionCallExpression *function_call_expression =
 		    raviX_function_call_expression(expression);
 		const struct var_type *type = raviX_function_call_expression_type(function_call_expression);
 		(void)type;
