@@ -22,7 +22,7 @@ struct ast_state {
 	int dummy;
 };
 
-static void walk_variable_symbol(void *data, const struct lua_variable_symbol *symbol)
+static void walk_variable_symbol(void *data, const LuaVariableSymbol *symbol)
 {
 	const StringObject *name = raviX_variable_symbol_name(symbol);
 	assert(name != NULL);
@@ -44,7 +44,7 @@ static void walk_symbol(void *data, const LuaSymbol *symbol)
 	}
 	case SYM_GLOBAL:
 	case SYM_LOCAL: {
-		const struct lua_variable_symbol *variable = raviX_symbol_variable(symbol);
+		const LuaVariableSymbol *variable = raviX_symbol_variable(symbol);
 		walk_variable_symbol(data, variable);
 		break;
 	}

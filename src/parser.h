@@ -115,7 +115,7 @@ struct var_type {
 struct pseudo;
 DECLARE_PTR_LIST(LuaSymbolList, LuaSymbol);
 
-struct lua_variable_symbol {
+struct LuaVariableSymbol {
 	struct var_type value_type;
 	const StringObject *var_name; /* name of the variable */
 	Scope *block; /* NULL if global symbol, as globals are never added to a scope */
@@ -142,7 +142,7 @@ struct LuaUpvalueSymbol {
 struct LuaSymbol {
 	enum SymbolType symbol_type;
 	union {
-		struct lua_variable_symbol variable;
+		LuaVariableSymbol variable;
 		struct lua_label_symbol label;
 		LuaUpvalueSymbol upvalue;
 	};
