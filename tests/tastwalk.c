@@ -111,7 +111,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		break;
 	}
 	case EXPR_SUFFIXED: {
-		const struct suffixed_expression *suffixed_expression = raviX_suffixed_expression(expression);
+		const SuffixedExpression *suffixed_expression = raviX_suffixed_expression(expression);
 		const struct var_type *type = raviX_suffixed_expression_type(suffixed_expression);
 		(void)type;
 		walk_expression(data, raviX_suffixed_expression_primary(suffixed_expression));
@@ -119,7 +119,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		break;
 	}
 	case EXPR_TABLE_LITERAL: {
-		const struct table_literal_expression *table_literal_expression =
+		const TableLiteralExpression *table_literal_expression =
 		    raviX_table_literal_expression(expression);
 		const struct var_type *type = raviX_table_literal_expression_type(table_literal_expression);
 		(void)type;

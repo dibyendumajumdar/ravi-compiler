@@ -275,13 +275,13 @@ struct TableElementAssignmentExpression {
 };
 /* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
 /* table constructor expression EXPR_TABLE_LITERAL occurs in function call and simple expr */
-struct table_literal_expression {
+struct TableLiteralExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct ast_node_list *expr_list;
 };
 /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 /* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
-struct suffixed_expression {
+struct SuffixedExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct ast_node *primary_expr;
 	struct ast_node_list *suffix_list;
@@ -341,8 +341,8 @@ struct ast_node {
 		BinaryExpression binary_expr;
 		FunctionExpression function_expr; /* a literal expression whose result is a value of type function */
 		TableElementAssignmentExpression table_elem_assign_expr;
-		struct table_literal_expression table_expr;
-		struct suffixed_expression suffixed_expr;
+		TableLiteralExpression table_expr;
+		SuffixedExpression suffixed_expr;
 		struct function_call_expression function_call_expr;
 	};
 };

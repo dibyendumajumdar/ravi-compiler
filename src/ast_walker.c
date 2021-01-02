@@ -179,12 +179,12 @@ raviX_table_element_assignment_expression(const struct expression *expr)
 	assert(expr->type == EXPR_TABLE_ELEMENT_ASSIGN);
 	return &n(expr)->table_elem_assign_expr;
 }
-const struct table_literal_expression *raviX_table_literal_expression(const struct expression *expr)
+const TableLiteralExpression *raviX_table_literal_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_TABLE_LITERAL);
 	return &n(expr)->table_expr;
 }
-const struct suffixed_expression *raviX_suffixed_expression(const struct expression *expr)
+const SuffixedExpression *raviX_suffixed_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_SUFFIXED);
 	return &n(expr)->suffixed_expr;
@@ -499,12 +499,12 @@ raviX_table_element_assignment_expression_value(const TableElementAssignmentExpr
 	assert(expression->value_expr->type >= EXPR_LITERAL && expression->value_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->value_expr;
 }
-const struct var_type *raviX_table_literal_expression_type(const struct table_literal_expression *expression)
+const struct var_type *raviX_table_literal_expression_type(const TableLiteralExpression *expression)
 {
 	return &expression->type;
 }
 void raviX_table_literal_expression_foreach_element(
-    const struct table_literal_expression *expression, void *userdata,
+    const TableLiteralExpression *expression, void *userdata,
     void (*callback)(void *, const TableElementAssignmentExpression *expr))
 {
 	struct ast_node *node;
@@ -516,16 +516,16 @@ void raviX_table_literal_expression_foreach_element(
 	END_FOR_EACH_PTR(node)
 }
 
-const struct var_type *raviX_suffixed_expression_type(const struct suffixed_expression *expression)
+const struct var_type *raviX_suffixed_expression_type(const SuffixedExpression *expression)
 {
 	return &expression->type;
 }
-const struct expression *raviX_suffixed_expression_primary(const struct suffixed_expression *expression)
+const struct expression *raviX_suffixed_expression_primary(const SuffixedExpression *expression)
 {
 	assert(expression->primary_expr->type >= EXPR_LITERAL && expression->primary_expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->primary_expr;
 }
-void raviX_suffixed_expression_foreach_suffix(const struct suffixed_expression *expression, void *userdata,
+void raviX_suffixed_expression_foreach_suffix(const SuffixedExpression *expression, void *userdata,
 					      void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;
