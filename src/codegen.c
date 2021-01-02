@@ -2456,7 +2456,7 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 	raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", proc->num_strconstants);
 	raviX_buffer_add_string(
 	    mb, "  setnilvalue(&f->k[i]);\n"); // Do this in case there is a problem allocating the strings
-	struct set_entry *entry;
+	SetEntry *entry;
 	set_foreach(proc->constants, entry)
 	{
 		const Constant *constant = (Constant *)entry->key;

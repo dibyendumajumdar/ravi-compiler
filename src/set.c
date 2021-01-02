@@ -86,29 +86,29 @@ static const struct {
 };
 
 static int
-entry_is_free(const struct set_entry *entry)
+entry_is_free(const SetEntry *entry)
 {
 	return entry->key == NULL;
 }
 
 static int
-entry_is_deleted(const struct set_entry *entry)
+entry_is_deleted(const SetEntry *entry)
 {
 	return entry->key == deleted_key;
 }
 
 static int
-entry_is_present(const struct set_entry *entry)
+entry_is_present(const SetEntry *entry)
 {
 	return entry->key != NULL && entry->key != deleted_key;
 }
 
-struct set *
+Set *
 set_create(uint32_t (*hash_function)(const void *key),
 	   int (*key_equals_function)(const void *a,
 				   const void *b))
 {
-	struct set *set;
+	Set *set;
 
 	set = malloc(sizeof(*set));
 	if (set == NULL)
@@ -139,13 +139,13 @@ set_create(uint32_t (*hash_function)(const void *key),
  * freeing.
  */
 void
-set_destroy(struct set *set, void (*delete_function)(struct set_entry *entry))
+set_destroy(Set *set, void (*delete_function)(SetEntry *entry))
 {
 	if (!set)
 		return;
 
 	if (delete_function) {
-		struct set_entry *entry;
+		SetEntry *entry;
 
 		set_foreach(set, entry) {
 			delete_function(entry);
@@ -158,9 +158,9 @@ set_destroy(struct set *set, void (*delete_function)(struct set_entry *entry))
 /* Does the set contain an entry with the given key.
  */
 bool
-set_contains(struct set *set, const void *key)
+set_contains(Set *set, const void *key)
 {
-	struct set_entry *entry;
+	SetEntry *entry;
 
 	entry = set_search(set, key);
 
@@ -172,8 +172,8 @@ set_contains(struct set *set, const void *key)
  *
  * Returns NULL if no entry is found.
  */
-struct set_entry *
-set_search(struct set *set, const void *key)
+SetEntry *
+set_search(Set *set, const void *key)
 {
 	uint32_t hash = set->hash_function(key);
 
@@ -185,8 +185,8 @@ set_search(struct set *set, const void *key)
  *
  * Returns NULL if no entry is found.
  */
-struct set_entry *
-set_search_pre_hashed(struct set *set, uint32_t hash, const void *key)
+SetEntry *
+set_search_pre_hashed(Set *set, uint32_t hash, const void *key)
 {
 	uint32_t hash_address;
 
@@ -194,7 +194,7 @@ set_search_pre_hashed(struct set *set, uint32_t hash, const void *key)
 	do {
 		uint32_t double_hash;
 
-		struct set_entry *entry = set->table + hash_address;
+		SetEntry *entry = set->table + hash_address;
 
 		if (entry_is_free(entry)) {
 			return NULL;
@@ -213,10 +213,10 @@ set_search_pre_hashed(struct set *set, uint32_t hash, const void *key)
 }
 
 static void
-set_rehash(struct set *set, int new_size_index)
+set_rehash(Set *set, int new_size_index)
 {
-	struct set old_set;
-	struct set_entry *table, *entry;
+	Set old_set;
+	SetEntry *table, *entry;
 
 	if (new_size_index >= ARRAY_SIZE(hash_sizes))
 		return;
@@ -249,8 +249,8 @@ set_rehash(struct set *set, int new_size_index)
  * previously found set_entry pointers are no longer valid after this
  * function.
  */
-struct set_entry *
-set_add(struct set *set, const void *key)
+SetEntry *
+set_add(Set *set, const void *key)
 {
 	uint32_t hash = set->hash_function(key);
 
@@ -271,11 +271,11 @@ set_add(struct set *set, const void *key)
  * previously found set_entry pointers are no longer valid after this
  * function.
  */
-struct set_entry *
-set_add_pre_hashed(struct set *set, uint32_t hash, const void *key)
+SetEntry *
+set_add_pre_hashed(Set *set, uint32_t hash, const void *key)
 {
 	uint32_t hash_address;
-	struct set_entry *available_entry = NULL;
+	SetEntry *available_entry = NULL;
 
 	if (set->entries >= set->max_entries) {
 		set_rehash(set, set->size_index + 1);
@@ -285,7 +285,7 @@ set_add_pre_hashed(struct set *set, uint32_t hash, const void *key)
 
 	hash_address = hash % set->size;
 	do {
-		struct set_entry *entry = set->table + hash_address;
+		SetEntry *entry = set->table + hash_address;
 		uint32_t double_hash;
 
 		if (!entry_is_present(entry)) {
@@ -336,14 +336,14 @@ set_add_pre_hashed(struct set *set, uint32_t hash, const void *key)
 /**
  * This function searches for, and removes an entry from the set.
  *
- * If the caller has previously found a struct set_entry pointer,
+ * If the caller has previously found a SetEntry pointer,
  * (from calling set_search or remembering it from set_add), then
  * set_remove_entry can be called instead to avoid an extra search.
  */
 void
-set_remove(struct set *set, const void *key)
+set_remove(Set *set, const void *key)
 {
-	struct set_entry *entry;
+	SetEntry *entry;
 
 	entry = set_search(set, key);
 
@@ -357,7 +357,7 @@ set_remove(struct set *set, const void *key)
  * iteration over the set deleting entries is safe.
  */
 void
-set_remove_entry(struct set *set, struct set_entry *entry)
+set_remove_entry(Set *set, SetEntry *entry)
 {
 	if (!entry)
 		return;
@@ -374,8 +374,8 @@ set_remove_entry(struct set *set, struct set_entry *entry)
  * Note that an iteration over the set is O(table_size) not
  * O(entries).
  */
-struct set_entry *
-set_next_entry(struct set *set, struct set_entry *entry)
+SetEntry *
+set_next_entry(Set *set, SetEntry *entry)
 {
 	if (entry == NULL)
 		entry = set->table;
@@ -392,11 +392,11 @@ set_next_entry(struct set *set, struct set_entry *entry)
 }
 
 #ifndef _WIN32
-struct set_entry *
-set_random_entry(struct set *set,
-		 int (*predicate)(struct set_entry *entry))
+SetEntry *
+set_random_entry(Set *set,
+		 int (*predicate)(SetEntry *entry))
 {
-	struct set_entry *entry;
+	SetEntry *entry;
 	uint32_t i = random() % set->size;
 
 	if (set->entries == 0)

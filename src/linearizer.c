@@ -165,7 +165,7 @@ static uint32_t hash_constant(const void *c)
  */
 static const Constant *add_constant(Proc *proc, const Constant *c)
 {
-	struct set_entry *entry = set_search(proc->constants, c);
+	SetEntry *entry = set_search(proc->constants, c);
 	if (entry == NULL) {
 		int reg = 0;
 		/* Assign each type of constant a different range so that if backend

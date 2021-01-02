@@ -210,7 +210,7 @@ struct Proc {
 	PseudoGenerator temp_int_pseudos; /* temporaries known to be integer type */
 	PseudoGenerator temp_flt_pseudos; /* temporaries known to be number type */
 	PseudoGenerator temp_pseudos;	  /* All other temporaries */
-	struct set *constants;			  /* constants used by this proc */
+	Set *constants;			  /* constants used by this proc */
 	uint16_t num_intconstants;
 	uint16_t num_fltconstants;
 	uint16_t num_strconstants;

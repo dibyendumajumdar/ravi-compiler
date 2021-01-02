@@ -47,7 +47,7 @@ struct CompilerState {
 	Allocator symbol_allocator;
 	Allocator string_allocator;
 	Allocator string_object_allocator;
-	struct set *strings;
+	Set *strings;
 	AstNode *main_function;
 	LinearizerState *linearizer;
 	int (*error_handler)(const char *fmt, ...);

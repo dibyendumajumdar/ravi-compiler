@@ -31,13 +31,13 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-struct set_entry {
+typedef struct SetEntry {
 	uint32_t hash;
 	const void *key;
-};
+} SetEntry;
 
-struct set {
-	struct set_entry *table;
+typedef struct Set {
+	SetEntry *table;
 	uint32_t (*hash_function)(const void *key);
 	int (*key_equals_function)(const void *a, const void *b);
 	uint32_t size;
@@ -46,37 +46,37 @@ struct set {
 	uint32_t size_index;
 	uint32_t entries;
 	uint32_t deleted_entries;
-};
+} Set;
 
-struct set *
+Set *
 set_create(uint32_t (*hash_function)(const void *key),
 	   int (*key_equals_function)(const void *a,
 				      const void *b));
 void
-set_destroy(struct set *set,
-	    void (*delete_function)(struct set_entry *entry));
+set_destroy(Set *set,
+	    void (*delete_function)(SetEntry *entry));
 
-struct set_entry *
-set_add(struct set *set, const void *key);
+SetEntry *
+set_add(Set *set, const void *key);
 
 bool
-set_contains(struct set *set, const void *key);
+set_contains(Set *set, const void *key);
 
 void
-set_remove(struct set *set, const void *key);
+set_remove(Set *set, const void *key);
 
-struct set_entry *
-set_search(struct set *set, const void *key);
+SetEntry *
+set_search(Set *set, const void *key);
 
 void
-set_remove_entry(struct set *set, struct set_entry *entry);
+set_remove_entry(Set *set, SetEntry *entry);
 
-struct set_entry *
-set_next_entry(struct set *set, struct set_entry *entry);
+SetEntry *
+set_next_entry(Set *set, SetEntry *entry);
 
-struct set_entry *
-set_random_entry(struct set *set,
-		 int (*predicate)(struct set_entry *entry));
+SetEntry *
+set_random_entry(Set *set,
+		 int (*predicate)(SetEntry *entry));
 
 /**
  * This foreach function is safe against deletion (which just replaces
@@ -89,10 +89,10 @@ set_random_entry(struct set *set,
 	     entry = set_next_entry(ht, entry))
 
 /* Alternate interfaces to reduce repeated calls to hash function. */
-struct set_entry *
-set_search_pre_hashed(struct set *set, uint32_t hash, const void *key);
+SetEntry *
+set_search_pre_hashed(Set *set, uint32_t hash, const void *key);
 
-struct set_entry *
-set_add_pre_hashed(struct set *set, uint32_t hash, const void *key);
+SetEntry *
+set_add_pre_hashed(Set *set, uint32_t hash, const void *key);
 
 #endif
