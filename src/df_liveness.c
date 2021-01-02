@@ -20,11 +20,11 @@ struct liveness_info {
 DECLARE_ARRAY(liveness_info_array, struct liveness_info *);
 
 struct liveness_data {
-	struct proc *proc;
+	Proc *proc;
 	struct liveness_info_array lives;
 };
 
-static void init_liveness_data(struct proc *proc, struct liveness_data *liveness_data)
+static void init_liveness_data(Proc *proc, struct liveness_data *liveness_data)
 {
 	memset(liveness_data, 0, sizeof(*liveness_data));
 	for (unsigned i = 0; i < proc->node_count; i++) {

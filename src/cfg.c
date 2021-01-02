@@ -9,7 +9,7 @@
 /* Recursively create control flow graph for each proc
  * Return 0 on success
  */
-int raviX_construct_cfg(struct proc *proc)
+int raviX_construct_cfg(Proc *proc)
 {
 	struct graph *g = raviX_init_graph(ENTRY_BLOCK, EXIT_BLOCK, proc);
 	for (unsigned i = 0; i < proc->node_count; i++) {
@@ -30,7 +30,7 @@ int raviX_construct_cfg(struct proc *proc)
 		}
 	}
 	proc->cfg = g;
-	struct proc *childproc;
+	Proc *childproc;
 	FOR_EACH_PTR(proc->procs, childproc)
 	{
 		if (raviX_construct_cfg(childproc) != 0)
@@ -42,14 +42,14 @@ int raviX_construct_cfg(struct proc *proc)
 
 struct CfgArg {
 	FILE *fp;
-	struct proc *proc;
+	Proc *proc;
 };
 
 static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 {
 	struct CfgArg *myargs = (struct CfgArg *)arg;
 	FILE *fp = myargs->fp;
-	struct proc *proc = myargs->proc;
+	Proc *proc = myargs->proc;
 	struct node_list *successors = raviX_successors(raviX_graph_node(g, nodeid));
 	if (!successors)
 		return;
@@ -64,12 +64,12 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 	for (unsigned i = 0; i < raviX_node_list_size(successors); i++) {
 		fprintf(fp, "L%d -> L%d\n", nodeid, raviX_node_list_at(successors, i));
 	}
-	struct proc *childproc;
+	Proc *childproc;
 	FOR_EACH_PTR(proc->procs, childproc) { raviX_output_cfg(childproc, fp); }
 	END_FOR_EACH_PTR(childproc)
 }
 
-void raviX_output_cfg(struct proc *proc, FILE *fp)
+void raviX_output_cfg(Proc *proc, FILE *fp)
 {
 	struct graph *g = proc->cfg;
 	if (!g)

@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-int raviX_construct_cfg(struct proc *proc);
-void raviX_output_cfg(struct proc *proc, FILE *fp);
+int raviX_construct_cfg(Proc *proc);
+void raviX_output_cfg(Proc *proc, FILE *fp);
 
 #endif

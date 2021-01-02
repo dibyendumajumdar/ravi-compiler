@@ -15,12 +15,12 @@ a Linear intermediate representation (IR).
 */
 typedef struct Instruction Instruction;
 typedef struct BasicBlock BasicBlock;
-struct proc;
+typedef struct Proc Proc;
 struct constant;
 
 DECLARE_PTR_LIST(InstructionList, Instruction);
 DECLARE_PTR_LIST(PseudoList, struct pseudo);
-DECLARE_PTR_LIST(ProcList, struct proc);
+DECLARE_PTR_LIST(ProcList, Proc);
 
 #define container_of(ptr, type, member) ((type *)((char *)(ptr)-offsetof(type, member)))
 
@@ -151,7 +151,7 @@ struct pseudo {
 		LuaSymbol *symbol;	 /* PSEUDO_SYMBOL */
 		const struct constant *constant; /* PSEUDO_CONSTANT */
 		LuaSymbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
-		struct proc *proc;		 /* PSEUDO_PROC */
+		Proc *proc;		 /* PSEUDO_PROC */
 		BasicBlock *block;	 /* PSEUDO_BLOCK */
 		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
 		int stackidx; /* PSEUDO_LUASTACK */
@@ -191,14 +191,14 @@ struct constant {
 };
 
 /* proc is a type of cfg */
-struct proc {
+struct Proc {
 	unsigned node_count;
 	unsigned allocated;
 	BasicBlock **nodes;
 	uint32_t id; /* ID for the proc */
 	LinearizerState *linearizer;
 	ProcList *procs;	/* procs defined in this proc */
-	struct proc *parent;		/* enclosing proc */
+	Proc *parent;		/* enclosing proc */
 	AstNode *function_expr; /* function ast that we are compiling */
 	Scope *current_scope;
 	BasicBlock *current_bb;
@@ -227,17 +227,17 @@ struct LinearizerState {
 	struct allocator unsized_allocator;
 	struct allocator constant_allocator;
 	CompilerState *ast_container;
-	struct proc *main_proc;	     /* The root of the compiled chunk of code */
+	Proc *main_proc;	     /* The root of the compiled chunk of code */
 	ProcList *all_procs; /* All procs allocated by the linearizer */
-	struct proc *current_proc;   /* proc being compiled */
+	Proc *current_proc;   /* proc being compiled */
 	uint32_t proc_id;
 };
 
 void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
-void raviX_output_basic_block_as_table(struct proc *proc, BasicBlock *bb, TextBuffer *mb);
+void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *mb);
 
 Instruction *raviX_last_instruction(BasicBlock *block);
-struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg);
+struct pseudo* raviX_allocate_stack_pseudo(Proc* proc, unsigned reg);
 const char *raviX_opcode_name(unsigned int opcode);
 
 #endif

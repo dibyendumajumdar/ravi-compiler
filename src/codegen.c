@@ -619,7 +619,7 @@ static const char Lua_header[] =
     "#define luai_numunm(L,a)        (-(a))\n";
 
 struct function {
-	struct proc *proc;
+	Proc *proc;
 	TextBuffer prologue;
 	TextBuffer body;
 	struct Ravi_CompilerInterface *api;
@@ -713,7 +713,7 @@ static inline unsigned get_num_instructions(BasicBlock *bb)
 	return ptrlist_size((const struct ptr_list *)bb->insns);
 }
 
-static inline unsigned get_num_childprocs(struct proc *proc)
+static inline unsigned get_num_childprocs(Proc *proc)
 {
 	return ptrlist_size((const struct ptr_list *)proc->procs);
 }
@@ -749,7 +749,7 @@ static void emit_varname(const struct pseudo *pseudo, TextBuffer *mb)
 	}
 }
 
-static void initfn(struct function *fn, struct proc *proc, struct Ravi_CompilerInterface *api)
+static void initfn(struct function *fn, Proc *proc, struct Ravi_CompilerInterface *api)
 {
 	fn->proc = proc;
 	fn->api = api;
@@ -785,16 +785,16 @@ static void cleanup(struct function *fn)
 
 static void emit_reload_base(struct function *fn) { raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n"); }
 
-static inline unsigned num_locals(struct proc *proc) { return proc->local_pseudos.next_reg; }
+static inline unsigned num_locals(Proc *proc) { return proc->local_pseudos.next_reg; }
 
-static inline unsigned num_temps(struct proc *proc) { return proc->temp_pseudos.next_reg; }
+static inline unsigned num_temps(Proc *proc) { return proc->temp_pseudos.next_reg; }
 
 /*
  * Max stack size is number of Lua vars and any temps that live on Lua stack during execution.
  * Note that this is the number of slots that is known to the compiler - at runtime additional
  * stack space may be needed when making function calls - that is not accounted for here.
  */
-static unsigned compute_max_stack_size(struct proc *proc) { return num_locals(proc) + num_temps(proc); }
+static unsigned compute_max_stack_size(Proc *proc) { return num_locals(proc) + num_temps(proc); }
 
 /**
  * Computes the register offset from base. Input pseudo must be a local variable,
@@ -1834,9 +1834,9 @@ static int emit_op_closure(struct function *fn, Instruction *insn)
 	struct pseudo *target_pseudo = get_first_target(insn);
 
 	assert(closure_pseudo->type == PSEUDO_PROC);
-	struct proc *proc = closure_pseudo->proc;
-	struct proc *parent_proc = proc->parent;
-	struct proc *cursor;
+	Proc *proc = closure_pseudo->proc;
+	Proc *parent_proc = proc->parent;
+	Proc *cursor;
 	int parent_index = -1;
 	int i = 0;
 	FOR_EACH_PTR(parent_proc->procs, cursor)
@@ -2431,18 +2431,18 @@ static int output_basic_block(struct function *fn, BasicBlock *bb)
 	return rc;
 }
 
-static inline unsigned get_num_params(struct proc *proc)
+static inline unsigned get_num_params(Proc *proc)
 {
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
 }
 
-static inline unsigned get_num_upvalues(struct proc *proc)
+static inline unsigned get_num_upvalues(Proc *proc)
 {
 	return ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
 }
 
 /* Generate code for setting up a Lua Proto structure, recursively for each child function */
-static int generate_lua_proc(struct proc *proc, TextBuffer *mb)
+static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, " f->ravi_jit.jit_function = %s;\n", proc->funcname);
 	raviX_buffer_add_string(mb, " f->ravi_jit.jit_status = RAVI_JIT_COMPILED;\n");
@@ -2497,7 +2497,7 @@ static int generate_lua_proc(struct proc *proc, TextBuffer *mb)
 		raviX_buffer_add_fstring(mb, " f->sizep = %u;\n", get_num_childprocs(proc));
 		raviX_buffer_add_fstring(mb, " for (int i = 0; i < %u; i++)\n", get_num_childprocs(proc));
 		raviX_buffer_add_string(mb, "   f->p[i] = NULL;\n");
-		struct proc *childproc;
+		Proc *childproc;
 		i = 0;
 		FOR_EACH_PTR(proc->procs, childproc)
 		{
@@ -2517,7 +2517,7 @@ static int generate_lua_proc(struct proc *proc, TextBuffer *mb)
 /* Generate the equivalent of a luaU_undump such that when called from Lua/Ravi code
  * it will build the closure encapsulating the Lua chunk.
  */
-static int generate_lua_closure(struct proc *proc, const char *funcname, TextBuffer *mb)
+static int generate_lua_closure(Proc *proc, const char *funcname, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, "EXPORT LClosure *%s(lua_State *L) {\n", funcname);
 	raviX_buffer_add_fstring(mb, " LClosure *cl = luaF_newLclosure(L, %u);\n", get_num_upvalues(proc));
@@ -2532,7 +2532,7 @@ static int generate_lua_closure(struct proc *proc, const char *funcname, TextBuf
 }
 
 /* Generate C code for each proc recursively */
-static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, TextBuffer *mb)
+static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, Proc *proc, TextBuffer *mb)
 {
 	int rc = 0;
 	struct function fn;
@@ -2555,7 +2555,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 	if (rc != 0)
 		return rc;
 
-	struct proc *childproc;
+	Proc *childproc;
 	FOR_EACH_PTR(proc->procs, childproc)
 	{
 		rc = generate_C_code(ravi_interface, childproc, mb);
@@ -2579,7 +2579,7 @@ static inline AstNode *get_parent_function_of_upvalue(LuaSymbol *symbol)
  * the register for the local variable and instack should be true, else idx should have the index of
  * upvalue in parent proto and instack should be false.
  */
-static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bool *in_stack)
+static unsigned get_upvalue_idx(Proc *proc, LuaSymbol *upvalue_symbol, bool *in_stack)
 {
 	*in_stack = false;
 	LuaSymbol *underlying = upvalue_symbol->upvalue.target_variable;
@@ -2611,7 +2611,7 @@ static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bo
 /**
  * Computes upvalue attributes needed by the Lua side
  */
-static void compute_upvalue_attributes(struct proc *proc)
+static void compute_upvalue_attributes(Proc *proc)
 {
 	LuaSymbol *sym;
 	AstNode *this_function = proc->function_expr;
@@ -2628,10 +2628,10 @@ static void compute_upvalue_attributes(struct proc *proc)
 /*
  * Preprocess upvalues by populating a couple of attributes needed by the Lua side
  */
-static void preprocess_upvalues(struct proc *proc)
+static void preprocess_upvalues(Proc *proc)
 {
 	compute_upvalue_attributes(proc);
-	struct proc *child_proc;
+	Proc *child_proc;
 	FOR_EACH_PTR(proc->procs, child_proc) { preprocess_upvalues(child_proc); }
 	END_FOR_EACH_PTR(childproc);
 }
