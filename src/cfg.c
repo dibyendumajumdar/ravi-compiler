@@ -50,7 +50,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 	struct CfgArg *myargs = (struct CfgArg *)arg;
 	FILE *fp = myargs->fp;
 	Proc *proc = myargs->proc;
-	struct node_list *successors = raviX_successors(raviX_graph_node(g, nodeid));
+	GraphNodeList *successors = raviX_successors(raviX_graph_node(g, nodeid));
 	if (!successors)
 		return;
 	BasicBlock *block = proc->nodes[nodeid];

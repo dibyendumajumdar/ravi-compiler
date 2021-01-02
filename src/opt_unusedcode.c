@@ -15,13 +15,13 @@
 static int process_block(LinearizerState *linearizer, Proc *proc, BasicBlock *bb)
 {
 	struct node *node = raviX_graph_node(proc->cfg, bb->index);
-	struct node_list *predecessors = raviX_predecessors(node);
+	GraphNodeList *predecessors = raviX_predecessors(node);
 	if (raviX_node_list_size(predecessors) != 0) {
 		// Has predecessors so nothing to do
 		return 0;
 	}
 	// No predecessor blocks, so we can remove this block
-	struct node_list *successors = raviX_successors(node);
+	GraphNodeList *successors = raviX_successors(node);
 	uint32_t count = raviX_node_list_size(successors);
 	if (count == 0) {
 		// Nothing to do, but odd?

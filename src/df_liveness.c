@@ -63,7 +63,7 @@ static int live_join_func(void *userdata, nodeId_t id, bool init)
 		raviX_bitset_clear(&liveness_info->in);
 		return 0;
 	} else {
-		struct node_list *successors = raviX_successors(raviX_graph_node(liveness_data->proc->cfg, id));
+		GraphNodeList *successors = raviX_successors(raviX_graph_node(liveness_data->proc->cfg, id));
 		int changed = 0;
 		// out[n] = Union of in[s] where s in succ[n]
 		for (unsigned i = 0; i < raviX_node_list_size(successors); i++) {

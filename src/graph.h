@@ -25,7 +25,7 @@
 /* nodeId_t is declared elsewhere */
 struct graph;
 struct node;
-struct node_list;
+typedef struct GraphNodeList GraphNodeList;
 enum edge_type {
 	EDGE_TYPE_UNCLASSIFIED = 0,
 	EDGE_TYPE_TREE = 1,
@@ -59,14 +59,14 @@ uint32_t raviX_node_RPO(struct node *n);
 /* Get the node's id */
 nodeId_t raviX_node_index(struct node *n);
 /* Get list of predecessors */
-struct node_list *raviX_predecessors(struct node *n);
+GraphNodeList *raviX_predecessors(struct node *n);
 /* Get list of successors */
-struct node_list *raviX_successors(struct node *n);
+GraphNodeList *raviX_successors(struct node *n);
 
 /* Number of entries in the node_list */
-uint32_t raviX_node_list_size(struct node_list *list);
+uint32_t raviX_node_list_size(GraphNodeList *list);
 /* Get the nodeId at given node_link position */
-nodeId_t raviX_node_list_at(struct node_list *list, uint32_t i);
+nodeId_t raviX_node_list_at(GraphNodeList *list, uint32_t i);
 
 void raviX_for_each_node(struct graph *g, void (*callback)(void *arg, struct graph *g, nodeId_t nodeid), void *arg);
 

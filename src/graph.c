@@ -18,7 +18,7 @@ struct GraphNodeLink {
 };
 /* A node_list is simply a dynamic array/vector of node ids.
  */
-struct node_list {
+struct GraphNodeList {
 	unsigned count : 16;	 /* in use */
 	unsigned allocated : 16; /* tracks allocated size of links array */
 	struct GraphNodeLink *links; /* array[allocated] of links, populated [0..count) */
@@ -30,20 +30,20 @@ struct node {
 	nodeId_t index;		/* the id of the basic_block */
 	uint32_t pre;		/* preorder */
 	uint32_t rpost;		/* reverse postorder */
-	struct node_list preds; /* predecessor nodes */
-	struct node_list succs; /* successor nodes */
+	GraphNodeList preds; /* predecessor nodes */
+	GraphNodeList succs; /* successor nodes */
 };
 
 static struct node *raviX_add_node(struct graph *g, nodeId_t index);
 
-static void node_list_init(struct node_list *node_list)
+static void node_list_init(GraphNodeList *node_list)
 {
 	node_list->count = 0;
 	node_list->allocated = 0;
 	node_list->links = NULL;
 }
 
-static void node_list_destroy(struct node_list *node_list)
+static void node_list_destroy(GraphNodeList *node_list)
 {
 	node_list->count = 0;
 	node_list->allocated = 0;
@@ -52,7 +52,7 @@ static void node_list_destroy(struct node_list *node_list)
 }
 
 /* Gets the offset of the node or -1 if not found */
-static int64_t node_list_search(const struct node_list *node_list, nodeId_t index)
+static int64_t node_list_search(const GraphNodeList *node_list, nodeId_t index)
 {
 	for (unsigned i = 0; i < node_list->count; i++) {
 		if (node_list->links[i].node_index == index) {
@@ -63,7 +63,7 @@ static int64_t node_list_search(const struct node_list *node_list, nodeId_t inde
 }
 
 /* Gets the given node or NULL if node does not exist */
-static inline struct GraphNodeLink *node_list_get(const struct node_list *node_list, nodeId_t index)
+static inline struct GraphNodeLink *node_list_get(const GraphNodeList *node_list, nodeId_t index)
 {
 	int64_t i = node_list_search(node_list, index);
 	if (i < 0)
@@ -72,7 +72,7 @@ static inline struct GraphNodeLink *node_list_get(const struct node_list *node_l
 }
 
 /* Grows the node list array */
-static void node_list_grow(struct node_list *node_list)
+static void node_list_grow(GraphNodeList *node_list)
 {
 	unsigned new_size = node_list->allocated + 8u;
 	struct GraphNodeLink *edges = raviX_realloc_array(node_list->links, sizeof(struct GraphNodeLink), node_list->allocated,
@@ -82,7 +82,7 @@ static void node_list_grow(struct node_list *node_list)
 }
 
 /* add an node to the node_list if not already added */
-static void node_list_add(struct node_list *node_list, nodeId_t index)
+static void node_list_add(GraphNodeList *node_list, nodeId_t index)
 {
 	if (node_list_search(node_list, index) != -1)
 		return;
@@ -97,7 +97,7 @@ static void node_list_add(struct node_list *node_list, nodeId_t index)
 }
 
 /* delete an node from the node_list if it exists */
-static void node_list_delete(struct node_list *node_list, nodeId_t index)
+static void node_list_delete(GraphNodeList *node_list, nodeId_t index)
 {
 	int64_t i = node_list_search(node_list, index);
 	if (i < 0)
@@ -105,9 +105,9 @@ static void node_list_delete(struct node_list *node_list, nodeId_t index)
 	node_list->count = (unsigned) raviX_del_array_element(node_list->links, sizeof node_list->links[0], node_list->count, i, 1);
 }
 
-uint32_t raviX_node_list_size(struct node_list *list) { return list->count; }
+uint32_t raviX_node_list_size(GraphNodeList *list) { return list->count; }
 
-nodeId_t raviX_node_list_at(struct node_list *list, uint32_t i)
+nodeId_t raviX_node_list_at(GraphNodeList *list, uint32_t i)
 {
 	if (i < list->count)
 		return list->links[i].node_index;
@@ -198,8 +198,8 @@ void raviX_add_edge(struct graph *g, nodeId_t from, nodeId_t to)
 
 void raviX_delete_edge(struct graph *g, nodeId_t a, nodeId_t b)
 {
-	struct node_list *successors_of_a = raviX_successors(raviX_graph_node(g, a));
-	struct node_list *predecessors_of_b = raviX_predecessors(raviX_graph_node(g, b));
+	GraphNodeList *successors_of_a = raviX_successors(raviX_graph_node(g, a));
+	GraphNodeList *predecessors_of_b = raviX_predecessors(raviX_graph_node(g, b));
 
 	assert(successors_of_a);
 	assert(predecessors_of_b);
@@ -266,12 +266,12 @@ struct node *raviX_graph_node(struct graph *g, nodeId_t index)
 	assert(index < g->allocated);
 	return g->nodes[index];
 }
-struct node_list *raviX_predecessors(struct node *n)
+GraphNodeList *raviX_predecessors(struct node *n)
 {
 	assert(n);
 	return &n->preds;
 }
-struct node_list *raviX_successors(struct node *n)
+GraphNodeList *raviX_successors(struct node *n)
 {
 	assert(n);
 	return &n->succs;
@@ -374,7 +374,7 @@ struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward)
 static void draw_node(void *arg, struct graph *g, uint32_t nodeid)
 {
 	FILE *fp = (FILE *)arg;
-	struct node_list *successors = raviX_successors(raviX_graph_node(g, nodeid));
+	GraphNodeList *successors = raviX_successors(raviX_graph_node(g, nodeid));
 	if (!successors)
 		return;
 	for (unsigned i = 0; i < raviX_node_list_size(successors); i++) {

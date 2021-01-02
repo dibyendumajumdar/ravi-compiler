@@ -106,12 +106,12 @@ static int test4(void)
 	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 2))) != 1)
 		errcount++;
 	raviX_delete_edge(g, 1, 2);
-	struct node_list *succ = raviX_successors(raviX_graph_node(g, 1));
+	GraphNodeList *succ = raviX_successors(raviX_graph_node(g, 1));
 	if (raviX_node_list_size(succ) != 1)
 		errcount++;
 	if (raviX_node_list_at(succ, 0) != 5)
 		errcount++;
-	struct node_list *preds = raviX_predecessors(raviX_graph_node(g, 2));
+	GraphNodeList *preds = raviX_predecessors(raviX_graph_node(g, 2));
 	if (raviX_node_list_size(preds) != 0)
 		errcount++;
 	raviX_destroy_graph(g);

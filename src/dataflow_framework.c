@@ -64,14 +64,14 @@ void raviX_solve_dataflow(struct graph *g, bool forward_p,
 		for (unsigned i = 0; i < worklist->count; i++) {
 			int changed_p = iter == 0;
 			struct node *bb = addr[i];
-			struct node_list *nodes = forward_p ? raviX_predecessors(bb) : raviX_successors(bb);
+			GraphNodeList *nodes = forward_p ? raviX_predecessors(bb) : raviX_successors(bb);
 			// TODO should we pass the nodes array to the join function?
 			if (raviX_node_list_size(nodes) == 0)
 				join_function(ctx.userdata, raviX_node_index(bb), true);
 			else
 				changed_p |= join_function(ctx.userdata, raviX_node_index(bb), false);
 			if (changed_p && transfer_function(ctx.userdata, raviX_node_index(bb))) {
-				struct node_list *list = forward_p ? raviX_successors(bb) : raviX_predecessors(bb);
+				GraphNodeList *list = forward_p ? raviX_successors(bb) : raviX_predecessors(bb);
 				for (unsigned i = 0; i < raviX_node_list_size(list); i++) {
 					nodeId_t index = raviX_node_list_at(list, i);
 					/* If this bb is not already been added to pending then add it */

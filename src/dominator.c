@@ -75,7 +75,7 @@ static struct node *intersect(struct dominator_tree *state, struct node *i, stru
  * Because of the order in which this search occurs, we will always find at least 1
  * such predecessor.
  */
-static struct node *find_first_predecessor_with_idom(struct dominator_tree *state, struct node_list *predlist)
+static struct node *find_first_predecessor_with_idom(struct dominator_tree *state, GraphNodeList *predlist)
 {
 	for (uint32_t i = 0; i < raviX_node_list_size(predlist); i++) {
 		nodeId_t id = raviX_node_list_at(predlist, i);
@@ -116,7 +116,7 @@ void raviX_calculate_dominator_tree(struct dominator_tree *state)
 			nodeId_t bid = raviX_node_index(b);
 			if (bid == ENTRY_BLOCK) // skip root
 				continue;
-			struct node_list *predecessors = raviX_predecessors(b); // Predecessors of b
+			GraphNodeList *predecessors = raviX_predecessors(b); // Predecessors of b
 			// NewIDom = first (processed) predecessor of b, pick one
 			struct node *firstpred = find_first_predecessor_with_idom(state, predecessors);
 			assert(firstpred != NULL);
