@@ -360,10 +360,10 @@ void *raviX_ptrlist_undo_last(struct ptr_list **self)
 	return NULL;
 }
 
-void *ptrlist_delete_last(struct ptr_list **head)
+void *raviX_ptrlist_delete_last(struct ptr_list **self)
 {
 	void *ptr = NULL;
-	struct ptr_list *last, *first = *head;
+	struct ptr_list *last, *first = *self;
 
 	if (!first)
 		return NULL;
@@ -374,7 +374,7 @@ void *ptrlist_delete_last(struct ptr_list **head)
 		first->prev_ = last->prev_;
 		last->prev_->next_ = first;
 		if (last == first)
-			*head = NULL;
+			*self = NULL;
 		raviX_allocator_free(last->allocator_, last);
 	}
 	return ptr;

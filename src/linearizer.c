@@ -1033,7 +1033,7 @@ static void convert_loadglobal_to_store(Proc *proc, Instruction *insn, Pseudo *v
 	remove_instruction(insn->block, insn); // remove the instruction from its original block
 	insn->opcode = op_storeglobal;
 	// Remove the targets
-	Pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
+	Pseudo *get_target = raviX_ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target, false);
 	Pseudo *pseudo;
 	// Move the loadglobal operands to target
@@ -1082,7 +1082,7 @@ static void convert_indexed_load_to_store(Proc *proc, Instruction *insn, Pseudo 
 	remove_instruction(insn->block, insn);
 	insn->opcode = putop;
 	// Remove target
-	Pseudo *get_target = ptrlist_delete_last((struct ptr_list **)&insn->targets);
+	Pseudo *get_target = raviX_ptrlist_delete_last((struct ptr_list **)&insn->targets);
 	free_temp_pseudo(proc, get_target, false);
 	Pseudo *pseudo;
 	// Move the get operands to put target (table, key)
