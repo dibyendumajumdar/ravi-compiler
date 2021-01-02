@@ -380,18 +380,18 @@ void *raviX_ptrlist_delete_last(struct ptr_list **self)
 	return ptr;
 }
 
-void ptrlist_concat(struct ptr_list *a, struct ptr_list **b)
+void raviX_ptrlist_concat(struct ptr_list *a, struct ptr_list **self)
 {
 	Allocator *alloc = NULL;
 	PtrListIterator iter = ptrlist_forward_iterator(a);
 	if (a)
 		alloc = a->allocator_;
-	else if (*b)
-		alloc = (*b)->allocator_;
+	else if (*self)
+		alloc = (*self)->allocator_;
 	else
 		return;
 	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
-		raviX_ptrlist_add(b, ptr, alloc);
+		raviX_ptrlist_add(self, ptr, alloc);
 	}
 }
 
