@@ -261,9 +261,9 @@ int raviX_ptrlist_linearize(struct ptr_list *head, void **arr, int max)
  * any empty blocks left (empty blocks upset the
  * walking code
  */
-void ptrlist_pack(struct ptr_list **listp)
+void raviX_ptrlist_pack(struct ptr_list **self)
 {
-	struct ptr_list *head = *listp;
+	struct ptr_list *head = *self;
 
 	if (head) {
 		struct ptr_list *entry = head;
@@ -275,7 +275,7 @@ void ptrlist_pack(struct ptr_list **listp)
 				struct ptr_list *prev;
 				if (next == entry) {
 					raviX_allocator_free(entry->allocator_, entry);
-					*listp = NULL;
+					*self = NULL;
 					return;
 				}
 				prev = entry->prev_;
@@ -283,7 +283,7 @@ void ptrlist_pack(struct ptr_list **listp)
 				next->prev_ = prev;
 				raviX_allocator_free(entry->allocator_, entry);
 				if (entry == head) {
-					*listp = next;
+					*self = next;
 					head = next;
 					entry = next;
 					goto restart;
@@ -320,7 +320,7 @@ int ptrlist_remove(struct ptr_list **self, void *entry, int count)
 	}
 	assert(count <= 0);
 out:
-	ptrlist_pack(self);
+	raviX_ptrlist_pack(self);
 	return count;
 }
 
