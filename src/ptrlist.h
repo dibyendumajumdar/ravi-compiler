@@ -77,7 +77,7 @@ extern void raviX_ptrlist_split_node(struct ptr_list *head);
 extern void raviX_ptrlist_pack(struct ptr_list **self);
 extern void raviX_ptrlist_remove_all(struct ptr_list **self);
 extern int raviX_ptrlist_remove(struct ptr_list **self, void *entry, int count);
-extern int ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr,
+extern int raviX_ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr,
 	int count);
 extern void *ptrlist_undo_last(struct ptr_list **self);
 extern void *ptrlist_delete_last(struct ptr_list **self);

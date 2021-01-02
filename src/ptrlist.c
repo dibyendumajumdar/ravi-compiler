@@ -324,7 +324,7 @@ out:
 	return count;
 }
 
-int ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr, int count)
+int raviX_ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr, int count)
 {
 	PtrListIterator iter = ptrlist_forward_iterator(*self);
 	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
