@@ -16,7 +16,7 @@ Copyright (C) 2018-2020 Dibyendu Majumdar
 
 /* forward declarations */
 static struct ast_node *parse_expression(struct parser_state *);
-static void parse_statement_list(struct parser_state *, struct ast_node_list **list);
+static void parse_statement_list(struct parser_state *, AstNodeList **list);
 static struct ast_node *parse_statement(struct parser_state *);
 static struct ast_node *new_function(struct parser_state *parser);
 static struct ast_node *end_function(struct parser_state *parser);
@@ -31,7 +31,7 @@ static void add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol
 	ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
 }
 
-static void add_ast_node(CompilerState *container, struct ast_node_list **list, struct ast_node *node)
+static void add_ast_node(CompilerState *container, AstNodeList **list, struct ast_node *node)
 {
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
@@ -540,7 +540,7 @@ static struct ast_node *has_function_call(struct ast_node *expr)
 /* If a call expr appears as the last in the expression list then mark it as multi-return (-1)
  * i.e. the caller wants all available returns.
  */
-static void set_multireturn(struct parser_state *parser, struct ast_node_list *expr_list, bool in_table_constructor)
+static void set_multireturn(struct parser_state *parser, AstNodeList *expr_list, bool in_table_constructor)
 {
 	struct ast_node *last_expr = (struct ast_node *)ptrlist_last((struct ptr_list *)expr_list);
 	if (!last_expr)
@@ -719,7 +719,7 @@ static void parse_function_body(struct parser_state *parser, struct ast_node *fu
 }
 
 /* parse expression list */
-static int parse_expression_list(struct parser_state *parser, struct ast_node_list **list)
+static int parse_expression_list(struct parser_state *parser, AstNodeList **list)
 {
 	LexerState *ls = parser->ls;
 	/* explist -> expr { ',' expr } */
@@ -1093,7 +1093,7 @@ static void add_local_symbol_to_current_scope(struct parser_state *parser, LuaSy
 	add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
 }
 
-static Scope *parse_block(struct parser_state *parser, struct ast_node_list **statement_list)
+static Scope *parse_block(struct parser_state *parser, AstNodeList **statement_list)
 {
 	/* block -> statlist */
 	Scope *scope = new_scope(parser);
@@ -1350,7 +1350,7 @@ static struct ast_node *parse_local_function_statement(struct parser_state *pars
  * If a call expression is at the end of a local or expression statement then
  * we need to check the number of return values that is expected.
  */
-static void limit_function_call_results(struct parser_state *parser, int num_lhs, struct ast_node_list *expr_list)
+static void limit_function_call_results(struct parser_state *parser, int num_lhs, AstNodeList *expr_list)
 {
 	// FIXME probably doesn't handle var arg case
 	struct ast_node *last_expr = (struct ast_node *)ptrlist_last((struct ptr_list *)expr_list);
@@ -1436,7 +1436,7 @@ static struct ast_node *parse_expression_statement(struct parser_state *parser)
 	LexerState *ls = parser->ls;
 	/* stat -> func | assignment */
 	/* Until we see '=' we do not know if this is an assignment or expr list*/
-	struct ast_node_list *current_list = NULL;
+	AstNodeList *current_list = NULL;
 	add_ast_node(parser->container, &current_list, parse_suffixed_expression(parser));
 	while (testnext(ls, ',')) { /* assignment -> ',' suffixedexp assignment */
 		add_ast_node(parser->container, &current_list, parse_suffixed_expression(parser));
@@ -1549,7 +1549,7 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 
 /* Parses a sequence of statements */
 /* statlist -> { stat [';'] } */
-static void parse_statement_list(struct parser_state *parser, struct ast_node_list **list)
+static void parse_statement_list(struct parser_state *parser, AstNodeList **list)
 {
 	LexerState *ls = parser->ls;
 	while (!block_follow(ls, 1)) {

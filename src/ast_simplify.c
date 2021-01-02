@@ -6,8 +6,8 @@
 #include <math.h>
 #include <string.h>
 
-static void process_expression_list(CompilerState *container, struct ast_node_list *node);
-static void process_statement_list(CompilerState *container, struct ast_node_list *node);
+static void process_expression_list(CompilerState *container, AstNodeList *node);
+static void process_statement_list(CompilerState *container, AstNodeList *node);
 static void process_statement(CompilerState *container, struct ast_node *node);
 
 #define l_mathop(op) op
@@ -431,14 +431,14 @@ static void process_expression(CompilerState *container, struct ast_node *node)
 	}
 }
 
-static void process_expression_list(CompilerState *container, struct ast_node_list *list)
+static void process_expression_list(CompilerState *container, AstNodeList *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { process_expression(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
-static void process_statement_list(CompilerState *container, struct ast_node_list *list)
+static void process_statement_list(CompilerState *container, AstNodeList *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { process_statement(container, node); }

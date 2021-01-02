@@ -93,7 +93,7 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 	va_end(ap);
 }
 
-static void print_ast_node_list(TextBuffer *buf, struct ast_node_list *list, int level, const char *delimiter)
+static void print_ast_node_list(TextBuffer *buf, AstNodeList *list, int level, const char *delimiter)
 {
 	struct ast_node *node;
 	bool is_first = true;
@@ -108,7 +108,7 @@ static void print_ast_node_list(TextBuffer *buf, struct ast_node_list *list, int
 	END_FOR_EACH_PTR(node);
 }
 
-static void print_statement_list(TextBuffer *buf, struct ast_node_list *statement_list, int level)
+static void print_statement_list(TextBuffer *buf, AstNodeList *statement_list, int level)
 {
 	print_ast_node_list(buf, statement_list, level + 1, NULL);
 }

@@ -81,10 +81,7 @@ struct LexerState {
 void raviX_syntaxerror(LexerState *ls, const char *msg);
 
 struct ast_node;
-DECLARE_PTR_LIST(ast_node_list, struct ast_node);
-
-struct var_type;
-DECLARE_PTR_LIST(var_type_list, struct var_type);
+DECLARE_PTR_LIST(AstNodeList, struct ast_node);
 
 /* RAVI: Following are the types we will use
 ** use in parsing. The rationale for types is
@@ -159,7 +156,7 @@ struct Scope {
 
 /*STMT_RETURN */
 struct ReturnStatement {
-	struct ast_node_list *expr_list;
+	AstNodeList *expr_list;
 };
 /* STMT_LABEL */
 struct LabelStatement {
@@ -174,46 +171,46 @@ struct GotoStatement {
 /* STMT_LOCAL local variable declarations */
 struct LocalStatement {
 	LuaSymbolList *var_list;
-	struct ast_node_list *expr_list;
+	AstNodeList *expr_list;
 };
 /* STMT_EXPR: Also covers assignments */
 struct ExpressionStatement {
-	struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
-	struct ast_node_list *expr_list;     /* Comma separated expressions */
+	AstNodeList *var_expr_list; /* Optional var expressions, comma separated */
+	AstNodeList *expr_list;     /* Comma separated expressions */
 };
 struct FunctionStatement {
 	struct ast_node *name;		 /* base symbol to be looked up - symbol_expression */
-	struct ast_node_list *selectors; /* Optional list of index_expression(s) */
+	AstNodeList *selectors; /* Optional list of index_expression(s) */
 	struct ast_node *method_name;	 /* Optional - index_expression */
 	struct ast_node *function_expr;	 /* Function's AST - function_expression */
 };
 struct DoStatement {
 	Scope *scope;		 /* The do statement only creates a new scope */
-	struct ast_node_list *do_statement_list; /* statements in this block */
+	AstNodeList *do_statement_list; /* statements in this block */
 };
 /* Used internally in if_stmt, not an independent AST node */
 struct TestThenStatement {
 	struct ast_node *condition;
 	Scope *test_then_scope;
-	struct ast_node_list *test_then_statement_list; /* statements in this block */
+	AstNodeList *test_then_statement_list; /* statements in this block */
 };
 struct IfStatement {
-	struct ast_node_list *if_condition_list; /* Actually a list of test_then_blocks */
+	AstNodeList *if_condition_list; /* Actually a list of test_then_blocks */
 	Scope *else_block;
-	struct ast_node_list *else_statement_list; /* statements in this block */
+	AstNodeList *else_statement_list; /* statements in this block */
 };
 struct WhileOrRepeatStatement {
 	struct ast_node *condition;
 	Scope *loop_scope;
-	struct ast_node_list *loop_statement_list; /* statements in this block */
+	AstNodeList *loop_statement_list; /* statements in this block */
 };
 /* Used for both generic and numeric for loops */
 struct ForStatement {
 	Scope* for_scope; /* encapsulates the entire for statement */
 	LuaSymbolList *symbols;
-	struct ast_node_list *expr_list;
+	AstNodeList *expr_list;
 	Scope *for_body;
-	struct ast_node_list *for_statement_list; /* statements in this block */
+	AstNodeList *for_statement_list; /* statements in this block */
 };
 /* To access the type field common to all expr objects */
 /* all expr types must be compatible with base_expression */
@@ -258,10 +255,10 @@ struct FunctionExpression {
 	uint32_t proc_id; /* Backend allocated id */
 	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
 	Scope *main_block;		       /* the function's main block */
-	struct ast_node_list *function_statement_list; /* statements in this block */
+	AstNodeList *function_statement_list; /* statements in this block */
 	LuaSymbolList
 	    *args; /* arguments, also must be part of the function block's symbol list */
-	struct ast_node_list *child_functions; /* child functions declared in this function */
+	AstNodeList *child_functions; /* child functions declared in this function */
 	LuaSymbolList *upvalues;      /* List of upvalues */
 	LuaSymbolList *locals;	       /* List of locals */
 };
@@ -277,14 +274,14 @@ struct TableElementAssignmentExpression {
 /* table constructor expression EXPR_TABLE_LITERAL occurs in function call and simple expr */
 struct TableLiteralExpression {
 	BASE_EXPRESSION_FIELDS;
-	struct ast_node_list *expr_list;
+	AstNodeList *expr_list;
 };
 /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 /* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
 struct SuffixedExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct ast_node *primary_expr;
-	struct ast_node_list *suffix_list;
+	AstNodeList *suffix_list;
 };
 struct FunctionCallExpression {
 	/* Note that in Ravi the results from a function call must be type asserted during assignment to
@@ -293,7 +290,7 @@ struct FunctionCallExpression {
 	 */
 	BASE_EXPRESSION_FIELDS;
 	const StringObject *method_name; /* Optional method_name */
-	struct ast_node_list *arg_list;		 /* Call arguments */
+	AstNodeList *arg_list;		 /* Call arguments */
 	int num_results;			 /* How many results do we expect, -1 means all available results */
 };
 #undef BASE_EXPRESSION_FIELDS

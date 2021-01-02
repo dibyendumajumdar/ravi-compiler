@@ -35,7 +35,7 @@ static void handle_error(CompilerState *container, const char *msg)
 static void typecheck_ast_node(CompilerState *container, struct ast_node *function, struct ast_node *node);
 
 /* Type checker - WIP  */
-static void typecheck_ast_list(CompilerState *container, struct ast_node *function, struct ast_node_list *list)
+static void typecheck_ast_list(CompilerState *container, struct ast_node *function, AstNodeList *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { typecheck_ast_node(container, function, node); }

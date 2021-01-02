@@ -43,7 +43,7 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 static struct basic_block *create_block(struct proc *proc);
 static void start_block(struct proc *proc, struct basic_block *bb);
 static void linearize_statement(struct proc *proc, struct ast_node *node);
-static void linearize_statement_list(struct proc *proc, struct ast_node_list *list);
+static void linearize_statement_list(struct proc *proc, AstNodeList *list);
 static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope);
 static void end_scope(LinearizerState *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct pseudo *pseudo);
@@ -514,7 +514,7 @@ static void linearize_function_args(LinearizerState *linearizer)
 	END_FOR_EACH_PTR(sym)
 }
 
-static void linearize_statement_list(struct proc *proc, struct ast_node_list *list)
+static void linearize_statement_list(struct proc *proc, AstNodeList *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { linearize_statement(proc, node); }
@@ -1283,7 +1283,7 @@ struct node_info {
 	struct pseudo *pseudo;
 };
 
-static void linearize_assignment(struct proc *proc, struct ast_node_list *expr_list, struct node_info *varinfo, int nv)
+static void linearize_assignment(struct proc *proc, AstNodeList *expr_list, struct node_info *varinfo, int nv)
 {
 	struct ast_node *expr;
 
@@ -1447,7 +1447,7 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 	return result;
 }
 
-static void linearize_expr_list(struct proc *proc, struct ast_node_list *expr_list, struct instruction *insn,
+static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struct instruction *insn,
 				struct pseudo_list **pseudo_list)
 {
 	struct ast_node *expr;
@@ -1562,8 +1562,8 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 	struct basic_block *else_block = NULL;
 	struct basic_block_list *if_blocks = NULL;
 	struct basic_block_list *if_true_blocks = NULL;
-	struct ast_node_list *if_else_stmts = ifnode->if_stmt.if_condition_list;
-	struct ast_node_list *else_stmts = ifnode->if_stmt.else_statement_list;
+	AstNodeList *if_else_stmts = ifnode->if_stmt.if_condition_list;
+	AstNodeList *else_stmts = ifnode->if_stmt.else_statement_list;
 	Scope *else_scope = ifnode->if_stmt.else_block;
 
 	struct ast_node *this_node;
