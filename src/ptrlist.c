@@ -340,9 +340,9 @@ out:
 }
 
 /* This removes the last entry, but doesn't pack the ptr list */
-void *ptrlist_undo_last(struct ptr_list **head)
+void *raviX_ptrlist_undo_last(struct ptr_list **self)
 {
-	struct ptr_list *last, *first = *head;
+	struct ptr_list *last, *first = *self;
 
 	if (!first)
 		return NULL;

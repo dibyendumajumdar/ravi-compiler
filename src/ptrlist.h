@@ -79,7 +79,7 @@ extern void raviX_ptrlist_remove_all(struct ptr_list **self);
 extern int raviX_ptrlist_remove(struct ptr_list **self, void *entry, int count);
 extern int raviX_ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr,
 	int count);
-extern void *ptrlist_undo_last(struct ptr_list **self);
+extern void *raviX_ptrlist_undo_last(struct ptr_list **self);
 extern void *ptrlist_delete_last(struct ptr_list **self);
 extern void ptrlist_concat(struct ptr_list *a, struct ptr_list **self);
 extern void ptrlist_sort(struct ptr_list **self, void *,
