@@ -294,9 +294,9 @@ void raviX_ptrlist_pack(struct ptr_list **self)
 	}
 }
 
-void ptrlist_remove_all(struct ptr_list **listp)
+void raviX_ptrlist_remove_all(struct ptr_list **self)
 {
-	struct ptr_list *tmp, *list = *listp;
+	struct ptr_list *tmp, *list = *self;
 	if (!list)
 		return;
 	list->prev_->next_ = NULL;
@@ -305,7 +305,7 @@ void ptrlist_remove_all(struct ptr_list **listp)
 		list = list->next_;
 		raviX_allocator_free(tmp->allocator_, tmp);
 	}
-	*listp = NULL;
+	*self = NULL;
 }
 
 int ptrlist_remove(struct ptr_list **self, void *entry, int count)

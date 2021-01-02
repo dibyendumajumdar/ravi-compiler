@@ -1039,7 +1039,7 @@ static void convert_loadglobal_to_store(Proc *proc, Instruction *insn, Pseudo *v
 	// Move the loadglobal operands to target
 	FOR_EACH_PTR(insn->operands, pseudo) { add_instruction_target(proc, insn, pseudo); }
 	END_FOR_EACH_PTR(pseudo);
-	ptrlist_remove_all((struct ptr_list **)&insn->operands);
+	raviX_ptrlist_remove_all((struct ptr_list **)&insn->operands);
 	// Add new operand
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
@@ -1088,7 +1088,7 @@ static void convert_indexed_load_to_store(Proc *proc, Instruction *insn, Pseudo 
 	// Move the get operands to put target (table, key)
 	FOR_EACH_PTR(insn->operands, pseudo) { add_instruction_target(proc, insn, pseudo); }
 	END_FOR_EACH_PTR(pseudo);
-	ptrlist_remove_all((struct ptr_list **)&insn->operands);
+	raviX_ptrlist_remove_all((struct ptr_list **)&insn->operands);
 	// Add new operand
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
