@@ -24,7 +24,7 @@
 
 /* nodeId_t is declared elsewhere */
 struct graph;
-struct node;
+typedef struct GraphNode GraphNode;
 typedef struct GraphNodeList GraphNodeList;
 enum edge_type {
 	EDGE_TYPE_UNCLASSIFIED = 0,
@@ -53,15 +53,15 @@ void raviX_delete_edge(struct graph *g, nodeId_t a, nodeId_t b);
 enum edge_type raviX_get_edge_type(struct graph *g, nodeId_t a, nodeId_t b);
 
 /* Get node identified by index */
-struct node *raviX_graph_node(struct graph *g, nodeId_t index);
+GraphNode *raviX_graph_node(struct graph *g, nodeId_t index);
 /* Get the RPO - reverse post order index of the node */
-uint32_t raviX_node_RPO(struct node *n);
+uint32_t raviX_node_RPO(GraphNode *n);
 /* Get the node's id */
-nodeId_t raviX_node_index(struct node *n);
+nodeId_t raviX_node_index(GraphNode *n);
 /* Get list of predecessors */
-GraphNodeList *raviX_predecessors(struct node *n);
+GraphNodeList *raviX_predecessors(GraphNode *n);
 /* Get list of successors */
-GraphNodeList *raviX_successors(struct node *n);
+GraphNodeList *raviX_successors(GraphNode *n);
 
 /* Number of entries in the node_list */
 uint32_t raviX_node_list_size(GraphNodeList *list);
@@ -86,9 +86,9 @@ void raviX_classify_edges(struct graph *g);
  * Before attempting to sort, you must have called
  * raviX_classify_edges(g).
  */
-struct node **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward);
+GraphNode **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward);
 
-void raviX_sort_nodes_by_RPO(struct node **nodes, size_t count, bool forward);
+void raviX_sort_nodes_by_RPO(GraphNode **nodes, size_t count, bool forward);
 
 /* says how many nodes are in the graph */
 uint32_t raviX_graph_size(struct graph *g);

@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-DECLARE_ARRAY(node_array, struct node *);
+DECLARE_ARRAY(node_array, GraphNode *);
 
 struct dataflow_context {
 	struct graph *g;
@@ -57,13 +57,13 @@ void raviX_solve_dataflow(struct graph *g, bool forward_p,
 	}
 	iter = 0;
 	while (worklist->count != 0) {
-		struct node **addr = worklist->data;
+		GraphNode **addr = worklist->data;
 		raviX_sort_nodes_by_RPO(addr, worklist->count, forward_p);
 		raviX_bitset_clear(&ctx.bb_to_consider);
 		pending->count = 0;
 		for (unsigned i = 0; i < worklist->count; i++) {
 			int changed_p = iter == 0;
-			struct node *bb = addr[i];
+			GraphNode *bb = addr[i];
 			GraphNodeList *nodes = forward_p ? raviX_predecessors(bb) : raviX_successors(bb);
 			// TODO should we pass the nodes array to the join function?
 			if (raviX_node_list_size(nodes) == 0)

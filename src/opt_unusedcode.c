@@ -14,7 +14,7 @@
  */
 static int process_block(LinearizerState *linearizer, Proc *proc, BasicBlock *bb)
 {
-	struct node *node = raviX_graph_node(proc->cfg, bb->index);
+	GraphNode *node = raviX_graph_node(proc->cfg, bb->index);
 	GraphNodeList *predecessors = raviX_predecessors(node);
 	if (raviX_node_list_size(predecessors) != 0) {
 		// Has predecessors so nothing to do
