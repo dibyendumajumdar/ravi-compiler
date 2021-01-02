@@ -11,10 +11,10 @@
 
 struct liveness_info {
 	nodeId_t node_id;
-	struct bitset_t in;
-	struct bitset_t out;
-	struct bitset_t use;
-	struct bitset_t def;
+	BitSet in;
+	BitSet out;
+	BitSet use;
+	BitSet def;
 };
 
 DECLARE_ARRAY(liveness_info_array, struct liveness_info *);

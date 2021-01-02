@@ -34,14 +34,14 @@ extern "C" {
 
 #include <inttypes.h>
 
-struct hash_entry {
+typedef struct HashEntry {
 	uint32_t hash;
 	const void *key;
 	void *data;
-};
+} HashEntry;
 
 struct hash_table {
-	struct hash_entry *table;
+	HashEntry *table;
 	uint32_t (*hash_function)(const void *key);
 	int (*key_equals_function)(const void *a, const void *b);
 	uint32_t size;
@@ -58,27 +58,27 @@ raviX_hash_table_create(uint32_t (*hash_function)(const void *key),
 					     const void *b));
 void
 raviX_hash_table_destroy(struct hash_table *ht,
-		   void (*delete_function)(struct hash_entry *entry));
+		   void (*delete_function)(HashEntry *entry));
 
-struct hash_entry *
+HashEntry *
 raviX_hash_table_insert(struct hash_table *ht, const void *key, void *data);
 
-struct hash_entry *
+HashEntry *
 raviX_hash_table_search(struct hash_table *ht, const void *key);
 
 void
 raviX_hash_table_remove(struct hash_table *ht, const void *key);
 
 void
-raviX_hash_table_remove_entry(struct hash_table *ht, struct hash_entry *entry);
+raviX_hash_table_remove_entry(struct hash_table *ht, HashEntry *entry);
 
-struct hash_entry *
+HashEntry *
 raviX_hash_table_next_entry(struct hash_table *ht,
-		      struct hash_entry *entry);
+		      HashEntry *entry);
 
-//struct hash_entry *
+//HashEntry *
 //hash_table_random_entry(struct hash_table *ht,
-//			int (*predicate)(struct hash_entry *entry));
+//			int (*predicate)(HashEntry *entry));
 
 /**
  * This foreach function is safe against deletion (which just replaces
@@ -91,12 +91,12 @@ raviX_hash_table_next_entry(struct hash_table *ht,
 	     entry = raviX_hash_table_next_entry(ht, entry))
 
 /* Alternate interfaces to reduce repeated calls to hash function. */
-struct hash_entry *
+HashEntry *
 raviX_hash_table_search_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
 			     const void *key);
 
-struct hash_entry *
+HashEntry *
 raviX_hash_table_insert_pre_hashed(struct hash_table *ht,
 			     uint32_t hash,
 			     const void *key, void *data);

@@ -42,7 +42,7 @@ static int test_memalloc(void)
 static int test_bitset(void)
 {
 	int status;
-	struct bitset_t b1, b2, b3, b4;
+	BitSet b1, b2, b3, b4;
 
 	raviX_bitset_create(&b1);
 	raviX_bitset_create(&b2);
@@ -142,7 +142,7 @@ static int test_bitset(void)
 
 	status &= raviX_bitset_set_bit_range_p(&b1, 30, 362);
 
-	bitset_iterator_t iter;
+	BitSetIterator iter;
 	size_t nb = 0, n = 0, nmax = 0, nmin = 10000;
 	FOREACH_BITSET_BIT(iter, &b1, nb)
 	{

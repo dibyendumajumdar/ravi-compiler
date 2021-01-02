@@ -35,18 +35,18 @@ static inline void mir_bitset_assert_fail (const char *op) {
 
 #define BITMAP_WORD_BITS 64
 
-void raviX_bitset_create2(struct bitset_t *bm, size_t init_bits_num) {
+void raviX_bitset_create2(BitSet *bm, size_t init_bits_num) {
 	bm->els_num = 0;
 	bm->size = (init_bits_num + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS;
 	bm->varr = calloc(bm->size, sizeof(bitset_el_t));
 }
 
-void raviX_bitset_destroy(struct bitset_t * bm)
+void raviX_bitset_destroy(BitSet * bm)
 {
 	free(bm->varr);
 }
 
-static void bitset_expand (struct bitset_t * bm, size_t nb) {
+static void bitset_expand (BitSet * bm, size_t nb) {
 	size_t new_len = (nb + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS;
 	if (new_len > bm->els_num) {
 		if (new_len > bm->size) {
@@ -57,7 +57,7 @@ static void bitset_expand (struct bitset_t * bm, size_t nb) {
 	}
 }
 
-int raviX_bitset_bit_p(const struct bitset_t * bm, size_t nb) {
+int raviX_bitset_bit_p(const BitSet * bm, size_t nb) {
 	size_t nw, sh, len = bm->els_num;
 	bitset_el_t *addr = bm->varr;
 
@@ -70,7 +70,7 @@ int raviX_bitset_bit_p(const struct bitset_t * bm, size_t nb) {
 /* Set the given bit to 1, and return true if the bit was previously unset, i.e.
  * this set caused bit to change from 0 to 1
  */
-int raviX_bitset_set_bit_p(struct bitset_t * bm, size_t bit) {
+int raviX_bitset_set_bit_p(BitSet * bm, size_t bit) {
 	size_t nw, sh;
 	bitset_el_t *addr;
 	int res;
@@ -85,7 +85,7 @@ int raviX_bitset_set_bit_p(struct bitset_t * bm, size_t bit) {
 	return res;
 }
 
-int raviX_bitset_clear_bit_p(struct bitset_t * bm, size_t nb) {
+int raviX_bitset_clear_bit_p(BitSet * bm, size_t nb) {
 	size_t nw, sh, len = bm->els_num;
 	bitset_el_t *addr = bm->varr;
 	int res;
@@ -98,7 +98,7 @@ int raviX_bitset_clear_bit_p(struct bitset_t * bm, size_t nb) {
 	return res;
 }
 
-int raviX_bitset_set_or_clear_bit_range_p(struct bitset_t * bm, size_t nb, size_t len, int set_p) {
+int raviX_bitset_set_or_clear_bit_range_p(BitSet * bm, size_t nb, size_t len, int set_p) {
 	size_t nw, lsh, rsh, range_len;
 	bitset_el_t mask, *addr;
 	int res = 0;
@@ -124,7 +124,7 @@ int raviX_bitset_set_or_clear_bit_range_p(struct bitset_t * bm, size_t nb, size_
 	return res;
 }
 
-void raviX_bitset_copy(struct bitset_t * dst, const struct bitset_t * src) {
+void raviX_bitset_copy(BitSet * dst, const BitSet * src) {
 
 	size_t dst_len = dst->els_num;
 	size_t src_len = src->els_num;
@@ -137,8 +137,8 @@ void raviX_bitset_copy(struct bitset_t * dst, const struct bitset_t * src) {
 		src_len * sizeof (bitset_el_t));
 }
 
-int raviX_bitset_equal_p(const struct bitset_t * bm1, const struct bitset_t * bm2) {
-	const struct bitset_t * temp_bm;
+int raviX_bitset_equal_p(const BitSet * bm1, const BitSet * bm2) {
+	const BitSet * temp_bm;
 	size_t i, temp_len, bm1_len = bm1->els_num;
 	size_t bm2_len = bm2->els_num;
 	bitset_el_t *addr1, *addr2;
@@ -159,7 +159,7 @@ int raviX_bitset_equal_p(const struct bitset_t * bm1, const struct bitset_t * bm
 	return true;
 }
 
-int raviX_bitset_intersect_p(const struct bitset_t * bm1, const struct bitset_t * bm2) {
+int raviX_bitset_intersect_p(const BitSet * bm1, const BitSet * bm2) {
 	size_t i, min_len, bm1_len = bm1->els_num;
 	size_t bm2_len = bm2->els_num;
 	bitset_el_t *addr1 = bm1->varr;
@@ -171,7 +171,7 @@ int raviX_bitset_intersect_p(const struct bitset_t * bm1, const struct bitset_t 
 	return false;
 }
 
-int raviX_bitset_empty_p(const struct bitset_t * bm) {
+int raviX_bitset_empty_p(const BitSet * bm) {
 	size_t i, len = bm->els_num;
 	bitset_el_t *addr = bm->varr;
 
@@ -190,7 +190,7 @@ static bitset_el_t bitset_el_max3 (bitset_el_t el1, bitset_el_t el2, bitset_el_t
 }
 
 /* Return the number of bits set in BM.  */
-size_t raviX_bitset_bit_count(const struct bitset_t * bm) {
+size_t raviX_bitset_bit_count(const BitSet * bm) {
 	size_t i, len = bm->els_num;
 	bitset_el_t el, *addr = bm->varr;
 	size_t count = 0;
@@ -204,7 +204,7 @@ size_t raviX_bitset_bit_count(const struct bitset_t * bm) {
 	return count;
 }
 
-int raviX_bitset_op2(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
+int raviX_bitset_op2(BitSet * dst, const BitSet * src1, const BitSet * src2,
 		     bitset_el_t (*op) (bitset_el_t, bitset_el_t)) {
 	size_t i, len, bound, src1_len, src2_len;
 	bitset_el_t old, *dst_addr, *src1_addr, *src2_addr;
@@ -228,8 +228,8 @@ int raviX_bitset_op2(struct bitset_t * dst, const struct bitset_t * src1, const 
 	return change_p;
 }
 
-int raviX_bitset_op3(struct bitset_t * dst, const struct bitset_t * src1, const struct bitset_t * src2,
-			      const struct bitset_t * src3, bitset_el_t (*op) (bitset_el_t, bitset_el_t, bitset_el_t)) {
+int raviX_bitset_op3(BitSet * dst, const BitSet * src1, const BitSet * src2,
+			      const BitSet * src3, bitset_el_t (*op) (bitset_el_t, bitset_el_t, bitset_el_t)) {
 	size_t i, len, bound, src1_len, src2_len, src3_len;
 	bitset_el_t old, *dst_addr, *src1_addr, *src2_addr, *src3_addr;
 	int change_p = false;
@@ -255,7 +255,7 @@ int raviX_bitset_op3(struct bitset_t * dst, const struct bitset_t * src1, const 
 	return change_p;
 }
 
-int raviX_bitset_iterator_next(bitset_iterator_t *iter, size_t *nbit) {
+int raviX_bitset_iterator_next(BitSetIterator *iter, size_t *nbit) {
 	const size_t el_bits_num = sizeof (bitset_el_t) * CHAR_BIT;
 	size_t curr_nel = iter->nbit / el_bits_num, len = iter->bitset->els_num;
 	bitset_el_t el, *addr = iter->bitset->varr;

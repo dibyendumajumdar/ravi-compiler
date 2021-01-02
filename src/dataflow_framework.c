@@ -16,7 +16,7 @@ struct dataflow_context {
 	Graph *g;
 	GraphNodeArray worklist;
 	GraphNodeArray pending;
-	struct bitset_t bb_to_consider;
+	BitSet bb_to_consider;
 	void *userdata;
 };
 

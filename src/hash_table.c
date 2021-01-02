@@ -85,19 +85,19 @@ static const struct {
 };
 
 static int
-entry_is_free(const struct hash_entry *entry)
+entry_is_free(const HashEntry *entry)
 {
 	return entry->key == NULL;
 }
 
 static int
-entry_is_deleted(const struct hash_entry *entry)
+entry_is_deleted(const HashEntry *entry)
 {
 	return entry->key == deleted_key;
 }
 
 static int
-entry_is_present(const struct hash_entry *entry)
+entry_is_present(const HashEntry *entry)
 {
 	return entry->key != NULL && entry->key != deleted_key;
 }
@@ -139,13 +139,13 @@ raviX_hash_table_create(uint32_t (*hash_function)(const void *key),
  */
 void
 raviX_hash_table_destroy(struct hash_table *ht,
-		   void (*delete_function)(struct hash_entry *entry))
+		   void (*delete_function)(HashEntry *entry))
 {
 	if (!ht)
 		return;
 
 	if (delete_function) {
-		struct hash_entry *entry;
+		HashEntry *entry;
 
 		hash_table_foreach(ht, entry) {
 			delete_function(entry);
@@ -161,7 +161,7 @@ raviX_hash_table_destroy(struct hash_table *ht,
  * Returns NULL if no entry is found.  Note that the data pointer may be
  * modified by the user.
  */
-struct hash_entry *
+HashEntry *
 raviX_hash_table_search(struct hash_table *ht, const void *key)
 {
 	uint32_t hash = ht->hash_function(key);
@@ -175,7 +175,7 @@ raviX_hash_table_search(struct hash_table *ht, const void *key)
  * Returns NULL if no entry is found.  Note that the data pointer may be
  * modified by the user.
  */
-struct hash_entry *
+HashEntry *
 raviX_hash_table_search_pre_hashed(struct hash_table *ht, uint32_t hash,
 			     const void *key)
 {
@@ -185,7 +185,7 @@ raviX_hash_table_search_pre_hashed(struct hash_table *ht, uint32_t hash,
 	do {
 		uint32_t double_hash;
 
-		struct hash_entry *entry = ht->table + hash_address;
+		HashEntry *entry = ht->table + hash_address;
 
 		if (entry_is_free(entry)) {
 			return NULL;
@@ -207,7 +207,7 @@ static void
 hash_table_rehash(struct hash_table *ht, int new_size_index)
 {
 	struct hash_table old_ht;
-	struct hash_entry *table, *entry;
+	HashEntry *table, *entry;
 
 	if (new_size_index >= ARRAY_SIZE(hash_sizes))
 		return;
@@ -240,7 +240,7 @@ hash_table_rehash(struct hash_table *ht, int new_size_index)
  * Note that insertion may rearrange the table on a resize or rehash,
  * so previously found hash_entries are no longer valid after this function.
  */
-struct hash_entry *
+HashEntry *
 raviX_hash_table_insert(struct hash_table *ht, const void *key, void *data)
 {
 	uint32_t hash = ht->hash_function(key);
@@ -261,12 +261,12 @@ raviX_hash_table_insert(struct hash_table *ht, const void *key, void *data)
  * Note that insertion may rearrange the table on a resize or rehash,
  * so previously found hash_entries are no longer valid after this function.
  */
-struct hash_entry *
+HashEntry *
 raviX_hash_table_insert_pre_hashed(struct hash_table *ht, uint32_t hash,
 			     const void *key, void *data)
 {
 	uint32_t start_hash_address, hash_address;
-	struct hash_entry *available_entry = NULL;
+	HashEntry *available_entry = NULL;
 
 	if (ht->entries >= ht->max_entries) {
 		hash_table_rehash(ht, ht->size_index + 1);
@@ -277,7 +277,7 @@ raviX_hash_table_insert_pre_hashed(struct hash_table *ht, uint32_t hash,
 	start_hash_address = hash % ht->size;
 	hash_address = start_hash_address;
 	do {
-		struct hash_entry *entry = ht->table + hash_address;
+		HashEntry *entry = ht->table + hash_address;
 		uint32_t double_hash;
 
 		if (!entry_is_present(entry)) {
@@ -332,7 +332,7 @@ raviX_hash_table_insert_pre_hashed(struct hash_table *ht, uint32_t hash,
 /**
  * This function searches for, and removes an entry from the hash table.
  *
- * If the caller has previously found a struct hash_entry pointer,
+ * If the caller has previously found a HashEntry pointer,
  * (from calling hash_table_search or remembering it from
  * hash_table_insert), then hash_table_remove_entry can be called
  * instead to avoid an extra search.
@@ -340,7 +340,7 @@ raviX_hash_table_insert_pre_hashed(struct hash_table *ht, uint32_t hash,
 void
 raviX_hash_table_remove(struct hash_table *ht, const void *key)
 {
-	struct hash_entry *entry;
+	HashEntry *entry;
 
 	entry = raviX_hash_table_search(ht, key);
 
@@ -354,7 +354,7 @@ raviX_hash_table_remove(struct hash_table *ht, const void *key)
  * the table deleting entries is safe.
  */
 void
-raviX_hash_table_remove_entry(struct hash_table *ht, struct hash_entry *entry)
+raviX_hash_table_remove_entry(struct hash_table *ht, HashEntry *entry)
 {
 	if (!entry)
 		return;
@@ -370,8 +370,8 @@ raviX_hash_table_remove_entry(struct hash_table *ht, struct hash_entry *entry)
  * Pass in NULL for the first entry, as in the start of a for loop.  Note that
  * an iteration over the table is O(table_size) not O(entries).
  */
-struct hash_entry *
-raviX_hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
+HashEntry *
+raviX_hash_table_next_entry(struct hash_table *ht, HashEntry *entry)
 {
 	if (entry == NULL)
 		entry = ht->table;
@@ -397,11 +397,11 @@ raviX_hash_table_next_entry(struct hash_table *ht, struct hash_entry *entry)
  * implementation.  @predicate may be used to filter entries, or may
  * be set to NULL for no filtering.
  */
-struct hash_entry *
+HashEntry *
 hash_table_random_entry(struct hash_table *ht,
-			int (*predicate)(struct hash_entry *entry))
+			int (*predicate)(HashEntry *entry))
 {
-	struct hash_entry *entry;
+	HashEntry *entry;
 	uint32_t i = random() % ht->size;
 
 	if (ht->entries == 0)
