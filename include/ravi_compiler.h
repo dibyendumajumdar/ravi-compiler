@@ -260,7 +260,7 @@ typedef enum UnaryOperatorType {
 RAVICOMP_EXPORT const char *raviX_get_unary_opr_str(UnaryOperatorType op);
 
 /* Types of AST nodes */
-enum ast_node_type {
+enum AstNodeType {
 	AST_NONE, /* Will never be set on a properly initialized node */
 	STMT_RETURN,
 	STMT_GOTO,
@@ -503,7 +503,7 @@ raviX_function_call_expression_foreach_argument(const struct function_call_expre
 						void (*callback)(void *, const struct expression *expr));
 
 /* Convert a statement to the correct type */
-RAVICOMP_EXPORT enum ast_node_type raviX_statement_type(const struct statement *statement);
+RAVICOMP_EXPORT enum AstNodeType raviX_statement_type(const struct statement *statement);
 RAVICOMP_EXPORT const struct return_statement *raviX_return_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct label_statement *raviX_label_statement(const struct statement *stmt);
 RAVICOMP_EXPORT const struct goto_statement *raviX_goto_statement(const struct statement *stmt);
@@ -517,7 +517,7 @@ RAVICOMP_EXPORT const struct while_or_repeat_statement *raviX_while_or_repeat_st
 RAVICOMP_EXPORT const struct for_statement *raviX_for_statement(const struct statement *stmt);
 
 /* Convert an expression to the correct type */
-RAVICOMP_EXPORT enum ast_node_type raviX_expression_type(const struct expression *expression);
+RAVICOMP_EXPORT enum AstNodeType raviX_expression_type(const struct expression *expression);
 RAVICOMP_EXPORT const struct literal_expression *raviX_literal_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct symbol_expression *raviX_symbol_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct index_expression *raviX_index_expression(const struct expression *expr);

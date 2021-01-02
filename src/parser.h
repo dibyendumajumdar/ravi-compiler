@@ -298,7 +298,7 @@ struct function_call_expression {
 #undef BASE_EXPRESSION_FIELDS
 
 /* ALL AST nodes start with following fields */
-#define BASE_AST_FIELDS enum ast_node_type type; int line_number
+#define BASE_AST_FIELDS enum AstNodeType type; int line_number
 /* Statement AST nodes have following common fields.
  */
 struct statement {

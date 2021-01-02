@@ -48,7 +48,7 @@ void raviX_function_foreach_statement(const struct function_expression *function
 	}
 	END_FOR_EACH_PTR(node)
 }
-enum ast_node_type raviX_statement_type(const struct statement *statement) { return statement->type; }
+enum AstNodeType raviX_statement_type(const struct statement *statement) { return statement->type; }
 void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
 				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
@@ -142,7 +142,7 @@ const struct for_statement *raviX_for_statement(const struct statement *stmt)
 	assert(stmt->type == STMT_FOR_IN || stmt->type == STMT_FOR_NUM);
 	return &n(stmt)->for_stmt;
 }
-enum ast_node_type raviX_expression_type(const struct expression *expression) { return expression->type; }
+enum AstNodeType raviX_expression_type(const struct expression *expression) { return expression->type; }
 const struct literal_expression *raviX_literal_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_LITERAL);

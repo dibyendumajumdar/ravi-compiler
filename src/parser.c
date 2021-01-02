@@ -36,7 +36,7 @@ static void add_ast_node(CompilerState *container, struct ast_node_list **list, 
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
 
-static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_node_type type)
+static struct ast_node *allocate_ast_node(struct parser_state *parser, enum AstNodeType type)
 {
 	struct ast_node *node = (struct ast_node *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = type;
@@ -44,7 +44,7 @@ static struct ast_node *allocate_ast_node(struct parser_state *parser, enum ast_
 	return node;
 }
 
-static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum ast_node_type type)
+static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum AstNodeType type)
 {
 	struct ast_node *node = allocate_ast_node(parser, type);
 	node->common_expr.truncate_results = 0;
