@@ -6,9 +6,9 @@
 #include <math.h>
 #include <string.h>
 
-static void process_expression_list(struct compiler_state *container, struct ast_node_list *node);
-static void process_statement_list(struct compiler_state *container, struct ast_node_list *node);
-static void process_statement(struct compiler_state *container, struct ast_node *node);
+static void process_expression_list(CompilerState *container, struct ast_node_list *node);
+static void process_statement_list(CompilerState *container, struct ast_node_list *node);
+static void process_statement(CompilerState *container, struct ast_node *node);
 
 #define l_mathop(op) op
 
@@ -139,7 +139,7 @@ typedef enum {
 /* convert an object to an integer (without string coercion) */
 #define tointegerns(o, i) (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointegerns(o, i, LUA_FLOORN2I))
 
-static void handle_error(struct compiler_state *container, const char *msg)
+static void handle_error(CompilerState *container, const char *msg)
 {
 	// TODO source and line number
 	raviX_buffer_add_string(&container->error_message, msg);
@@ -152,7 +152,7 @@ static void handle_error(struct compiler_state *container, const char *msg)
 ** 'floor(q) == trunc(q)' when 'q >= 0' or when 'q' is integer,
 ** otherwise 'floor(q) == trunc(q) - 1'.
 */
-static lua_Integer luaV_idiv(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
+static lua_Integer luaV_idiv(CompilerState *compiler_state, lua_Integer m, lua_Integer n)
 {
 	if (unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
 		if (n == 0)
@@ -171,7 +171,7 @@ static lua_Integer luaV_idiv(struct compiler_state *compiler_state, lua_Integer 
 ** negative operands follows C99 behavior. See previous comment
 ** about luaV_idiv.)
 */
-static lua_Integer luaV_mod(struct compiler_state *compiler_state, lua_Integer m, lua_Integer n)
+static lua_Integer luaV_mod(CompilerState *compiler_state, lua_Integer m, lua_Integer n)
 {
 	if (unlikely(l_castS2U(n) + 1u <= 1u)) { /* special cases: -1 or 0 */
 		if (n == 0)
@@ -213,7 +213,7 @@ static lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y)
 	}
 }
 
-static lua_Integer intarith(struct compiler_state *compiler_state, int op, lua_Integer v1, lua_Integer v2)
+static lua_Integer intarith(CompilerState *compiler_state, int op, lua_Integer v1, lua_Integer v2)
 {
 	switch (op) {
 	case BINOPR_ADD:
@@ -246,7 +246,7 @@ static lua_Integer intarith(struct compiler_state *compiler_state, int op, lua_I
 	}
 }
 
-static lua_Number numarith(struct compiler_state *compiler_state, int op, lua_Number v1, lua_Number v2)
+static lua_Number numarith(CompilerState *compiler_state, int op, lua_Number v1, lua_Number v2)
 {
 	switch (op) {
 	case BINOPR_ADD:
@@ -302,7 +302,7 @@ static int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p
 		return 0;
 }
 
-static int luaO_rawarith(struct compiler_state *compiler_state, int op, const struct literal_expression *p1,
+static int luaO_rawarith(CompilerState *compiler_state, int op, const struct literal_expression *p1,
 			 const struct literal_expression *p2, struct literal_expression *res)
 {
 	switch (op) {
@@ -345,7 +345,7 @@ static int luaO_rawarith(struct compiler_state *compiler_state, int op, const st
 	}
 }
 
-static void process_expression(struct compiler_state *container, struct ast_node *node)
+static void process_expression(CompilerState *container, struct ast_node *node)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION:
@@ -431,21 +431,21 @@ static void process_expression(struct compiler_state *container, struct ast_node
 	}
 }
 
-static void process_expression_list(struct compiler_state *container, struct ast_node_list *list)
+static void process_expression_list(CompilerState *container, struct ast_node_list *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { process_expression(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
-static void process_statement_list(struct compiler_state *container, struct ast_node_list *list)
+static void process_statement_list(CompilerState *container, struct ast_node_list *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { process_statement(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
-static void process_statement(struct compiler_state *container, struct ast_node *node)
+static void process_statement(CompilerState *container, struct ast_node *node)
 {
 	switch (node->type) {
 	case AST_NONE:
@@ -504,7 +504,7 @@ static void process_statement(struct compiler_state *container, struct ast_node 
 	}
 }
 
-int raviX_ast_simplify(struct compiler_state *container)
+int raviX_ast_simplify(CompilerState *container)
 {
 	int rc = setjmp(container->env);
 	if (rc == 0) {

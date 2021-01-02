@@ -282,7 +282,7 @@ static void walk_function(void *data, const struct function_expression *function
 	walk_scope(state, scope);
 }
 
-static void walk_ast(struct compiler_state *container)
+static void walk_ast(CompilerState *container)
 {
 	// Dummy struct - in a useful implementation this is where you
 	// would maintain state
@@ -308,7 +308,7 @@ int main(int argc, const char *argv[])
 		rc = 1;
 		goto L_exit;
 	}
-	struct compiler_state *container = raviX_init_compiler();
+	CompilerState *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));

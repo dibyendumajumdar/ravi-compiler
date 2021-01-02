@@ -226,7 +226,7 @@ struct linearizer_state {
 	struct allocator proc_allocator;
 	struct allocator unsized_allocator;
 	struct allocator constant_allocator;
-	struct compiler_state *ast_container;
+	CompilerState *ast_container;
 	struct proc *main_proc;	     /* The root of the compiled chunk of code */
 	struct proc_list *all_procs; /* All procs allocated by the linearizer */
 	struct proc *current_proc;   /* proc being compiled */

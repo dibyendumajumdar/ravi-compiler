@@ -16,7 +16,7 @@ Copyright 2018-2020 Dibyendu Majumdar
 #include <stdint.h>
 #include <stdio.h>
 
-struct compiler_state;
+typedef struct CompilerState CompilerState;
 struct lexer_state;
 struct linearizer_state;
 
@@ -25,9 +25,9 @@ typedef double lua_Number;
 
 /* Initialize the compiler state */
 /* During compilation all data structures are stored in the compiler state */
-RAVICOMP_EXPORT struct compiler_state *raviX_init_compiler(void);
+RAVICOMP_EXPORT CompilerState *raviX_init_compiler(void);
 /* Destroy the compiler state */
-RAVICOMP_EXPORT void raviX_destroy_compiler(struct compiler_state *compiler);
+RAVICOMP_EXPORT void raviX_destroy_compiler(CompilerState *compiler);
 
 /* ------------------------ LEXICAL ANALYZER API -------------------------------*/
 /* Note: following enum was generate using utils/tokenenum.h                               */
@@ -142,11 +142,11 @@ typedef struct {
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
-RAVICOMP_EXPORT const struct string_object *raviX_create_string(struct compiler_state *compiler_state, const char *s,
+RAVICOMP_EXPORT const struct string_object *raviX_create_string(CompilerState *compiler_state, const char *s,
 								uint32_t len);
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
-RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(struct compiler_state *compiler_state, const char *buf,
+RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(CompilerState *compiler_state, const char *buf,
 						     size_t buflen, const char *source_name);
 /* Gets the public part of the lexer data structure to allow access the current token. Note that the returned
  * value should be treated as readonly data structure
@@ -180,24 +180,24 @@ RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
  *
  * Returns 0 on success, non-zero on failure.
  */
-RAVICOMP_EXPORT int raviX_parse(struct compiler_state *compiler_state, const char *buffer, size_t buflen,
+RAVICOMP_EXPORT int raviX_parse(CompilerState *compiler_state, const char *buffer, size_t buflen,
 				const char *source_name);
 /* Prints out the AST to the file */
-RAVICOMP_EXPORT void raviX_output_ast(struct compiler_state *compiler_state, FILE *fp);
+RAVICOMP_EXPORT void raviX_output_ast(CompilerState *compiler_state, FILE *fp);
 /* Performs type checks on the AST and annotates types of expressions nad variables where possible.
  * As a result the AST will be modified.
  *
  * Returns 0 on success, non-zero on failure.
  */
 RAVICOMP_EXPORT int
-raviX_ast_typecheck(struct compiler_state *compiler_state); /* Perform type checks and assign types to AST */
+raviX_ast_typecheck(CompilerState *compiler_state); /* Perform type checks and assign types to AST */
 
 /* ---------------------------- LINEARIZER API --------------------------------------- */
 /* linear IR generator.
  * The goal of this component is to convert the AST to a linear IR.
  * This is work in progress, therefore the IR is not yet publicly exposed.
  */
-RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(struct compiler_state *compiler_state);
+RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(CompilerState *compiler_state);
 /* Attempts to create linear IR for given AST.
  * Returns 0 on success.
  */
@@ -208,7 +208,7 @@ RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer
 RAVICOMP_EXPORT void raviX_destroy_linearizer(struct linearizer_state *linearizer);
 
 /* utilies */
-RAVICOMP_EXPORT const char *raviX_get_last_error(struct compiler_state *compiler_state);
+RAVICOMP_EXPORT const char *raviX_get_last_error(CompilerState *compiler_state);
 
 /* ----------------------- AST WALKING API ------------------------ */
 
@@ -332,7 +332,7 @@ struct lua_label_symbol;
  * function hence the AST root is this function.
  */
 RAVICOMP_EXPORT const struct function_expression *
-raviX_ast_get_main_function(const struct compiler_state *compiler_state);
+raviX_ast_get_main_function(const CompilerState *compiler_state);
 
 /* return statement walking */
 RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const struct return_statement *statement, void *userdata,

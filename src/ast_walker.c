@@ -2,7 +2,7 @@
 
 #include <parser.h>
 
-const struct function_expression *raviX_ast_get_main_function(const struct compiler_state *compiler_state)
+const struct function_expression *raviX_ast_get_main_function(const CompilerState *compiler_state)
 {
 	return &compiler_state->main_function->function_expr;
 }

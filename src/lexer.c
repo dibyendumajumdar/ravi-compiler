@@ -127,7 +127,7 @@ with the keyword else this attribute will be -1. The hash value of the string is
 attribute. Note that we need to allow strings that have embedded 0 character hence the length
 is explicit. But all tokens and reserved keywords are expected to be standard C strings.
 */
-const struct string_object *raviX_create_string(struct compiler_state *compiler_state, const char *input, uint32_t len)
+const struct string_object *raviX_create_string(CompilerState *compiler_state, const char *input, uint32_t len)
 {
 	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
 	struct set_entry *entry = set_search_pre_hashed(compiler_state->strings, temp.hash, &temp);
@@ -248,7 +248,7 @@ static void inclinenumber(struct lexer_state *ls)
 		lexerror(ls, "chunk has too many lines", 0);
 }
 
-struct lexer_state *raviX_init_lexer(struct compiler_state *container, const char *buf, size_t buflen,
+struct lexer_state *raviX_init_lexer(CompilerState *container, const char *buf, size_t buflen,
 				     const char *source)
 {
 	struct lexer_state *ls = (struct lexer_state *)calloc(1, sizeof(struct lexer_state));
@@ -987,4 +987,4 @@ int raviX_lookahead(struct lexer_state *ls)
 	return ls->lookahead.token;
 }
 
-const char *raviX_get_last_error(struct compiler_state *container) { return container->error_message.buf; }
+const char *raviX_get_last_error(CompilerState *container) { return container->error_message.buf; }

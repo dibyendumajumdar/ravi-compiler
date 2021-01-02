@@ -6,7 +6,7 @@
 
 static int test_stringset(void)
 {
-	struct compiler_state *container = raviX_init_compiler();
+	CompilerState *container = raviX_init_compiler();
 	int rc = 0;
 
 	const char *s1 = "local";

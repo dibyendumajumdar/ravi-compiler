@@ -24,7 +24,7 @@ static bool is_type_same(const struct var_type *a, const struct var_type *b)
 	return a->type_code == b->type_code && a->type_name == b->type_name;
 }
 
-static void handle_error(struct compiler_state *container, const char *msg)
+static void handle_error(CompilerState *container, const char *msg)
 {
 	// TODO source and line number
 	raviX_buffer_add_string(&container->error_message, msg);
@@ -32,10 +32,10 @@ static void handle_error(struct compiler_state *container, const char *msg)
 }
 
 /* Type checker - WIP  */
-static void typecheck_ast_node(struct compiler_state *container, struct ast_node *function, struct ast_node *node);
+static void typecheck_ast_node(CompilerState *container, struct ast_node *function, struct ast_node *node);
 
 /* Type checker - WIP  */
-static void typecheck_ast_list(struct compiler_state *container, struct ast_node *function, struct ast_node_list *list)
+static void typecheck_ast_list(CompilerState *container, struct ast_node *function, struct ast_node_list *list)
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(list, node) { typecheck_ast_node(container, function, node); }
@@ -43,7 +43,7 @@ static void typecheck_ast_list(struct compiler_state *container, struct ast_node
 }
 
 /* Type checker - WIP  */
-static void typecheck_unary_operator(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_unary_operator(CompilerState *container, struct ast_node *function, struct ast_node *node)
 {
 	UnaryOperatorType op = node->unary_expr.unary_op;
 	typecheck_ast_node(container, function, node->unary_expr.expr);
@@ -98,7 +98,7 @@ static void typecheck_unary_operator(struct compiler_state *container, struct as
 }
 
 /* Type checker - WIP  */
-static void typecheck_binary_operator(struct compiler_state *container, struct ast_node *function,
+static void typecheck_binary_operator(CompilerState *container, struct ast_node *function,
 				      struct ast_node *node)
 {
 	BinaryOperatorType op = node->binary_expr.binary_op;
@@ -194,7 +194,7 @@ static bool is_unindexable_type(struct var_type *type)
  * x[1][2]
  * x.y[1]
  */
-static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_suffixedexpr(CompilerState *container, struct ast_node *function, struct ast_node *node)
 {
 	typecheck_ast_node(container, function, node->suffixed_expr.primary_expr);
 	struct ast_node *prev_node = node->suffixed_expr.primary_expr;
@@ -225,7 +225,7 @@ static void typecheck_suffixedexpr(struct compiler_state *container, struct ast_
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void typecheck_var_assignment(struct compiler_state *container, struct var_type *var_type, struct ast_node *expr,
+static void typecheck_var_assignment(CompilerState *container, struct var_type *var_type, struct ast_node *expr,
 				     const struct string_object *var_name)
 {
 	if (var_type->type_code == RAVI_TANY)
@@ -260,7 +260,7 @@ static void typecheck_var_assignment(struct compiler_state *container, struct va
 	}
 }
 
-static void typecheck_local_statement(struct compiler_state *container, struct ast_node *function,
+static void typecheck_local_statement(CompilerState *container, struct ast_node *function,
 				      struct ast_node *node)
 {
 	// The local vars should already be annotated
@@ -289,7 +289,7 @@ static void typecheck_local_statement(struct compiler_state *container, struct a
 	}
 }
 
-static void typecheck_expr_statement(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_expr_statement(CompilerState *container, struct ast_node *function, struct ast_node *node)
 {
 	if (node->expression_stmt.var_expr_list)
 		typecheck_ast_list(container, function, node->expression_stmt.var_expr_list);
@@ -317,14 +317,14 @@ static void typecheck_expr_statement(struct compiler_state *container, struct as
 	}
 }
 
-static void typecheck_for_in_statment(struct compiler_state *container, struct ast_node *function,
+static void typecheck_for_in_statment(CompilerState *container, struct ast_node *function,
 				      struct ast_node *node)
 {
 	typecheck_ast_list(container, function, node->for_stmt.expr_list);
 	typecheck_ast_list(container, function, node->for_stmt.for_statement_list);
 }
 
-static void typecheck_for_num_statment(struct compiler_state *container, struct ast_node *function,
+static void typecheck_for_num_statment(CompilerState *container, struct ast_node *function,
 				       struct ast_node *node)
 {
 	typecheck_ast_list(container, function, node->for_stmt.expr_list);
@@ -367,7 +367,7 @@ static void typecheck_for_num_statment(struct compiler_state *container, struct 
 	typecheck_ast_list(container, function, node->for_stmt.for_statement_list);
 }
 
-static void typecheck_if_statement(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_if_statement(CompilerState *container, struct ast_node *function, struct ast_node *node)
 {
 	struct ast_node *test_then_block;
 	FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
@@ -381,7 +381,7 @@ static void typecheck_if_statement(struct compiler_state *container, struct ast_
 	}
 }
 
-static void typecheck_while_or_repeat_statement(struct compiler_state *container, struct ast_node *function,
+static void typecheck_while_or_repeat_statement(CompilerState *container, struct ast_node *function,
 						struct ast_node *node)
 {
 	typecheck_ast_node(container, function, node->while_or_repeat_stmt.condition);
@@ -391,7 +391,7 @@ static void typecheck_while_or_repeat_statement(struct compiler_state *container
 }
 
 /* Type checker - WIP  */
-static void typecheck_ast_node(struct compiler_state *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_ast_node(CompilerState *container, struct ast_node *function, struct ast_node *node)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION: {
@@ -504,13 +504,13 @@ static void typecheck_ast_node(struct compiler_state *container, struct ast_node
 }
 
 /* Type checker - WIP  */
-static void typecheck_function(struct compiler_state *container, struct ast_node *func)
+static void typecheck_function(CompilerState *container, struct ast_node *func)
 {
 	typecheck_ast_list(container, func, func->function_expr.function_statement_list);
 }
 
 /* Type checker - WIP  */
-int raviX_ast_typecheck(struct compiler_state *container)
+int raviX_ast_typecheck(CompilerState *container)
 {
 	struct ast_node *main_function = container->main_function;
 	raviX_buffer_reset(&container->error_message);

@@ -105,7 +105,7 @@ static int do_code(const char *code, const struct arguments *args)
 		printf("%s\n", code);
 	}
 
-	struct compiler_state *container = raviX_init_compiler();
+	CompilerState *container = raviX_init_compiler();
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));

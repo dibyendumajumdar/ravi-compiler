@@ -26,12 +26,12 @@ static struct ast_node *new_literal_expression(struct parser_state *parser, ravi
 static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label);
 static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym);
 
-static void add_symbol(struct compiler_state *container, struct lua_symbol_list **list, struct lua_symbol *sym)
+static void add_symbol(CompilerState *container, struct lua_symbol_list **list, struct lua_symbol *sym)
 {
 	ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
 }
 
-static void add_ast_node(struct compiler_state *container, struct ast_node_list **list, struct ast_node *node)
+static void add_ast_node(CompilerState *container, struct ast_node_list **list, struct ast_node *node)
 {
 	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
@@ -1569,7 +1569,7 @@ static void parse_statement_list(struct parser_state *parser, struct ast_node_li
  */
 static struct block_scope *new_scope(struct parser_state *parser)
 {
-	struct compiler_state *container = parser->container;
+	CompilerState *container = parser->container;
 	struct block_scope *scope = raviX_allocator_allocate(&container->block_scope_allocator, 0);
 	scope->symbol_list = NULL;
 	// scope->do_statement_list = NULL;
@@ -1647,7 +1647,7 @@ static void parse_lua_chunk(struct parser_state *parser)
 	check(parser->ls, TOK_EOS);
 }
 
-static void parser_state_init(struct parser_state *parser, struct lexer_state *ls, struct compiler_state *container)
+static void parser_state_init(struct parser_state *parser, struct lexer_state *ls, CompilerState *container)
 {
 	parser->ls = ls;
 	parser->container = container;
@@ -1660,7 +1660,7 @@ static void parser_state_init(struct parser_state *parser, struct lexer_state *l
 ** syntax tree; return 0 on success / non-zero return code on
 ** failure
 */
-int raviX_parse(struct compiler_state *container, const char *buffer, size_t buflen, const char *name)
+int raviX_parse(CompilerState *container, const char *buffer, size_t buflen, const char *name)
 {
 	struct lexer_state *lexstate = raviX_init_lexer(container, buffer, buflen, name);
 	struct parser_state parser_state;
@@ -1691,9 +1691,9 @@ static uint32_t string_hash(const void *c)
 	return c1->hash;
 }
 
-struct compiler_state *raviX_init_compiler()
+CompilerState *raviX_init_compiler()
 {
-	struct compiler_state *container = (struct compiler_state *)calloc(1, sizeof(struct compiler_state));
+	CompilerState *container = (CompilerState *)calloc(1, sizeof(CompilerState));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(struct ast_node), sizeof(double),
 			     sizeof(struct ast_node) * 32);
 	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
@@ -1715,7 +1715,7 @@ struct compiler_state *raviX_init_compiler()
 	return container;
 }
 
-// static void show_allocations(struct compiler_state *compiler)
+// static void show_allocations(CompilerState *compiler)
 //{
 //	raviX_allocator_show_allocations(&compiler->symbol_allocator);
 //	raviX_allocator_show_allocations(&compiler->block_scope_allocator);
@@ -1725,7 +1725,7 @@ struct compiler_state *raviX_init_compiler()
 //	raviX_allocator_show_allocations(&compiler->string_object_allocator);
 //}
 
-void raviX_destroy_compiler(struct compiler_state *container)
+void raviX_destroy_compiler(CompilerState *container)
 {
 	if (!container->killed) {
 		// show_allocations(container);

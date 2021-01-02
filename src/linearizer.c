@@ -32,7 +32,7 @@ The final instruction of a block must always be a branch instruction.
 #include <malloc.h>
 #endif
 
-static void handle_error(struct compiler_state *container, const char *msg)
+static void handle_error(CompilerState *container, const char *msg)
 {
 	// TODO source and line number
 	raviX_buffer_add_string(&container->error_message, msg);
@@ -83,7 +83,7 @@ static inline void free_register(struct proc *proc, struct pseudo_generator *gen
 }
 
 /* Linearizer initialization  */
-struct linearizer_state *raviX_init_linearizer(struct compiler_state *container)
+struct linearizer_state *raviX_init_linearizer(CompilerState *container)
 {
 	struct linearizer_state *linearizer = (struct linearizer_state *)calloc(1, sizeof(struct linearizer_state));
 	linearizer->ast_container = container;

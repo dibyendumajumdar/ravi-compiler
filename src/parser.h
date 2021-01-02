@@ -42,7 +42,7 @@ struct lexer_state;
  * All memory is held by this object or sub-objects. Memory is freed when
  * the object is destroyed.
  */
-struct compiler_state {
+struct CompilerState {
 	struct allocator ast_node_allocator;
 	struct allocator ptrlist_allocator;
 	struct allocator block_scope_allocator;
@@ -71,7 +71,7 @@ struct lexer_state {
 	int lastline;	 /* line of last token 'consumed' */
 	Token t;	 /* current token */
 	Token lookahead; /* look ahead token */
-	struct compiler_state *container;
+	CompilerState *container;
 	const char *buf;
 	size_t bufsize;
 	size_t n;
@@ -368,7 +368,7 @@ static inline void copy_type(struct var_type *a, const struct var_type *b)
 
 struct parser_state {
 	struct lexer_state *ls;
-	struct compiler_state *container;
+	CompilerState *container;
 	struct ast_node *current_function;
 	struct block_scope *current_scope;
 };
@@ -376,6 +376,6 @@ struct parser_state {
 void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level); /* output the AST structure recursively */
 const char *raviX_get_type_name(ravitype_t tt);
 
-int raviX_ast_simplify(struct compiler_state* container);
+int raviX_ast_simplify(CompilerState* container);
 
 #endif
