@@ -18,7 +18,7 @@ int raviX_construct_cfg(Proc *proc)
 		if (insn == NULL)
 			continue;
 		if (insn->opcode == op_br || insn->opcode == op_cbr || insn->opcode == op_ret) {
-			struct pseudo *pseudo;
+			Pseudo *pseudo;
 			FOR_EACH_PTR(insn->targets, pseudo)
 			{
 				assert(pseudo->type == PSEUDO_BLOCK);

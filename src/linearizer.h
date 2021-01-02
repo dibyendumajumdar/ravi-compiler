@@ -19,7 +19,7 @@ typedef struct Proc Proc;
 typedef struct Constant Constant;
 
 DECLARE_PTR_LIST(InstructionList, Instruction);
-DECLARE_PTR_LIST(PseudoList, struct pseudo);
+DECLARE_PTR_LIST(PseudoList, Pseudo);
 DECLARE_PTR_LIST(ProcList, Proc);
 
 #define container_of(ptr, type, member) ((type *)((char *)(ptr)-offsetof(type, member)))
@@ -144,7 +144,7 @@ enum PseudoType {
 };
 
 /* pseudo represents a pseudo (virtual) register */
-struct pseudo {
+struct Pseudo {
 	unsigned type : 4, regnum : 16, freed : 1;
 	Instruction *insn; /* instruction that created this pseudo */
 	union {
@@ -153,7 +153,7 @@ struct pseudo {
 		LuaSymbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
 		Proc *proc;		 /* PSEUDO_PROC */
 		BasicBlock *block;	 /* PSEUDO_BLOCK */
-		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
+		Pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */
 		int stackidx; /* PSEUDO_LUASTACK */
 	};
 };
@@ -237,7 +237,7 @@ void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
 void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *mb);
 
 Instruction *raviX_last_instruction(BasicBlock *block);
-struct pseudo* raviX_allocate_stack_pseudo(Proc* proc, unsigned reg);
+Pseudo* raviX_allocate_stack_pseudo(Proc* proc, unsigned reg);
 const char *raviX_opcode_name(unsigned int opcode);
 
 #endif

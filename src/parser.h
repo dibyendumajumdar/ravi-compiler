@@ -111,7 +111,7 @@ struct VariableType {
 	const StringObject *type_name;
 };
 
-struct pseudo;
+typedef struct Pseudo Pseudo;
 DECLARE_PTR_LIST(LuaSymbolList, LuaSymbol);
 
 struct LuaVariableSymbol {
@@ -121,12 +121,12 @@ struct LuaVariableSymbol {
 	LuaSymbol *env; /* Only applicable for global symbols - this should point to _ENV */
 	unsigned escaped: 1, /* Has one or more up-value references */
 		function_parameter: 1; /* Is a function parameter */
-	struct pseudo *pseudo;	   /* backend data for the symbol */
+	Pseudo *pseudo;	   /* backend data for the symbol */
 };
 struct LuaLabelSymbol {
 	const StringObject *label_name;
 	Scope *block;
-	struct pseudo* pseudo;     /* backend data for the symbol */
+	Pseudo* pseudo;     /* backend data for the symbol */
 };
 struct LuaUpvalueSymbol {
 	VariableType value_type;

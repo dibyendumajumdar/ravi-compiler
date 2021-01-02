@@ -628,7 +628,7 @@ struct function {
 /* readonly statics */
 static const char *int_var_prefix = "i_";
 static const char *flt_var_prefix = "f_";
-// static struct pseudo NIL_pseudo = {.type = PSEUDO_NIL};
+// static Pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 enum errorcode {
 	Error_integer_expected,
@@ -668,34 +668,34 @@ enum {
 	LUA_OPBNOT = 13
 };
 
-static inline struct pseudo *get_operand(Instruction *insn, unsigned idx)
+static inline Pseudo *get_operand(Instruction *insn, unsigned idx)
 {
-	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
+	return (Pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
 }
 
-static inline struct pseudo *get_first_operand(Instruction *insn)
+static inline Pseudo *get_first_operand(Instruction *insn)
 {
-	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->operands);
+	return (Pseudo *)ptrlist_first((struct ptr_list *)insn->operands);
 }
 
-static inline struct pseudo *get_last_operand(Instruction *insn)
+static inline Pseudo *get_last_operand(Instruction *insn)
 {
-	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->operands);
+	return (Pseudo *)ptrlist_last((struct ptr_list *)insn->operands);
 }
 
-static inline struct pseudo *get_target(Instruction *insn, unsigned idx)
+static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 {
-	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+	return (Pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
 }
 
-static inline struct pseudo *get_first_target(Instruction *insn)
+static inline Pseudo *get_first_target(Instruction *insn)
 {
-	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->targets);
+	return (Pseudo *)ptrlist_first((struct ptr_list *)insn->targets);
 }
 
-static inline struct pseudo *get_last_target(Instruction *insn)
+static inline Pseudo *get_last_target(Instruction *insn)
 {
-	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->targets);
+	return (Pseudo *)ptrlist_last((struct ptr_list *)insn->targets);
 }
 
 static inline unsigned get_num_operands(Instruction *insn)
@@ -737,7 +737,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
-static void emit_varname(const struct pseudo *pseudo, TextBuffer *mb)
+static void emit_varname(const Pseudo *pseudo, TextBuffer *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
@@ -800,7 +800,7 @@ static unsigned compute_max_stack_size(Proc *proc) { return num_locals(proc) + n
  * Computes the register offset from base. Input pseudo must be a local variable,
  * or temp register or range register (on Lua stack)
  */
-static unsigned compute_register_from_base(struct function *fn, const struct pseudo *pseudo)
+static unsigned compute_register_from_base(struct function *fn, const Pseudo *pseudo)
 {
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_ANY:
@@ -822,7 +822,7 @@ static unsigned compute_register_from_base(struct function *fn, const struct pse
 // Check if two pseudos point to the same register
 // note we cannot easily check PSEUDO_LUASTACK type because there may
 // be var args between CI->func and base. So stackbase may not be base-1 always.
-static bool refers_to_same_register(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static bool refers_to_same_register(struct function *fn, Pseudo *src, Pseudo *dst)
 {
 	static bool reg_pseudos[] = {
 	    [PSEUDO_SYMBOL] = true,	/* An object of type lua_symbol representing local var or upvalue */
@@ -864,7 +864,7 @@ TValue *. Thus for constants, we need to use a temp stack variable of type TValu
 The issue is what happens if we need two values at the same time and both are constants
 of the same type. This is where the discriminator comes in - to help differentiate.
 */
-static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo, unsigned discriminator)
+static int emit_reg_accessor(struct function *fn, const Pseudo *pseudo, unsigned discriminator)
 {
 	if (pseudo->type == PSEUDO_LUASTACK) {
 		// Note pseudo->stackidx is relative to ci->func
@@ -929,7 +929,7 @@ static int emit_reg_accessor(struct function *fn, const struct pseudo *pseudo, u
 }
 
 /*copy floating point value to a temporary float */
-static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move_flttemp(struct function *fn, Pseudo *src, Pseudo *dst)
 {
 	if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMFLT) {
@@ -961,7 +961,7 @@ static int emit_move_flttemp(struct function *fn, struct pseudo *src, struct pse
 }
 
 /*copy integer value to temporary int */
-static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move_inttemp(struct function *fn, Pseudo *src, Pseudo *dst)
 {
 	if (src->type == PSEUDO_CONSTANT) {
 		if (src->constant->type == RAVI_TNUMINT) {
@@ -991,7 +991,7 @@ static int emit_move_inttemp(struct function *fn, struct pseudo *src, struct pse
 }
 
 /* copy a value from source pseudo to destination pseudo.*/
-static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst)
+static int emit_move(struct function *fn, Pseudo *src, Pseudo *dst)
 {
 	if (dst->type == PSEUDO_TEMP_FLT) {
 		emit_move_flttemp(fn, src, dst);
@@ -1074,7 +1074,7 @@ static int emit_move(struct function *fn, struct pseudo *src, struct pseudo *dst
 	return 0;
 }
 
-static int emit_jump(struct function *fn, struct pseudo *pseudo)
+static int emit_jump(struct function *fn, Pseudo *pseudo)
 {
 	assert(pseudo->type == PSEUDO_BLOCK);
 	raviX_buffer_add_fstring(&fn->body, "goto L%d;\n", pseudo->block->index);
@@ -1084,7 +1084,7 @@ static int emit_jump(struct function *fn, struct pseudo *pseudo)
 static int emit_op_cbr(struct function *fn, Instruction *insn)
 {
 	assert(insn->opcode == op_cbr);
-	struct pseudo *cond_pseudo = get_operand(insn, 0);
+	Pseudo *cond_pseudo = get_operand(insn, 0);
 	if (cond_pseudo->type == PSEUDO_FALSE || cond_pseudo->type == PSEUDO_NIL) {
 		emit_jump(fn, get_target(insn, 1));
 	} else if (cond_pseudo->type == PSEUDO_TRUE || cond_pseudo->type == PSEUDO_CONSTANT) {
@@ -1145,12 +1145,12 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, " result = wanted == -1 ? 0 : 1;\n"); /* see OP_RETURN impl in JIT */
 	int n = get_num_operands(insn);
 	if (n > 0) {
-		struct pseudo *last_operand = get_operand(insn, n - 1);
+		Pseudo *last_operand = get_operand(insn, n - 1);
 		/* the last operand might be a range pseudo */
 		if (last_operand->type == PSEUDO_RANGE) {
 			raviX_buffer_add_string(&fn->body, " if (wanted == -1) {\n");
 			raviX_buffer_add_string(&fn->body, "  TValue *start_vararg = ");
-			struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = last_operand->regnum};
+			Pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = last_operand->regnum};
 			emit_reg_accessor(fn, &tmp, 0);
 			raviX_buffer_add_string(&fn->body, " ;\n");
 			raviX_buffer_add_fstring(&fn->body, "  wanted = (L->top - start_vararg) + %d;\n", n - 1);
@@ -1161,13 +1161,13 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 	} else {
 		raviX_buffer_add_string(&fn->body, " if (wanted == -1) wanted = 0;\n");
 	}
-	struct pseudo *pseudo;
+	Pseudo *pseudo;
 	int i = 0;
 	raviX_buffer_add_string(&fn->body, " int j = 0;\n");
 	FOR_EACH_PTR(insn->operands, pseudo)
 	{
 		if (pseudo->type != PSEUDO_RANGE) {
-			struct pseudo dummy_dest = {.type = PSEUDO_LUASTACK,
+			Pseudo dummy_dest = {.type = PSEUDO_LUASTACK,
 						    .stackidx = i}; /* will go to stackbase[i] */
 			raviX_buffer_add_fstring(&fn->body, " if (%d < wanted) {\n", i);
 			/* FIXME last argument might be a range pseudo */
@@ -1214,9 +1214,9 @@ static int emit_op_load_table(struct function *fn, Instruction *insn)
 	} else if (insn->opcode == op_tget_skey) {
 		fname = "raviV_gettable_sskey";
 	}
-	struct pseudo *env = get_operand(insn, 0);
-	struct pseudo *varname = get_operand(insn, 1);
-	struct pseudo *dst = get_target(insn, 0);
+	Pseudo *env = get_operand(insn, 0);
+	Pseudo *varname = get_operand(insn, 1);
+	Pseudo *dst = get_target(insn, 0);
 	if (varname->type == PSEUDO_CONSTANT && varname->constant->type == RAVI_TSTRING) {
 		if (varname->constant->s->len < 40) {
 			fname = "raviV_gettable_sskey";
@@ -1246,9 +1246,9 @@ static int emit_op_store_table(struct function *fn, Instruction *insn)
 	} else if (insn->opcode == op_tput_skey) {
 		fname = "raviV_settable_sskey";
 	}
-	struct pseudo *env = get_target(insn, 0);
-	struct pseudo *varname = get_target(insn, 1);
-	struct pseudo *src = get_operand(insn, 0);
+	Pseudo *env = get_target(insn, 0);
+	Pseudo *varname = get_target(insn, 1);
+	Pseudo *src = get_operand(insn, 0);
 	if (varname->type == PSEUDO_CONSTANT && varname->constant->type == RAVI_TSTRING) {
 		if (varname->constant->s->len < 40) {
 			fname = "raviV_settable_sskey";
@@ -1303,7 +1303,7 @@ static int emit_op_call(struct function *fn, Instruction *insn)
 	    &fn->body, " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n + 1, n + 1);
 	if (n > 1) {
 		// We have function arguments (as n=0 is the function itself)
-		struct pseudo *last_arg = get_operand(insn, n - 1);
+		Pseudo *last_arg = get_operand(insn, n - 1);
 		if (last_arg->type == PSEUDO_RANGE) {
 			// If last argument is a range that tells us that we need
 			// to copy all available values from the register to L->top
@@ -1319,7 +1319,7 @@ static int emit_op_call(struct function *fn, Instruction *insn)
 				emit_reg_accessor(fn, last_arg, 0);
 				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(&fn->body, " TValue *dest_base = ");
-				struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = copy_to};
+				Pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = copy_to};
 				emit_reg_accessor(fn, &tmp, 0);
 				raviX_buffer_add_string(&fn->body, ";\n TValue *src = L->top-1;\n");
 				raviX_buffer_add_string(&fn->body, " L->top = dest_base + (L->top-src_base);\n");
@@ -1344,7 +1344,7 @@ static int emit_op_call(struct function *fn, Instruction *insn)
 	}
 	// Copy the rest of the args
 	for (int j = n - 1; j >= 0; j--) {
-		struct pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = target_register + j};
+		Pseudo tmp = {.type = PSEUDO_TEMP_ANY, .regnum = target_register + j};
 		emit_move(fn, get_operand(insn, j), &tmp);
 	}
 	// Call the function
@@ -1367,7 +1367,7 @@ static int emit_op_call(struct function *fn, Instruction *insn)
 /*
  * Output a C stack variable representing int/float value or constant
  */
-static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
+static void emit_varname_or_constant(struct function *fn, Pseudo *pseudo)
 {
 	if (pseudo->type == PSEUDO_CONSTANT) {
 		if (pseudo->constant->type == RAVI_TNUMINT) {
@@ -1406,7 +1406,7 @@ static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 static int emit_comp_ii(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{ ");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
@@ -1448,7 +1448,7 @@ static int emit_bin_ii(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
@@ -1513,7 +1513,7 @@ static int emit_bin_ii(struct function *fn, Instruction *insn)
 static int emit_bitop_ii(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n ");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_FLT || target->type == PSEUDO_TEMP_INT || target->type == PSEUDO_TEMP_BOOL) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
@@ -1546,7 +1546,7 @@ static int emit_bin_fi(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_FLT) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
@@ -1593,7 +1593,7 @@ static int emit_bin_if(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	if (target->type == PSEUDO_TEMP_FLT) {
 		emit_varname(target, &fn->body);
 		raviX_buffer_add_string(&fn->body, " = ");
@@ -1633,9 +1633,9 @@ static int emit_op_arrayget_ikey(struct function *fn, Instruction *insn)
 	const char *array_type = insn->opcode == op_iaget_ikey ? "lua_Integer *" : "lua_Number *";
 	const char *setterfunc = insn->opcode == op_iaget_ikey ? "setivalue" : "setfltvalue";
 	unsigned type = insn->opcode == op_iaget_ikey ? PSEUDO_TEMP_INT : PSEUDO_TEMP_FLT;
-	struct pseudo *arr = get_operand(insn, 0);
-	struct pseudo *key = get_operand(insn, 1);
-	struct pseudo *dst = get_target(insn, 0);
+	Pseudo *arr = get_operand(insn, 0);
+	Pseudo *key = get_operand(insn, 1);
+	Pseudo *dst = get_target(insn, 0);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " RaviArray *arr = arrvalue(");
 	emit_reg_accessor(fn, arr, 0);
@@ -1676,9 +1676,9 @@ static int emit_op_arrayput_val(struct function *fn, Instruction *insn)
 	const char *getterfunc = insn->opcode == op_iaput_ival ? "ivalue" : "fltvalue";
 	const char *setterfunc = insn->opcode == op_iaput_ival ? "raviH_set_int" : "raviH_set_float";
 	unsigned type = insn->opcode == op_iaput_ival ? PSEUDO_TEMP_INT : PSEUDO_TEMP_FLT;
-	struct pseudo *arr = get_target(insn, 0);
-	struct pseudo *key = get_target(insn, 1);
-	struct pseudo *src = get_operand(insn, 0);
+	Pseudo *arr = get_target(insn, 0);
+	Pseudo *key = get_target(insn, 1);
+	Pseudo *src = get_operand(insn, 0);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " RaviArray *arr = arrvalue(");
 	emit_reg_accessor(fn, arr, 0);
@@ -1785,7 +1785,7 @@ static int emit_op_toflt(struct function *fn, Instruction *insn)
 
 static int emit_op_tousertype(struct function *fn, Instruction *insn)
 {
-	struct pseudo *typename = get_first_operand(insn);
+	Pseudo *typename = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, get_first_target(insn), 0);
@@ -1805,7 +1805,7 @@ static int emit_op_tousertype(struct function *fn, Instruction *insn)
 
 static int emit_op_newtable(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target_pseudo = get_first_target(insn);
+	Pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, target_pseudo, 0);
@@ -1817,7 +1817,7 @@ static int emit_op_newtable(struct function *fn, Instruction *insn)
 
 static int emit_op_newarray(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target_pseudo = get_first_target(insn);
+	Pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, target_pseudo, 0);
@@ -1830,8 +1830,8 @@ static int emit_op_newarray(struct function *fn, Instruction *insn)
 
 static int emit_op_closure(struct function *fn, Instruction *insn)
 {
-	struct pseudo *closure_pseudo = get_first_operand(insn);
-	struct pseudo *target_pseudo = get_first_target(insn);
+	Pseudo *closure_pseudo = get_first_operand(insn);
+	Pseudo *target_pseudo = get_first_target(insn);
 
 	assert(closure_pseudo->type == PSEUDO_PROC);
 	Proc *proc = closure_pseudo->proc;
@@ -1861,7 +1861,7 @@ static int emit_op_closure(struct function *fn, Instruction *insn)
 
 static int emit_op_close(struct function *fn, Instruction *insn)
 {
-	struct pseudo *pseudo = get_first_operand(insn);
+	Pseudo *pseudo = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n TValue *clsvar = ");
 	emit_reg_accessor(fn, pseudo, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
@@ -1877,8 +1877,8 @@ static int emit_op_close(struct function *fn, Instruction *insn)
 
 static int emit_op_len(struct function *fn, Instruction *insn)
 {
-	struct pseudo *obj = get_first_operand(insn);
-	struct pseudo *target = get_first_target(insn);
+	Pseudo *obj = get_first_operand(insn);
+	Pseudo *target = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n TValue *len = ");
 	emit_reg_accessor(fn, target, 0);
 	raviX_buffer_add_string(&fn->body, ";\n TValue *obj = ");
@@ -1919,7 +1919,7 @@ static int emit_generic_comp(struct function *fn, Instruction *insn)
 	// been reallocated - so the previous base pointer could be stale
 	emit_reload_base(fn);
 	raviX_buffer_add_string(&fn->body, " }\n");
-	struct pseudo *target = get_first_target(insn);
+	Pseudo *target = get_first_target(insn);
 	if (target->type == PSEUDO_TEMP_ANY) {
 		raviX_buffer_add_string(&fn->body, " setbvalue(");
 		emit_reg_accessor(fn, target, 0);
@@ -1939,7 +1939,7 @@ static int emit_generic_comp(struct function *fn, Instruction *insn)
 static int emit_op_arith(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
-	struct pseudo *target = get_target(insn, 0);
+	Pseudo *target = get_target(insn, 0);
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, target, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
@@ -2070,8 +2070,8 @@ static int emit_op_binary(struct function *fn, Instruction *insn)
 
 static int emit_op_unmi_unmf(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target = get_first_target(insn);
-	struct pseudo *operand = get_first_operand(insn);
+	Pseudo *target = get_first_target(insn);
+	Pseudo *operand = get_first_operand(insn);
 	int type = insn->opcode == op_unmi ? PSEUDO_TEMP_INT : PSEUDO_TEMP_FLT;
 	const char *setter = insn->opcode == op_unmi ? "setivalue" : "setfltvalue";
 	const char *getter = insn->opcode == op_unmi ? "ivalue" : "fltvalue";
@@ -2112,8 +2112,8 @@ static int emit_op_unmi_unmf(struct function *fn, Instruction *insn)
 
 static int emit_op_unm(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target = get_first_target(insn);
-	struct pseudo *operand = get_first_operand(insn);
+	Pseudo *target = get_first_target(insn);
+	Pseudo *operand = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " lua_Number n = 0.0;\n");
 	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
@@ -2137,8 +2137,8 @@ static int emit_op_unm(struct function *fn, Instruction *insn)
 
 static int emit_op_movfi(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target = get_first_target(insn);
-	struct pseudo *operand = get_first_operand(insn);
+	Pseudo *target = get_first_target(insn);
+	Pseudo *operand = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
 	emit_reg_accessor(fn, operand, 0);
@@ -2167,8 +2167,8 @@ static int emit_op_movfi(struct function *fn, Instruction *insn)
 
 static int emit_op_movif(struct function *fn, Instruction *insn)
 {
-	struct pseudo *target = get_first_target(insn);
-	struct pseudo *operand = get_first_operand(insn);
+	Pseudo *target = get_first_target(insn);
+	Pseudo *operand = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *rb = ");
 	emit_reg_accessor(fn, operand, 0);
