@@ -224,12 +224,12 @@ static const Constant *allocate_integer_constant(Proc *proc, int i)
 
 static inline void add_instruction_operand(Proc *proc, Instruction *insn, Pseudo *pseudo)
 {
-	ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
 static inline void add_instruction_target(Proc *proc, Instruction *insn, Pseudo *pseudo)
 {
-	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
 static Instruction *allocate_instruction(Proc *proc, enum opcode op)
@@ -249,7 +249,7 @@ static void free_instruction_operand_pseudos(Proc *proc, Instruction *insn)
 static inline void add_instruction(Proc *proc, Instruction *insn)
 {
 	assert(insn->block == NULL || insn->block == proc->current_bb);
-	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 	insn->block = proc->current_bb;
 }
 
@@ -434,10 +434,11 @@ static Proc *allocate_proc(LinearizerState *linearizer, AstNode *function_expr)
 	proc->function_expr = function_expr;
 	proc->id = raviX_ptrlist_size((struct ptr_list *)linearizer->all_procs)+1; // so that 0 is not assigned
 	function_expr->function_expr.proc_id = proc->id;
-	ptrlist_add((struct ptr_list **)&linearizer->all_procs, proc, &linearizer->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)&linearizer->all_procs, proc, &linearizer->ptrlist_allocator);
 	if (linearizer->current_proc) {
 		proc->parent = linearizer->current_proc;
-		ptrlist_add((struct ptr_list **)&linearizer->current_proc->procs, proc, &linearizer->ptrlist_allocator);
+		raviX_ptrlist_add((struct ptr_list **)&linearizer->current_proc->procs, proc,
+				  &linearizer->ptrlist_allocator);
 	}
 	proc->constants = set_create(hash_constant, compare_constants);
 	proc->linearizer = linearizer;
@@ -1459,7 +1460,7 @@ static void linearize_expr_list(Proc *proc, AstNodeList *expr_list, Instruction 
 		if (ne != 0 && pseudo->type == PSEUDO_RANGE) {
 			convert_range_to_temp(pseudo); // Only accept one result unless it is the last expr
 		}
-		ptrlist_add((struct ptr_list **)pseudo_list, pseudo, &proc->linearizer->ptrlist_allocator);
+		raviX_ptrlist_add((struct ptr_list **)pseudo_list, pseudo, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(expr)
 }
@@ -1570,14 +1571,14 @@ static void linearize_if_statement(Proc *proc, AstNode *ifnode)
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
 		BasicBlock *block = create_block(proc);
-		ptrlist_add((struct ptr_list **)&if_blocks, block, &proc->linearizer->ptrlist_allocator);
+		raviX_ptrlist_add((struct ptr_list **)&if_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(this_node)
 
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
 		BasicBlock *block = create_block(proc);
-		ptrlist_add((struct ptr_list **)&if_true_blocks, block, &proc->linearizer->ptrlist_allocator);
+		raviX_ptrlist_add((struct ptr_list **)&if_true_blocks, block, &proc->linearizer->ptrlist_allocator);
 	}
 	END_FOR_EACH_PTR(this_node)
 

@@ -28,12 +28,12 @@ static void add_local_symbol_to_current_scope(struct parser_state *parser, LuaSy
 
 static void add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym)
 {
-	ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
 }
 
 static void add_ast_node(CompilerState *container, AstNodeList **list, AstNode *node)
 {
-	ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
+	raviX_ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
 }
 
 static AstNode *allocate_ast_node(struct parser_state *parser, enum AstNodeType type)

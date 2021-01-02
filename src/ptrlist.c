@@ -181,20 +181,20 @@ int raviX_ptrlist_size(const struct ptr_list *self)
 	return nr;
 }
 
-void **ptrlist_add(struct ptr_list **listp, void *ptr, Allocator *alloc)
+void **raviX_ptrlist_add(struct ptr_list **self, void *ptr, Allocator *ptr_list_allocator)
 {
-	struct ptr_list *list = *listp;
+	struct ptr_list *list = *self;
 	struct ptr_list *last = NULL;
 	void **ret;
 	int nr;
 
 	if (!list || (nr = (last = list->prev_)->nr_) >= N_) {
-		struct ptr_list *newlist = (struct ptr_list *)raviX_allocator_allocate(alloc, 0);
-		newlist->allocator_ = alloc;
+		struct ptr_list *newlist = (struct ptr_list *)raviX_allocator_allocate(ptr_list_allocator, 0);
+		newlist->allocator_ = ptr_list_allocator;
 		if (!list) {
 			newlist->next_ = newlist;
 			newlist->prev_ = newlist;
-			*listp = newlist;
+			*self = newlist;
 		} else {
 			newlist->prev_ = last;
 			newlist->next_ = list;
@@ -391,7 +391,7 @@ void ptrlist_concat(struct ptr_list *a, struct ptr_list **b)
 	else
 		return;
 	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
-		ptrlist_add(b, ptr, alloc);
+		raviX_ptrlist_add(b, ptr, alloc);
 	}
 }
 
