@@ -63,14 +63,14 @@ static void walk_scope(void *data, const struct block_scope *scope)
 	raviX_scope_foreach_symbol(scope, data, walk_symbol);
 }
 
-static void walk_index_expression(void *data, const struct index_expression *index_expression)
+static void walk_index_expression(void *data, const IndexExpression *index_expression)
 {
 	const struct var_type *type = raviX_index_expression_type(index_expression);
 	(void)type;
 	walk_expression(data, raviX_index_expression_expression(index_expression));
 }
 
-static void walk_symbol_expression(void *data, const struct symbol_expression *symbol_expression)
+static void walk_symbol_expression(void *data, const SymbolExpression *symbol_expression)
 {
 	const struct var_type *type = raviX_symbol_expression_type(symbol_expression);
 	(void)type;
@@ -207,7 +207,7 @@ static void walk_statement(void *data, const Statement *statement)
 	}
 	case STMT_FUNCTION: {
 		const FunctionStatement *function_statement = raviX_function_statement(statement);
-		const struct symbol_expression *name_expression = raviX_function_statement_name(function_statement);
+		const SymbolExpression *name_expression = raviX_function_statement_name(function_statement);
 		walk_symbol_expression(data, name_expression);
 		if (raviX_function_statement_has_selectors(function_statement)) {
 			raviX_function_statement_foreach_selector(function_statement, data, walk_index_expression);

@@ -303,8 +303,8 @@ typedef struct ForStatement ForStatement;
 
 struct expression;
 typedef struct LiteralExpression LiteralExpression;
-struct symbol_expression;
-struct index_expression;
+typedef struct SymbolExpression SymbolExpression;
+typedef struct IndexExpression IndexExpression;
 struct unary_expression;
 struct binary_expression;
 struct function_expression;
@@ -363,15 +363,15 @@ raviX_expression_statement_foreach_rhs_expression(const ExpressionStatement *sta
 						  void (*callback)(void *, const struct expression *expr));
 
 /* function statement walking */
-RAVICOMP_EXPORT const struct symbol_expression *
+RAVICOMP_EXPORT const SymbolExpression *
 raviX_function_statement_name(const FunctionStatement *statement);
 RAVICOMP_EXPORT bool raviX_function_statement_is_method(const FunctionStatement *statement);
-RAVICOMP_EXPORT const struct index_expression *
+RAVICOMP_EXPORT const IndexExpression *
 raviX_function_statement_method_name(const FunctionStatement *statement);
 RAVICOMP_EXPORT bool raviX_function_statement_has_selectors(const FunctionStatement *statement);
 RAVICOMP_EXPORT void
 raviX_function_statement_foreach_selector(const FunctionStatement *statement, void *userdata,
-					  void (*callback)(void *, const struct index_expression *expr));
+					  void (*callback)(void *, const IndexExpression *expr));
 RAVICOMP_EXPORT const struct function_expression *raviX_function_ast(const FunctionStatement *statement);
 
 /* do statement walking */
@@ -426,12 +426,12 @@ RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const Liter
 RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression);
 
 /* symbol expression */
-RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression);
-RAVICOMP_EXPORT const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expression *expression);
+RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expression);
+RAVICOMP_EXPORT const struct lua_symbol *raviX_symbol_expression_symbol(const SymbolExpression *expression);
 
 /* index expression */
-RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const struct index_expression *expression);
-RAVICOMP_EXPORT const struct expression *raviX_index_expression_expression(const struct index_expression *expression);
+RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const IndexExpression *expression);
+RAVICOMP_EXPORT const struct expression *raviX_index_expression_expression(const IndexExpression *expression);
 
 /* unary expression */
 RAVICOMP_EXPORT const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression);
@@ -519,8 +519,8 @@ RAVICOMP_EXPORT const ForStatement *raviX_for_statement(const Statement *stmt);
 /* Convert an expression to the correct type */
 RAVICOMP_EXPORT enum AstNodeType raviX_expression_type(const struct expression *expression);
 RAVICOMP_EXPORT const LiteralExpression *raviX_literal_expression(const struct expression *expr);
-RAVICOMP_EXPORT const struct symbol_expression *raviX_symbol_expression(const struct expression *expr);
-RAVICOMP_EXPORT const struct index_expression *raviX_index_expression(const struct expression *expr);
+RAVICOMP_EXPORT const SymbolExpression *raviX_symbol_expression(const struct expression *expr);
+RAVICOMP_EXPORT const IndexExpression *raviX_index_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct unary_expression *raviX_unary_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct binary_expression *raviX_binary_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct function_expression *raviX_function_expression(const struct expression *expr);

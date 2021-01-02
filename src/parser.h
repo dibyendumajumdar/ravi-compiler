@@ -229,12 +229,12 @@ struct LiteralExpression {
 	SemInfo u;
 };
 /* primaryexp -> NAME | '(' expr ')', NAME is parsed as EXPR_SYMBOL */
-struct symbol_expression {
+struct SymbolExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct lua_symbol *var;
 };
 /* EXPR_Y_INDEX or EXPR_FIELD_SELECTOR */
-struct index_expression {
+struct IndexExpression {
 	BASE_EXPRESSION_FIELDS;
 	struct ast_node *expr; /* '[' expr ']' */
 };
@@ -335,8 +335,8 @@ struct ast_node {
 		ForStatement for_stmt;
 		BaseExpression common_expr;
 		LiteralExpression literal_expr;
-		struct symbol_expression symbol_expr;
-		struct index_expression index_expr;
+		SymbolExpression symbol_expr;
+		IndexExpression index_expr;
 		struct unary_expression unary_expr;
 		struct binary_expression binary_expr;
 		struct function_expression function_expr; /* a literal expression whose result is a value of type function */

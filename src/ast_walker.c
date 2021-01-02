@@ -148,12 +148,12 @@ const LiteralExpression *raviX_literal_expression(const struct expression *expr)
 	assert(expr->type == EXPR_LITERAL);
 	return &n(expr)->literal_expr;
 }
-const struct symbol_expression *raviX_symbol_expression(const struct expression *expr)
+const SymbolExpression *raviX_symbol_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_SYMBOL);
 	return &n(expr)->symbol_expr;
 }
-const struct index_expression *raviX_index_expression(const struct expression *expr)
+const IndexExpression *raviX_index_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_Y_INDEX || expr->type == EXPR_FIELD_SELECTOR);
 	return &n(expr)->index_expr;
@@ -271,7 +271,7 @@ void raviX_expression_statement_foreach_rhs_expression(const ExpressionStatement
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct symbol_expression *raviX_function_statement_name(const FunctionStatement *statement)
+const SymbolExpression *raviX_function_statement_name(const FunctionStatement *statement)
 {
 	assert(statement->name->type == EXPR_SYMBOL);
 	return &statement->name->symbol_expr;
@@ -280,7 +280,7 @@ bool raviX_function_statement_is_method(const FunctionStatement *statement)
 {
 	return statement->method_name != NULL;
 }
-const struct index_expression *raviX_function_statement_method_name(const FunctionStatement *statement)
+const IndexExpression *raviX_function_statement_method_name(const FunctionStatement *statement)
 {
 	assert(statement->method_name->type == EXPR_Y_INDEX || statement->method_name->type == EXPR_FIELD_SELECTOR);
 	return &statement->method_name->index_expr;
@@ -290,7 +290,7 @@ bool raviX_function_statement_has_selectors(const FunctionStatement *statement)
 	return statement->selectors != NULL;
 }
 void raviX_function_statement_foreach_selector(const FunctionStatement *statement, void *userdata,
-					       void (*callback)(void *, const struct index_expression *expr))
+					       void (*callback)(void *, const IndexExpression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->selectors, node)
@@ -432,19 +432,19 @@ const struct var_type *raviX_literal_expression_type(const LiteralExpression *ex
 	return &expression->type;
 }
 const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression) { return &expression->u; }
-const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression)
+const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expression)
 {
 	return &expression->type;
 }
-const struct lua_symbol *raviX_symbol_expression_symbol(const struct symbol_expression *expression)
+const struct lua_symbol *raviX_symbol_expression_symbol(const SymbolExpression *expression)
 {
 	return expression->var;
 }
-const struct var_type *raviX_index_expression_type(const struct index_expression *expression)
+const struct var_type *raviX_index_expression_type(const IndexExpression *expression)
 {
 	return &expression->type;
 }
-const struct expression *raviX_index_expression_expression(const struct index_expression *expression)
+const struct expression *raviX_index_expression_expression(const IndexExpression *expression)
 {
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr;
