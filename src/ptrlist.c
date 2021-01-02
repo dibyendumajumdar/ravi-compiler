@@ -308,7 +308,7 @@ void raviX_ptrlist_remove_all(struct ptr_list **self)
 	*self = NULL;
 }
 
-int ptrlist_remove(struct ptr_list **self, void *entry, int count)
+int raviX_ptrlist_remove(struct ptr_list **self, void *entry, int count)
 {
 	PtrListIterator iter = ptrlist_forward_iterator(*self);
 	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {

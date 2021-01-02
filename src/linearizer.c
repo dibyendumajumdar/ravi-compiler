@@ -255,7 +255,7 @@ static inline void add_instruction(Proc *proc, Instruction *insn)
 
 static inline void remove_instruction(BasicBlock *block, Instruction *insn)
 {
-	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
+	raviX_ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
 	insn->block = NULL;
 }
 
