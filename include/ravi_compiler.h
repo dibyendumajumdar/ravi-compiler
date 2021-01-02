@@ -326,7 +326,7 @@ enum SymbolType {
 typedef struct LuaSymbol LuaSymbol;
 typedef struct LuaUpvalueSymbol LuaUpvalueSymbol;
 typedef struct LuaVariableSymbol LuaVariableSymbol;
-struct lua_label_symbol;
+typedef struct LuaLabelSymbol LuaLabelSymbol;
 
 /* As described before each parsed Lua script or chunk is wrapped in an anonymous 'main'
  * function hence the AST root is this function.
@@ -539,7 +539,7 @@ RAVICOMP_EXPORT enum SymbolType raviX_symbol_type(const LuaSymbol *symbol);
 /* symbol downcast */
 RAVICOMP_EXPORT const LuaVariableSymbol *raviX_symbol_variable(const LuaSymbol *symbol);
 RAVICOMP_EXPORT const LuaUpvalueSymbol *raviX_symbol_upvalue(const LuaSymbol *symbol);
-RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol);
+RAVICOMP_EXPORT const LuaLabelSymbol *raviX_symbol_label(const LuaSymbol *symbol);
 
 /* variable symbol - local and global variables */
 RAVICOMP_EXPORT const StringObject *
@@ -550,8 +550,8 @@ RAVICOMP_EXPORT const Scope *
 raviX_variable_symbol_scope(const LuaVariableSymbol *lua_local_symbol);
 
 /* label symbol */
-RAVICOMP_EXPORT const StringObject *raviX_label_name(const struct lua_label_symbol *symbol);
-RAVICOMP_EXPORT const Scope *raviX_label_scope(const struct lua_label_symbol *symbol);
+RAVICOMP_EXPORT const StringObject *raviX_label_name(const LuaLabelSymbol *symbol);
+RAVICOMP_EXPORT const Scope *raviX_label_scope(const LuaLabelSymbol *symbol);
 
 /* upvalue symbol */
 RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol);

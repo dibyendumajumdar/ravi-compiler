@@ -38,7 +38,7 @@ static void walk_symbol(void *data, const LuaSymbol *symbol)
 	enum SymbolType type = raviX_symbol_type(symbol);
 	switch (type) {
 	case SYM_LABEL: {
-		const struct lua_label_symbol *label = raviX_symbol_label(symbol);
+		const LuaLabelSymbol *label = raviX_symbol_label(symbol);
 		(void)label;
 		break;
 	}

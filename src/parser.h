@@ -124,7 +124,7 @@ struct LuaVariableSymbol {
 		function_parameter: 1; /* Is a function parameter */
 	struct pseudo *pseudo;	   /* backend data for the symbol */
 };
-struct lua_label_symbol {
+struct LuaLabelSymbol {
 	const StringObject *label_name;
 	Scope *block;
 	struct pseudo* pseudo;     /* backend data for the symbol */
@@ -143,7 +143,7 @@ struct LuaSymbol {
 	enum SymbolType symbol_type;
 	union {
 		LuaVariableSymbol variable;
-		struct lua_label_symbol label;
+		LuaLabelSymbol label;
 		LuaUpvalueSymbol upvalue;
 	};
 };

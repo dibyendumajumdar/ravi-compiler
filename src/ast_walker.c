@@ -585,13 +585,13 @@ const LuaUpvalueSymbol *raviX_symbol_upvalue(const LuaSymbol *symbol)
 	assert(symbol->symbol_type == SYM_UPVALUE);
 	return &symbol->upvalue;
 }
-const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol)
+const LuaLabelSymbol *raviX_symbol_label(const LuaSymbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_LABEL);
 	return &symbol->label;
 }
-const StringObject *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
-const Scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
+const StringObject *raviX_label_name(const LuaLabelSymbol *symbol) { return symbol->label_name; }
+const Scope *raviX_label_scope(const LuaLabelSymbol *symbol) { return symbol->block; }
 const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol)
 {
 	return &symbol->value_type;
