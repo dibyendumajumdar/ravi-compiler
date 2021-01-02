@@ -23,7 +23,7 @@ static struct ast_node *end_function(struct parser_state *parser);
 static struct block_scope *new_scope(struct parser_state *parser);
 static void end_scope(struct parser_state *parser);
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type);
-static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label);
+static struct ast_node *generate_label(struct parser_state *parser, const StringObject *label);
 static void add_local_symbol_to_current_scope(struct parser_state *parser, struct lua_symbol *sym);
 
 static void add_symbol(CompilerState *container, struct lua_symbol_list **list, struct lua_symbol *sym)
@@ -125,9 +125,9 @@ static void check_match(LexerState *ls, int what, int who, int where)
 }
 
 /* Check that current token is a name, and advance */
-static const struct string_object *check_name_and_next(LexerState *ls)
+static const StringObject *check_name_and_next(LexerState *ls)
 {
-	const struct string_object *ts;
+	const StringObject *ts;
 	check(ls, TOK_NAME);
 	ts = ls->t.seminfo.ts;
 	raviX_next(ls);
@@ -136,8 +136,8 @@ static const struct string_object *check_name_and_next(LexerState *ls)
 
 /* create a new local variable in function scope, and set the
  * variable type (RAVI - added type tt) */
-static struct lua_symbol *new_local_symbol(struct parser_state *parser, const struct string_object *name, ravitype_t tt,
-					   const struct string_object *usertype)
+static struct lua_symbol *new_local_symbol(struct parser_state *parser, const StringObject *name, ravitype_t tt,
+					   const StringObject *usertype)
 {
 	struct block_scope *scope = parser->current_scope;
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
@@ -151,7 +151,7 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const st
 }
 
 /* create a new label */
-static struct lua_symbol *new_label(struct parser_state *parser, const struct string_object *name)
+static struct lua_symbol *new_label(struct parser_state *parser, const StringObject *name)
 {
 	struct block_scope *scope = parser->current_scope;
 	assert(scope);
@@ -177,7 +177,7 @@ static struct lua_symbol *new_localvarliteral_(struct parser_state *parser, cons
  */
 #define new_localvarliteral(parser, name) new_localvarliteral_(parser, "" name, (sizeof(name) / sizeof(char)) - 1)
 
-static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope, const struct string_object *varname)
+static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope, const StringObject *varname)
 {
 	struct lua_symbol *symbol;
 	// Lookup in reverse order so that we discover the
@@ -205,7 +205,7 @@ static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope
 
 /* Each function has a list of upvalues, searches this list for given name
  */
-static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, const struct string_object *name)
+static struct lua_symbol *search_upvalue_in_function(struct ast_node *function, const StringObject *name)
 {
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
@@ -272,7 +272,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, struct ast_node
  * the symbol is found or we exhaust the search. NULL is returned if search was
  * exhausted.
  */
-static struct lua_symbol *search_for_variable(struct parser_state *parser, const struct string_object *varname,
+static struct lua_symbol *search_for_variable(struct parser_state *parser, const StringObject *varname,
 					      bool *is_local)
 {
 	*is_local = false;
@@ -355,7 +355,7 @@ static void add_upvalue_for_ENV(struct parser_state *parser)
 /* Creates a symbol reference to the name; the returned symbol reference
  * may be local, upvalue or global.
  */
-static struct ast_node *new_symbol_reference(struct parser_state *parser, const struct string_object *varname)
+static struct ast_node *new_symbol_reference(struct parser_state *parser, const StringObject *varname)
 {
 	bool is_local = false;
 	struct lua_symbol *symbol = search_for_variable(parser, varname, &is_local); // Search in all scopes
@@ -411,7 +411,7 @@ static struct ast_node *new_symbol_reference(struct parser_state *parser, const 
 /* GRAMMAR RULES */
 /*============================================================*/
 
-static struct ast_node *new_string_literal(struct parser_state *parser, const struct string_object *ts)
+static struct ast_node *new_string_literal(struct parser_state *parser, const StringObject *ts)
 {
 	struct ast_node *node = allocate_expr_ast_node(parser, EXPR_LITERAL);
 	set_type(&node->literal_expr.type, RAVI_TSTRING);
@@ -419,7 +419,7 @@ static struct ast_node *new_string_literal(struct parser_state *parser, const st
 	return node;
 }
 
-static struct ast_node *new_field_selector(struct parser_state *parser, const struct string_object *ts)
+static struct ast_node *new_field_selector(struct parser_state *parser, const StringObject *ts)
 {
 	struct ast_node *index = allocate_expr_ast_node(parser, EXPR_FIELD_SELECTOR);
 	index->index_expr.expr = new_string_literal(parser, ts);
@@ -435,7 +435,7 @@ static struct ast_node *parse_field_selector(struct parser_state *parser)
 	LexerState *ls = parser->ls;
 	/* fieldsel -> ['.' | ':'] NAME */
 	raviX_next(ls); /* skip the dot or colon */
-	const struct string_object *ts = check_name_and_next(ls);
+	const StringObject *ts = check_name_and_next(ls);
 	return new_field_selector(parser, ts);
 }
 
@@ -479,7 +479,7 @@ static struct ast_node *parse_recfield(struct parser_state *parser)
 	/* recfield -> (NAME | '['exp1']') = exp1 */
 	struct ast_node *index_expr;
 	if (ls->t.token == TOK_NAME) {
-		const struct string_object *ts = check_name_and_next(ls);
+		const StringObject *ts = check_name_and_next(ls);
 		index_expr = new_field_selector(parser, ts);
 	} else /* ls->t.token == '[' */
 		index_expr = parse_yindex(parser);
@@ -591,8 +591,8 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
  * Note that the returned string will be anchored in the Lexer and must
  * be anchored somewhere else by the time parsing finishes
  */
-static const struct string_object *parse_user_defined_type_name(LexerState *ls,
-								const struct string_object *typename)
+static const StringObject *parse_user_defined_type_name(LexerState *ls,
+								const StringObject *typename)
 {
 	size_t len = 0;
 	if (testnext(ls, '.')) {
@@ -630,10 +630,10 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 	LexerState *ls = parser->ls;
 	/* assume a dynamic type */
 	ravitype_t tt = RAVI_TANY;
-	const struct string_object *name = check_name_and_next(ls);
-	const struct string_object *pusertype = NULL;
+	const StringObject *name = check_name_and_next(ls);
+	const StringObject *pusertype = NULL;
 	if (testnext(ls, ':')) {
-		const struct string_object *typename = check_name_and_next(ls); /* we expect a type name */
+		const StringObject *typename = check_name_and_next(ls); /* we expect a type name */
 		const char *str = typename->str;
 		/* following is not very nice but easy as
 		 * the lexer doesn't need to be changed
@@ -735,7 +735,7 @@ static int parse_expression_list(struct parser_state *parser, struct ast_node_li
 }
 
 /* parse function arguments */
-static struct ast_node *parse_function_call(struct parser_state *parser, const struct string_object *methodname,
+static struct ast_node *parse_function_call(struct parser_state *parser, const StringObject *methodname,
 					    int line)
 {
 	LexerState *ls = parser->ls;
@@ -835,7 +835,7 @@ static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 		}
 		case ':': { /* ':' NAME funcargs */
 			raviX_next(ls);
-			const struct string_object *methodname = check_name_and_next(ls);
+			const StringObject *methodname = check_name_and_next(ls);
 			struct ast_node *suffix = parse_function_call(parser, methodname, line);
 			add_ast_node(parser->container, &suffixed_expr->suffixed_expr.suffix_list, suffix);
 			break;
@@ -1034,7 +1034,7 @@ static struct ast_node *parse_sub_expression(struct parser_state *parser, int li
 	uop = get_unary_opr(ls->t.token);
 	if (uop != UNOPR_NOUNOPR) {
 		// RAVI change - get usertype if @<name>
-		const struct string_object *usertype = NULL;
+		const StringObject *usertype = NULL;
 		if (uop == UNOPR_TO_TYPE) {
 			usertype = ls->t.seminfo.ts;
 			raviX_next(ls);
@@ -1114,7 +1114,7 @@ static struct ast_node *parse_condition(struct parser_state *parser)
 static struct ast_node *parse_goto_statment(struct parser_state *parser)
 {
 	LexerState *ls = parser->ls;
-	const struct string_object *label;
+	const StringObject *label;
 	int is_break = 0;
 	if (testnext(ls, TOK_goto))
 		label = check_name_and_next(ls);
@@ -1139,7 +1139,7 @@ static void skip_noop_statements(struct parser_state *parser)
 		parse_statement(parser);
 }
 
-static struct ast_node *generate_label(struct parser_state *parser, const struct string_object *label)
+static struct ast_node *generate_label(struct parser_state *parser, const StringObject *label)
 {
 	struct lua_symbol *symbol = new_label(parser, label);
 	struct ast_node *label_stmt = allocate_ast_node(parser, STMT_LABEL);
@@ -1147,7 +1147,7 @@ static struct ast_node *generate_label(struct parser_state *parser, const struct
 	return label_stmt;
 }
 
-static struct ast_node *parse_label_statement(struct parser_state *parser, const struct string_object *label, int line)
+static struct ast_node *parse_label_statement(struct parser_state *parser, const StringObject *label, int line)
 {
 	(void)line;
 	LexerState *ls = parser->ls;
@@ -1204,7 +1204,7 @@ static void parse_forbody(struct parser_state *parser, struct ast_node *stmt, in
 
 /* parse a numerical for loop */
 static void parse_fornum_statement(struct parser_state *parser, struct ast_node *stmt,
-				   const struct string_object *varname, int line)
+				   const StringObject *varname, int line)
 {
 	LexerState *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
@@ -1224,7 +1224,7 @@ static void parse_fornum_statement(struct parser_state *parser, struct ast_node 
 }
 
 /* parse a generic for loop */
-static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, const struct string_object *indexname)
+static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, const StringObject *indexname)
 {
 	LexerState *ls = parser->ls;
 	/* forlist -> NAME {,NAME} IN explist forbody */
@@ -1250,7 +1250,7 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 {
 	LexerState *ls = parser->ls;
 	/* forstat -> FOR (fornum | forlist) END */
-	const struct string_object *varname;
+	const StringObject *varname;
 	struct ast_node *stmt = allocate_ast_node(parser, AST_NONE);
 	stmt->for_stmt.symbols = NULL;
 	stmt->for_stmt.expr_list = NULL;
@@ -1678,8 +1678,8 @@ Return true if two strings are equal, false otherwise.
 */
 static int string_equal(const void *a, const void *b)
 {
-	const struct string_object *c1 = (const struct string_object *)a;
-	const struct string_object *c2 = (const struct string_object *)b;
+	const StringObject *c1 = (const StringObject *)a;
+	const StringObject *c2 = (const StringObject *)b;
 	if (c1->len != c2->len || c1->hash != c2->hash)
 		return 0;
 	return memcmp(c1->str, c2->str, c1->len) == 0;
@@ -1687,7 +1687,7 @@ static int string_equal(const void *a, const void *b)
 
 static uint32_t string_hash(const void *c)
 {
-	const struct string_object *c1 = (const struct string_object *)c;
+	const StringObject *c1 = (const StringObject *)c;
 	return c1->hash;
 }
 
@@ -1703,8 +1703,8 @@ CompilerState *raviX_init_compiler()
 	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double),
 			     sizeof(struct lua_symbol) * 64);
 	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), 1024);
-	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(struct string_object),
-			     sizeof(double), sizeof(struct string_object) * 64);
+	raviX_allocator_init(&container->string_object_allocator, "string_objects", sizeof(StringObject),
+			     sizeof(double), sizeof(StringObject) * 64);
 	raviX_buffer_init(&container->buff, 1024);
 	raviX_buffer_init(&container->error_message, 256);
 	container->strings = set_create(string_hash, string_equal);

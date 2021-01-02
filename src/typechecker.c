@@ -226,7 +226,7 @@ static void typecheck_suffixedexpr(CompilerState *container, struct ast_node *fu
 }
 
 static void typecheck_var_assignment(CompilerState *container, struct var_type *var_type, struct ast_node *expr,
-				     const struct string_object *var_name)
+				     const StringObject *var_name)
 {
 	if (var_type->type_code == RAVI_TANY)
 		// Any value can be assigned to type ANY
@@ -280,7 +280,7 @@ static void typecheck_local_statement(CompilerState *container, struct ast_node 
 			break;
 
 		struct var_type *var_type = &var->variable.value_type;
-		const struct string_object *var_name = var->variable.var_name;
+		const StringObject *var_name = var->variable.var_name;
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
 
@@ -308,7 +308,7 @@ static void typecheck_expr_statement(CompilerState *container, struct ast_node *
 			break;
 
 		struct var_type *var_type = &var->common_expr.type;
-		const struct string_object *var_name = NULL; // FIXME how do we get this?
+		const StringObject *var_name = NULL; // FIXME how do we get this?
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
 

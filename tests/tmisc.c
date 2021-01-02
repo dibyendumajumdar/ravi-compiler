@@ -10,12 +10,12 @@ static int test_stringset(void)
 	int rc = 0;
 
 	const char *s1 = "local";
-	const struct string_object *s2 = raviX_create_string(container, s1, (uint32_t)strlen(s1));
+	const StringObject *s2 = raviX_create_string(container, s1, (uint32_t)strlen(s1));
 	if (strcmp(s1, s2->str) != 0)
 		rc++;
 	if (s1 == s2->str)
 		rc++;
-	const struct string_object *s3 = raviX_create_string(container, s1, (uint32_t)strlen(s1));
+	const StringObject *s3 = raviX_create_string(container, s1, (uint32_t)strlen(s1));
 	if (s3 != s2)
 		rc++;
 	if (strcmp(s1, s3->str) != 0)

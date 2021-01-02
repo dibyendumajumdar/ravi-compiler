@@ -48,14 +48,14 @@ static void printf_buf(buffer_t *buf, const char *format, ...)
 			raviX_buffer_add_string(buf, tbuf);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 't') { /* string_object */
-			const struct string_object *s = va_arg(ap, const struct string_object *);
+			const StringObject *s = va_arg(ap, const StringObject *);
 			raviX_buffer_add_string(buf, s->str);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'T') { /* struct var_type */
 			const struct var_type *type;
 			type = va_arg(ap, const struct var_type *);
 			if (type->type_code == RAVI_TUSERDATA) {
-				const struct string_object *s = type->type_name;
+				const StringObject *s = type->type_name;
 				raviX_buffer_add_string(buf, s->str);
 			} else {
 				raviX_buffer_add_string(buf, raviX_get_type_name(type->type_code));
@@ -113,7 +113,7 @@ static void print_statement_list(buffer_t *buf, struct ast_node_list *statement_
 	print_ast_node_list(buf, statement_list, level + 1, NULL);
 }
 
-static inline const char *get_as_str(const struct string_object *ts) { return ts ? ts->str : ""; }
+static inline const char *get_as_str(const StringObject *ts) { return ts ? ts->str : ""; }
 
 static void print_symbol(buffer_t *buf, struct lua_symbol *sym, int level)
 {

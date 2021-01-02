@@ -91,12 +91,12 @@ enum TokenType {
  * The compiler stores a single copy of each string so that strings
  * can be compared by equality.
  */
-struct string_object {
+typedef struct StringObject {
 	uint32_t len;	  /* length of the string */
 	int32_t reserved; /* if is this a keyword then token id else -1 */
 	uint32_t hash;	  /* hash value of the string */
 	const char *str;  /* string data */
-};
+} StringObject;
 
 /*
  * Lua literals
@@ -104,7 +104,7 @@ struct string_object {
 typedef union {
 	lua_Number r;
 	lua_Integer i;
-	const struct string_object *ts;
+	const StringObject *ts;
 } SemInfo;
 
 typedef struct Token {
@@ -124,7 +124,7 @@ typedef struct {
 	int lastline;	 /* line number of the last token 'consumed' */
 	Token t;	 /* current token, set after call to raviX_next() */
 	Token lookahead; /* look ahead token, set after call to raviX_lookahead() */
-} LexState;
+} LexerInfo;
 
 /* Following is a dynamic buffer implementation that is not strictly part of the
  * compiler api but is relied upon by various compiler parts. We should perhaps avoid
@@ -142,7 +142,7 @@ typedef struct {
 /* all strings are interned and stored in a hash set, strings may have embedded
  * 0 bytes therefore explicit length is necessary
  */
-RAVICOMP_EXPORT const struct string_object *raviX_create_string(CompilerState *compiler_state, const char *s,
+RAVICOMP_EXPORT const StringObject *raviX_create_string(CompilerState *compiler_state, const char *s,
 								uint32_t len);
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
@@ -151,7 +151,7 @@ RAVICOMP_EXPORT LexerState *raviX_init_lexer(CompilerState *compiler_state, cons
 /* Gets the public part of the lexer data structure to allow access the current token. Note that the returned
  * value should be treated as readonly data structure
  */
-RAVICOMP_EXPORT const LexState *raviX_get_lexer_info(LexerState *ls);
+RAVICOMP_EXPORT const LexerInfo *raviX_get_lexer_info(LexerState *ls);
 /* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved
  * (and reset to EOS) else the next token is retrieved
  */
@@ -339,11 +339,11 @@ RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const struct retu
 							       void (*callback)(void *, const struct expression *expr));
 
 /* label statement walking */
-RAVICOMP_EXPORT const struct string_object *raviX_label_statement_label_name(const struct label_statement *statement);
+RAVICOMP_EXPORT const StringObject *raviX_label_statement_label_name(const struct label_statement *statement);
 RAVICOMP_EXPORT const struct block_scope *raviX_label_statement_label_scope(const struct label_statement *statement);
 
 /* goto statement walking */
-RAVICOMP_EXPORT const struct string_object *raviX_goto_statement_label_name(const struct goto_statement *statement);
+RAVICOMP_EXPORT const StringObject *raviX_goto_statement_label_name(const struct goto_statement *statement);
 RAVICOMP_EXPORT const struct block_scope *raviX_goto_statement_scope(const struct goto_statement *statement);
 RAVICOMP_EXPORT bool raviX_goto_statement_is_break(const struct goto_statement *statement);
 
@@ -496,7 +496,7 @@ RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const struct suffi
 RAVICOMP_EXPORT const struct var_type *
 raviX_function_call_expression_type(const struct function_call_expression *expression);
 // can return NULL
-RAVICOMP_EXPORT const struct string_object *
+RAVICOMP_EXPORT const StringObject *
 raviX_function_call_expression_method_name(const struct function_call_expression *expression);
 RAVICOMP_EXPORT void
 raviX_function_call_expression_foreach_argument(const struct function_call_expression *expression, void *userdata,
@@ -542,7 +542,7 @@ RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const stru
 RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbol);
 
 /* variable symbol - local and global variables */
-RAVICOMP_EXPORT const struct string_object *
+RAVICOMP_EXPORT const StringObject *
 raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol);
 // NULL if global
@@ -550,7 +550,7 @@ RAVICOMP_EXPORT const struct block_scope *
 raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
 
 /* label symbol */
-RAVICOMP_EXPORT const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol);
+RAVICOMP_EXPORT const StringObject *raviX_label_name(const struct lua_label_symbol *symbol);
 RAVICOMP_EXPORT const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol);
 
 /* upvalue symbol */

@@ -71,7 +71,7 @@ void raviX_function_foreach_upvalue(const struct function_expression *function_e
 	END_FOR_EACH_PTR(symbol)
 }
 
-const struct string_object *raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol)
+const StringObject *raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol)
 {
 	return lua_local_symbol->var_name;
 }
@@ -208,7 +208,7 @@ void raviX_return_statement_foreach_expression(const struct return_statement *st
 	END_FOR_EACH_PTR(node)
 }
 
-const struct string_object *raviX_label_statement_label_name(const struct label_statement *statement)
+const StringObject *raviX_label_statement_label_name(const struct label_statement *statement)
 {
 	return statement->symbol->label.label_name;
 }
@@ -217,7 +217,7 @@ const struct block_scope *raviX_label_statement_label_scope(const struct label_s
 	return statement->symbol->label.block;
 }
 
-const struct string_object *raviX_goto_statement_label_name(const struct goto_statement *statement)
+const StringObject *raviX_goto_statement_label_name(const struct goto_statement *statement)
 {
 	return statement->name;
 }
@@ -542,7 +542,7 @@ const struct var_type *raviX_function_call_expression_type(const struct function
 	return &expression->type;
 }
 // Can return NULL
-const struct string_object *
+const StringObject *
 raviX_function_call_expression_method_name(const struct function_call_expression *expression)
 {
 	return expression->method_name;
@@ -590,7 +590,7 @@ const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbo
 	assert(symbol->symbol_type == SYM_LABEL);
 	return &symbol->label;
 }
-const struct string_object *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
+const StringObject *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
 const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
 const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol)
 {

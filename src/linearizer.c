@@ -266,7 +266,7 @@ struct instruction *raviX_last_instruction(struct basic_block *block)
 	return (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
 
-static const struct constant *allocate_string_constant(struct proc *proc, const struct string_object *s)
+static const struct constant *allocate_string_constant(struct proc *proc, const StringObject *s)
 {
 	struct constant c = {.type = RAVI_TSTRING, .s = s};
 	return add_constant(proc, &c);
@@ -1670,7 +1670,7 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
  * label scope, and where a local variable escaped.
  */
 static struct lua_symbol *find_label(struct proc *proc, struct block_scope *block,
-				     const struct string_object *label_name, struct block_scope **min_closing_block)
+				     const StringObject *label_name, struct block_scope **min_closing_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
 	*min_closing_block = NULL;

@@ -73,7 +73,7 @@ static const char *const luaX_tokens[] = {
     "<string>",
 };
 /* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
-static inline int is_reserved(const struct string_object *s) { return s->reserved; }
+static inline int is_reserved(const StringObject *s) { return s->reserved; }
 
 enum { ALPHABIT = 0, DIGITBIT = 1, PRINTBIT = 2, SPACEBIT = 3, XDIGITBIT = 4 };
 
@@ -127,15 +127,15 @@ with the keyword else this attribute will be -1. The hash value of the string is
 attribute. Note that we need to allow strings that have embedded 0 character hence the length
 is explicit. But all tokens and reserved keywords are expected to be standard C strings.
 */
-const struct string_object *raviX_create_string(CompilerState *compiler_state, const char *input, uint32_t len)
+const StringObject *raviX_create_string(CompilerState *compiler_state, const char *input, uint32_t len)
 {
-	struct string_object temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
+	StringObject temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
 	struct set_entry *entry = set_search_pre_hashed(compiler_state->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
-		return (struct string_object *)entry->key;
+		return (StringObject *)entry->key;
 	else {
-		struct string_object *new_string = raviX_allocator_allocate(&compiler_state->string_object_allocator, 0);
+		StringObject *new_string = raviX_allocator_allocate(&compiler_state->string_object_allocator, 0);
 		char *s = raviX_allocator_allocate(&compiler_state->string_allocator, len + 1); /* allow for 0 terminator */
 		memcpy(s, input, len);
 		s[len] = 0; /* 0 terminate string, however string may contain embedded 0 characters */
@@ -228,7 +228,7 @@ static inline void save_and_next(LexerState *ls)
 /*
 ** creates a new interned string.
 */
-static const struct string_object *luaX_newstring(LexerState *ls, const char *str, uint32_t l)
+static const StringObject *luaX_newstring(LexerState *ls, const char *str, uint32_t l)
 {
 	return raviX_create_string(ls->container, str, l);
 }
@@ -278,7 +278,7 @@ void raviX_destroy_lexer(LexerState *ls)
 	free(ls);
 }
 
-const LexState *raviX_get_lexer_info(LexerState *ls) { return (LexState *)ls; }
+const LexerInfo *raviX_get_lexer_info(LexerState *ls) { return (LexerInfo *)ls; }
 
 /*
 ** =======================================================
@@ -947,7 +947,7 @@ static int llex(LexerState *ls, SemInfo *seminfo)
 		}
 		default: {
 			if (lislalpha(ls->current)) { /* identifier or reserved word? */
-				const struct string_object *ts;
+				const StringObject *ts;
 				do {
 					save_and_next(ls);
 				} while (lislalnum(ls->current));

@@ -55,7 +55,7 @@ struct CompilerState {
 	jmp_buf env;		 /* For error handling */
 	buffer_t error_message; /* For error handling, error message is saved here */
 	bool killed;		 /* flag to check if this is already destroyed */
-	const struct string_object *_ENV; /* name of the env variable */
+	const StringObject *_ENV; /* name of the env variable */
 };
 
 /* number of reserved words */
@@ -112,7 +112,7 @@ struct var_type {
 	ravitype_t type_code;
 	/* type name for user defined types; used to lookup metatable in registry, only set when type_code is
 	 * RAVI_TUSERDATA */
-	const struct string_object *type_name;
+	const StringObject *type_name;
 };
 
 struct pseudo;
@@ -120,7 +120,7 @@ DECLARE_PTR_LIST(lua_symbol_list, struct lua_symbol);
 
 struct lua_variable_symbol {
 	struct var_type value_type;
-	const struct string_object *var_name; /* name of the variable */
+	const StringObject *var_name; /* name of the variable */
 	struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
 	struct lua_symbol *env; /* Only applicable for global symbols - this should point to _ENV */
 	unsigned escaped: 1, /* Has one or more up-value references */
@@ -128,7 +128,7 @@ struct lua_variable_symbol {
 	struct pseudo *pseudo;	   /* backend data for the symbol */
 };
 struct lua_label_symbol {
-	const struct string_object *label_name;
+	const StringObject *label_name;
 	struct block_scope *block;
 	struct pseudo* pseudo;     /* backend data for the symbol */
 };
@@ -168,7 +168,7 @@ struct label_statement {
 /* STMT_GOTO */
 struct goto_statement {
 	unsigned is_break : 1; /* is this a break statement */
-	const struct string_object *name; /* target label, used to resolve the goto destination */
+	const StringObject *name; /* target label, used to resolve the goto destination */
 	struct block_scope* goto_scope;   /* The scope of the goto statement */
 };
 /* STMT_LOCAL local variable declarations */
@@ -291,7 +291,7 @@ struct function_call_expression {
 	 * values do not overwrite the type of the variables in an inconsistent way.
 	 */
 	BASE_EXPRESSION_FIELDS;
-	const struct string_object *method_name; /* Optional method_name */
+	const StringObject *method_name; /* Optional method_name */
 	struct ast_node_list *arg_list;		 /* Call arguments */
 	int num_results;			 /* How many results do we expect, -1 means all available results */
 };
@@ -353,7 +353,7 @@ static inline void set_type(struct var_type *vt, ravitype_t t)
 	vt->type_code = t;
 	vt->type_name = NULL;
 }
-static inline void set_typename(struct var_type *vt, ravitype_t t, const struct string_object *name)
+static inline void set_typename(struct var_type *vt, ravitype_t t, const StringObject *name)
 {
 	vt->type_code = t;
 	vt->type_name = name;

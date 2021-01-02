@@ -24,7 +24,7 @@ struct ast_state {
 
 static void walk_variable_symbol(void *data, const struct lua_variable_symbol *symbol)
 {
-	const struct string_object *name = raviX_variable_symbol_name(symbol);
+	const StringObject *name = raviX_variable_symbol_name(symbol);
 	assert(name != NULL);
 	const struct block_scope *scope = raviX_variable_symbol_scope(symbol);
 	// If global scope will be NULL
@@ -104,7 +104,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		    raviX_function_call_expression(expression);
 		const struct var_type *type = raviX_function_call_expression_type(function_call_expression);
 		(void)type;
-		const struct string_object *method_name =
+		const StringObject *method_name =
 		    raviX_function_call_expression_method_name(function_call_expression);
 		(void)method_name;
 		raviX_function_call_expression_foreach_argument(function_call_expression, data, walk_expression);
@@ -221,7 +221,7 @@ static void walk_statement(void *data, const struct statement *statement)
 	case STMT_GOTO: {
 		const struct goto_statement *goto_statement = raviX_goto_statement(statement);
 		if (!raviX_goto_statement_is_break(goto_statement)) {
-			const struct string_object *goto_label = raviX_goto_statement_label_name(goto_statement);
+			const StringObject *goto_label = raviX_goto_statement_label_name(goto_statement);
 			(void)goto_label;
 		}
 		walk_scope(data, raviX_goto_statement_scope(goto_statement));
@@ -236,7 +236,7 @@ static void walk_statement(void *data, const struct statement *statement)
 	}
 	case STMT_LABEL: {
 		const struct label_statement *label_statement = raviX_label_statement(statement);
-		const struct string_object *label_name = raviX_label_statement_label_name(label_statement);
+		const StringObject *label_name = raviX_label_statement_label_name(label_statement);
 		(void)label_name;
 		walk_scope(data, raviX_label_statement_label_scope(label_statement));
 		break;

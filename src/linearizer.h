@@ -186,7 +186,7 @@ struct constant {
 	union {
 		lua_Integer i;
 		lua_Number n;
-		const struct string_object *s;
+		const StringObject *s;
 	};
 };
 
