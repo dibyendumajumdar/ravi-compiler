@@ -17,6 +17,7 @@ typedef struct Instruction Instruction;
 typedef struct BasicBlock BasicBlock;
 typedef struct Proc Proc;
 typedef struct Constant Constant;
+typedef struct Graph Graph;
 
 DECLARE_PTR_LIST(InstructionList, Instruction);
 DECLARE_PTR_LIST(PseudoList, Pseudo);
@@ -213,7 +214,7 @@ struct Proc {
 	uint16_t num_intconstants;
 	uint16_t num_fltconstants;
 	uint16_t num_strconstants;
-	struct graph *cfg;  /* place holder for control flow graph; the linearizer does not create this */
+	Graph *cfg;  /* place holder for control flow graph; the linearizer does not create this */
 	char funcname[30]; /* Each proc needs a name inside a module - name is a short string */
 	void *userdata; /* For use by code generator */
 };

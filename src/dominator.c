@@ -29,12 +29,12 @@ array that describes the dominator tree.
 */
 
 struct dominator_tree {
-	struct graph *g;
+	Graph *g;
 	GraphNode **IDOM; /* IDOM[] - array of immediate dominators, one per node in the graph, indexed by node id */
 	uint32_t N;	    /* sizeof IDOM */
 };
 
-struct dominator_tree *raviX_new_dominator_tree(struct graph *g)
+struct dominator_tree *raviX_new_dominator_tree(Graph *g)
 {
 	struct dominator_tree *state = (struct dominator_tree *)calloc(1, sizeof(struct dominator_tree));
 	state->N = raviX_graph_size(g);

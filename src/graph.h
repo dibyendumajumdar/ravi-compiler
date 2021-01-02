@@ -23,10 +23,10 @@
  */
 
 /* nodeId_t is declared elsewhere */
-struct graph;
+typedef struct Graph Graph;
 typedef struct GraphNode GraphNode;
 typedef struct GraphNodeList GraphNodeList;
-enum edge_type {
+enum EdgeType {
 	EDGE_TYPE_UNCLASSIFIED = 0,
 	EDGE_TYPE_TREE = 1,
 	EDGE_TYPE_BACKWARD = 2,
@@ -36,24 +36,24 @@ enum edge_type {
 
 
 /* Initialize the graph data structure and associate some userdata with it. */
-struct graph *raviX_init_graph(nodeId_t entry, nodeId_t exit, void *userdata);
+Graph *raviX_init_graph(nodeId_t entry, nodeId_t exit, void *userdata);
 /* Destroy the graph data structure */
-void raviX_destroy_graph(struct graph *g);
+void raviX_destroy_graph(Graph *g);
 
 /* Add an edge from one node a to b. Both nodes a and b will be implicitly added
  * to the graph if they do not already exist.
  */
-void raviX_add_edge(struct graph *g, nodeId_t a, nodeId_t b);
+void raviX_add_edge(Graph *g, nodeId_t a, nodeId_t b);
 /* Check if an edge exists from one node a to b */
-bool raviX_has_edge(struct graph *g, nodeId_t a, nodeId_t b);
+bool raviX_has_edge(Graph *g, nodeId_t a, nodeId_t b);
 /* Delete an edge from a to b */
-void raviX_delete_edge(struct graph *g, nodeId_t a, nodeId_t b);
+void raviX_delete_edge(Graph *g, nodeId_t a, nodeId_t b);
 /* Get the edge classification for edge from a to b; this is only available if graph has been
  * analyzed for edges. */
-enum edge_type raviX_get_edge_type(struct graph *g, nodeId_t a, nodeId_t b);
+enum EdgeType raviX_get_edge_type(Graph *g, nodeId_t a, nodeId_t b);
 
 /* Get node identified by index */
-GraphNode *raviX_graph_node(struct graph *g, nodeId_t index);
+GraphNode *raviX_graph_node(Graph *g, nodeId_t index);
 /* Get the RPO - reverse post order index of the node */
 uint32_t raviX_node_RPO(GraphNode *n);
 /* Get the node's id */
@@ -68,13 +68,13 @@ uint32_t raviX_node_list_size(GraphNodeList *list);
 /* Get the nodeId at given node_link position */
 nodeId_t raviX_node_list_at(GraphNodeList *list, uint32_t i);
 
-void raviX_for_each_node(struct graph *g, void (*callback)(void *arg, struct graph *g, nodeId_t nodeid), void *arg);
+void raviX_for_each_node(Graph *g, void (*callback)(void *arg, Graph *g, nodeId_t nodeid), void *arg);
 
 /*
  * Classifies links in the graph and also computes the
  * reverse post order value.
  */
-void raviX_classify_edges(struct graph *g);
+void raviX_classify_edges(Graph *g);
 /*
  * Returns a sorted array (allocated).
  * Sorted by reverse postorder value.
@@ -86,14 +86,14 @@ void raviX_classify_edges(struct graph *g);
  * Before attempting to sort, you must have called
  * raviX_classify_edges(g).
  */
-GraphNode **raviX_graph_nodes_sorted_by_RPO(struct graph *g, bool forward);
+GraphNode **raviX_graph_nodes_sorted_by_RPO(Graph *g, bool forward);
 
 void raviX_sort_nodes_by_RPO(GraphNode **nodes, size_t count, bool forward);
 
 /* says how many nodes are in the graph */
-uint32_t raviX_graph_size(struct graph *g);
+uint32_t raviX_graph_size(Graph *g);
 /* Generates GraphViz (dot) output */
-void raviX_draw_graph(struct graph *g, FILE *fp);
+void raviX_draw_graph(Graph *g, FILE *fp);
 
 
 #endif

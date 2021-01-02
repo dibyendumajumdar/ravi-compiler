@@ -13,14 +13,14 @@
 DECLARE_ARRAY(GraphNodeArray, GraphNode *);
 
 struct dataflow_context {
-	struct graph *g;
+	Graph *g;
 	GraphNodeArray worklist;
 	GraphNodeArray pending;
 	struct bitset_t bb_to_consider;
 	void *userdata;
 };
 
-static void init_data_flow(struct dataflow_context *dataflow_context, struct graph *g)
+static void init_data_flow(struct dataflow_context *dataflow_context, Graph *g)
 {
 	memset(dataflow_context, 0, sizeof *dataflow_context);
 	raviX_bitset_create2(&dataflow_context->bb_to_consider, 512);
@@ -34,7 +34,7 @@ static void finish_data_flow(struct dataflow_context *dataflow_context)
 	raviX_bitset_destroy(&dataflow_context->bb_to_consider);
 }
 
-void raviX_solve_dataflow(struct graph *g, bool forward_p,
+void raviX_solve_dataflow(Graph *g, bool forward_p,
 			  int (*join_function)(void *, nodeId_t, bool),
 			  int (*transfer_function)(void *, nodeId_t), void *userdata)
 {

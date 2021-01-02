@@ -11,7 +11,7 @@
  */
 int raviX_construct_cfg(Proc *proc)
 {
-	struct graph *g = raviX_init_graph(ENTRY_BLOCK, EXIT_BLOCK, proc);
+	Graph *g = raviX_init_graph(ENTRY_BLOCK, EXIT_BLOCK, proc);
 	for (unsigned i = 0; i < proc->node_count; i++) {
 		BasicBlock *block = proc->nodes[i];
 		Instruction *insn = raviX_last_instruction(block);
@@ -45,7 +45,7 @@ struct CfgArg {
 	Proc *proc;
 };
 
-static void output_node(void *arg, struct graph *g, uint32_t nodeid)
+static void output_node(void *arg, Graph *g, uint32_t nodeid)
 {
 	struct CfgArg *myargs = (struct CfgArg *)arg;
 	FILE *fp = myargs->fp;
@@ -71,7 +71,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 
 void raviX_output_cfg(Proc *proc, FILE *fp)
 {
-	struct graph *g = proc->cfg;
+	Graph *g = proc->cfg;
 	if (!g)
 		return;
 	fprintf(fp, "digraph Proc%d {\n", proc->id);

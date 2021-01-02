@@ -4,7 +4,7 @@
 static int test1(void)
 {
 	int errcount = 0;
-	struct graph *g = raviX_init_graph(0, 2, NULL);
+	Graph *g = raviX_init_graph(0, 2, NULL);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	if (!raviX_has_edge(g, 0, 1))
@@ -18,9 +18,9 @@ static int test1(void)
 	return errcount;
 }
 
-static struct graph *make_graph(void)
+static Graph *make_graph(void)
 {
-	struct graph *g = raviX_init_graph(0, 5, NULL);
+	Graph *g = raviX_init_graph(0, 5, NULL);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	raviX_add_edge(g, 2, 3);
@@ -38,7 +38,7 @@ static struct graph *make_graph(void)
 static int test2(void)
 {
 	int errcount = 0;
-	struct graph *g = make_graph();
+	Graph *g = make_graph();
 	raviX_classify_edges(g);
 	if (raviX_get_edge_type(g, 0, 1) != EDGE_TYPE_TREE)
 		errcount++;
@@ -67,9 +67,9 @@ static int test2(void)
 	return errcount;
 }
 
-static struct graph *make_graph2(void)
+static Graph *make_graph2(void)
 {
-	struct graph *g = raviX_init_graph(0, 4, NULL);
+	Graph *g = raviX_init_graph(0, 4, NULL);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	raviX_add_edge(g, 1, 5);
@@ -87,7 +87,7 @@ static struct graph *make_graph2(void)
 static int test3(void)
 {
 	int errcount = 0;
-	struct graph *g = make_graph2();
+	Graph *g = make_graph2();
 	raviX_classify_edges(g);
 	struct dominator_tree *tree = raviX_new_dominator_tree(g);
 	raviX_calculate_dominator_tree(tree);
@@ -100,7 +100,7 @@ static int test3(void)
 static int test4(void)
 {
 	int errcount = 0;
-	struct graph *g = make_graph2();
+	Graph *g = make_graph2();
 	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 1))) != 2)
 		errcount++;
 	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 2))) != 1)
