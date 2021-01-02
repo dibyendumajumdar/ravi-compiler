@@ -35,7 +35,6 @@ typedef unsigned char lu_byte;
 
 struct lua_symbol_list;
 struct linearizer_state;
-struct lexer_state;
 
 /*
  * Encapsulate all the compiler state.
@@ -65,7 +64,7 @@ struct CompilerState {
 
 /* state of the lexer plus state of the parser when shared by all
    functions */
-struct lexer_state {
+struct LexerState {
 	int current;	 /* current character (charint) */
 	int linenumber;	 /* input line counter */
 	int lastline;	 /* line of last token 'consumed' */
@@ -80,7 +79,7 @@ struct lexer_state {
 	const char *source; /* current source name */
 	const char *envn;   /* environment variable name */
 };
-void raviX_syntaxerror(struct lexer_state *ls, const char *msg);
+void raviX_syntaxerror(LexerState *ls, const char *msg);
 
 struct ast_node;
 DECLARE_PTR_LIST(ast_node_list, struct ast_node);
@@ -367,7 +366,7 @@ static inline void copy_type(struct var_type *a, const struct var_type *b)
 }
 
 struct parser_state {
-	struct lexer_state *ls;
+	LexerState *ls;
 	CompilerState *container;
 	struct ast_node *current_function;
 	struct block_scope *current_scope;

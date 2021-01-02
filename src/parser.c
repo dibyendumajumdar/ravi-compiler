@@ -52,14 +52,14 @@ static struct ast_node *allocate_expr_ast_node(struct parser_state *parser, enum
 	return node;
 }
 
-static void error_expected(struct lexer_state *ls, int token)
+static void error_expected(LexerState *ls, int token)
 {
 	raviX_token2str(token, &ls->container->error_message);
 	raviX_buffer_add_string(&ls->container->error_message, " expected");
 	longjmp(ls->container->env, 1);
 }
 
-static int testnext(struct lexer_state *ls, int c)
+static int testnext(LexerState *ls, int c)
 {
 	if (ls->t.token == c) {
 		raviX_next(ls);
@@ -68,13 +68,13 @@ static int testnext(struct lexer_state *ls, int c)
 		return 0;
 }
 
-static void check(struct lexer_state *ls, int c)
+static void check(LexerState *ls, int c)
 {
 	if (ls->t.token != c)
 		error_expected(ls, c);
 }
 
-static void checknext(struct lexer_state *ls, int c)
+static void checknext(LexerState *ls, int c)
 {
 	check(ls, c);
 	raviX_next(ls);
@@ -89,7 +89,7 @@ static void checknext(struct lexer_state *ls, int c)
 ** 'until' closes syntactical blocks, but do not close scope,
 ** so it is handled in separate.
 */
-static int block_follow(struct lexer_state *ls, int withuntil)
+static int block_follow(LexerState *ls, int withuntil)
 {
 	switch (ls->t.token) {
 	case TOK_else:
@@ -104,7 +104,7 @@ static int block_follow(struct lexer_state *ls, int withuntil)
 	}
 }
 
-static void check_match(struct lexer_state *ls, int what, int who, int where)
+static void check_match(LexerState *ls, int what, int who, int where)
 {
 	if (!testnext(ls, what)) {
 		if (where == ls->linenumber)
@@ -125,7 +125,7 @@ static void check_match(struct lexer_state *ls, int what, int who, int where)
 }
 
 /* Check that current token is a name, and advance */
-static const struct string_object *check_name_and_next(struct lexer_state *ls)
+static const struct string_object *check_name_and_next(LexerState *ls)
 {
 	const struct string_object *ts;
 	check(ls, TOK_NAME);
@@ -432,7 +432,7 @@ static struct ast_node *new_field_selector(struct parser_state *parser, const st
  */
 static struct ast_node *parse_field_selector(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* fieldsel -> ['.' | ':'] NAME */
 	raviX_next(ls); /* skip the dot or colon */
 	const struct string_object *ts = check_name_and_next(ls);
@@ -444,7 +444,7 @@ static struct ast_node *parse_field_selector(struct parser_state *parser)
  */
 static struct ast_node *parse_yindex(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* index -> '[' expr ']' */
 	raviX_next(ls); /* skip the '[' */
 	struct ast_node *expr = parse_expression(parser);
@@ -475,7 +475,7 @@ static struct ast_node *new_indexed_assign_expr(struct parser_state *parser, str
 
 static struct ast_node *parse_recfield(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* recfield -> (NAME | '['exp1']') = exp1 */
 	struct ast_node *index_expr;
 	if (ls->t.token == TOK_NAME) {
@@ -497,7 +497,7 @@ static struct ast_node *parse_listfield(struct parser_state *parser)
 
 static struct ast_node *parse_field(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* field -> listfield | recfield */
 	switch (ls->t.token) {
 	case TOK_NAME: {			/* may be 'listfield' or 'recfield' */
@@ -562,7 +562,7 @@ static void set_multireturn(struct parser_state *parser, struct ast_node_list *e
 
 static struct ast_node *parse_table_constructor(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* constructor -> '{' [ field { sep field } [sep] ] '}'
 	sep -> ',' | ';' */
 	int line = ls->linenumber;
@@ -591,7 +591,7 @@ static struct ast_node *parse_table_constructor(struct parser_state *parser)
  * Note that the returned string will be anchored in the Lexer and must
  * be anchored somewhere else by the time parsing finishes
  */
-static const struct string_object *parse_user_defined_type_name(struct lexer_state *ls,
+static const struct string_object *parse_user_defined_type_name(LexerState *ls,
 								const struct string_object *typename)
 {
 	size_t len = 0;
@@ -627,7 +627,7 @@ static const struct string_object *parse_user_defined_type_name(struct lexer_sta
  */
 static struct lua_symbol *parse_local_variable_declaration(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* assume a dynamic type */
 	ravitype_t tt = RAVI_TANY;
 	const struct string_object *name = check_name_and_next(ls);
@@ -672,7 +672,7 @@ static struct lua_symbol *parse_local_variable_declaration(struct parser_state *
 
 static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_list **list)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* parlist -> [ param { ',' param } ] */
 	int nparams = 0;
 	bool is_vararg = false;
@@ -703,7 +703,7 @@ static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_
 
 static void parse_function_body(struct parser_state *parser, struct ast_node *func_ast, int ismethod, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* body ->  '(' parlist ')' block END */
 	checknext(ls, '(');
 	if (ismethod) {
@@ -721,7 +721,7 @@ static void parse_function_body(struct parser_state *parser, struct ast_node *fu
 /* parse expression list */
 static int parse_expression_list(struct parser_state *parser, struct ast_node_list **list)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* explist -> expr { ',' expr } */
 	int n = 1; /* at least one expression */
 	struct ast_node *expr = parse_expression(parser);
@@ -738,7 +738,7 @@ static int parse_expression_list(struct parser_state *parser, struct ast_node_li
 static struct ast_node *parse_function_call(struct parser_state *parser, const struct string_object *methodname,
 					    int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	struct ast_node *call_expr = allocate_expr_ast_node(parser, EXPR_FUNCTION_CALL);
 	call_expr->function_call_expr.method_name = methodname;
 	call_expr->function_call_expr.arg_list = NULL;
@@ -784,7 +784,7 @@ static struct ast_node *parse_function_call(struct parser_state *parser, const s
 /* primary expression - name or subexpression */
 static struct ast_node *parse_primary_expression(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	struct ast_node *primary_expr = NULL;
 	/* primaryexp -> NAME | '(' expr ')' */
 	switch (ls->t.token) {
@@ -811,7 +811,7 @@ static struct ast_node *parse_primary_expression(struct parser_state *parser)
 /* variable or field access or function call */
 static struct ast_node *parse_suffixed_expression(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* suffixedexp ->
 	primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	int line = ls->linenumber;
@@ -863,7 +863,7 @@ static struct ast_node *new_literal_expression(struct parser_state *parser, ravi
 
 static struct ast_node *parse_simple_expression(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
 	constructor | FUNCTION body | suffixedexp */
 	struct ast_node *expr = NULL;
@@ -1027,7 +1027,7 @@ static const struct {
 */
 static struct ast_node *parse_sub_expression(struct parser_state *parser, int limit, BinaryOperatorType *untreated_op)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	BinaryOperatorType op;
 	UnaryOperatorType uop;
 	struct ast_node *expr = NULL;
@@ -1113,7 +1113,7 @@ static struct ast_node *parse_condition(struct parser_state *parser)
 
 static struct ast_node *parse_goto_statment(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	const struct string_object *label;
 	int is_break = 0;
 	if (testnext(ls, TOK_goto))
@@ -1134,7 +1134,7 @@ static struct ast_node *parse_goto_statment(struct parser_state *parser)
 /* skip no-op statements */
 static void skip_noop_statements(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	while (ls->t.token == ';') //  || ls->t.token == TOK_DBCOLON)
 		parse_statement(parser);
 }
@@ -1150,7 +1150,7 @@ static struct ast_node *generate_label(struct parser_state *parser, const struct
 static struct ast_node *parse_label_statement(struct parser_state *parser, const struct string_object *label, int line)
 {
 	(void)line;
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* label -> '::' NAME '::' */
 	checknext(ls, TOK_DBCOLON); /* skip double colon */
 	/* create new entry for this label */
@@ -1161,7 +1161,7 @@ static struct ast_node *parse_label_statement(struct parser_state *parser, const
 
 static struct ast_node *parse_while_statement(struct parser_state *parser, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* whilestat -> WHILE cond DO block END */
 	raviX_next(ls); /* skip WHILE */
 	struct ast_node *stmt = allocate_ast_node(parser, STMT_WHILE);
@@ -1176,7 +1176,7 @@ static struct ast_node *parse_while_statement(struct parser_state *parser, int l
 
 static struct ast_node *parse_repeat_statement(struct parser_state *parser, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* repeatstat -> REPEAT block UNTIL cond */
 	raviX_next(ls); /* skip REPEAT */
 	struct ast_node *stmt = allocate_ast_node(parser, STMT_REPEAT);
@@ -1196,7 +1196,7 @@ static void parse_forbody(struct parser_state *parser, struct ast_node *stmt, in
 	(void)line;
 	(void)nvars;
 	(void)isnum;
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* forbody -> DO block */
 	checknext(ls, TOK_do);
 	stmt->for_stmt.for_body = parse_block(parser, &stmt->for_stmt.for_statement_list);
@@ -1206,7 +1206,7 @@ static void parse_forbody(struct parser_state *parser, struct ast_node *stmt, in
 static void parse_fornum_statement(struct parser_state *parser, struct ast_node *stmt,
 				   const struct string_object *varname, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
 	struct lua_symbol *local = new_local_symbol(parser, varname, RAVI_TANY, NULL);
 	add_symbol(parser->container, &stmt->for_stmt.symbols, local);
@@ -1226,7 +1226,7 @@ static void parse_fornum_statement(struct parser_state *parser, struct ast_node 
 /* parse a generic for loop */
 static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, const struct string_object *indexname)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* forlist -> NAME {,NAME} IN explist forbody */
 	int nvars = 4; /* gen, state, control, plus at least one declared var */
 	/* create declared variables */
@@ -1248,7 +1248,7 @@ static void parse_for_list(struct parser_state *parser, struct ast_node *stmt, c
 /* initial parsing of a for loop - calls fornum() or forlist() */
 static struct ast_node *parse_for_statement(struct parser_state *parser, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* forstat -> FOR (fornum | forlist) END */
 	const struct string_object *varname;
 	struct ast_node *stmt = allocate_ast_node(parser, AST_NONE);
@@ -1280,7 +1280,7 @@ static struct ast_node *parse_for_statement(struct parser_state *parser, int lin
 /* parse if cond then block - called from parse_if_statement() */
 static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
 	struct ast_node *test_then_block =
@@ -1310,7 +1310,7 @@ static struct ast_node *parse_if_cond_then_block(struct parser_state *parser)
 
 static struct ast_node *parse_if_statement(struct parser_state *parser, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
 	struct ast_node *stmt = allocate_ast_node(parser, STMT_IF);
 	stmt->if_stmt.if_condition_list = NULL;
@@ -1330,7 +1330,7 @@ static struct ast_node *parse_if_statement(struct parser_state *parser, int line
 
 static struct ast_node *parse_local_function_statement(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	struct lua_symbol *symbol =
 	    new_local_symbol(parser, check_name_and_next(ls), RAVI_TFUNCTION, NULL); /* new local variable */
 	/* local function f ... is parsed as local f; f = function ... */
@@ -1365,7 +1365,7 @@ static void limit_function_call_results(struct parser_state *parser, int num_lhs
 
 static struct ast_node *parse_local_statement(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* stat -> LOCAL NAME {',' NAME} ['=' explist] */
 	struct ast_node *node = allocate_ast_node(parser, STMT_LOCAL);
 	node->local_stmt.var_list = NULL;
@@ -1397,7 +1397,7 @@ static struct ast_node *parse_local_statement(struct parser_state *parser)
  */
 static struct ast_node *parse_function_name(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* funcname -> NAME {fieldsel} [':' NAME] */
 	struct ast_node *function_stmt = allocate_ast_node(parser, STMT_FUNCTION);
 	function_stmt->function_stmt.function_expr = NULL;
@@ -1415,7 +1415,7 @@ static struct ast_node *parse_function_name(struct parser_state *parser)
 
 static struct ast_node *parse_function_statement(struct parser_state *parser, int line)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* funcstat -> FUNCTION funcname body */
 	raviX_next(ls); /* skip FUNCTION */
 	struct ast_node *function_stmt = parse_function_name(parser);
@@ -1433,7 +1433,7 @@ static struct ast_node *parse_expression_statement(struct parser_state *parser)
 	struct ast_node *stmt = allocate_ast_node(parser, STMT_EXPR);
 	stmt->expression_stmt.var_expr_list = NULL;
 	stmt->expression_stmt.expr_list = NULL;
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* stat -> func | assignment */
 	/* Until we see '=' we do not know if this is an assignment or expr list*/
 	struct ast_node_list *current_list = NULL;
@@ -1456,7 +1456,7 @@ static struct ast_node *parse_expression_statement(struct parser_state *parser)
 
 static struct ast_node *parse_return_statement(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	/* stat -> RETURN [explist] [';'] */
 	struct ast_node *return_stmt = allocate_ast_node(parser, STMT_RETURN);
 	return_stmt->return_stmt.expr_list = NULL;
@@ -1484,7 +1484,7 @@ static struct ast_node *parse_do_statement(struct parser_state *parser, int line
 /* parse a statement */
 static struct ast_node *parse_statement(struct parser_state *parser)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	int line = ls->linenumber; /* may be needed for error messages */
 	struct ast_node *stmt = NULL;
 	switch (ls->t.token) {
@@ -1551,7 +1551,7 @@ static struct ast_node *parse_statement(struct parser_state *parser)
 /* statlist -> { stat [';'] } */
 static void parse_statement_list(struct parser_state *parser, struct ast_node_list **list)
 {
-	struct lexer_state *ls = parser->ls;
+	LexerState *ls = parser->ls;
 	while (!block_follow(ls, 1)) {
 		bool was_return = ls->t.token == TOK_return;
 		struct ast_node *stmt = parse_statement(parser);
@@ -1647,7 +1647,7 @@ static void parse_lua_chunk(struct parser_state *parser)
 	check(parser->ls, TOK_EOS);
 }
 
-static void parser_state_init(struct parser_state *parser, struct lexer_state *ls, CompilerState *container)
+static void parser_state_init(struct parser_state *parser, LexerState *ls, CompilerState *container)
 {
 	parser->ls = ls;
 	parser->container = container;
@@ -1662,7 +1662,7 @@ static void parser_state_init(struct parser_state *parser, struct lexer_state *l
 */
 int raviX_parse(CompilerState *container, const char *buffer, size_t buflen, const char *name)
 {
-	struct lexer_state *lexstate = raviX_init_lexer(container, buffer, buflen, name);
+	LexerState *lexstate = raviX_init_lexer(container, buffer, buflen, name);
 	struct parser_state parser_state;
 	parser_state_init(&parser_state, lexstate, container);
 	int rc = setjmp(container->env);

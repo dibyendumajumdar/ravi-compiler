@@ -17,7 +17,7 @@ Copyright 2018-2020 Dibyendu Majumdar
 #include <stdio.h>
 
 typedef struct CompilerState CompilerState;
-struct lexer_state;
+typedef struct LexerState LexerState;
 struct linearizer_state;
 
 typedef long long lua_Integer;
@@ -146,24 +146,24 @@ RAVICOMP_EXPORT const struct string_object *raviX_create_string(CompilerState *c
 								uint32_t len);
 
 /* Initialize lexical analyser. Takes as input a buffer containing Lua/Ravi source and the source name */
-RAVICOMP_EXPORT struct lexer_state *raviX_init_lexer(CompilerState *compiler_state, const char *buf,
+RAVICOMP_EXPORT LexerState *raviX_init_lexer(CompilerState *compiler_state, const char *buf,
 						     size_t buflen, const char *source_name);
 /* Gets the public part of the lexer data structure to allow access the current token. Note that the returned
  * value should be treated as readonly data structure
  */
-RAVICOMP_EXPORT const LexState *raviX_get_lexer_info(struct lexer_state *ls);
+RAVICOMP_EXPORT const LexState *raviX_get_lexer_info(LexerState *ls);
 /* Retrieves the next token and saves it is LexState structure. If a lookahead was set then that is retrieved
  * (and reset to EOS) else the next token is retrieved
  */
-RAVICOMP_EXPORT void raviX_next(struct lexer_state *ls);
+RAVICOMP_EXPORT void raviX_next(LexerState *ls);
 /* Retrieves the next token and sets it as the lookahead. This means that a next call will get the lookahead.
  * Returns the token id.
  */
-RAVICOMP_EXPORT int raviX_lookahead(struct lexer_state *ls);
+RAVICOMP_EXPORT int raviX_lookahead(LexerState *ls);
 /* Convert a token to text format. The token will be written to current position in mb. */
 RAVICOMP_EXPORT void raviX_token2str(int token, buffer_t *mb);
 /* Release all data structures used by the lexer */
-RAVICOMP_EXPORT void raviX_destroy_lexer(struct lexer_state *);
+RAVICOMP_EXPORT void raviX_destroy_lexer(LexerState *);
 
 /* ---------------- PARSER API -------------------------- */
 

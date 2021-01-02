@@ -16,9 +16,9 @@ enum { EOZ = -1 }; /* end of stream */
 #define cast_uchar(c) cast(unsigned char, c)
 #define cast_num(n) cast(lua_Number, n)
 #define l_castU2S(i) ((lua_Integer)(i))
-static inline int zgetc(struct lexer_state *z) { return z->n-- > 0 ? cast_uchar(*z->p++) : EOZ; }
-static inline void next(struct lexer_state *ls) { ls->current = zgetc(ls); }
-static inline bool currIsNewline(struct lexer_state *ls) { return ls->current == '\n' || ls->current == '\r'; }
+static inline int zgetc(LexerState *z) { return z->n-- > 0 ? cast_uchar(*z->p++) : EOZ; }
+static inline void next(LexerState *ls) { ls->current = zgetc(ls); }
+static inline bool currIsNewline(LexerState *ls) { return ls->current == '\n' || ls->current == '\r'; }
 
 static inline char lua_getlocaledecpoint() { return localeconv()->decimal_point[0]; }
 
@@ -160,7 +160,7 @@ const struct string_object *raviX_create_string(CompilerState *compiler_state, c
 }
 
 #define lua_str2number(s, p) ((lua_Number)strtod((s), (p)))
-static void save(struct lexer_state *ls, int c);
+static void save(LexerState *ls, int c);
 
 void raviX_token2str(int token, buffer_t *mb)
 {
@@ -176,7 +176,7 @@ void raviX_token2str(int token, buffer_t *mb)
 	}
 }
 
-static void txtToken(struct lexer_state *ls, int token)
+static void txtToken(LexerState *ls, int token)
 {
 	switch (token) {
 	case TOK_NAME:
@@ -190,7 +190,7 @@ static void txtToken(struct lexer_state *ls, int token)
 		raviX_token2str(token, &ls->container->error_message);
 	}
 }
-static void lexerror(struct lexer_state *ls, const char *msg, int token)
+static void lexerror(LexerState *ls, const char *msg, int token)
 {
 	raviX_buffer_add_fstring(&ls->container->error_message, "%s(%d): %s", ls->source, ls->linenumber, msg);
 	if (token) {
@@ -200,9 +200,9 @@ static void lexerror(struct lexer_state *ls, const char *msg, int token)
 	longjmp(ls->container->env, 1);
 }
 
-void raviX_syntaxerror(struct lexer_state *ls, const char *msg) { lexerror(ls, msg, ls->t.token); }
+void raviX_syntaxerror(LexerState *ls, const char *msg) { lexerror(ls, msg, ls->t.token); }
 
-static void save(struct lexer_state *ls, int c)
+static void save(LexerState *ls, int c)
 {
 	buffer_t *b = ls->buff;
 	if (raviX_buffer_len(b) + 1 > raviX_buffer_size(b)) {
@@ -219,7 +219,7 @@ static void save(struct lexer_state *ls, int c)
 	raviX_buffer_addc(b, c);
 }
 
-static inline void save_and_next(struct lexer_state *ls)
+static inline void save_and_next(LexerState *ls)
 {
 	save(ls, ls->current);
 	next(ls);
@@ -228,7 +228,7 @@ static inline void save_and_next(struct lexer_state *ls)
 /*
 ** creates a new interned string.
 */
-static const struct string_object *luaX_newstring(struct lexer_state *ls, const char *str, uint32_t l)
+static const struct string_object *luaX_newstring(LexerState *ls, const char *str, uint32_t l)
 {
 	return raviX_create_string(ls->container, str, l);
 }
@@ -237,7 +237,7 @@ static const struct string_object *luaX_newstring(struct lexer_state *ls, const 
 ** increment line number and skips newline sequence (any of
 ** \n, \r, \n\r, or \r\n)
 */
-static void inclinenumber(struct lexer_state *ls)
+static void inclinenumber(LexerState *ls)
 {
 	int old = ls->current;
 	assert(currIsNewline(ls));
@@ -248,10 +248,10 @@ static void inclinenumber(struct lexer_state *ls)
 		lexerror(ls, "chunk has too many lines", 0);
 }
 
-struct lexer_state *raviX_init_lexer(CompilerState *container, const char *buf, size_t buflen,
+LexerState *raviX_init_lexer(CompilerState *container, const char *buf, size_t buflen,
 				     const char *source)
 {
-	struct lexer_state *ls = (struct lexer_state *)calloc(1, sizeof(struct lexer_state));
+	LexerState *ls = (LexerState *)calloc(1, sizeof(LexerState));
 	ls->container = container;
 	ls->t.token = 0;
 	ls->buf = buf;
@@ -271,14 +271,14 @@ struct lexer_state *raviX_init_lexer(CompilerState *container, const char *buf, 
 	return ls;
 }
 
-void raviX_destroy_lexer(struct lexer_state *ls)
+void raviX_destroy_lexer(LexerState *ls)
 {
 	if (ls == NULL)
 		return;
 	free(ls);
 }
 
-const LexState *raviX_get_lexer_info(struct lexer_state *ls) { return (LexState *)ls; }
+const LexState *raviX_get_lexer_info(LexerState *ls) { return (LexState *)ls; }
 
 /*
 ** =======================================================
@@ -286,7 +286,7 @@ const LexState *raviX_get_lexer_info(struct lexer_state *ls) { return (LexState 
 ** =======================================================
 */
 
-static int check_next1(struct lexer_state *ls, int c)
+static int check_next1(LexerState *ls, int c)
 {
 	if (ls->current == c) {
 		next(ls);
@@ -295,7 +295,7 @@ static int check_next1(struct lexer_state *ls, int c)
 		return 0;
 }
 
-static int check_save_next1(struct lexer_state *ls, int c)
+static int check_save_next1(LexerState *ls, int c)
 {
 	if (ls->current == c) {
 		save_and_next(ls);
@@ -308,7 +308,7 @@ static int check_save_next1(struct lexer_state *ls, int c)
 ** Check whether current char is in set 'set' (with two chars) and
 ** saves it
 */
-static int check_next2(struct lexer_state *ls, const char *set)
+static int check_next2(LexerState *ls, const char *set)
 {
 	assert(set[2] == '\0');
 	if (ls->current == set[0] || ls->current == set[1]) {
@@ -528,7 +528,7 @@ static size_t luaO_str2num(const char *s, struct konst *o)
 ** this function is quite liberal in what it accepts, as 'luaO_str2num'
 ** will reject ill-formed numerals.
 */
-static int read_numeral(struct lexer_state *ls, SemInfo *seminfo)
+static int read_numeral(LexerState *ls, SemInfo *seminfo)
 {
 	struct konst obj;
 	const char *expo = "Ee";
@@ -565,7 +565,7 @@ static int read_numeral(struct lexer_state *ls, SemInfo *seminfo)
 ** its number of '='s; otherwise, return a negative number (-1 iff there
 ** are no '='s after initial bracket)
 */
-static int skip_sep(struct lexer_state *ls)
+static int skip_sep(LexerState *ls)
 {
 	int count = 0;
 	int s = ls->current;
@@ -578,7 +578,7 @@ static int skip_sep(struct lexer_state *ls)
 	return (ls->current == s) ? count : (-count) - 1;
 }
 
-static void read_long_string(struct lexer_state *ls, SemInfo *seminfo, int sep)
+static void read_long_string(LexerState *ls, SemInfo *seminfo, int sep)
 {
 	int line = ls->linenumber; /* initial line (for error message) */
 	(void)line;
@@ -625,7 +625,7 @@ endloop:
 					     (uint32_t)(raviX_buffer_len(ls->buff) - 2 * (2 + sep)));
 }
 
-static void esccheck(struct lexer_state *ls, int c, const char *msg)
+static void esccheck(LexerState *ls, int c, const char *msg)
 {
 	if (!c) {
 		if (ls->current != EOZ)
@@ -634,14 +634,14 @@ static void esccheck(struct lexer_state *ls, int c, const char *msg)
 	}
 }
 
-static int gethexa(struct lexer_state *ls)
+static int gethexa(LexerState *ls)
 {
 	save_and_next(ls);
 	esccheck(ls, lisxdigit(ls->current), "hexadecimal digit expected");
 	return luaO_hexavalue(ls->current);
 }
 
-static int readhexaesc(struct lexer_state *ls)
+static int readhexaesc(LexerState *ls)
 {
 	int r = gethexa(ls);
 	r = (r << 4) + gethexa(ls);
@@ -649,7 +649,7 @@ static int readhexaesc(struct lexer_state *ls)
 	return r;
 }
 
-// static unsigned long readutf8esc (struct lexer_state *ls) {
+// static unsigned long readutf8esc (LexerState *ls) {
 //	unsigned long r;
 //	int i = 4;  /* chars to be removed: '\', 'u', '{', and first digit */
 //	save_and_next(ls);  /* skip 'u' */
@@ -667,14 +667,14 @@ static int readhexaesc(struct lexer_state *ls)
 //}
 //
 //
-// static void utf8esc (struct lexer_state *ls) {
+// static void utf8esc (LexerState *ls) {
 //	char buff[UTF8BUFFSZ];
 //	int n = luaO_utf8esc(buff, readutf8esc(ls));
 //	for (; n > 0; n--)  /* add 'buff' to string */
 //		save(ls, buff[UTF8BUFFSZ - n]);
 //}
 
-static int readdecesc(struct lexer_state *ls)
+static int readdecesc(LexerState *ls)
 {
 	int i;
 	int r = 0;					   /* result accumulator */
@@ -687,7 +687,7 @@ static int readdecesc(struct lexer_state *ls)
 	return r;
 }
 
-static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
+static void read_string(LexerState *ls, int del, SemInfo *seminfo)
 {
 	save_and_next(ls); /* keep delimiter (for error messages) */
 	while (ls->current != del) {
@@ -780,7 +780,7 @@ static void read_string(struct lexer_state *ls, int del, SemInfo *seminfo)
 ** RAVI extension: generate a token for the cast operators -
 ** @number, @number[], @integer, @integer[], @table, @string, @closure
 */
-static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
+static int casttoken(LexerState *ls, SemInfo *seminfo)
 {
 	size_t n = raviX_buffer_len(ls->buff);
 	const char *s = raviX_buffer_data(ls->buff);
@@ -811,7 +811,7 @@ static int casttoken(struct lexer_state *ls, SemInfo *seminfo)
 	return tok;
 }
 
-static int llex(struct lexer_state *ls, SemInfo *seminfo)
+static int llex(LexerState *ls, SemInfo *seminfo)
 {
 	raviX_buffer_reset(ls->buff);
 	for (;;) {
@@ -970,7 +970,7 @@ static int llex(struct lexer_state *ls, SemInfo *seminfo)
 	}
 }
 
-void raviX_next(struct lexer_state *ls)
+void raviX_next(LexerState *ls)
 {
 	ls->lastline = ls->linenumber;
 	if (ls->lookahead.token != TOK_EOS) {  /* is there a look-ahead token? */
@@ -980,7 +980,7 @@ void raviX_next(struct lexer_state *ls)
 		ls->t.token = llex(ls, &ls->t.seminfo); /* read next token */
 }
 
-int raviX_lookahead(struct lexer_state *ls)
+int raviX_lookahead(LexerState *ls)
 {
 	assert(ls->lookahead.token == TOK_EOS);
 	ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
