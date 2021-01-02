@@ -38,17 +38,17 @@ const struct block_scope *raviX_function_scope(const struct function_expression 
 	return function_expression->main_block;
 }
 void raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
-				      void (*callback)(void *userdata, const struct statement *statement))
+				      void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(function_expression->function_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
-enum AstNodeType raviX_statement_type(const struct statement *statement) { return statement->type; }
+enum AstNodeType raviX_statement_type(const Statement *statement) { return statement->type; }
 void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
 				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
@@ -87,57 +87,57 @@ const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_
 }
 
 #define n(v) ((struct ast_node *)v)
-const struct return_statement *raviX_return_statement(const struct statement *stmt)
+const struct return_statement *raviX_return_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_RETURN);
 	return &n(stmt)->return_stmt;
 }
-const struct label_statement *raviX_label_statement(const struct statement *stmt)
+const struct label_statement *raviX_label_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_LABEL);
 	return &n(stmt)->label_stmt;
 }
-const struct goto_statement *raviX_goto_statement(const struct statement *stmt)
+const struct goto_statement *raviX_goto_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_GOTO);
 	return &n(stmt)->goto_stmt;
 }
-const struct local_statement *raviX_local_statement(const struct statement *stmt)
+const struct local_statement *raviX_local_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_LOCAL);
 	return &n(stmt)->local_stmt;
 }
-const struct expression_statement *raviX_expression_statement(const struct statement *stmt)
+const struct expression_statement *raviX_expression_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_EXPR);
 	return &n(stmt)->expression_stmt;
 }
-const struct function_statement *raviX_function_statement(const struct statement *stmt)
+const struct function_statement *raviX_function_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_FUNCTION);
 	return &n(stmt)->function_stmt;
 }
-const struct do_statement *raviX_do_statement(const struct statement *stmt)
+const struct do_statement *raviX_do_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_DO);
 	return &n(stmt)->do_stmt;
 }
-const struct test_then_statement *raviX_test_then_statement(const struct statement *stmt)
+const struct test_then_statement *raviX_test_then_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_TEST_THEN);
 	return &n(stmt)->test_then_block;
 }
-const struct if_statement *raviX_if_statement(const struct statement *stmt)
+const struct if_statement *raviX_if_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_IF);
 	return &n(stmt)->if_stmt;
 }
-const struct while_or_repeat_statement *raviX_while_or_repeat_statement(const struct statement *stmt)
+const struct while_or_repeat_statement *raviX_while_or_repeat_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_WHILE || stmt->type == STMT_REPEAT);
 	return &n(stmt)->while_or_repeat_stmt;
 }
-const struct for_statement *raviX_for_statement(const struct statement *stmt)
+const struct for_statement *raviX_for_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_FOR_IN || stmt->type == STMT_FOR_NUM);
 	return &n(stmt)->for_stmt;
@@ -307,13 +307,13 @@ const struct function_expression *raviX_function_ast(const struct function_state
 }
 const struct block_scope *raviX_do_statement_scope(const struct do_statement *statement) { return statement->scope; }
 void raviX_do_statement_foreach_statement(const struct do_statement *statement, void *userdata,
-					  void (*callback)(void *userdata, const struct statement *statement))
+					  void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->do_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -322,13 +322,13 @@ const struct block_scope *raviX_test_then_statement_scope(const struct test_then
 	return statement->test_then_scope;
 }
 void raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
-						 void (*callback)(void *userdata, const struct statement *statement))
+						 void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->test_then_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -353,13 +353,13 @@ const struct block_scope *raviX_if_then_statement_else_scope(const struct if_sta
 	return statement->else_block;
 }
 void raviX_if_statement_foreach_else_statement(const struct if_statement *statement, void *userdata,
-					       void (*callback)(void *userdata, const struct statement *statement))
+					       void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->else_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -376,13 +376,13 @@ const struct block_scope *raviX_while_or_repeat_statement_scope(const struct whi
 void raviX_while_or_repeat_statement_foreach_statement(const struct while_or_repeat_statement *statement,
 						       void *userdata,
 						       void (*callback)(void *userdata,
-									const struct statement *statement))
+									const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->loop_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -417,13 +417,13 @@ const struct block_scope *raviX_for_statement_body_scope(const struct for_statem
 	return statement->for_body;
 }
 void raviX_for_statement_body_foreach_statement(const struct for_statement *statement, void *userdata,
-						void (*callback)(void *userdata, const struct statement *statement))
+						void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->for_statement_list, node)
 	{
 		assert(node->type <= STMT_EXPR);
-		callback(userdata, (struct statement *)node);
+		callback(userdata, (Statement *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }

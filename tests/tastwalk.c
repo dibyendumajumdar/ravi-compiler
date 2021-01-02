@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void walk_statement(void *data, const struct statement *statement);
+static void walk_statement(void *data, const Statement *statement);
 static void walk_expression(void *data, const struct expression *expression);
 static void walk_function(void *data, const struct function_expression *function);
 
@@ -180,7 +180,7 @@ static void walk_test_then_statement(void *data, const struct test_then_statemen
 	raviX_test_then_statement_foreach_statement(test_then_statement, data, walk_statement);
 }
 
-static void walk_statement(void *data, const struct statement *statement)
+static void walk_statement(void *data, const Statement *statement)
 {
 	switch (raviX_statement_type(statement)) {
 	case STMT_DO: {

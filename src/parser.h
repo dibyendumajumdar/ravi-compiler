@@ -301,7 +301,7 @@ struct function_call_expression {
 #define BASE_AST_FIELDS enum AstNodeType type; int line_number
 /* Statement AST nodes have following common fields.
  */
-struct statement {
+struct Statement {
 	BASE_AST_FIELDS;
 };
 /* Expression AST nodes have following common fields
@@ -316,7 +316,7 @@ scopes but not all scopes may be referenced. The tree captures Lua syntax tree -
 while, repeat, and for are captured in the way user uses them and not the way Lua generates code. Potentially
 we can have a transformation step to convert to a tree that is more like the code generation
 
-The ast_node must be aligned with struct expression for expressions, and with struct statement for statements.
+The ast_node must be aligned with struct expression for expressions, and with Statement for statements.
 */
 struct ast_node {
 	BASE_AST_FIELDS;
