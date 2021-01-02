@@ -8,7 +8,7 @@
 
 static void process_expression_list(CompilerState *container, AstNodeList *node);
 static void process_statement_list(CompilerState *container, AstNodeList *node);
-static void process_statement(CompilerState *container, struct ast_node *node);
+static void process_statement(CompilerState *container, AstNode *node);
 
 #define l_mathop(op) op
 
@@ -345,7 +345,7 @@ static int luaO_rawarith(CompilerState *compiler_state, int op, const LiteralExp
 	}
 }
 
-static void process_expression(CompilerState *container, struct ast_node *node)
+static void process_expression(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION:
@@ -358,7 +358,7 @@ static void process_expression(CompilerState *container, struct ast_node *node)
 		} else {
 			// We can simplify and get rid of the suffixed expr
 			// TODO free primary_expr
-			memcpy(node, node->suffixed_expr.primary_expr, sizeof(struct ast_node));
+			memcpy(node, node->suffixed_expr.primary_expr, sizeof(AstNode));
 		}
 		break;
 	case EXPR_FUNCTION_CALL:
@@ -433,19 +433,19 @@ static void process_expression(CompilerState *container, struct ast_node *node)
 
 static void process_expression_list(CompilerState *container, AstNodeList *list)
 {
-	struct ast_node *node;
+	AstNode *node;
 	FOR_EACH_PTR(list, node) { process_expression(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
 static void process_statement_list(CompilerState *container, AstNodeList *list)
 {
-	struct ast_node *node;
+	AstNode *node;
 	FOR_EACH_PTR(list, node) { process_statement(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
-static void process_statement(CompilerState *container, struct ast_node *node)
+static void process_statement(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
 	case AST_NONE:
@@ -472,7 +472,7 @@ static void process_statement(CompilerState *container, struct ast_node *node)
 		process_expression_list(container, node->expression_stmt.expr_list);
 		break;
 	case STMT_IF: {
-		struct ast_node *test_then_block;
+		AstNode *test_then_block;
 		FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
 		{
 			process_expression(container, test_then_block->test_then_block.condition);

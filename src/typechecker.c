@@ -32,18 +32,18 @@ static void handle_error(CompilerState *container, const char *msg)
 }
 
 /* Type checker - WIP  */
-static void typecheck_ast_node(CompilerState *container, struct ast_node *function, struct ast_node *node);
+static void typecheck_ast_node(CompilerState *container, AstNode *function, AstNode *node);
 
 /* Type checker - WIP  */
-static void typecheck_ast_list(CompilerState *container, struct ast_node *function, AstNodeList *list)
+static void typecheck_ast_list(CompilerState *container, AstNode *function, AstNodeList *list)
 {
-	struct ast_node *node;
+	AstNode *node;
 	FOR_EACH_PTR(list, node) { typecheck_ast_node(container, function, node); }
 	END_FOR_EACH_PTR(node);
 }
 
 /* Type checker - WIP  */
-static void typecheck_unary_operator(CompilerState *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_unary_operator(CompilerState *container, AstNode *function, AstNode *node)
 {
 	UnaryOperatorType op = node->unary_expr.unary_op;
 	typecheck_ast_node(container, function, node->unary_expr.expr);
@@ -98,12 +98,12 @@ static void typecheck_unary_operator(CompilerState *container, struct ast_node *
 }
 
 /* Type checker - WIP  */
-static void typecheck_binary_operator(CompilerState *container, struct ast_node *function,
-				      struct ast_node *node)
+static void typecheck_binary_operator(CompilerState *container, AstNode *function,
+				      AstNode *node)
 {
 	BinaryOperatorType op = node->binary_expr.binary_op;
-	struct ast_node *e1 = node->binary_expr.expr_left;
-	struct ast_node *e2 = node->binary_expr.expr_right;
+	AstNode *e1 = node->binary_expr.expr_left;
+	AstNode *e2 = node->binary_expr.expr_right;
 	typecheck_ast_node(container, function, e1);
 	typecheck_ast_node(container, function, e2);
 	switch (op) {
@@ -194,11 +194,11 @@ static bool is_unindexable_type(VariableType *type)
  * x[1][2]
  * x.y[1]
  */
-static void typecheck_suffixedexpr(CompilerState *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_suffixedexpr(CompilerState *container, AstNode *function, AstNode *node)
 {
 	typecheck_ast_node(container, function, node->suffixed_expr.primary_expr);
-	struct ast_node *prev_node = node->suffixed_expr.primary_expr;
-	struct ast_node *this_node;
+	AstNode *prev_node = node->suffixed_expr.primary_expr;
+	AstNode *this_node;
 	FOR_EACH_PTR(node->suffixed_expr.suffix_list, this_node)
 	{
 		typecheck_ast_node(container, function, this_node);
@@ -225,7 +225,7 @@ static void typecheck_suffixedexpr(CompilerState *container, struct ast_node *fu
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void typecheck_var_assignment(CompilerState *container, VariableType *var_type, struct ast_node *expr,
+static void typecheck_var_assignment(CompilerState *container, VariableType *var_type, AstNode *expr,
 				     const StringObject *var_name)
 {
 	if (var_type->type_code == RAVI_TANY)
@@ -260,8 +260,8 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 	}
 }
 
-static void typecheck_local_statement(CompilerState *container, struct ast_node *function,
-				      struct ast_node *node)
+static void typecheck_local_statement(CompilerState *container, AstNode *function,
+				      AstNode *node)
 {
 	// The local vars should already be annotated
 	// We need to typecheck the expressions to the right of =
@@ -271,7 +271,7 @@ static void typecheck_local_statement(CompilerState *container, struct ast_node 
 	typecheck_ast_list(container, function, node->local_stmt.expr_list);
 
 	LuaSymbol *var;
-	struct ast_node *expr;
+	AstNode *expr;
 	PREPARE_PTR_LIST(node->local_stmt.var_list, var);
 	PREPARE_PTR_LIST(node->local_stmt.expr_list, expr);
 
@@ -289,7 +289,7 @@ static void typecheck_local_statement(CompilerState *container, struct ast_node 
 	}
 }
 
-static void typecheck_expr_statement(CompilerState *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_expr_statement(CompilerState *container, AstNode *function, AstNode *node)
 {
 	if (node->expression_stmt.var_expr_list)
 		typecheck_ast_list(container, function, node->expression_stmt.var_expr_list);
@@ -298,8 +298,8 @@ static void typecheck_expr_statement(CompilerState *container, struct ast_node *
 	if (!node->expression_stmt.var_expr_list)
 		return;
 
-	struct ast_node *var;
-	struct ast_node *expr;
+	AstNode *var;
+	AstNode *expr;
 	PREPARE_PTR_LIST(node->expression_stmt.var_expr_list, var);
 	PREPARE_PTR_LIST(node->local_stmt.expr_list, expr);
 
@@ -317,18 +317,18 @@ static void typecheck_expr_statement(CompilerState *container, struct ast_node *
 	}
 }
 
-static void typecheck_for_in_statment(CompilerState *container, struct ast_node *function,
-				      struct ast_node *node)
+static void typecheck_for_in_statment(CompilerState *container, AstNode *function,
+				      AstNode *node)
 {
 	typecheck_ast_list(container, function, node->for_stmt.expr_list);
 	typecheck_ast_list(container, function, node->for_stmt.for_statement_list);
 }
 
-static void typecheck_for_num_statment(CompilerState *container, struct ast_node *function,
-				       struct ast_node *node)
+static void typecheck_for_num_statment(CompilerState *container, AstNode *function,
+				       AstNode *node)
 {
 	typecheck_ast_list(container, function, node->for_stmt.expr_list);
-	struct ast_node *expr;
+	AstNode *expr;
 	enum { I = 1, F = 2, A = 4 }; /* bits representing integer, number, any */
 	int index_type = 0;
 	FOR_EACH_PTR(node->for_stmt.expr_list, expr)
@@ -367,9 +367,9 @@ static void typecheck_for_num_statment(CompilerState *container, struct ast_node
 	typecheck_ast_list(container, function, node->for_stmt.for_statement_list);
 }
 
-static void typecheck_if_statement(CompilerState *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_if_statement(CompilerState *container, AstNode *function, AstNode *node)
 {
-	struct ast_node *test_then_block;
+	AstNode *test_then_block;
 	FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
 	{
 		typecheck_ast_node(container, function, test_then_block->test_then_block.condition);
@@ -381,8 +381,8 @@ static void typecheck_if_statement(CompilerState *container, struct ast_node *fu
 	}
 }
 
-static void typecheck_while_or_repeat_statement(CompilerState *container, struct ast_node *function,
-						struct ast_node *node)
+static void typecheck_while_or_repeat_statement(CompilerState *container, AstNode *function,
+						AstNode *node)
 {
 	typecheck_ast_node(container, function, node->while_or_repeat_stmt.condition);
 	if (node->while_or_repeat_stmt.loop_statement_list) {
@@ -391,7 +391,7 @@ static void typecheck_while_or_repeat_statement(CompilerState *container, struct
 }
 
 /* Type checker - WIP  */
-static void typecheck_ast_node(CompilerState *container, struct ast_node *function, struct ast_node *node)
+static void typecheck_ast_node(CompilerState *container, AstNode *function, AstNode *node)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION: {
@@ -504,7 +504,7 @@ static void typecheck_ast_node(CompilerState *container, struct ast_node *functi
 }
 
 /* Type checker - WIP  */
-static void typecheck_function(CompilerState *container, struct ast_node *func)
+static void typecheck_function(CompilerState *container, AstNode *func)
 {
 	typecheck_ast_list(container, func, func->function_expr.function_statement_list);
 }
@@ -512,7 +512,7 @@ static void typecheck_function(CompilerState *container, struct ast_node *func)
 /* Type checker - WIP  */
 int raviX_ast_typecheck(CompilerState *container)
 {
-	struct ast_node *main_function = container->main_function;
+	AstNode *main_function = container->main_function;
 	raviX_buffer_reset(&container->error_message);
 	int rc = setjmp(container->env);
 	if (rc == 0) {

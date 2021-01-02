@@ -39,10 +39,10 @@ static void handle_error(CompilerState *container, const char *msg)
 	longjmp(container->env, 1);
 }
 
-static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr);
+static struct pseudo *linearize_expression(struct proc *proc, AstNode *expr);
 static struct basic_block *create_block(struct proc *proc);
 static void start_block(struct proc *proc, struct basic_block *bb);
-static void linearize_statement(struct proc *proc, struct ast_node *node);
+static void linearize_statement(struct proc *proc, AstNode *node);
 static void linearize_statement_list(struct proc *proc, AstNodeList *list);
 static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope);
 static void end_scope(LinearizerState *linearizer, struct proc *proc);
@@ -203,7 +203,7 @@ static const struct constant *add_constant(struct proc *proc, const struct const
  * Allocates and adds a constant to the Proc's constants table.
  * Input is expected to be EXPR_LITERAL
  */
-static const struct constant *allocate_constant(struct proc *proc, struct ast_node *node)
+static const struct constant *allocate_constant(struct proc *proc, AstNode *node)
 {
 	assert(node->type == EXPR_LITERAL);
 	struct constant c = {.type = node->literal_expr.type.type_code};
@@ -427,7 +427,7 @@ static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free
  * Allocate a new Proc. If there is a current Proc, then the new Proc gets added to the
  * current Proc's children.
  */
-static struct proc *allocate_proc(LinearizerState *linearizer, struct ast_node *function_expr)
+static struct proc *allocate_proc(LinearizerState *linearizer, AstNode *function_expr)
 {
 	assert(function_expr->type == EXPR_FUNCTION);
 	struct proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
@@ -503,7 +503,7 @@ static void instruct_totype(struct proc *proc, struct pseudo *target, const Vari
 static void linearize_function_args(LinearizerState *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
-	struct ast_node *func_expr = proc->function_expr;
+	AstNode *func_expr = proc->function_expr;
 	LuaSymbol *sym;
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
@@ -516,7 +516,7 @@ static void linearize_function_args(LinearizerState *linearizer)
 
 static void linearize_statement_list(struct proc *proc, AstNodeList *list)
 {
-	struct ast_node *node;
+	AstNode *node;
 	FOR_EACH_PTR(list, node) { linearize_statement(proc, node); }
 	END_FOR_EACH_PTR(node)
 }
@@ -528,7 +528,7 @@ static inline struct pseudo *convert_range_to_temp(struct pseudo *pseudo)
 	return pseudo;
 }
 
-static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr)
+static struct pseudo *linearize_literal(struct proc *proc, AstNode *expr)
 {
 	assert(expr->type == EXPR_LITERAL);
 	ravitype_t type = expr->literal_expr.type.type_code;
@@ -555,7 +555,7 @@ static struct pseudo *linearize_literal(struct proc *proc, struct ast_node *expr
 	return pseudo;
 }
 
-static struct pseudo *linearize_unary_operator(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_unary_operator(struct proc *proc, AstNode *node)
 {
 	// TODO if any expr is range we need to convert to temp?
 	UnaryOperatorType op = node->unary_expr.unary_op;
@@ -700,10 +700,10 @@ Ldone:
 
 */
 // clang-format on
-static struct pseudo *linearize_bool(struct proc *proc, struct ast_node *node, bool is_and)
+static struct pseudo *linearize_bool(struct proc *proc, AstNode *node, bool is_and)
 {
-	struct ast_node *e1 = node->binary_expr.expr_left;
-	struct ast_node *e2 = node->binary_expr.expr_right;
+	AstNode *e1 = node->binary_expr.expr_left;
+	AstNode *e2 = node->binary_expr.expr_right;
 
 	struct basic_block *first_block = create_block(proc);
 	struct basic_block *end_block = create_block(proc);
@@ -739,7 +739,7 @@ static void create_binary_instruction(struct proc *proc, enum opcode targetop, s
 	add_instruction(proc, insn);
 }
 
-static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_binary_operator(struct proc *proc, AstNode *node)
 {
 	// TODO if any expr is range we need to convert to temp?
 
@@ -751,8 +751,8 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 		return linearize_bool(proc, node, false);
 	}
 
-	struct ast_node *e1 = node->binary_expr.expr_left;
-	struct ast_node *e2 = node->binary_expr.expr_right;
+	AstNode *e1 = node->binary_expr.expr_left;
+	AstNode *e2 = node->binary_expr.expr_right;
 	struct pseudo *operand1 = linearize_expression(proc, e1);
 	struct pseudo *operand2 = linearize_expression(proc, e2);
 
@@ -838,7 +838,7 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 
 	if (swap) {
 		struct pseudo *temp;
-		struct ast_node *ntemp;
+		AstNode *ntemp;
 		temp = operand1;
 		operand1 = operand2;
 		operand2 = temp;
@@ -900,7 +900,7 @@ static struct pseudo *linearize_binary_operator(struct proc *proc, struct ast_no
 }
 
 /* generates closure instruction - linearizes a Proc, and then adds instruction to create closure from it */
-static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node *expr)
+static struct pseudo *linearize_function_expr(struct proc *proc, AstNode *expr)
 {
 	struct proc *curproc = proc->linearizer->current_proc;
 	struct proc *newproc = allocate_proc(proc->linearizer, expr);
@@ -918,7 +918,7 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 	return target;
 }
 
-static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_node *expr)
+static struct pseudo *linearize_symbol_expression(struct proc *proc, AstNode *expr)
 {
 	LuaSymbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
@@ -1099,8 +1099,8 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
  * We also handle method call:
  * <pseudo>:name(...) -> is translated to <pseudo>.name(<pseudo>, ...)
  */
-static struct pseudo *linearize_function_call_expression(struct proc *proc, struct ast_node *expr,
-							 struct ast_node *callsite_expr, struct pseudo *callsite_pseudo)
+static struct pseudo *linearize_function_call_expression(struct proc *proc, AstNode *expr,
+							 AstNode *callsite_expr, struct pseudo *callsite_pseudo)
 {
 	struct instruction *insn = allocate_instruction(proc, op_call);
 	struct pseudo *self_arg = NULL; /* For method call */
@@ -1119,7 +1119,7 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
 		add_instruction_operand(proc, insn, self_arg);
 	}
 
-	struct ast_node *arg;
+	AstNode *arg;
 	int argc = ptrlist_size((const struct ptr_list *)expr->function_call_expr.arg_list);
 	FOR_EACH_PTR(expr->function_call_expr.arg_list, arg)
 	{
@@ -1155,12 +1155,12 @@ static struct pseudo *linearize_function_call_expression(struct proc *proc, stru
  * Lua parser does this by creating a VINDEXED node which is only converted to load/store
  * when the VINDEXED node is used.
  */
-static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node *node)
+static struct pseudo *linearize_suffixedexpr(struct proc *proc, AstNode *node)
 {
 	/* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	struct pseudo *prev_pseudo = linearize_expression(proc, node->suffixed_expr.primary_expr);
-	struct ast_node *prev_node = node->suffixed_expr.primary_expr;
-	struct ast_node *this_node;
+	AstNode *prev_node = node->suffixed_expr.primary_expr;
+	AstNode *this_node;
 	FOR_EACH_PTR(node->suffixed_expr.suffix_list, this_node)
 	{
 		struct pseudo *next;
@@ -1185,7 +1185,7 @@ static struct pseudo *linearize_suffixedexpr(struct proc *proc, struct ast_node 
 }
 
 static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, ravitype_t table_type,
-				    struct ast_node *expr, int next)
+				    AstNode *expr, int next)
 {
 	struct pseudo *index_pseudo;
 	ravitype_t index_type;
@@ -1206,7 +1206,7 @@ static int linearize_indexed_assign(struct proc *proc, struct pseudo *table, rav
 	return next;
 }
 
-static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_node *expr)
+static struct pseudo *linearize_table_constructor(struct proc *proc, AstNode *expr)
 {
 	/* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
 	struct pseudo *target = allocate_temp_pseudo(proc, expr->table_expr.type.type_code);
@@ -1220,7 +1220,7 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 	add_instruction(proc, insn);
 
 	/*TODO process constructor elements */
-	struct ast_node *ia;
+	AstNode *ia;
 	int i = 1;
 	FOR_EACH_PTR(expr->table_expr.expr_list, ia)
 	{
@@ -1285,7 +1285,7 @@ struct node_info {
 
 static void linearize_assignment(struct proc *proc, AstNodeList *expr_list, struct node_info *varinfo, int nv)
 {
-	struct ast_node *expr;
+	AstNode *expr;
 
 	int ne = ptrlist_size((const struct ptr_list *)expr_list);
 	struct node_info *valinfo = (struct node_info *)alloca(ne * sizeof(struct node_info));
@@ -1366,9 +1366,9 @@ The handling of 'local' and expression statements can be partially combined
 because the main difference is the LHS side of it. The rest of the processing has to be
 the same.
 */
-static void linearize_expression_statement(struct proc *proc, struct ast_node *node)
+static void linearize_expression_statement(struct proc *proc, AstNode *node)
 {
-	struct ast_node *var;
+	AstNode *var;
 
 	int nv = ptrlist_size((const struct ptr_list *)node->expression_stmt.var_expr_list);
 	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
@@ -1385,7 +1385,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv);
 }
 
-static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
+static void linearize_local_statement(struct proc *proc, AstNode *stmt)
 {
 	LuaSymbol *sym;
 
@@ -1406,7 +1406,7 @@ static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv);
 }
 
-static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *expr)
+static struct pseudo *linearize_expression(struct proc *proc, AstNode *expr)
 {
 	struct pseudo *result = NULL;
 	switch (expr->type) {
@@ -1450,7 +1450,7 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struct instruction *insn,
 				PseudoList **pseudo_list)
 {
-	struct ast_node *expr;
+	AstNode *expr;
 	int ne = ptrlist_size((const struct ptr_list *)expr_list);
 	FOR_EACH_PTR(expr_list, expr)
 	{
@@ -1464,7 +1464,7 @@ static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struc
 	END_FOR_EACH_PTR(expr)
 }
 
-static void linearize_return(struct proc *proc, struct ast_node *node)
+static void linearize_return(struct proc *proc, AstNode *node)
 {
 	assert(node->type == STMT_RETURN);
 	struct instruction *insn = allocate_instruction(proc, op_ret);
@@ -1485,7 +1485,7 @@ static bool is_block_terminated(struct basic_block *block)
 	return false;
 }
 
-static void linearize_test_cond(struct proc *proc, struct ast_node *node, struct basic_block *true_block,
+static void linearize_test_cond(struct proc *proc, AstNode *node, struct basic_block *true_block,
 				struct basic_block *false_block)
 {
 	struct pseudo *condition_pseudo = linearize_expression(proc, node->test_then_block.condition);
@@ -1493,7 +1493,7 @@ static void linearize_test_cond(struct proc *proc, struct ast_node *node, struct
 }
 
 /* linearize the 'else if' block */
-static void linearize_test_then(struct proc *proc, struct ast_node *node, struct basic_block *true_block,
+static void linearize_test_then(struct proc *proc, AstNode *node, struct basic_block *true_block,
 				struct basic_block *end_block)
 {
 	start_block(proc, true_block);
@@ -1556,7 +1556,7 @@ Belse:
 Bend:
 */
 // clang-format on
-static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
+static void linearize_if_statement(struct proc *proc, AstNode *ifnode)
 {
 	struct basic_block *end_block = NULL;
 	struct basic_block *else_block = NULL;
@@ -1566,7 +1566,7 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 	AstNodeList *else_stmts = ifnode->if_stmt.else_statement_list;
 	Scope *else_scope = ifnode->if_stmt.else_block;
 
-	struct ast_node *this_node;
+	AstNode *this_node;
 	FOR_EACH_PTR(if_else_stmts, this_node)
 	{
 		struct basic_block *block = create_block(proc);
@@ -1643,7 +1643,7 @@ We start a new block which will get associated with the label.
 We have to handle the situation where the label pseudo was already created when we
 encountered a goto statement but we did not know the block then.
 */
-static void linearize_label_statement(struct proc *proc, struct ast_node *node)
+static void linearize_label_statement(struct proc *proc, AstNode *node)
 {
 	struct basic_block* block;
 	if (node->label_stmt.symbol->label.pseudo != NULL) {
@@ -1672,7 +1672,7 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
 static LuaSymbol *find_label(struct proc *proc, Scope *block,
 				     const StringObject *label_name, Scope **min_closing_block)
 {
-	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
+	AstNode *function = block->function; /* We need to stay inside the function when lookng for the label */
 	*min_closing_block = NULL;
 	while (block != NULL && block->function == function) {
 		LuaSymbol *symbol;
@@ -1697,7 +1697,7 @@ static LuaSymbol *find_label(struct proc *proc, Scope *block,
 */
 static Scope *find_min_closing_block(Scope *block, Scope *target_block)
 {
-	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
+	AstNode *function = block->function; /* We need to stay inside the function when lookng for the label */
 	Scope *min_closing_block = NULL;
 	while (block != NULL && block->function == function) {
 		if (block->need_close) {
@@ -1770,7 +1770,7 @@ But at this point we may not know the target basic block to goto, which we expec
 encountered. Of course if the label was linearized before we got to the goto statement then the target block
 would already be known and specified in the pseudo.
 */
-static void linearize_goto_statement(struct proc *proc, const struct ast_node *node)
+static void linearize_goto_statement(struct proc *proc, const AstNode *node)
 {
 	if (node->goto_stmt.is_break) {
 		if (proc->current_break_target == NULL) {
@@ -1812,7 +1812,7 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 	handle_error(proc->linearizer->ast_container, "goto label not found");
 }
 
-static void linearize_do_statement(struct proc *proc, struct ast_node *node)
+static void linearize_do_statement(struct proc *proc, AstNode *node)
 {
 	assert(node->type == STMT_DO);
 	start_scope(proc->linearizer, proc, node->do_stmt.scope);
@@ -1908,13 +1908,13 @@ Lend:
 */
 //clang-format on
 
-static void linearize_for_num_statement_positivestep(struct proc *proc, struct ast_node *node)
+static void linearize_for_num_statement_positivestep(struct proc *proc, AstNode *node)
 {
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
-	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
-	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
-	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	AstNode *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	AstNode *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
+	AstNode *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
 	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
@@ -1992,12 +1992,12 @@ static void linearize_for_num_statement_positivestep(struct proc *proc, struct a
 	proc->current_break_scope = previous_break_scope;
 }
 
-static void linearize_for_num_statement(struct proc *proc, struct ast_node *node)
+static void linearize_for_num_statement(struct proc *proc, AstNode *node)
 {
 	assert(node->type == STMT_FOR_NUM);
 
 	/* For now we only allow integer expressions */
-	struct ast_node *expr;
+	AstNode *expr;
 	FOR_EACH_PTR(node->for_stmt.expr_list, expr)
 		{
 			if (expr->common_expr.type.type_code != RAVI_TNUMINT) {
@@ -2008,7 +2008,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	END_FOR_EACH_PTR(expr)
 
 	/* Check if we can optimize */
-	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
+	AstNode *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
 	{
 		bool step_known_positive = false;
 //		bool step_known_negative = false;
@@ -2031,8 +2031,8 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	/* Default case where we do not know if step is negative or positive */
 	start_scope(proc->linearizer, proc, node->for_stmt.for_scope);
 
-	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
-	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
+	AstNode *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
+	AstNode *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
 	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
@@ -2121,7 +2121,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	proc->current_break_scope = previous_break_scope;
 }
 
-static void linearize_while_statment(struct proc *proc, struct ast_node *node)
+static void linearize_while_statment(struct proc *proc, AstNode *node)
 {
 	struct basic_block *test_block = create_block(proc);
 	struct basic_block *body_block = create_block(proc);
@@ -2157,7 +2157,7 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	proc->current_break_scope = previous_break_scope;
 }
 
-static void linearize_function_statement(struct proc *proc, struct ast_node *node)
+static void linearize_function_statement(struct proc *proc, AstNode *node)
 {
 	/* function funcname funcbody */
 	/* funcname ::= Name {‘.’ Name} [‘:’ Name] */
@@ -2166,8 +2166,8 @@ static void linearize_function_statement(struct proc *proc, struct ast_node *nod
 	// In truth we could translate this to an expression statement - the only benefit here is that we
 	// do not allow selectors to be arbitrary expressions
 	struct pseudo *prev_pseudo = linearize_symbol_expression(proc, node->function_stmt.name);
-	struct ast_node *prev_node = node->function_stmt.name;
-	struct ast_node *this_node;
+	AstNode *prev_node = node->function_stmt.name;
+	AstNode *this_node;
 	FOR_EACH_PTR(node->function_stmt.selectors, this_node)
 	{
 		struct pseudo *next;
@@ -2207,7 +2207,7 @@ static void linearize_function_statement(struct proc *proc, struct ast_node *nod
 			    &node->function_stmt.function_expr->common_expr.type, function_pseudo);
 }
 
-static void linearize_statement(struct proc *proc, struct ast_node *node)
+static void linearize_statement(struct proc *proc, AstNode *node)
 {
 	switch (node->type) {
 	case AST_NONE: {
@@ -2389,7 +2389,7 @@ static void linearize_function(LinearizerState *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
 	assert(proc != NULL);
-	struct ast_node *func_expr = proc->function_expr;
+	AstNode *func_expr = proc->function_expr;
 	assert(func_expr->type == EXPR_FUNCTION);
 	initialize_graph(proc);
 	assert(proc->node_count >= 2);

@@ -95,7 +95,7 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 
 static void print_ast_node_list(TextBuffer *buf, AstNodeList *list, int level, const char *delimiter)
 {
-	struct ast_node *node;
+	AstNode *node;
 	bool is_first = true;
 	FOR_EACH_PTR(list, node)
 	{
@@ -279,7 +279,7 @@ const char *raviX_get_binary_opr_str(BinaryOperatorType op)
 	}
 }
 
-void raviX_print_ast_node(TextBuffer *buf, struct ast_node *node, int level)
+void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION: {
@@ -363,7 +363,7 @@ void raviX_print_ast_node(TextBuffer *buf, struct ast_node *node, int level)
 		break;
 	}
 	case STMT_IF: {
-		struct ast_node *test_then_block;
+		AstNode *test_then_block;
 		bool is_first = true;
 		FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
 		{

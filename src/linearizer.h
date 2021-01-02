@@ -199,7 +199,7 @@ struct proc {
 	LinearizerState *linearizer;
 	ProcList *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
-	struct ast_node *function_expr; /* function ast that we are compiling */
+	AstNode *function_expr; /* function ast that we are compiling */
 	Scope *current_scope;
 	struct basic_block *current_bb;
 	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /

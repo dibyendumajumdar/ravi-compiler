@@ -33,7 +33,7 @@ typedef unsigned char lu_byte;
 
 //////////////////////////
 
-struct LuaSymbolList;
+typedef struct AstNode AstNode;
 
 /*
  * Encapsulate all the compiler state.
@@ -48,7 +48,7 @@ struct CompilerState {
 	struct allocator string_allocator;
 	struct allocator string_object_allocator;
 	struct set *strings;
-	struct ast_node *main_function;
+	AstNode *main_function;
 	LinearizerState *linearizer;
 	int (*error_handler)(const char *fmt, ...);
 	TextBuffer buff;		 /* temp storage for literals, used by the lexer and parser */
@@ -80,8 +80,7 @@ struct LexerState {
 };
 void raviX_syntaxerror(LexerState *ls, const char *msg);
 
-struct ast_node;
-DECLARE_PTR_LIST(AstNodeList, struct ast_node);
+DECLARE_PTR_LIST(AstNodeList, AstNode);
 
 /* RAVI: Following are the types we will use
 ** use in parsing. The rationale for types is
@@ -132,7 +131,7 @@ struct LuaLabelSymbol {
 struct LuaUpvalueSymbol {
 	VariableType value_type;
 	LuaSymbol *target_variable;	   /* variable reference */
-	struct ast_node *target_function; /* Where the upvalue lives */
+	AstNode *target_function; /* Where the upvalue lives */
 	unsigned upvalue_index : 16,   /* index of the upvalue in the function where this upvalue occurs */
 	    is_in_parent_stack : 1,    /* 1 if yes - populated by code generator only */
 	    parent_upvalue_index : 15; /* if !is_in_parent_stack then upvalue index in parent - populated by code generator only */
@@ -148,7 +147,7 @@ struct LuaSymbol {
 	};
 };
 struct Scope {
-	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
+	AstNode *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	Scope *parent;	     /* parent block, may belong to parent function */
 	LuaSymbolList *symbol_list; /* symbols defined in this block */
 	unsigned need_close: 1;              /* When we exit scope of this block the upvalues need to be closed */
@@ -179,10 +178,10 @@ struct ExpressionStatement {
 	AstNodeList *expr_list;     /* Comma separated expressions */
 };
 struct FunctionStatement {
-	struct ast_node *name;		 /* base symbol to be looked up - symbol_expression */
+	AstNode *name;		 /* base symbol to be looked up - symbol_expression */
 	AstNodeList *selectors; /* Optional list of index_expression(s) */
-	struct ast_node *method_name;	 /* Optional - index_expression */
-	struct ast_node *function_expr;	 /* Function's AST - function_expression */
+	AstNode *method_name;	 /* Optional - index_expression */
+	AstNode *function_expr;	 /* Function's AST - function_expression */
 };
 struct DoStatement {
 	Scope *scope;		 /* The do statement only creates a new scope */
@@ -190,7 +189,7 @@ struct DoStatement {
 };
 /* Used internally in if_stmt, not an independent AST node */
 struct TestThenStatement {
-	struct ast_node *condition;
+	AstNode *condition;
 	Scope *test_then_scope;
 	AstNodeList *test_then_statement_list; /* statements in this block */
 };
@@ -200,7 +199,7 @@ struct IfStatement {
 	AstNodeList *else_statement_list; /* statements in this block */
 };
 struct WhileOrRepeatStatement {
-	struct ast_node *condition;
+	AstNode *condition;
 	Scope *loop_scope;
 	AstNodeList *loop_statement_list; /* statements in this block */
 };
@@ -233,19 +232,19 @@ struct SymbolExpression {
 /* EXPR_Y_INDEX or EXPR_FIELD_SELECTOR */
 struct IndexExpression {
 	BASE_EXPRESSION_FIELDS;
-	struct ast_node *expr; /* '[' expr ']' */
+	AstNode *expr; /* '[' expr ']' */
 };
 /* EXPR_UNARY */
 struct UnaryExpression {
 	BASE_EXPRESSION_FIELDS;
 	UnaryOperatorType unary_op;
-	struct ast_node *expr;
+	AstNode *expr;
 };
 struct BinaryExpression {
 	BASE_EXPRESSION_FIELDS;
 	BinaryOperatorType binary_op;
-	struct ast_node *expr_left;
-	struct ast_node *expr_right;
+	AstNode *expr_left;
+	AstNode *expr_right;
 };
 struct FunctionExpression {
 	BASE_EXPRESSION_FIELDS;
@@ -253,7 +252,7 @@ struct FunctionExpression {
 	unsigned is_method : 1;
 	unsigned need_close : 1;
 	uint32_t proc_id; /* Backend allocated id */
-	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
+	AstNode *parent_function;	       /* parent function or NULL if main chunk */
 	Scope *main_block;		       /* the function's main block */
 	AstNodeList *function_statement_list; /* statements in this block */
 	LuaSymbolList
@@ -266,9 +265,9 @@ struct FunctionExpression {
 /* EXPR_TABLE_ELEMENT_ASSIGN - used in table constructor */
 struct TableElementAssignmentExpression {
 	BASE_EXPRESSION_FIELDS;
-	struct ast_node *key_expr; /* If NULL means this is a list field with next available index,
+	AstNode *key_expr; /* If NULL means this is a list field with next available index,
 							else specifies index expression */
-	struct ast_node *value_expr;
+	AstNode *value_expr;
 };
 /* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
 /* table constructor expression EXPR_TABLE_LITERAL occurs in function call and simple expr */
@@ -280,7 +279,7 @@ struct TableLiteralExpression {
 /* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
 struct SuffixedExpression {
 	BASE_EXPRESSION_FIELDS;
-	struct ast_node *primary_expr;
+	AstNode *primary_expr;
 	AstNodeList *suffix_list;
 };
 struct FunctionCallExpression {
@@ -316,7 +315,7 @@ we can have a transformation step to convert to a tree that is more like the cod
 
 The ast_node must be aligned with Expression for expressions, and with Statement for statements.
 */
-struct ast_node {
+struct AstNode {
 	BASE_AST_FIELDS;
 	union {
 		ReturnStatement return_stmt; /*STMT_RETURN */
@@ -365,11 +364,11 @@ static inline void copy_type(VariableType *a, const VariableType *b)
 struct parser_state {
 	LexerState *ls;
 	CompilerState *container;
-	struct ast_node *current_function;
+	AstNode *current_function;
 	Scope *current_scope;
 };
 
-void raviX_print_ast_node(TextBuffer *buf, struct ast_node *node, int level); /* output the AST structure recursively */
+void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level); /* output the AST structure recursively */
 const char *raviX_get_type_name(ravitype_t tt);
 
 int raviX_ast_simplify(CompilerState* container);

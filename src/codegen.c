@@ -2566,10 +2566,10 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 	return 0;
 }
 
-static inline struct ast_node *get_parent_function_of_upvalue(LuaSymbol *symbol)
+static inline AstNode *get_parent_function_of_upvalue(LuaSymbol *symbol)
 {
-	struct ast_node *upvalue_function = symbol->upvalue.target_function;
-	struct ast_node *parent_function = upvalue_function->function_expr.parent_function;
+	AstNode *upvalue_function = symbol->upvalue.target_function;
+	AstNode *parent_function = upvalue_function->function_expr.parent_function;
 	return parent_function;
 }
 
@@ -2585,8 +2585,8 @@ static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bo
 	LuaSymbol *underlying = upvalue_symbol->upvalue.target_variable;
 	if (underlying->symbol_type == SYM_LOCAL) {
 		/* Upvalue is in the stack of parent ? */
-		struct ast_node *function_containing_local = underlying->variable.block->function;
-		struct ast_node *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
+		AstNode *function_containing_local = underlying->variable.block->function;
+		AstNode *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
 		if (parent_function == function_containing_local) {
 			/* Upvalue is a local in parent function */
 			*in_stack = true;
@@ -2595,7 +2595,7 @@ static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bo
 	}
 	/* Search for the upvalue in parent function */
 	LuaSymbol *sym;
-	struct ast_node *this_function = upvalue_symbol->upvalue.target_function;
+	AstNode *this_function = upvalue_symbol->upvalue.target_function;
 	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
 	{
 		if (sym->upvalue.target_variable == upvalue_symbol->upvalue.target_variable) {
@@ -2614,7 +2614,7 @@ static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bo
 static void compute_upvalue_attributes(struct proc *proc)
 {
 	LuaSymbol *sym;
-	struct ast_node *this_function = proc->function_expr;
+	AstNode *this_function = proc->function_expr;
 	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
 	{
 		bool in_stack = false;
