@@ -20,7 +20,7 @@ struct constant;
 
 DECLARE_PTR_LIST(InstructionList, struct instruction);
 DECLARE_PTR_LIST(PseudoList, struct pseudo);
-DECLARE_PTR_LIST(proc_list, struct proc);
+DECLARE_PTR_LIST(ProcList, struct proc);
 
 #define container_of(ptr, type, member) ((type *)((char *)(ptr)-offsetof(type, member)))
 
@@ -171,7 +171,7 @@ struct basic_block {
 	nodeId_t index; /* The index of the block is a key to enable retrieving the block from its container */
 	InstructionList *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
 };
-DECLARE_PTR_LIST(basic_block_list, struct basic_block);
+DECLARE_PTR_LIST(BasicBlockList, struct basic_block);
 
 struct pseudo_generator {
 	uint8_t next_reg; /* Next register if no free registers, initially 0 */
@@ -197,7 +197,7 @@ struct proc {
 	struct basic_block **nodes;
 	uint32_t id; /* ID for the proc */
 	LinearizerState *linearizer;
-	struct proc_list *procs;	/* procs defined in this proc */
+	ProcList *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
 	struct ast_node *function_expr; /* function ast that we are compiling */
 	Scope *current_scope;
@@ -228,7 +228,7 @@ struct LinearizerState {
 	struct allocator constant_allocator;
 	CompilerState *ast_container;
 	struct proc *main_proc;	     /* The root of the compiled chunk of code */
-	struct proc_list *all_procs; /* All procs allocated by the linearizer */
+	ProcList *all_procs; /* All procs allocated by the linearizer */
 	struct proc *current_proc;   /* proc being compiled */
 	uint32_t proc_id;
 };

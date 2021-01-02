@@ -1560,8 +1560,8 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 {
 	struct basic_block *end_block = NULL;
 	struct basic_block *else_block = NULL;
-	struct basic_block_list *if_blocks = NULL;
-	struct basic_block_list *if_true_blocks = NULL;
+	BasicBlockList *if_blocks = NULL;
+	BasicBlockList *if_true_blocks = NULL;
 	AstNodeList *if_else_stmts = ifnode->if_stmt.if_condition_list;
 	AstNodeList *else_stmts = ifnode->if_stmt.else_statement_list;
 	Scope *else_scope = ifnode->if_stmt.else_block;
