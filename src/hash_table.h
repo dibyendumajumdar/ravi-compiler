@@ -40,7 +40,7 @@ typedef struct HashEntry {
 	void *data;
 } HashEntry;
 
-struct hash_table {
+typedef struct HashTable {
 	HashEntry *table;
 	uint32_t (*hash_function)(const void *key);
 	int (*key_equals_function)(const void *a, const void *b);
@@ -50,34 +50,34 @@ struct hash_table {
 	uint32_t size_index;
 	uint32_t entries;
 	uint32_t deleted_entries;
-};
+} HashTable;
 
-struct hash_table *
+HashTable *
 raviX_hash_table_create(uint32_t (*hash_function)(const void *key),
 		  int (*key_equals_function)(const void *a,
 					     const void *b));
 void
-raviX_hash_table_destroy(struct hash_table *ht,
+raviX_hash_table_destroy(HashTable *ht,
 		   void (*delete_function)(HashEntry *entry));
 
 HashEntry *
-raviX_hash_table_insert(struct hash_table *ht, const void *key, void *data);
+raviX_hash_table_insert(HashTable *ht, const void *key, void *data);
 
 HashEntry *
-raviX_hash_table_search(struct hash_table *ht, const void *key);
+raviX_hash_table_search(HashTable *ht, const void *key);
 
 void
-raviX_hash_table_remove(struct hash_table *ht, const void *key);
+raviX_hash_table_remove(HashTable *ht, const void *key);
 
 void
-raviX_hash_table_remove_entry(struct hash_table *ht, HashEntry *entry);
+raviX_hash_table_remove_entry(HashTable *ht, HashEntry *entry);
 
 HashEntry *
-raviX_hash_table_next_entry(struct hash_table *ht,
+raviX_hash_table_next_entry(HashTable *ht,
 		      HashEntry *entry);
 
 //HashEntry *
-//hash_table_random_entry(struct hash_table *ht,
+//hash_table_random_entry(HashTable *ht,
 //			int (*predicate)(HashEntry *entry));
 
 /**
@@ -92,12 +92,12 @@ raviX_hash_table_next_entry(struct hash_table *ht,
 
 /* Alternate interfaces to reduce repeated calls to hash function. */
 HashEntry *
-raviX_hash_table_search_pre_hashed(struct hash_table *ht,
+raviX_hash_table_search_pre_hashed(HashTable *ht,
 			     uint32_t hash,
 			     const void *key);
 
 HashEntry *
-raviX_hash_table_insert_pre_hashed(struct hash_table *ht,
+raviX_hash_table_insert_pre_hashed(HashTable *ht,
 			     uint32_t hash,
 			     const void *key, void *data);
 
