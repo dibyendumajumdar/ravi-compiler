@@ -347,7 +347,7 @@ a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
 static struct pseudo *allocate_temp_pseudo(struct proc *proc, ravitype_t type)
 {
 	struct pseudo_generator *gen;
-	enum pseudo_type pseudo_type;
+	enum PseudoType pseudo_type;
 	switch (type) {
 	case RAVI_TNUMFLT:
 		gen = &proc->temp_flt_pseudos;

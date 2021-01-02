@@ -125,7 +125,7 @@ enum opcode {
 * The IR instructions use operands and targets of type pseudo, which
 * is a way of referencing several different types of objects.
 */
-enum pseudo_type {
+enum PseudoType {
 	PSEUDO_SYMBOL, /* An object of type lua_symbol representing local var or upvalue, always refers to Lua stack relative to 'base' */
 	PSEUDO_TEMP_FLT, /* A floating point temp - may also be used for locals that don't escape - refers to C var */
 	PSEUDO_TEMP_INT, /* An integer temp - may also be used for locals that don't escape - refers to C var */
