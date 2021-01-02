@@ -55,7 +55,7 @@ static void output_node(void *arg, struct graph *g, uint32_t nodeid)
 		return;
 	struct basic_block *block = proc->nodes[nodeid];
 	if (ptrlist_size((const struct ptr_list *) block->insns) > 0) {
-		buffer_t buf;
+		TextBuffer buf;
 		raviX_buffer_init(&buf, 1024);
 		raviX_output_basic_block_as_table(proc, block, &buf);
 		fprintf(fp, "L%d [shape=none, margin=0, label=<%s>];\n", nodeid, raviX_buffer_data(&buf));

@@ -34,7 +34,7 @@ const char *raviX_get_type_name(ravitype_t tt)
 	}
 }
 
-static void printf_buf(buffer_t *buf, const char *format, ...)
+static void printf_buf(TextBuffer *buf, const char *format, ...)
 {
 	static const char *PADDING = "                                                                                ";
 	char tbuf[128] = {0};
@@ -93,7 +93,7 @@ static void printf_buf(buffer_t *buf, const char *format, ...)
 	va_end(ap);
 }
 
-static void print_ast_node_list(buffer_t *buf, struct ast_node_list *list, int level, const char *delimiter)
+static void print_ast_node_list(TextBuffer *buf, struct ast_node_list *list, int level, const char *delimiter)
 {
 	struct ast_node *node;
 	bool is_first = true;
@@ -108,14 +108,14 @@ static void print_ast_node_list(buffer_t *buf, struct ast_node_list *list, int l
 	END_FOR_EACH_PTR(node);
 }
 
-static void print_statement_list(buffer_t *buf, struct ast_node_list *statement_list, int level)
+static void print_statement_list(TextBuffer *buf, struct ast_node_list *statement_list, int level)
 {
 	print_ast_node_list(buf, statement_list, level + 1, NULL);
 }
 
 static inline const char *get_as_str(const StringObject *ts) { return ts ? ts->str : ""; }
 
-static void print_symbol(buffer_t *buf, struct lua_symbol *sym, int level)
+static void print_symbol(TextBuffer *buf, struct lua_symbol *sym, int level)
 {
 	switch (sym->symbol_type) {
 	case SYM_ENV: {
@@ -144,7 +144,7 @@ static void print_symbol(buffer_t *buf, struct lua_symbol *sym, int level)
 	}
 }
 
-static void print_symbol_name(buffer_t *buf, struct lua_symbol *sym)
+static void print_symbol_name(TextBuffer *buf, struct lua_symbol *sym)
 {
 	switch (sym->symbol_type) {
 	case SYM_LOCAL:
@@ -167,7 +167,7 @@ static void print_symbol_name(buffer_t *buf, struct lua_symbol *sym)
 	}
 }
 
-static void print_symbol_list(buffer_t *buf, struct lua_symbol_list *list, int level, const char *delimiter)
+static void print_symbol_list(TextBuffer *buf, struct lua_symbol_list *list, int level, const char *delimiter)
 {
 	struct lua_symbol *node;
 	bool is_first = true;
@@ -182,7 +182,7 @@ static void print_symbol_list(buffer_t *buf, struct lua_symbol_list *list, int l
 	END_FOR_EACH_PTR(node);
 }
 
-static void print_symbol_names(buffer_t *buf, struct lua_symbol_list *list)
+static void print_symbol_names(TextBuffer *buf, struct lua_symbol_list *list)
 {
 	struct lua_symbol *node;
 	bool is_first = true;
@@ -279,7 +279,7 @@ const char *raviX_get_binary_opr_str(BinaryOperatorType op)
 	}
 }
 
-void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level)
+void raviX_print_ast_node(TextBuffer *buf, struct ast_node *node, int level)
 {
 	switch (node->type) {
 	case EXPR_FUNCTION: {
@@ -535,7 +535,7 @@ void raviX_print_ast_node(buffer_t *buf, struct ast_node *node, int level)
 
 void raviX_output_ast(CompilerState *container, FILE *fp)
 {
-	buffer_t mbuf;
+	TextBuffer mbuf;
 	raviX_buffer_init(&mbuf, 1024);
 	raviX_print_ast_node(&mbuf, container->main_function, 0);
 	fputs(mbuf.buf, fp);

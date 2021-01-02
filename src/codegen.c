@@ -620,8 +620,8 @@ static const char Lua_header[] =
 
 struct function {
 	struct proc *proc;
-	buffer_t prologue;
-	buffer_t body;
+	TextBuffer prologue;
+	TextBuffer body;
 	struct Ravi_CompilerInterface *api;
 };
 
@@ -721,7 +721,7 @@ static inline unsigned get_num_childprocs(struct proc *proc)
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
  */
-static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, buffer_t *mb)
+static void emit_vars(const char *type, const char *prefix, struct pseudo_generator *gen, TextBuffer *mb)
 {
 	if (gen->next_reg == 0)
 		return;
@@ -737,7 +737,7 @@ static void emit_vars(const char *type, const char *prefix, struct pseudo_genera
 	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
-static void emit_varname(const struct pseudo *pseudo, buffer_t *mb)
+static void emit_varname(const struct pseudo *pseudo, TextBuffer *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL) {
 		raviX_buffer_add_fstring(mb, "%s%d", int_var_prefix, pseudo->regnum);
@@ -2442,7 +2442,7 @@ static inline unsigned get_num_upvalues(struct proc *proc)
 }
 
 /* Generate code for setting up a Lua Proto structure, recursively for each child function */
-static int generate_lua_proc(struct proc *proc, buffer_t *mb)
+static int generate_lua_proc(struct proc *proc, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, " f->ravi_jit.jit_function = %s;\n", proc->funcname);
 	raviX_buffer_add_string(mb, " f->ravi_jit.jit_status = RAVI_JIT_COMPILED;\n");
@@ -2517,7 +2517,7 @@ static int generate_lua_proc(struct proc *proc, buffer_t *mb)
 /* Generate the equivalent of a luaU_undump such that when called from Lua/Ravi code
  * it will build the closure encapsulating the Lua chunk.
  */
-static int generate_lua_closure(struct proc *proc, const char *funcname, buffer_t *mb)
+static int generate_lua_closure(struct proc *proc, const char *funcname, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, "EXPORT LClosure *%s(lua_State *L) {\n", funcname);
 	raviX_buffer_add_fstring(mb, " LClosure *cl = luaF_newLclosure(L, %u);\n", get_num_upvalues(proc));
@@ -2532,7 +2532,7 @@ static int generate_lua_closure(struct proc *proc, const char *funcname, buffer_
 }
 
 /* Generate C code for each proc recursively */
-static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, buffer_t *mb)
+static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct proc *proc, TextBuffer *mb)
 {
 	int rc = 0;
 	struct function fn;
@@ -2652,7 +2652,7 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {.context = NULL,
 							       .debug_message = debug_message};
 
 /* Generate and compile C code */
-int raviX_generate_C(LinearizerState *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface)
+int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_CompilerInterface *ravi_interface)
 {
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
@@ -2680,7 +2680,7 @@ void raviX_generate_C_tofile(LinearizerState *linearizer, const char *mainfunc, 
 	struct Ravi_CompilerInterface *ravi_interface = &stub_compilerInterface;
 	raviX_string_copy(ravi_interface->main_func_name, (mainfunc != NULL ? mainfunc : "setup"),
 			  sizeof ravi_interface->main_func_name);
-	buffer_t mb;
+	TextBuffer mb;
 	raviX_buffer_init(&mb, 4096);
 	raviX_generate_C(linearizer, &mb, NULL);
 	fprintf(fp, "%s\n", mb.buf);

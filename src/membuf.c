@@ -20,7 +20,7 @@ void raviX_string_copy(char *buf, const char *src, size_t buflen)
 	buf[buflen - 1] = 0;
 }
 
-void raviX_buffer_init(buffer_t *mb, size_t initial_size)
+void raviX_buffer_init(TextBuffer *mb, size_t initial_size)
 {
 	if (initial_size > 0) {
 		mb->buf = (char *)calloc(1, initial_size);
@@ -33,7 +33,7 @@ void raviX_buffer_init(buffer_t *mb, size_t initial_size)
 	mb->pos = 0;
 	mb->capacity = initial_size;
 }
-void raviX_buffer_resize(buffer_t *mb, size_t new_size)
+void raviX_buffer_resize(TextBuffer *mb, size_t new_size)
 {
 	if (new_size <= mb->capacity)
 		return;
@@ -45,7 +45,7 @@ void raviX_buffer_resize(buffer_t *mb, size_t new_size)
 	mb->buf = newmem;
 	mb->capacity = new_size;
 }
-void raviX_buffer_reserve(buffer_t *mb, size_t n)
+void raviX_buffer_reserve(TextBuffer *mb, size_t n)
 {
 	if (mb->capacity < mb->pos + n) {
 		size_t new_size = (((mb->pos + n) * 3 + 30) / 2) & ~15;
@@ -53,8 +53,8 @@ void raviX_buffer_reserve(buffer_t *mb, size_t n)
 		assert(mb->capacity > mb->pos + n);
 	}
 }
-void raviX_buffer_free(buffer_t *mb) { free(mb->buf); }
-void raviX_buffer_add_bytes(buffer_t *mb, const char *str, size_t len)
+void raviX_buffer_free(TextBuffer *mb) { free(mb->buf); }
+void raviX_buffer_add_bytes(TextBuffer *mb, const char *str, size_t len)
 {
 	size_t required_size = mb->pos + len + 1; /* extra byte for NULL terminator */
 	raviX_buffer_resize(mb, required_size);
@@ -62,13 +62,13 @@ void raviX_buffer_add_bytes(buffer_t *mb, const char *str, size_t len)
 	raviX_string_copy(&mb->buf[mb->pos], str, mb->capacity - mb->pos);
 	mb->pos += len;
 }
-void raviX_buffer_add_string(buffer_t *mb, const char *str)
+void raviX_buffer_add_string(TextBuffer *mb, const char *str)
 {
 	size_t len = strlen(str);
 	raviX_buffer_add_bytes(mb, str, len);
 }
 
-void raviX_buffer_add_fstring(buffer_t *mb, const char *fmt, ...)
+void raviX_buffer_add_fstring(TextBuffer *mb, const char *fmt, ...)
 {
 	va_list args;
 	int estimated_size = 128;
@@ -91,26 +91,26 @@ void raviX_buffer_add_fstring(buffer_t *mb, const char *fmt, ...)
 	}
 }
 
-void raviX_buffer_add_bool(buffer_t *mb, bool value)
+void raviX_buffer_add_bool(TextBuffer *mb, bool value)
 {
 	if (value)
 		raviX_buffer_add_string(mb, "true");
 	else
 		raviX_buffer_add_string(mb, "false");
 }
-void raviX_buffer_add_int(buffer_t *mb, int value)
+void raviX_buffer_add_int(TextBuffer *mb, int value)
 {
 	char temp[100];
 	snprintf(temp, sizeof temp, "%d", value);
 	raviX_buffer_add_string(mb, temp);
 }
-void raviX_buffer_add_longlong(buffer_t *mb, int64_t value)
+void raviX_buffer_add_longlong(TextBuffer *mb, int64_t value)
 {
 	char temp[100];
 	snprintf(temp, sizeof temp, "%" PRId64 "", value);
 	raviX_buffer_add_string(mb, temp);
 }
-void raviX_buffer_add_char(buffer_t *mb, char c)
+void raviX_buffer_add_char(TextBuffer *mb, char c)
 {
 	char temp[2] = {c, '\0'};
 	raviX_buffer_add_string(mb, temp);

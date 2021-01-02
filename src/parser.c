@@ -110,7 +110,7 @@ static void check_match(LexerState *ls, int what, int who, int where)
 		if (where == ls->linenumber)
 			error_expected(ls, what);
 		else {
-			buffer_t mb;
+			TextBuffer mb;
 			raviX_buffer_init(&mb, 256);
 			raviX_token2str(what, &mb);
 			raviX_buffer_add_string(&mb, " expected (to close ");

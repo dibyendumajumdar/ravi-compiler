@@ -5,7 +5,7 @@
 #include "ravi_api.h"
 #include "linearizer.h"
 
-RAVICOMP_EXPORT int raviX_generate_C(LinearizerState *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface);
+RAVICOMP_EXPORT int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_CompilerInterface *ravi_interface);
 RAVICOMP_EXPORT void raviX_generate_C_tofile(LinearizerState *linearizer, const char *mainfunc, FILE *fp);
 
 #endif

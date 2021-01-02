@@ -2407,7 +2407,7 @@ static void linearize_function(LinearizerState *linearizer)
 	}
 }
 
-static void output_pseudo(struct pseudo *pseudo, buffer_t *mb)
+static void output_pseudo(struct pseudo *pseudo, TextBuffer *mb)
 {
 	switch (pseudo->type) {
 	case PSEUDO_CONSTANT: {
@@ -2504,7 +2504,7 @@ static const char *op_codenames[] = {
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
     "STOREGLOBAL", "CLOSE", "STRCONCAT"};
 
-static void output_pseudo_list(struct pseudo_list *list, buffer_t *mb)
+static void output_pseudo_list(struct pseudo_list *list, TextBuffer *mb)
 {
 	struct pseudo *pseudo;
 	raviX_buffer_add_string(mb, " {");
@@ -2524,7 +2524,7 @@ const char *raviX_opcode_name(unsigned int opcode) {
 	return op_codenames[opcode];
 }
 
-static void output_instruction(struct instruction *insn, buffer_t *mb, const char *prefix, const char *suffix)
+static void output_instruction(struct instruction *insn, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	raviX_buffer_add_fstring(mb, "%s%s", prefix, op_codenames[insn->opcode]);
 	if (insn->operands) {
@@ -2536,14 +2536,14 @@ static void output_instruction(struct instruction *insn, buffer_t *mb, const cha
 	raviX_buffer_add_string(mb, suffix);
 }
 
-static void output_instructions(struct instruction_list *list, buffer_t *mb, const char *prefix, const char *suffix)
+static void output_instructions(struct instruction_list *list, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	struct instruction *insn;
 	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb, prefix, suffix); }
 	END_FOR_EACH_PTR(insn)
 }
 
-static void output_basic_block(struct proc *proc, struct basic_block *bb, buffer_t *mb)
+static void output_basic_block(struct proc *proc, struct basic_block *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, "L%d", bb->index);
 	if (bb->index == ENTRY_BLOCK) {
@@ -2556,7 +2556,7 @@ static void output_basic_block(struct proc *proc, struct basic_block *bb, buffer
 	output_instructions(bb->insns, mb, "\t", "\n");
 }
 
-void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, buffer_t *mb)
+void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_string(mb, "<TABLE BORDER=\"1\" CELLBORDER=\"0\">\n");
 	raviX_buffer_add_fstring(mb, "<TR><TD><B>L%d</B></TD></TR>\n", bb->index);
@@ -2565,7 +2565,7 @@ void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb
 }
 
 
-static void output_proc(struct proc *proc, buffer_t *mb)
+static void output_proc(struct proc *proc, TextBuffer *mb)
 {
 	struct basic_block *bb;
 	raviX_buffer_add_fstring(mb, "define Proc%%%d\n", proc->id);
@@ -2590,7 +2590,7 @@ int raviX_ast_linearize(LinearizerState *linearizer)
 	return rc;
 }
 
-void raviX_show_linearizer(LinearizerState *linearizer, buffer_t *mb)
+void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb)
 {
 	output_proc(linearizer->main_proc, mb);
 	struct proc *proc;
@@ -2605,7 +2605,7 @@ void raviX_show_linearizer(LinearizerState *linearizer, buffer_t *mb)
 
 void raviX_output_linearizer(LinearizerState *linearizer, FILE *fp)
 {
-	buffer_t mb;
+	TextBuffer mb;
 	raviX_buffer_init(&mb, 4096);
 	raviX_show_linearizer(linearizer, &mb);
 	fputs(mb.buf, fp);
