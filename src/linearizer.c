@@ -98,8 +98,8 @@ LinearizerState *raviX_init_linearizer(CompilerState *container)
 	raviX_allocator_init(&linearizer->proc_allocator, "proc_allocator", sizeof(Proc), sizeof(double),
 			     sizeof(Proc) * 32);
 	raviX_allocator_init(&linearizer->unsized_allocator, "unsized_allocator", 0, sizeof(double), CHUNK);
-	raviX_allocator_init(&linearizer->constant_allocator, "constant_allocator", sizeof(struct constant),
-			     sizeof(double), sizeof(struct constant) * 64);
+	raviX_allocator_init(&linearizer->constant_allocator, "constant_allocator", sizeof(Constant),
+			     sizeof(double), sizeof(Constant) * 64);
 	linearizer->proc_id = 0;
 	return linearizer;
 }
@@ -133,8 +133,8 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
  */
 static int compare_constants(const void *a, const void *b)
 {
-	const struct constant *c1 = (const struct constant *)a;
-	const struct constant *c2 = (const struct constant *)b;
+	const Constant *c1 = (const Constant *)a;
+	const Constant *c2 = (const Constant *)b;
 	if (c1->type != c2->type)
 		return 0;
 	if (c1->type == RAVI_TNUMINT)
@@ -150,7 +150,7 @@ static int compare_constants(const void *a, const void *b)
  */
 static uint32_t hash_constant(const void *c)
 {
-	const struct constant *c1 = (const struct constant *)c;
+	const Constant *c1 = (const Constant *)c;
 	if (c1->type == RAVI_TNUMINT)
 		return (uint32_t)c1->i;
 	else if (c1->type == RAVI_TNUMFLT)
@@ -163,7 +163,7 @@ static uint32_t hash_constant(const void *c)
  * Adds a constant to the proc's constant table. The constant is also assigned a
  * pseudo register.
  */
-static const struct constant *add_constant(Proc *proc, const struct constant *c)
+static const Constant *add_constant(Proc *proc, const Constant *c)
 {
 	struct set_entry *entry = set_search(proc->constants, c);
 	if (entry == NULL) {
@@ -185,15 +185,15 @@ static const struct constant *add_constant(Proc *proc, const struct constant *c)
 			reg = proc->num_strconstants++;
 			break;
 		}
-		struct constant *c1 = raviX_allocator_allocate(&proc->linearizer->constant_allocator, 0);
+		Constant *c1 = raviX_allocator_allocate(&proc->linearizer->constant_allocator, 0);
 		assert(c1); // FIXME
-		memcpy(c1, c, sizeof(struct constant));
+		memcpy(c1, c, sizeof(Constant));
 		c1->index = reg;
 		set_add(proc->constants, c1);
 		// printf("Created new constant of type %d and assigned reg %d\n", c->type, reg);
 		return c1;
 	} else {
-		const struct constant *c1 = entry->key;
+		const Constant *c1 = entry->key;
 		// printf("Found constant at reg %d\n", c1->index);
 		return c1;
 	}
@@ -203,10 +203,10 @@ static const struct constant *add_constant(Proc *proc, const struct constant *c)
  * Allocates and adds a constant to the Proc's constants table.
  * Input is expected to be EXPR_LITERAL
  */
-static const struct constant *allocate_constant(Proc *proc, AstNode *node)
+static const Constant *allocate_constant(Proc *proc, AstNode *node)
 {
 	assert(node->type == EXPR_LITERAL);
-	struct constant c = {.type = node->literal_expr.type.type_code};
+	Constant c = {.type = node->literal_expr.type.type_code};
 	if (c.type == RAVI_TNUMINT)
 		c.i = node->literal_expr.u.i;
 	else if (c.type == RAVI_TNUMFLT)
@@ -216,9 +216,9 @@ static const struct constant *allocate_constant(Proc *proc, AstNode *node)
 	return add_constant(proc, &c);
 }
 
-static const struct constant *allocate_integer_constant(Proc *proc, int i)
+static const Constant *allocate_integer_constant(Proc *proc, int i)
 {
-	struct constant c = {.type = RAVI_TNUMINT, .i = i};
+	Constant c = {.type = RAVI_TNUMINT, .i = i};
 	return add_constant(proc, &c);
 }
 
@@ -266,9 +266,9 @@ Instruction *raviX_last_instruction(BasicBlock *block)
 	return (Instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
 
-static const struct constant *allocate_string_constant(Proc *proc, const StringObject *s)
+static const Constant *allocate_string_constant(Proc *proc, const StringObject *s)
 {
-	struct constant c = {.type = RAVI_TSTRING, .s = s};
+	Constant c = {.type = RAVI_TSTRING, .s = s};
 	return add_constant(proc, &c);
 }
 
@@ -293,7 +293,7 @@ static struct pseudo *allocate_symbol_pseudo(Proc *proc, LuaSymbol *sym, unsigne
 	return pseudo;
 }
 
-static struct pseudo *allocate_constant_pseudo(Proc *proc, const struct constant *constant)
+static struct pseudo *allocate_constant_pseudo(Proc *proc, const Constant *constant)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_CONSTANT;
@@ -492,7 +492,7 @@ static void instruct_totype(Proc *proc, struct pseudo *target, const VariableTyp
 	Instruction *insn = allocate_instruction(proc, targetop);
 	if (targetop == op_totype) {
 		assert(vtype->type_name);
-		const struct constant *tname_constant = allocate_string_constant(proc, vtype->type_name);
+		const Constant *tname_constant = allocate_string_constant(proc, vtype->type_name);
 		struct pseudo *tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
 		add_instruction_operand(proc, insn, tname_pseudo);
 	}
@@ -621,7 +621,7 @@ static struct pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 	Instruction *insn = allocate_instruction(proc, targetop);
 	struct pseudo *target = subexpr;
 	if (op == UNOPR_TO_TYPE) {
-		const struct constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
+		const Constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
 		struct pseudo *tname_pseudo = allocate_constant_pseudo(proc, tname_constant);
 		add_instruction_operand(proc, insn, tname_pseudo);
 	} else if (op == UNOPR_NOT || op == UNOPR_BNOT) {
@@ -924,7 +924,7 @@ static struct pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
-		const struct constant *constant = allocate_string_constant(proc, sym->variable.var_name);
+		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		struct pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		struct pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
 		Instruction *insn = allocate_instruction(proc, op_loadglobal);
@@ -1105,7 +1105,7 @@ static struct pseudo *linearize_function_call_expression(Proc *proc, AstNode *ex
 	Instruction *insn = allocate_instruction(proc, op_call);
 	struct pseudo *self_arg = NULL; /* For method call */
 	if (expr->function_call_expr.method_name) {
-		const struct constant *name_constant =
+		const Constant *name_constant =
 		    allocate_string_constant(proc, expr->function_call_expr.method_name);
 		struct pseudo *name_pseudo = allocate_constant_pseudo(proc, name_constant);
 		self_arg = callsite_pseudo; /* The original callsite must be passed as 'self' */
@@ -1194,7 +1194,7 @@ static int linearize_indexed_assign(Proc *proc, struct pseudo *table, ravitype_t
 		index_type = expr->table_elem_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
 		// TODO check valid index
 	} else {
-		const struct constant *constant = allocate_integer_constant(proc, next++);
+		const Constant *constant = allocate_integer_constant(proc, next++);
 		index_pseudo = allocate_constant_pseudo(proc, constant);
 		index_type = RAVI_TNUMINT;
 	}
@@ -2411,7 +2411,7 @@ static void output_pseudo(struct pseudo *pseudo, TextBuffer *mb)
 {
 	switch (pseudo->type) {
 	case PSEUDO_CONSTANT: {
-		const struct constant *constant = pseudo->constant;
+		const Constant *constant = pseudo->constant;
 		const char *tc = "";
 		if (constant->type == RAVI_TNUMFLT) {
 			raviX_buffer_add_fstring(mb, "%.12f", constant->n);

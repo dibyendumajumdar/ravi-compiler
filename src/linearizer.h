@@ -16,7 +16,7 @@ a Linear intermediate representation (IR).
 typedef struct Instruction Instruction;
 typedef struct BasicBlock BasicBlock;
 typedef struct Proc Proc;
-struct constant;
+typedef struct Constant Constant;
 
 DECLARE_PTR_LIST(InstructionList, Instruction);
 DECLARE_PTR_LIST(PseudoList, struct pseudo);
@@ -149,7 +149,7 @@ struct pseudo {
 	Instruction *insn; /* instruction that created this pseudo */
 	union {
 		LuaSymbol *symbol;	 /* PSEUDO_SYMBOL */
-		const struct constant *constant; /* PSEUDO_CONSTANT */
+		const Constant *constant; /* PSEUDO_CONSTANT */
 		LuaSymbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
 		Proc *proc;		 /* PSEUDO_PROC */
 		BasicBlock *block;	 /* PSEUDO_BLOCK */
@@ -179,7 +179,7 @@ struct pseudo_generator {
 	uint8_t free_regs[256]; /* list of free registers */
 };
 
-struct constant {
+struct Constant {
 	uint8_t type;	/* ravitype_t RAVI_TNUMINT, RAVI_TNUMFLT or RAVI_TSTRING */
 	uint16_t index; /* index number starting from 0 assigned to each constant - acts like a reg num.
 			 * Each type will be assigned separate range */

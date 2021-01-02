@@ -2459,7 +2459,7 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 	struct set_entry *entry;
 	set_foreach(proc->constants, entry)
 	{
-		const struct constant *constant = (struct constant *)entry->key;
+		const Constant *constant = (Constant *)entry->key;
 		// We only need to register string constants
 		if (constant->type == RAVI_TSTRING) {
 			raviX_buffer_add_fstring(mb, " {\n  TValue *o = &f->k[%u];\n", constant->index);
