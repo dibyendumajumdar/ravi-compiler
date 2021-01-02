@@ -280,7 +280,7 @@ struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg)
 	return pseudo;
 }
 
-static struct pseudo *allocate_symbol_pseudo(struct proc *proc, struct lua_symbol *sym, unsigned reg)
+static struct pseudo *allocate_symbol_pseudo(struct proc *proc, LuaSymbol *sym, unsigned reg)
 {
 	struct pseudo *pseudo = raviX_allocator_allocate(&proc->linearizer->pseudo_allocator, 0);
 	pseudo->type = PSEUDO_SYMBOL;
@@ -504,7 +504,7 @@ static void linearize_function_args(LinearizerState *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
 	struct ast_node *func_expr = proc->function_expr;
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	FOR_EACH_PTR(func_expr->function_expr.args, sym)
 	{
 		/* The arg symbols already have register assigned by the local scope */
@@ -920,7 +920,7 @@ static struct pseudo *linearize_function_expr(struct proc *proc, struct ast_node
 
 static struct pseudo *linearize_symbol_expression(struct proc *proc, struct ast_node *expr)
 {
-	struct lua_symbol *sym = expr->symbol_expr.var;
+	LuaSymbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
 		struct pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
@@ -1387,7 +1387,7 @@ static void linearize_expression_statement(struct proc *proc, struct ast_node *n
 
 static void linearize_local_statement(struct proc *proc, struct ast_node *stmt)
 {
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 
 	int nv = ptrlist_size((const struct ptr_list *)stmt->local_stmt.var_list);
 	struct node_info *varinfo = (struct node_info *)alloca(nv * sizeof(struct node_info));
@@ -1669,13 +1669,13 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
  * Also return via min_closing_block the ancestor scope that is greater than or equal to the
  * label scope, and where a local variable escaped.
  */
-static struct lua_symbol *find_label(struct proc *proc, Scope *block,
+static LuaSymbol *find_label(struct proc *proc, Scope *block,
 				     const StringObject *label_name, Scope **min_closing_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
 	*min_closing_block = NULL;
 	while (block != NULL && block->function == function) {
-		struct lua_symbol *symbol;
+		LuaSymbol *symbol;
 		if (block->need_close) {
 			*min_closing_block = block;
 		}
@@ -1743,7 +1743,7 @@ static void instruct_close(struct proc *proc, struct basic_block *block, Scope *
 	struct basic_block *prev_current = proc->current_bb;
 	proc->current_bb = block;
 
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(scope->symbol_list, symbol)
 	{
 		/* We add the first escaping variable as the operand to op_close.
@@ -1790,7 +1790,7 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 	   and above */
 	if (node->goto_stmt.goto_scope) {
 		Scope *min_closing_block = NULL;
-		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name, &min_closing_block);
+		LuaSymbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name, &min_closing_block);
 		if (symbol) {
 			/* label found */
 			if (symbol->label.pseudo == NULL) {
@@ -1915,7 +1915,7 @@ static void linearize_for_num_statement_positivestep(struct proc *proc, struct a
 	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
 	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
 	struct ast_node *step_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 2);
-	struct lua_symbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
+	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
 		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
@@ -2033,7 +2033,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 
 	struct ast_node *index_var_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 0);
 	struct ast_node *limit_expr = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.expr_list, 1);
-	struct lua_symbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
+	LuaSymbol *var_sym = ptrlist_nth_entry((struct ptr_list *)node->for_stmt.symbols, 0);
 
 	if (index_var_expr == NULL || limit_expr == NULL) {
 		handle_error(proc->linearizer->ast_container, "A least index and limit must be supplied");
@@ -2325,7 +2325,7 @@ static void initialize_graph(struct proc *proc)
 static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope)
 {
 	proc->current_scope = scope;
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	FOR_EACH_PTR(scope->symbol_list, sym)
 	{
 		if (sym->symbol_type == SYM_LOCAL) {
@@ -2359,7 +2359,7 @@ static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *s
 static void end_scope(LinearizerState *linearizer, struct proc *proc)
 {
 	Scope *scope = proc->current_scope;
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	if (scope->need_close) {
 		instruct_close(proc, proc->current_bb, scope);
 	}

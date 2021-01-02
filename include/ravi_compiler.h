@@ -323,7 +323,7 @@ enum SymbolType {
 	SYM_LABEL,   /* lua_label_symbol */
 	SYM_ENV	     /* Special symbol type for _ENV */
 };
-struct lua_symbol;
+typedef struct LuaSymbol LuaSymbol;
 struct lua_upvalue_symbol;
 struct lua_variable_symbol;
 struct lua_label_symbol;
@@ -427,7 +427,7 @@ RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const LiteralExp
 
 /* symbol expression */
 RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expression);
-RAVICOMP_EXPORT const struct lua_symbol *raviX_symbol_expression_symbol(const SymbolExpression *expression);
+RAVICOMP_EXPORT const LuaSymbol *raviX_symbol_expression_symbol(const SymbolExpression *expression);
 
 /* index expression */
 RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const IndexExpression *expression);
@@ -533,13 +533,13 @@ RAVICOMP_EXPORT const FunctionCallExpression *raviX_function_call_expression(con
 RAVICOMP_EXPORT const FunctionExpression *raviX_scope_owning_function(const Scope *scope);
 RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope);
 RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
-						void (*callback)(void *userdata, const struct lua_symbol *symbol));
+						void (*callback)(void *userdata, const LuaSymbol *symbol));
 
-RAVICOMP_EXPORT enum SymbolType raviX_symbol_type(const struct lua_symbol *symbol);
+RAVICOMP_EXPORT enum SymbolType raviX_symbol_type(const LuaSymbol *symbol);
 /* symbol downcast */
-RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol);
-RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const struct lua_symbol *symbol);
-RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbol);
+RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_symbol_variable(const LuaSymbol *symbol);
+RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const LuaSymbol *symbol);
+RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol);
 
 /* variable symbol - local and global variables */
 RAVICOMP_EXPORT const StringObject *

@@ -116,13 +116,13 @@ struct var_type {
 };
 
 struct pseudo;
-DECLARE_PTR_LIST(lua_symbol_list, struct lua_symbol);
+DECLARE_PTR_LIST(lua_symbol_list, LuaSymbol);
 
 struct lua_variable_symbol {
 	struct var_type value_type;
 	const StringObject *var_name; /* name of the variable */
 	Scope *block; /* NULL if global symbol, as globals are never added to a scope */
-	struct lua_symbol *env; /* Only applicable for global symbols - this should point to _ENV */
+	LuaSymbol *env; /* Only applicable for global symbols - this should point to _ENV */
 	unsigned escaped: 1, /* Has one or more up-value references */
 		function_parameter: 1; /* Is a function parameter */
 	struct pseudo *pseudo;	   /* backend data for the symbol */
@@ -134,7 +134,7 @@ struct lua_label_symbol {
 };
 struct lua_upvalue_symbol {
 	struct var_type value_type;
-	struct lua_symbol *target_variable;	   /* variable reference */
+	LuaSymbol *target_variable;	   /* variable reference */
 	struct ast_node *target_function; /* Where the upvalue lives */
 	unsigned upvalue_index : 16,   /* index of the upvalue in the function where this upvalue occurs */
 	    is_in_parent_stack : 1,    /* 1 if yes - populated by code generator only */
@@ -142,7 +142,7 @@ struct lua_upvalue_symbol {
 	/*TODO add pseudo ?*/
 };
 /* A symbol is a name recognised in Ravi/Lua code*/
-struct lua_symbol {
+struct LuaSymbol {
 	enum SymbolType symbol_type;
 	union {
 		struct lua_variable_symbol variable;
@@ -163,7 +163,7 @@ struct ReturnStatement {
 };
 /* STMT_LABEL */
 struct LabelStatement {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 };
 /* STMT_GOTO */
 struct GotoStatement {
@@ -231,7 +231,7 @@ struct LiteralExpression {
 /* primaryexp -> NAME | '(' expr ')', NAME is parsed as EXPR_SYMBOL */
 struct SymbolExpression {
 	BASE_EXPRESSION_FIELDS;
-	struct lua_symbol *var;
+	LuaSymbol *var;
 };
 /* EXPR_Y_INDEX or EXPR_FIELD_SELECTOR */
 struct IndexExpression {

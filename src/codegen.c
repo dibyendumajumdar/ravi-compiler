@@ -2478,7 +2478,7 @@ static int generate_lua_proc(struct proc *proc, TextBuffer *mb)
 	raviX_buffer_add_fstring(mb, " f->upvalues = luaM_newvector(L, %u, Upvaldesc);\n", get_num_upvalues(proc));
 	raviX_buffer_add_fstring(mb, " f->sizeupvalues = %u;\n", get_num_upvalues(proc));
 	int i = 0;
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	FOR_EACH_PTR(proc->function_expr->function_expr.upvalues, sym)
 	{
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].instack = %u;\n", i, sym->upvalue.is_in_parent_stack);
@@ -2566,7 +2566,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, struct
 	return 0;
 }
 
-static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol *symbol)
+static inline struct ast_node *get_parent_function_of_upvalue(LuaSymbol *symbol)
 {
 	struct ast_node *upvalue_function = symbol->upvalue.target_function;
 	struct ast_node *parent_function = upvalue_function->function_expr.parent_function;
@@ -2579,10 +2579,10 @@ static inline struct ast_node *get_parent_function_of_upvalue(struct lua_symbol 
  * the register for the local variable and instack should be true, else idx should have the index of
  * upvalue in parent proto and instack should be false.
  */
-static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_symbol, bool *in_stack)
+static unsigned get_upvalue_idx(struct proc *proc, LuaSymbol *upvalue_symbol, bool *in_stack)
 {
 	*in_stack = false;
-	struct lua_symbol *underlying = upvalue_symbol->upvalue.target_variable;
+	LuaSymbol *underlying = upvalue_symbol->upvalue.target_variable;
 	if (underlying->symbol_type == SYM_LOCAL) {
 		/* Upvalue is in the stack of parent ? */
 		struct ast_node *function_containing_local = underlying->variable.block->function;
@@ -2594,7 +2594,7 @@ static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_sy
 		}
 	}
 	/* Search for the upvalue in parent function */
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	struct ast_node *this_function = upvalue_symbol->upvalue.target_function;
 	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
 	{
@@ -2613,7 +2613,7 @@ static unsigned get_upvalue_idx(struct proc *proc, struct lua_symbol *upvalue_sy
  */
 static void compute_upvalue_attributes(struct proc *proc)
 {
-	struct lua_symbol *sym;
+	LuaSymbol *sym;
 	struct ast_node *this_function = proc->function_expr;
 	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
 	{

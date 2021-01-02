@@ -148,9 +148,9 @@ struct pseudo {
 	unsigned type : 4, regnum : 16, freed : 1;
 	struct instruction *insn; /* instruction that created this pseudo */
 	union {
-		struct lua_symbol *symbol;	 /* PSEUDO_SYMBOL */
+		LuaSymbol *symbol;	 /* PSEUDO_SYMBOL */
 		const struct constant *constant; /* PSEUDO_CONSTANT */
-		struct lua_symbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
+		LuaSymbol *temp_for_local; /* PSEUDO_TEMP - if the temp represents a local */
 		struct proc *proc;		 /* PSEUDO_PROC */
 		struct basic_block *block;	 /* PSEUDO_BLOCK */
 		struct pseudo *range_pseudo;	 /* PSEUDO_RANGE_SELECT */

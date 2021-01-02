@@ -33,7 +33,7 @@ static void walk_variable_symbol(void *data, const struct lua_variable_symbol *s
 	assert(type != NULL);
 }
 
-static void walk_symbol(void *data, const struct lua_symbol *symbol)
+static void walk_symbol(void *data, const LuaSymbol *symbol)
 {
 	enum SymbolType type = raviX_symbol_type(symbol);
 	switch (type) {

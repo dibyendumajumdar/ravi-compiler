@@ -115,7 +115,7 @@ static void print_statement_list(TextBuffer *buf, struct ast_node_list *statemen
 
 static inline const char *get_as_str(const StringObject *ts) { return ts ? ts->str : ""; }
 
-static void print_symbol(TextBuffer *buf, struct lua_symbol *sym, int level)
+static void print_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 {
 	switch (sym->symbol_type) {
 	case SYM_ENV: {
@@ -144,7 +144,7 @@ static void print_symbol(TextBuffer *buf, struct lua_symbol *sym, int level)
 	}
 }
 
-static void print_symbol_name(TextBuffer *buf, struct lua_symbol *sym)
+static void print_symbol_name(TextBuffer *buf, LuaSymbol *sym)
 {
 	switch (sym->symbol_type) {
 	case SYM_LOCAL:
@@ -169,7 +169,7 @@ static void print_symbol_name(TextBuffer *buf, struct lua_symbol *sym)
 
 static void print_symbol_list(TextBuffer *buf, struct lua_symbol_list *list, int level, const char *delimiter)
 {
-	struct lua_symbol *node;
+	LuaSymbol *node;
 	bool is_first = true;
 	FOR_EACH_PTR(list, node)
 	{
@@ -184,7 +184,7 @@ static void print_symbol_list(TextBuffer *buf, struct lua_symbol_list *list, int
 
 static void print_symbol_names(TextBuffer *buf, struct lua_symbol_list *list)
 {
-	struct lua_symbol *node;
+	LuaSymbol *node;
 	bool is_first = true;
 	FOR_EACH_PTR(list, node)
 	{

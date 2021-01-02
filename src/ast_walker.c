@@ -52,21 +52,21 @@ enum AstNodeType raviX_statement_type(const Statement *statement) { return state
 void raviX_function_foreach_argument(const FunctionExpression *function_expression, void *userdata,
 				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(function_expression->args, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
 void raviX_function_foreach_local(const FunctionExpression *function_expression, void *userdata,
 				  void (*callback)(void *userdata, const struct lua_variable_symbol *lua_local_symbol))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(function_expression->locals, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
 void raviX_function_foreach_upvalue(const FunctionExpression *function_expression, void *userdata,
 				    void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(function_expression->upvalues, symbol) { callback(userdata, &symbol->upvalue); }
 	END_FOR_EACH_PTR(symbol)
 }
@@ -241,7 +241,7 @@ void raviX_local_statement_foreach_expression(const LocalStatement *statement, v
 void raviX_local_statement_foreach_symbol(const LocalStatement *statement, void *userdata,
 					  void (*callback)(void *, const struct lua_variable_symbol *expr))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(statement->var_list, symbol)
 	{
 		assert(symbol->symbol_type == SYM_LOCAL);
@@ -393,7 +393,7 @@ const Scope *raviX_for_statement_scope(const ForStatement *statement)
 void raviX_for_statement_foreach_symbol(const ForStatement *statement, void *userdata,
 					void (*callback)(void *, const struct lua_variable_symbol *expr))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(statement->symbols, symbol)
 	{
 		assert(symbol->symbol_type == SYM_LOCAL);
@@ -436,7 +436,7 @@ const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expr
 {
 	return &expression->type;
 }
-const struct lua_symbol *raviX_symbol_expression_symbol(const SymbolExpression *expression)
+const LuaSymbol *raviX_symbol_expression_symbol(const SymbolExpression *expression)
 {
 	return expression->var;
 }
@@ -568,24 +568,24 @@ RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope)
 	return scope->parent;
 }
 RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
-						void (*callback)(void *userdata, const struct lua_symbol *symbol))
+						void (*callback)(void *userdata, const LuaSymbol *symbol))
 {
-	struct lua_symbol *symbol;
+	LuaSymbol *symbol;
 	FOR_EACH_PTR(scope->symbol_list, symbol) { callback(userdata, symbol); }
 	END_FOR_EACH_PTR(node)
 }
-enum SymbolType raviX_symbol_type(const struct lua_symbol *symbol) { return symbol->symbol_type; }
-const struct lua_variable_symbol *raviX_symbol_variable(const struct lua_symbol *symbol)
+enum SymbolType raviX_symbol_type(const LuaSymbol *symbol) { return symbol->symbol_type; }
+const struct lua_variable_symbol *raviX_symbol_variable(const LuaSymbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_GLOBAL || symbol->symbol_type == SYM_LOCAL);
 	return &symbol->variable;
 }
-const struct lua_upvalue_symbol *raviX_symbol_upvalue(const struct lua_symbol *symbol)
+const struct lua_upvalue_symbol *raviX_symbol_upvalue(const LuaSymbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_UPVALUE);
 	return &symbol->upvalue;
 }
-const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbol)
+const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_LABEL);
 	return &symbol->label;

@@ -270,7 +270,7 @@ static void typecheck_local_statement(CompilerState *container, struct ast_node 
 
 	typecheck_ast_list(container, function, node->local_stmt.expr_list);
 
-	struct lua_symbol *var;
+	LuaSymbol *var;
 	struct ast_node *expr;
 	PREPARE_PTR_LIST(node->local_stmt.var_list, var);
 	PREPARE_PTR_LIST(node->local_stmt.expr_list, expr);
@@ -352,7 +352,7 @@ static void typecheck_for_num_statment(CompilerState *container, struct ast_node
 		/* for I+F we use F */
 		ravitype_t symbol_type = index_type == I ? RAVI_TNUMINT : RAVI_TNUMFLT;
 		struct lua_symbol_list *symbols = node->for_stmt.symbols;
-		struct lua_symbol *sym;
+		LuaSymbol *sym;
 		/* actually there will be only index variable */
 		FOR_EACH_PTR(symbols, sym)
 		{
