@@ -313,7 +313,7 @@ typedef struct TableLiteralExpression TableLiteralExpression;
 typedef struct SuffixedExpression SuffixedExpression;
 typedef struct FunctionCallExpression FunctionCallExpression;
 
-struct block_scope;
+typedef struct Scope Scope;
 
 /* Types of symbols */
 enum symbol_type {
@@ -340,11 +340,11 @@ RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const ReturnState
 
 /* label statement walking */
 RAVICOMP_EXPORT const StringObject *raviX_label_statement_label_name(const LabelStatement *statement);
-RAVICOMP_EXPORT const struct block_scope *raviX_label_statement_label_scope(const LabelStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_label_statement_label_scope(const LabelStatement *statement);
 
 /* goto statement walking */
 RAVICOMP_EXPORT const StringObject *raviX_goto_statement_label_name(const GotoStatement *statement);
-RAVICOMP_EXPORT const struct block_scope *raviX_goto_statement_scope(const GotoStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_goto_statement_scope(const GotoStatement *statement);
 RAVICOMP_EXPORT bool raviX_goto_statement_is_break(const GotoStatement *statement);
 
 /* local statement walking */
@@ -375,7 +375,7 @@ raviX_function_statement_foreach_selector(const FunctionStatement *statement, vo
 RAVICOMP_EXPORT const FunctionExpression *raviX_function_ast(const FunctionStatement *statement);
 
 /* do statement walking */
-RAVICOMP_EXPORT const struct block_scope *raviX_do_statement_scope(const DoStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_do_statement_scope(const DoStatement *statement);
 RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const DoStatement *statement, void *userdata,
 							  void (*callback)(void *userdata,
 									   const Statement *statement));
@@ -388,11 +388,11 @@ RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const DoStatement *sta
 RAVICOMP_EXPORT void
 raviX_if_statement_foreach_test_then_statement(const IfStatement *statement, void *userdata,
 					       void (*callback)(void *, const TestThenStatement *stmt));
-RAVICOMP_EXPORT const struct block_scope *raviX_if_then_statement_else_scope(const IfStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_if_then_statement_else_scope(const IfStatement *statement);
 RAVICOMP_EXPORT void raviX_if_statement_foreach_else_statement(const IfStatement *statement, void *userdata,
 							       void (*callback)(void *userdata,
 										const Statement *statement));
-RAVICOMP_EXPORT const struct block_scope *raviX_test_then_statement_scope(const TestThenStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_test_then_statement_scope(const TestThenStatement *statement);
 RAVICOMP_EXPORT void
 raviX_test_then_statement_foreach_statement(const TestThenStatement *statement, void *userdata,
 					    void (*callback)(void *userdata, const Statement *statement));
@@ -402,20 +402,20 @@ raviX_test_then_statement_condition(const TestThenStatement *statement);
 /* while or repeat statement walking */
 RAVICOMP_EXPORT const Expression *
 raviX_while_or_repeat_statement_condition(const WhileOrRepeatStatement *statement);
-RAVICOMP_EXPORT const struct block_scope *
+RAVICOMP_EXPORT const Scope *
 raviX_while_or_repeat_statement_scope(const WhileOrRepeatStatement *statement);
 RAVICOMP_EXPORT void
 raviX_while_or_repeat_statement_foreach_statement(const WhileOrRepeatStatement *statement, void *userdata,
 						  void (*callback)(void *userdata, const Statement *statement));
 
 /* for statement walking */
-RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_scope(const ForStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_for_statement_scope(const ForStatement *statement);
 RAVICOMP_EXPORT void raviX_for_statement_foreach_symbol(const ForStatement *statement, void *userdata,
 							void (*callback)(void *,
 									 const struct lua_variable_symbol *expr));
 RAVICOMP_EXPORT void raviX_for_statement_foreach_expression(const ForStatement *statement, void *userdata,
 							    void (*callback)(void *, const Expression *expr));
-RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_body_scope(const ForStatement *statement);
+RAVICOMP_EXPORT const Scope *raviX_for_statement_body_scope(const ForStatement *statement);
 RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const ForStatement *statement, void *userdata,
 								void (*callback)(void *userdata,
 										 const Statement *statement));
@@ -455,7 +455,7 @@ raviX_function_parent(const FunctionExpression *function_expression);
 RAVICOMP_EXPORT void
 raviX_function_foreach_child(const FunctionExpression *function_expression, void *userdata,
 			     void (*callback)(void *userdata, const FunctionExpression *function_expression));
-RAVICOMP_EXPORT const struct block_scope *raviX_function_scope(const FunctionExpression *function_expression);
+RAVICOMP_EXPORT const Scope *raviX_function_scope(const FunctionExpression *function_expression);
 RAVICOMP_EXPORT void
 raviX_function_foreach_statement(const FunctionExpression *function_expression, void *userdata,
 				 void (*callback)(void *userdata, const Statement *statement));
@@ -530,9 +530,9 @@ RAVICOMP_EXPORT const TableLiteralExpression *raviX_table_literal_expression(con
 RAVICOMP_EXPORT const SuffixedExpression *raviX_suffixed_expression(const Expression *expr);
 RAVICOMP_EXPORT const FunctionCallExpression *raviX_function_call_expression(const Expression *expr);
 
-RAVICOMP_EXPORT const FunctionExpression *raviX_scope_owning_function(const struct block_scope *scope);
-RAVICOMP_EXPORT const struct block_scope *raviX_scope_parent_scope(const struct block_scope *scope);
-RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const struct block_scope *scope, void *userdata,
+RAVICOMP_EXPORT const FunctionExpression *raviX_scope_owning_function(const Scope *scope);
+RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope);
+RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
 						void (*callback)(void *userdata, const struct lua_symbol *symbol));
 
 RAVICOMP_EXPORT enum symbol_type raviX_symbol_type(const struct lua_symbol *symbol);
@@ -546,12 +546,12 @@ RAVICOMP_EXPORT const StringObject *
 raviX_variable_symbol_name(const struct lua_variable_symbol *lua_local_symbol);
 RAVICOMP_EXPORT const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symbol *lua_local_symbol);
 // NULL if global
-RAVICOMP_EXPORT const struct block_scope *
+RAVICOMP_EXPORT const Scope *
 raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol);
 
 /* label symbol */
 RAVICOMP_EXPORT const StringObject *raviX_label_name(const struct lua_label_symbol *symbol);
-RAVICOMP_EXPORT const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol);
+RAVICOMP_EXPORT const Scope *raviX_label_scope(const struct lua_label_symbol *symbol);
 
 /* upvalue symbol */
 RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol);

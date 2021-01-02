@@ -26,7 +26,7 @@ static void walk_variable_symbol(void *data, const struct lua_variable_symbol *s
 {
 	const StringObject *name = raviX_variable_symbol_name(symbol);
 	assert(name != NULL);
-	const struct block_scope *scope = raviX_variable_symbol_scope(symbol);
+	const Scope *scope = raviX_variable_symbol_scope(symbol);
 	// If global scope will be NULL
 	(void)scope;
 	const struct var_type *type = raviX_variable_symbol_type(symbol);
@@ -58,7 +58,7 @@ static void walk_symbol(void *data, const struct lua_symbol *symbol)
 	}
 }
 
-static void walk_scope(void *data, const struct block_scope *scope)
+static void walk_scope(void *data, const Scope *scope)
 {
 	raviX_scope_foreach_symbol(scope, data, walk_symbol);
 }
@@ -275,9 +275,9 @@ static void walk_function(void *data, const FunctionExpression *function)
 	}
 	if (raviX_function_is_method(function)) {
 	}
-	const struct block_scope *scope = raviX_function_scope(function);
+	const Scope *scope = raviX_function_scope(function);
 	assert(function == raviX_scope_owning_function(scope));
-	const struct block_scope *parent = raviX_scope_parent_scope(scope);
+	const Scope *parent = raviX_scope_parent_scope(scope);
 	(void)parent;
 	walk_scope(state, scope);
 }

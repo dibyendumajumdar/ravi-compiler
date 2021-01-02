@@ -121,7 +121,7 @@ DECLARE_PTR_LIST(lua_symbol_list, struct lua_symbol);
 struct lua_variable_symbol {
 	struct var_type value_type;
 	const StringObject *var_name; /* name of the variable */
-	struct block_scope *block; /* NULL if global symbol, as globals are never added to a scope */
+	Scope *block; /* NULL if global symbol, as globals are never added to a scope */
 	struct lua_symbol *env; /* Only applicable for global symbols - this should point to _ENV */
 	unsigned escaped: 1, /* Has one or more up-value references */
 		function_parameter: 1; /* Is a function parameter */
@@ -129,7 +129,7 @@ struct lua_variable_symbol {
 };
 struct lua_label_symbol {
 	const StringObject *label_name;
-	struct block_scope *block;
+	Scope *block;
 	struct pseudo* pseudo;     /* backend data for the symbol */
 };
 struct lua_upvalue_symbol {
@@ -150,9 +150,9 @@ struct lua_symbol {
 		struct lua_upvalue_symbol upvalue;
 	};
 };
-struct block_scope {
+struct Scope {
 	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
-	struct block_scope *parent;	     /* parent block, may belong to parent function */
+	Scope *parent;	     /* parent block, may belong to parent function */
 	struct lua_symbol_list *symbol_list; /* symbols defined in this block */
 	unsigned need_close: 1;              /* When we exit scope of this block the upvalues need to be closed */
 };
@@ -169,7 +169,7 @@ struct LabelStatement {
 struct GotoStatement {
 	unsigned is_break : 1; /* is this a break statement */
 	const StringObject *name; /* target label, used to resolve the goto destination */
-	struct block_scope* goto_scope;   /* The scope of the goto statement */
+	Scope* goto_scope;   /* The scope of the goto statement */
 };
 /* STMT_LOCAL local variable declarations */
 struct LocalStatement {
@@ -188,31 +188,31 @@ struct FunctionStatement {
 	struct ast_node *function_expr;	 /* Function's AST - function_expression */
 };
 struct DoStatement {
-	struct block_scope *scope;		 /* The do statement only creates a new scope */
+	Scope *scope;		 /* The do statement only creates a new scope */
 	struct ast_node_list *do_statement_list; /* statements in this block */
 };
 /* Used internally in if_stmt, not an independent AST node */
 struct TestThenStatement {
 	struct ast_node *condition;
-	struct block_scope *test_then_scope;
+	Scope *test_then_scope;
 	struct ast_node_list *test_then_statement_list; /* statements in this block */
 };
 struct IfStatement {
 	struct ast_node_list *if_condition_list; /* Actually a list of test_then_blocks */
-	struct block_scope *else_block;
+	Scope *else_block;
 	struct ast_node_list *else_statement_list; /* statements in this block */
 };
 struct WhileOrRepeatStatement {
 	struct ast_node *condition;
-	struct block_scope *loop_scope;
+	Scope *loop_scope;
 	struct ast_node_list *loop_statement_list; /* statements in this block */
 };
 /* Used for both generic and numeric for loops */
 struct ForStatement {
-	struct block_scope* for_scope; /* encapsulates the entire for statement */
+	Scope* for_scope; /* encapsulates the entire for statement */
 	struct lua_symbol_list *symbols;
 	struct ast_node_list *expr_list;
-	struct block_scope *for_body;
+	Scope *for_body;
 	struct ast_node_list *for_statement_list; /* statements in this block */
 };
 /* To access the type field common to all expr objects */
@@ -257,7 +257,7 @@ struct FunctionExpression {
 	unsigned need_close : 1;
 	uint32_t proc_id; /* Backend allocated id */
 	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
-	struct block_scope *main_block;		       /* the function's main block */
+	Scope *main_block;		       /* the function's main block */
 	struct ast_node_list *function_statement_list; /* statements in this block */
 	struct lua_symbol_list
 	    *args; /* arguments, also must be part of the function block's symbol list */
@@ -369,7 +369,7 @@ struct parser_state {
 	LexerState *ls;
 	CompilerState *container;
 	struct ast_node *current_function;
-	struct block_scope *current_scope;
+	Scope *current_scope;
 };
 
 void raviX_print_ast_node(TextBuffer *buf, struct ast_node *node, int level); /* output the AST structure recursively */

@@ -44,7 +44,7 @@ static struct basic_block *create_block(struct proc *proc);
 static void start_block(struct proc *proc, struct basic_block *bb);
 static void linearize_statement(struct proc *proc, struct ast_node *node);
 static void linearize_statement_list(struct proc *proc, struct ast_node_list *list);
-static void start_scope(LinearizerState *linearizer, struct proc *proc, struct block_scope *scope);
+static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope);
 static void end_scope(LinearizerState *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
@@ -1564,7 +1564,7 @@ static void linearize_if_statement(struct proc *proc, struct ast_node *ifnode)
 	struct basic_block_list *if_true_blocks = NULL;
 	struct ast_node_list *if_else_stmts = ifnode->if_stmt.if_condition_list;
 	struct ast_node_list *else_stmts = ifnode->if_stmt.else_statement_list;
-	struct block_scope *else_scope = ifnode->if_stmt.else_block;
+	Scope *else_scope = ifnode->if_stmt.else_block;
 
 	struct ast_node *this_node;
 	FOR_EACH_PTR(if_else_stmts, this_node)
@@ -1669,8 +1669,8 @@ static void linearize_label_statement(struct proc *proc, struct ast_node *node)
  * Also return via min_closing_block the ancestor scope that is greater than or equal to the
  * label scope, and where a local variable escaped.
  */
-static struct lua_symbol *find_label(struct proc *proc, struct block_scope *block,
-				     const StringObject *label_name, struct block_scope **min_closing_block)
+static struct lua_symbol *find_label(struct proc *proc, Scope *block,
+				     const StringObject *label_name, Scope **min_closing_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
 	*min_closing_block = NULL;
@@ -1695,10 +1695,10 @@ static struct lua_symbol *find_label(struct proc *proc, struct block_scope *bloc
 * Starting from block, go up the hierarchy until target_block and determine the oldest
 * ancestor block that has escaped variables and thus needs to be closed.
 */
-static struct block_scope *find_min_closing_block(struct block_scope *block, struct block_scope *target_block)
+static Scope *find_min_closing_block(Scope *block, Scope *target_block)
 {
 	struct ast_node *function = block->function; /* We need to stay inside the function when lookng for the label */
-	struct block_scope *min_closing_block = NULL;
+	Scope *min_closing_block = NULL;
 	while (block != NULL && block->function == function) {
 		if (block->need_close) {
 			min_closing_block = block;
@@ -1735,7 +1735,7 @@ static bool is_already_closed(struct proc *proc, struct basic_block *block)
  * such as when processing goto or break statemnt where the close instruction must be added to the
  * the goto / break target block.
  */
-static void instruct_close(struct proc *proc, struct basic_block *block, struct block_scope *scope)
+static void instruct_close(struct proc *proc, struct basic_block *block, Scope *scope)
 {
 	if (is_already_closed(proc, block))
 		return;
@@ -1777,7 +1777,7 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 			handle_error(proc->linearizer->ast_container, "no current break target");
 		}
 		/* Find the oldest ancestor scope that may need to be closed */
-		struct block_scope *min_closing_block = find_min_closing_block(node->goto_stmt.goto_scope, proc->current_break_scope);
+		Scope *min_closing_block = find_min_closing_block(node->goto_stmt.goto_scope, proc->current_break_scope);
 		instruct_br(proc, allocate_block_pseudo(proc, proc->current_break_target));
 		start_block(proc, create_block(proc));
 		if (min_closing_block) {
@@ -1789,7 +1789,7 @@ static void linearize_goto_statement(struct proc *proc, const struct ast_node *n
 	/* The AST does not provide link to the label so we have to search for the label in the goto scope
 	   and above */
 	if (node->goto_stmt.goto_scope) {
-		struct block_scope *min_closing_block = NULL;
+		Scope *min_closing_block = NULL;
 		struct lua_symbol *symbol = find_label(proc, node->goto_stmt.goto_scope, node->goto_stmt.name, &min_closing_block);
 		if (symbol) {
 			/* label found */
@@ -1953,7 +1953,7 @@ static void linearize_for_num_statement_positivestep(struct proc *proc, struct a
 	struct basic_block *Lbody = create_block(proc);
 	struct basic_block *Lend = create_block(proc);
 	struct basic_block *previous_break_target = proc->current_break_target;
-	struct block_scope *previous_break_scope = proc->current_break_scope;
+	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = Lend;
 	proc->current_break_scope = proc->current_scope;
 
@@ -2077,7 +2077,7 @@ static void linearize_for_num_statement(struct proc *proc, struct ast_node *node
 	struct basic_block *Lbody = create_block(proc);
 	struct basic_block *Lend = create_block(proc);
 	struct basic_block *previous_break_target = proc->current_break_target;
-	struct block_scope *previous_break_scope = proc->current_break_scope;
+	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = Lend;
 	proc->current_break_scope = proc->current_scope;
 
@@ -2127,7 +2127,7 @@ static void linearize_while_statment(struct proc *proc, struct ast_node *node)
 	struct basic_block *body_block = create_block(proc);
 	struct basic_block *end_block = create_block(proc);
 	struct basic_block *previous_break_target = proc->current_break_target;
-	struct block_scope *previous_break_scope = proc->current_break_scope;
+	Scope *previous_break_scope = proc->current_break_scope;
 	proc->current_break_target = end_block;
 	proc->current_break_scope = node->while_or_repeat_stmt.loop_scope;
 
@@ -2322,7 +2322,7 @@ static void initialize_graph(struct proc *proc)
 /**
  * Makes given scope the current scope, and allocates registers for locals.
  */
-static void start_scope(LinearizerState *linearizer, struct proc *proc, struct block_scope *scope)
+static void start_scope(LinearizerState *linearizer, struct proc *proc, Scope *scope)
 {
 	proc->current_scope = scope;
 	struct lua_symbol *sym;
@@ -2358,7 +2358,7 @@ static void start_scope(LinearizerState *linearizer, struct proc *proc, struct b
  */
 static void end_scope(LinearizerState *linearizer, struct proc *proc)
 {
-	struct block_scope *scope = proc->current_scope;
+	Scope *scope = proc->current_scope;
 	struct lua_symbol *sym;
 	if (scope->need_close) {
 		instruct_close(proc, proc->current_bb, scope);

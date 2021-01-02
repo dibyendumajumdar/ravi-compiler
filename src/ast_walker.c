@@ -33,7 +33,7 @@ void raviX_function_foreach_child(const FunctionExpression *function_expression,
 	FOR_EACH_PTR(function_expression->child_functions, node) { callback(userdata, &node->function_expr); }
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_function_scope(const FunctionExpression *function_expression)
+const Scope *raviX_function_scope(const FunctionExpression *function_expression)
 {
 	return function_expression->main_block;
 }
@@ -81,7 +81,7 @@ const struct var_type *raviX_variable_symbol_type(const struct lua_variable_symb
 	return &lua_local_symbol->value_type;
 }
 
-const struct block_scope *raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol)
+const Scope *raviX_variable_symbol_scope(const struct lua_variable_symbol *lua_local_symbol)
 {
 	return lua_local_symbol->block;
 }
@@ -212,7 +212,7 @@ const StringObject *raviX_label_statement_label_name(const LabelStatement *state
 {
 	return statement->symbol->label.label_name;
 }
-const struct block_scope *raviX_label_statement_label_scope(const LabelStatement *statement)
+const Scope *raviX_label_statement_label_scope(const LabelStatement *statement)
 {
 	return statement->symbol->label.block;
 }
@@ -221,7 +221,7 @@ const StringObject *raviX_goto_statement_label_name(const GotoStatement *stateme
 {
 	return statement->name;
 }
-const struct block_scope *raviX_goto_statement_scope(const GotoStatement *statement)
+const Scope *raviX_goto_statement_scope(const GotoStatement *statement)
 {
 	return statement->goto_scope;
 }
@@ -305,7 +305,7 @@ const FunctionExpression *raviX_function_ast(const FunctionStatement *statement)
 	assert(statement->function_expr->type == EXPR_FUNCTION);
 	return &statement->function_expr->function_expr;
 }
-const struct block_scope *raviX_do_statement_scope(const DoStatement *statement) { return statement->scope; }
+const Scope *raviX_do_statement_scope(const DoStatement *statement) { return statement->scope; }
 void raviX_do_statement_foreach_statement(const DoStatement *statement, void *userdata,
 					  void (*callback)(void *userdata, const Statement *statement))
 {
@@ -317,7 +317,7 @@ void raviX_do_statement_foreach_statement(const DoStatement *statement, void *us
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_test_then_statement_scope(const TestThenStatement *statement)
+const Scope *raviX_test_then_statement_scope(const TestThenStatement *statement)
 {
 	return statement->test_then_scope;
 }
@@ -348,7 +348,7 @@ void raviX_if_statement_foreach_test_then_statement(const IfStatement *statement
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_if_then_statement_else_scope(const IfStatement *statement)
+const Scope *raviX_if_then_statement_else_scope(const IfStatement *statement)
 {
 	return statement->else_block;
 }
@@ -369,7 +369,7 @@ const Expression *raviX_while_or_repeat_statement_condition(const WhileOrRepeatS
 	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
 	return (Expression *)statement->condition;
 }
-const struct block_scope *raviX_while_or_repeat_statement_scope(const WhileOrRepeatStatement *statement)
+const Scope *raviX_while_or_repeat_statement_scope(const WhileOrRepeatStatement *statement)
 {
 	return statement->loop_scope;
 }
@@ -386,7 +386,7 @@ void raviX_while_or_repeat_statement_foreach_statement(const WhileOrRepeatStatem
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_for_statement_scope(const ForStatement *statement)
+const Scope *raviX_for_statement_scope(const ForStatement *statement)
 {
 	return statement->for_scope;
 }
@@ -412,7 +412,7 @@ void raviX_for_statement_foreach_expression(const ForStatement *statement, void 
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_for_statement_body_scope(const ForStatement *statement)
+const Scope *raviX_for_statement_body_scope(const ForStatement *statement)
 {
 	return statement->for_body;
 }
@@ -558,16 +558,16 @@ void raviX_function_call_expression_foreach_argument(const FunctionCallExpressio
 	}
 	END_FOR_EACH_PTR(node)
 }
-const FunctionExpression *raviX_scope_owning_function(const struct block_scope *scope)
+const FunctionExpression *raviX_scope_owning_function(const Scope *scope)
 {
 	assert(scope->function->type == EXPR_FUNCTION);
 	return &scope->function->function_expr;
 }
-RAVICOMP_EXPORT const struct block_scope *raviX_scope_parent_scope(const struct block_scope *scope)
+RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope)
 {
 	return scope->parent;
 }
-RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const struct block_scope *scope, void *userdata,
+RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
 						void (*callback)(void *userdata, const struct lua_symbol *symbol))
 {
 	struct lua_symbol *symbol;
@@ -591,7 +591,7 @@ const struct lua_label_symbol *raviX_symbol_label(const struct lua_symbol *symbo
 	return &symbol->label;
 }
 const StringObject *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
-const struct block_scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
+const Scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
 const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol)
 {
 	return &symbol->value_type;

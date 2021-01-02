@@ -20,7 +20,7 @@ static void parse_statement_list(struct parser_state *, struct ast_node_list **l
 static struct ast_node *parse_statement(struct parser_state *);
 static struct ast_node *new_function(struct parser_state *parser);
 static struct ast_node *end_function(struct parser_state *parser);
-static struct block_scope *new_scope(struct parser_state *parser);
+static Scope *new_scope(struct parser_state *parser);
 static void end_scope(struct parser_state *parser);
 static struct ast_node *new_literal_expression(struct parser_state *parser, ravitype_t type);
 static struct ast_node *generate_label(struct parser_state *parser, const StringObject *label);
@@ -139,7 +139,7 @@ static const StringObject *check_name_and_next(LexerState *ls)
 static struct lua_symbol *new_local_symbol(struct parser_state *parser, const StringObject *name, ravitype_t tt,
 					   const StringObject *usertype)
 {
-	struct block_scope *scope = parser->current_scope;
+	Scope *scope = parser->current_scope;
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	set_typename(&symbol->variable.value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
@@ -153,7 +153,7 @@ static struct lua_symbol *new_local_symbol(struct parser_state *parser, const St
 /* create a new label */
 static struct lua_symbol *new_label(struct parser_state *parser, const StringObject *name)
 {
-	struct block_scope *scope = parser->current_scope;
+	Scope *scope = parser->current_scope;
 	assert(scope);
 	struct lua_symbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	symbol->symbol_type = SYM_LABEL;
@@ -177,7 +177,7 @@ static struct lua_symbol *new_localvarliteral_(struct parser_state *parser, cons
  */
 #define new_localvarliteral(parser, name) new_localvarliteral_(parser, "" name, (sizeof(name) / sizeof(char)) - 1)
 
-static struct lua_symbol *search_for_variable_in_block(struct block_scope *scope, const StringObject *varname)
+static struct lua_symbol *search_for_variable_in_block(Scope *scope, const StringObject *varname)
 {
 	struct lua_symbol *symbol;
 	// Lookup in reverse order so that we discover the
@@ -276,7 +276,7 @@ static struct lua_symbol *search_for_variable(struct parser_state *parser, const
 					      bool *is_local)
 {
 	*is_local = false;
-	struct block_scope *current_scope = parser->current_scope;
+	Scope *current_scope = parser->current_scope;
 	struct ast_node *start_function = parser->current_function;
 	assert(current_scope && current_scope->function == parser->current_function);
 	while (current_scope) {
@@ -1093,10 +1093,10 @@ static void add_local_symbol_to_current_scope(struct parser_state *parser, struc
 	add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
 }
 
-static struct block_scope *parse_block(struct parser_state *parser, struct ast_node_list **statement_list)
+static Scope *parse_block(struct parser_state *parser, struct ast_node_list **statement_list)
 {
 	/* block -> statlist */
-	struct block_scope *scope = new_scope(parser);
+	Scope *scope = new_scope(parser);
 	parse_statement_list(parser, statement_list);
 	end_scope(parser);
 	return scope;
@@ -1567,10 +1567,10 @@ static void parse_statement_list(struct parser_state *parser, struct ast_node_li
  * gets existing scope as its parent even if that belongs to parent
  * function.
  */
-static struct block_scope *new_scope(struct parser_state *parser)
+static Scope *new_scope(struct parser_state *parser)
 {
 	CompilerState *container = parser->container;
-	struct block_scope *scope = raviX_allocator_allocate(&container->block_scope_allocator, 0);
+	Scope *scope = raviX_allocator_allocate(&container->block_scope_allocator, 0);
 	scope->symbol_list = NULL;
 	// scope->do_statement_list = NULL;
 	scope->function = parser->current_function;
@@ -1586,7 +1586,7 @@ static struct block_scope *new_scope(struct parser_state *parser)
 static void end_scope(struct parser_state *parser)
 {
 	assert(parser->current_scope);
-	struct block_scope *scope = parser->current_scope;
+	Scope *scope = parser->current_scope;
 	parser->current_scope = scope->parent;
 	assert(parser->current_scope != NULL || scope == parser->current_function->function_expr.main_block);
 }
@@ -1698,8 +1698,8 @@ CompilerState *raviX_init_compiler()
 			     sizeof(struct ast_node) * 32);
 	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
 			     sizeof(struct ptr_list) * 32);
-	raviX_allocator_init(&container->block_scope_allocator, "block scopes", sizeof(struct block_scope),
-			     sizeof(double), sizeof(struct block_scope) * 32);
+	raviX_allocator_init(&container->block_scope_allocator, "block scopes", sizeof(Scope),
+			     sizeof(double), sizeof(Scope) * 32);
 	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(struct lua_symbol), sizeof(double),
 			     sizeof(struct lua_symbol) * 64);
 	raviX_allocator_init(&container->string_allocator, "strings", 0, sizeof(double), 1024);

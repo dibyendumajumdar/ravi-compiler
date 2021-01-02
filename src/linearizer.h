@@ -200,11 +200,11 @@ struct proc {
 	struct proc_list *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
 	struct ast_node *function_expr; /* function ast that we are compiling */
-	struct block_scope *current_scope;
+	Scope *current_scope;
 	struct basic_block *current_bb;
 	struct basic_block *current_break_target; /* track the current break target, previous target must be saved /
 						     restored in stack discipline */
-	struct block_scope *current_break_scope;  /* as above track the block scope */
+	Scope *current_break_scope;  /* as above track the block scope */
 	struct pseudo_generator local_pseudos;	  /* locals */
 	struct pseudo_generator temp_int_pseudos; /* temporaries known to be integer type */
 	struct pseudo_generator temp_flt_pseudos; /* temporaries known to be number type */
