@@ -19,6 +19,7 @@ Copyright 2018-2020 Dibyendu Majumdar
 typedef struct CompilerState CompilerState;
 typedef struct LexerState LexerState;
 typedef struct LinearizerState LinearizerState;
+typedef struct VariableType VariableType;
 
 typedef long long lua_Integer;
 typedef double lua_Number;
@@ -422,24 +423,24 @@ RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const ForStateme
 
 /* literal expression */
 /* Note: '...' value has type RAVI_TVARARGS and no associated SemInfo. */
-RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const LiteralExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_literal_expression_type(const LiteralExpression *expression);
 RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression);
 
 /* symbol expression */
-RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_symbol_expression_type(const SymbolExpression *expression);
 RAVICOMP_EXPORT const LuaSymbol *raviX_symbol_expression_symbol(const SymbolExpression *expression);
 
 /* index expression */
-RAVICOMP_EXPORT const struct var_type *raviX_index_expression_type(const IndexExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_index_expression_type(const IndexExpression *expression);
 RAVICOMP_EXPORT const Expression *raviX_index_expression_expression(const IndexExpression *expression);
 
 /* unary expression */
-RAVICOMP_EXPORT const struct var_type *raviX_unary_expression_type(const UnaryExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_unary_expression_type(const UnaryExpression *expression);
 RAVICOMP_EXPORT const Expression *raviX_unary_expression_expression(const UnaryExpression *expression);
 RAVICOMP_EXPORT UnaryOperatorType raviX_unary_expression_operator(const UnaryExpression *expression);
 
 /* binary expression */
-RAVICOMP_EXPORT const struct var_type *raviX_binary_expression_type(const BinaryExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_binary_expression_type(const BinaryExpression *expression);
 RAVICOMP_EXPORT const Expression *
 raviX_binary_expression_left_expression(const BinaryExpression *expression);
 RAVICOMP_EXPORT const Expression *
@@ -447,7 +448,7 @@ raviX_binary_expression_right_expression(const BinaryExpression *expression);
 RAVICOMP_EXPORT BinaryOperatorType raviX_binary_expression_operator(const BinaryExpression *expression);
 
 /* function expression */
-RAVICOMP_EXPORT const struct var_type *raviX_function_type(const FunctionExpression *function_expression);
+RAVICOMP_EXPORT const VariableType *raviX_function_type(const FunctionExpression *function_expression);
 RAVICOMP_EXPORT bool raviX_function_is_vararg(const FunctionExpression *function_expression);
 RAVICOMP_EXPORT bool raviX_function_is_method(const FunctionExpression *function_expression);
 RAVICOMP_EXPORT const FunctionExpression *
@@ -470,7 +471,7 @@ raviX_function_foreach_upvalue(const FunctionExpression *function_expression, vo
 			       void (*callback)(void *userdata, const LuaUpvalueSymbol *symbol));
 
 /* table element assignment expression */
-RAVICOMP_EXPORT const struct var_type *
+RAVICOMP_EXPORT const VariableType *
 raviX_table_element_assignment_expression_type(const TableElementAssignmentExpression *expression);
 RAVICOMP_EXPORT const Expression *
 raviX_table_element_assignment_expression_key(const TableElementAssignmentExpression *expression);
@@ -478,14 +479,14 @@ RAVICOMP_EXPORT const Expression *
 raviX_table_element_assignment_expression_value(const TableElementAssignmentExpression *expression);
 
 /* table_literal_expression */
-RAVICOMP_EXPORT const struct var_type *
+RAVICOMP_EXPORT const VariableType *
 raviX_table_literal_expression_type(const TableLiteralExpression *expression);
 RAVICOMP_EXPORT void raviX_table_literal_expression_foreach_element(
     const TableLiteralExpression *expression, void *userdata,
     void (*callback)(void *, const TableElementAssignmentExpression *expr));
 
 /* suffixed_expression */
-RAVICOMP_EXPORT const struct var_type *raviX_suffixed_expression_type(const SuffixedExpression *expression);
+RAVICOMP_EXPORT const VariableType *raviX_suffixed_expression_type(const SuffixedExpression *expression);
 RAVICOMP_EXPORT const Expression *
 raviX_suffixed_expression_primary(const SuffixedExpression *expression);
 RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const SuffixedExpression *expression,
@@ -493,7 +494,7 @@ RAVICOMP_EXPORT void raviX_suffixed_expression_foreach_suffix(const SuffixedExpr
 							      void (*callback)(void *, const Expression *expr));
 
 /* function call expression */
-RAVICOMP_EXPORT const struct var_type *
+RAVICOMP_EXPORT const VariableType *
 raviX_function_call_expression_type(const FunctionCallExpression *expression);
 // can return NULL
 RAVICOMP_EXPORT const StringObject *
@@ -544,7 +545,7 @@ RAVICOMP_EXPORT const LuaLabelSymbol *raviX_symbol_label(const LuaSymbol *symbol
 /* variable symbol - local and global variables */
 RAVICOMP_EXPORT const StringObject *
 raviX_variable_symbol_name(const LuaVariableSymbol *lua_local_symbol);
-RAVICOMP_EXPORT const struct var_type *raviX_variable_symbol_type(const LuaVariableSymbol *lua_local_symbol);
+RAVICOMP_EXPORT const VariableType *raviX_variable_symbol_type(const LuaVariableSymbol *lua_local_symbol);
 // NULL if global
 RAVICOMP_EXPORT const Scope *
 raviX_variable_symbol_scope(const LuaVariableSymbol *lua_local_symbol);
@@ -554,7 +555,7 @@ RAVICOMP_EXPORT const StringObject *raviX_label_name(const LuaLabelSymbol *symbo
 RAVICOMP_EXPORT const Scope *raviX_label_scope(const LuaLabelSymbol *symbol);
 
 /* upvalue symbol */
-RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol);
+RAVICOMP_EXPORT const VariableType *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol);
 RAVICOMP_EXPORT const LuaVariableSymbol *
 raviX_upvalue_target_variable(const LuaUpvalueSymbol *symbol);
 RAVICOMP_EXPORT const FunctionExpression *

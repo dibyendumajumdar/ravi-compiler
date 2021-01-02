@@ -18,7 +18,7 @@ None of these operations are explicit in the AST.
 */
 
 
-static bool is_type_same(const struct var_type *a, const struct var_type *b)
+static bool is_type_same(const VariableType *a, const VariableType *b)
 {
 	// String comparion of type_name relies upon strings being interned
 	return a->type_code == b->type_code && a->type_name == b->type_name;
@@ -175,7 +175,7 @@ static void typecheck_binary_operator(CompilerState *container, struct ast_node 
 	}
 }
 
-static bool is_unindexable_type(struct var_type *type)
+static bool is_unindexable_type(VariableType *type)
 {
 	switch (type->type_code) {
 	case RAVI_TNUMFLT:
@@ -225,14 +225,14 @@ static void typecheck_suffixedexpr(CompilerState *container, struct ast_node *fu
 	copy_type(&node->suffixed_expr.type, &prev_node->common_expr.type);
 }
 
-static void typecheck_var_assignment(CompilerState *container, struct var_type *var_type, struct ast_node *expr,
+static void typecheck_var_assignment(CompilerState *container, VariableType *var_type, struct ast_node *expr,
 				     const StringObject *var_name)
 {
 	if (var_type->type_code == RAVI_TANY)
 		// Any value can be assigned to type ANY
 		return;
 	const char *variable_name = var_name ? var_name->str : "unknown-TODO";
-	struct var_type *expr_type = &expr->common_expr.type;
+	VariableType *expr_type = &expr->common_expr.type;
 
 	if (var_type->type_code == RAVI_TNUMINT) {
 		/* if the expr is of type number or # operator then insert @integer operator */
@@ -279,7 +279,7 @@ static void typecheck_local_statement(CompilerState *container, struct ast_node 
 		if (!var || !expr)
 			break;
 
-		struct var_type *var_type = &var->variable.value_type;
+		VariableType *var_type = &var->variable.value_type;
 		const StringObject *var_name = var->variable.var_name;
 
 		typecheck_var_assignment(container, var_type, expr, var_name);
@@ -307,7 +307,7 @@ static void typecheck_expr_statement(CompilerState *container, struct ast_node *
 		if (!var || !expr)
 			break;
 
-		struct var_type *var_type = &var->common_expr.type;
+		VariableType *var_type = &var->common_expr.type;
 		const StringObject *var_name = NULL; // FIXME how do we get this?
 
 		typecheck_var_assignment(container, var_type, expr, var_name);

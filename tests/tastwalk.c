@@ -29,7 +29,7 @@ static void walk_variable_symbol(void *data, const LuaVariableSymbol *symbol)
 	const Scope *scope = raviX_variable_symbol_scope(symbol);
 	// If global scope will be NULL
 	(void)scope;
-	const struct var_type *type = raviX_variable_symbol_type(symbol);
+	const VariableType *type = raviX_variable_symbol_type(symbol);
 	assert(type != NULL);
 }
 
@@ -65,14 +65,14 @@ static void walk_scope(void *data, const Scope *scope)
 
 static void walk_index_expression(void *data, const IndexExpression *index_expression)
 {
-	const struct var_type *type = raviX_index_expression_type(index_expression);
+	const VariableType *type = raviX_index_expression_type(index_expression);
 	(void)type;
 	walk_expression(data, raviX_index_expression_expression(index_expression));
 }
 
 static void walk_symbol_expression(void *data, const SymbolExpression *symbol_expression)
 {
-	const struct var_type *type = raviX_symbol_expression_type(symbol_expression);
+	const VariableType *type = raviX_symbol_expression_type(symbol_expression);
 	(void)type;
 	walk_symbol(data, raviX_symbol_expression_symbol(symbol_expression));
 }
@@ -81,7 +81,7 @@ static void
 walk_table_assignment_expression(void *data,
 				 const TableElementAssignmentExpression *table_element_assignment_expression)
 {
-	const struct var_type *type =
+	const VariableType *type =
 	    raviX_table_element_assignment_expression_type(table_element_assignment_expression);
 	(void)type;
 	const Expression *key_expression =
@@ -102,7 +102,7 @@ static void walk_expression(void *data, const Expression *expression)
 	case EXPR_FUNCTION_CALL: {
 		const FunctionCallExpression *function_call_expression =
 		    raviX_function_call_expression(expression);
-		const struct var_type *type = raviX_function_call_expression_type(function_call_expression);
+		const VariableType *type = raviX_function_call_expression_type(function_call_expression);
 		(void)type;
 		const StringObject *method_name =
 		    raviX_function_call_expression_method_name(function_call_expression);
@@ -112,7 +112,7 @@ static void walk_expression(void *data, const Expression *expression)
 	}
 	case EXPR_SUFFIXED: {
 		const SuffixedExpression *suffixed_expression = raviX_suffixed_expression(expression);
-		const struct var_type *type = raviX_suffixed_expression_type(suffixed_expression);
+		const VariableType *type = raviX_suffixed_expression_type(suffixed_expression);
 		(void)type;
 		walk_expression(data, raviX_suffixed_expression_primary(suffixed_expression));
 		raviX_suffixed_expression_foreach_suffix(suffixed_expression, data, walk_expression);
@@ -121,7 +121,7 @@ static void walk_expression(void *data, const Expression *expression)
 	case EXPR_TABLE_LITERAL: {
 		const TableLiteralExpression *table_literal_expression =
 		    raviX_table_literal_expression(expression);
-		const struct var_type *type = raviX_table_literal_expression_type(table_literal_expression);
+		const VariableType *type = raviX_table_literal_expression_type(table_literal_expression);
 		(void)type;
 		raviX_table_literal_expression_foreach_element(table_literal_expression, data,
 							       walk_table_assignment_expression);
@@ -137,7 +137,7 @@ static void walk_expression(void *data, const Expression *expression)
 	}
 	case EXPR_BINARY: {
 		const BinaryExpression *binary_expression = raviX_binary_expression(expression);
-		const struct var_type *type = raviX_binary_expression_type(binary_expression);
+		const VariableType *type = raviX_binary_expression_type(binary_expression);
 		(void)type;
 		enum BinaryOperatorType binary_operator = raviX_binary_expression_operator(binary_expression);
 		(void)binary_operator;
@@ -147,7 +147,7 @@ static void walk_expression(void *data, const Expression *expression)
 	}
 	case EXPR_UNARY: {
 		const UnaryExpression *unary_expression = raviX_unary_expression(expression);
-		const struct var_type *type = raviX_unary_expression_type(unary_expression);
+		const VariableType *type = raviX_unary_expression_type(unary_expression);
 		(void)type;
 		enum UnaryOperatorType unary_operator = raviX_unary_expression_operator(unary_expression);
 		(void)unary_operator;
@@ -156,7 +156,7 @@ static void walk_expression(void *data, const Expression *expression)
 	}
 	case EXPR_LITERAL: {
 		const LiteralExpression *literal_expression = raviX_literal_expression(expression);
-		const struct var_type *type = raviX_literal_expression_type(literal_expression);
+		const VariableType *type = raviX_literal_expression_type(literal_expression);
 		(void)type;
 		const SemInfo *sem_info = raviX_literal_expression_literal(literal_expression);
 		(void)sem_info;

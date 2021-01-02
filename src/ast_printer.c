@@ -51,9 +51,9 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 			const StringObject *s = va_arg(ap, const StringObject *);
 			raviX_buffer_add_string(buf, s->str);
 			cp++;
-		} else if (cp[0] == '%' && cp[1] == 'T') { /* struct var_type */
-			const struct var_type *type;
-			type = va_arg(ap, const struct var_type *);
+		} else if (cp[0] == '%' && cp[1] == 'T') { /* VariableType */
+			const VariableType *type;
+			type = va_arg(ap, const VariableType *);
 			if (type->type_code == RAVI_TUSERDATA) {
 				const StringObject *s = type->type_name;
 				raviX_buffer_add_string(buf, s->str);

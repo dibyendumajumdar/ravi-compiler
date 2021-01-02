@@ -6,7 +6,7 @@ const FunctionExpression *raviX_ast_get_main_function(const CompilerState *compi
 {
 	return &compiler_state->main_function->function_expr;
 }
-const struct var_type *raviX_function_type(const FunctionExpression *function_expression)
+const VariableType *raviX_function_type(const FunctionExpression *function_expression)
 {
 	return &function_expression->type;
 }
@@ -76,7 +76,7 @@ const StringObject *raviX_variable_symbol_name(const LuaVariableSymbol *lua_loca
 	return lua_local_symbol->var_name;
 }
 
-const struct var_type *raviX_variable_symbol_type(const LuaVariableSymbol *lua_local_symbol)
+const VariableType *raviX_variable_symbol_type(const LuaVariableSymbol *lua_local_symbol)
 {
 	return &lua_local_symbol->value_type;
 }
@@ -427,12 +427,12 @@ void raviX_for_statement_body_foreach_statement(const ForStatement *statement, v
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct var_type *raviX_literal_expression_type(const LiteralExpression *expression)
+const VariableType *raviX_literal_expression_type(const LiteralExpression *expression)
 {
 	return &expression->type;
 }
 const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression) { return &expression->u; }
-const struct var_type *raviX_symbol_expression_type(const SymbolExpression *expression)
+const VariableType *raviX_symbol_expression_type(const SymbolExpression *expression)
 {
 	return &expression->type;
 }
@@ -440,7 +440,7 @@ const LuaSymbol *raviX_symbol_expression_symbol(const SymbolExpression *expressi
 {
 	return expression->var;
 }
-const struct var_type *raviX_index_expression_type(const IndexExpression *expression)
+const VariableType *raviX_index_expression_type(const IndexExpression *expression)
 {
 	return &expression->type;
 }
@@ -449,7 +449,7 @@ const Expression *raviX_index_expression_expression(const IndexExpression *expre
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const Expression *)expression->expr;
 }
-const struct var_type *raviX_unary_expression_type(const UnaryExpression *expression)
+const VariableType *raviX_unary_expression_type(const UnaryExpression *expression)
 {
 	return &expression->type;
 }
@@ -462,7 +462,7 @@ UnaryOperatorType raviX_unary_expression_operator(const UnaryExpression *express
 {
 	return expression->unary_op;
 }
-const struct var_type *raviX_binary_expression_type(const BinaryExpression *expression)
+const VariableType *raviX_binary_expression_type(const BinaryExpression *expression)
 {
 	return &expression->type;
 }
@@ -480,7 +480,7 @@ BinaryOperatorType raviX_binary_expression_operator(const BinaryExpression *expr
 {
 	return expression->binary_op;
 }
-const struct var_type *
+const VariableType *
 raviX_table_element_assignment_expression_type(const TableElementAssignmentExpression *expression)
 {
 	return &expression->type;
@@ -499,7 +499,7 @@ raviX_table_element_assignment_expression_value(const TableElementAssignmentExpr
 	assert(expression->value_expr->type >= EXPR_LITERAL && expression->value_expr->type <= EXPR_FUNCTION_CALL);
 	return (const Expression *)expression->value_expr;
 }
-const struct var_type *raviX_table_literal_expression_type(const TableLiteralExpression *expression)
+const VariableType *raviX_table_literal_expression_type(const TableLiteralExpression *expression)
 {
 	return &expression->type;
 }
@@ -516,7 +516,7 @@ void raviX_table_literal_expression_foreach_element(
 	END_FOR_EACH_PTR(node)
 }
 
-const struct var_type *raviX_suffixed_expression_type(const SuffixedExpression *expression)
+const VariableType *raviX_suffixed_expression_type(const SuffixedExpression *expression)
 {
 	return &expression->type;
 }
@@ -537,7 +537,7 @@ void raviX_suffixed_expression_foreach_suffix(const SuffixedExpression *expressi
 	END_FOR_EACH_PTR(node)
 }
 
-const struct var_type *raviX_function_call_expression_type(const FunctionCallExpression *expression)
+const VariableType *raviX_function_call_expression_type(const FunctionCallExpression *expression)
 {
 	return &expression->type;
 }
@@ -592,7 +592,7 @@ const LuaLabelSymbol *raviX_symbol_label(const LuaSymbol *symbol)
 }
 const StringObject *raviX_label_name(const LuaLabelSymbol *symbol) { return symbol->label_name; }
 const Scope *raviX_label_scope(const LuaLabelSymbol *symbol) { return symbol->block; }
-const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol)
+const VariableType *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol)
 {
 	return &symbol->value_type;
 }

@@ -458,7 +458,7 @@ static inline void set_current_proc(LinearizerState *linearizer, struct proc *pr
 	linearizer->current_proc = proc;
 }
 
-static void instruct_totype(struct proc *proc, struct pseudo *target, const struct var_type *vtype)
+static void instruct_totype(struct proc *proc, struct pseudo *target, const VariableType *vtype)
 {
 	enum opcode targetop = op_nop;
 	switch (vtype->type_code) {
@@ -1232,14 +1232,14 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, struct ast_
 }
 
 /** Is the type NIL-able */
-static bool is_nillable(const struct var_type *var_type)
+static bool is_nillable(const VariableType *var_type)
 {
 	return var_type->type_code != RAVI_TARRAYFLT && var_type->type_code != RAVI_TARRAYINT &&
 	       var_type->type_code != RAVI_TNUMFLT && var_type->type_code != RAVI_TNUMINT;
 }
 
 /* Check if we can assign value to variable */
-static bool is_compatible(const struct var_type *var_type, const struct var_type *val_type)
+static bool is_compatible(const VariableType *var_type, const VariableType *val_type)
 {
 	if (var_type->type_code == RAVI_TANY)
 		return true;
@@ -1254,8 +1254,8 @@ static bool is_compatible(const struct var_type *var_type, const struct var_type
 	return false;
 }
 
-static void linearize_store_var(struct proc *proc, const struct var_type *var_type, struct pseudo *var_pseudo,
-				const struct var_type *val_type, struct pseudo *val_pseudo)
+static void linearize_store_var(struct proc *proc, const VariableType *var_type, struct pseudo *var_pseudo,
+				const VariableType *val_type, struct pseudo *val_pseudo)
 {
 	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
 		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
@@ -1279,7 +1279,7 @@ static void linearize_store_var(struct proc *proc, const struct var_type *var_ty
 }
 
 struct node_info {
-	const struct var_type *vartype;
+	const VariableType *vartype;
 	struct pseudo *pseudo;
 };
 

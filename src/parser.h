@@ -105,7 +105,7 @@ typedef enum {
 } ravitype_t;
 
 /* Lua type info. We need to support user defined types too which are known by name */
-struct var_type {
+struct VariableType {
 	ravitype_t type_code;
 	/* type name for user defined types; used to lookup metatable in registry, only set when type_code is
 	 * RAVI_TUSERDATA */
@@ -116,7 +116,7 @@ struct pseudo;
 DECLARE_PTR_LIST(LuaSymbolList, LuaSymbol);
 
 struct LuaVariableSymbol {
-	struct var_type value_type;
+	VariableType value_type;
 	const StringObject *var_name; /* name of the variable */
 	Scope *block; /* NULL if global symbol, as globals are never added to a scope */
 	LuaSymbol *env; /* Only applicable for global symbols - this should point to _ENV */
@@ -130,7 +130,7 @@ struct LuaLabelSymbol {
 	struct pseudo* pseudo;     /* backend data for the symbol */
 };
 struct LuaUpvalueSymbol {
-	struct var_type value_type;
+	VariableType value_type;
 	LuaSymbol *target_variable;	   /* variable reference */
 	struct ast_node *target_function; /* Where the upvalue lives */
 	unsigned upvalue_index : 16,   /* index of the upvalue in the function where this upvalue occurs */
@@ -215,7 +215,7 @@ struct ForStatement {
 /* To access the type field common to all expr objects */
 /* all expr types must be compatible with base_expression */
 
-#define BASE_EXPRESSION_FIELDS struct var_type type; unsigned truncate_results: 1
+#define BASE_EXPRESSION_FIELDS VariableType type; unsigned truncate_results: 1
 
 typedef struct BaseExpression {
 	BASE_EXPRESSION_FIELDS;
@@ -345,18 +345,18 @@ struct ast_node {
 };
 #undef BASE_AST_FIELDS
 
-static inline void set_typecode(struct var_type *vt, ravitype_t t) { vt->type_code = t; }
-static inline void set_type(struct var_type *vt, ravitype_t t)
+static inline void set_typecode(VariableType *vt, ravitype_t t) { vt->type_code = t; }
+static inline void set_type(VariableType *vt, ravitype_t t)
 {
 	vt->type_code = t;
 	vt->type_name = NULL;
 }
-static inline void set_typename(struct var_type *vt, ravitype_t t, const StringObject *name)
+static inline void set_typename(VariableType *vt, ravitype_t t, const StringObject *name)
 {
 	vt->type_code = t;
 	vt->type_name = name;
 }
-static inline void copy_type(struct var_type *a, const struct var_type *b)
+static inline void copy_type(VariableType *a, const VariableType *b)
 {
 	a->type_code = b->type_code;
 	a->type_name = b->type_name;
