@@ -155,7 +155,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		break;
 	}
 	case EXPR_LITERAL: {
-		const struct literal_expression *literal_expression = raviX_literal_expression(expression);
+		const LiteralExpression *literal_expression = raviX_literal_expression(expression);
 		const struct var_type *type = raviX_literal_expression_type(literal_expression);
 		(void)type;
 		const SemInfo *sem_info = raviX_literal_expression_literal(literal_expression);

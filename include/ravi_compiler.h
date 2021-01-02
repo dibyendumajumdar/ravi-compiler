@@ -302,7 +302,7 @@ typedef struct WhileOrRepeatStatement WhileOrRepeatStatement;
 typedef struct ForStatement ForStatement;
 
 struct expression;
-struct literal_expression;
+typedef struct LiteralExpression LiteralExpression;
 struct symbol_expression;
 struct index_expression;
 struct unary_expression;
@@ -422,8 +422,8 @@ RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const ForStateme
 
 /* literal expression */
 /* Note: '...' value has type RAVI_TVARARGS and no associated SemInfo. */
-RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression);
-RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression);
+RAVICOMP_EXPORT const struct var_type *raviX_literal_expression_type(const LiteralExpression *expression);
+RAVICOMP_EXPORT const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression);
 
 /* symbol expression */
 RAVICOMP_EXPORT const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression);
@@ -518,7 +518,7 @@ RAVICOMP_EXPORT const ForStatement *raviX_for_statement(const Statement *stmt);
 
 /* Convert an expression to the correct type */
 RAVICOMP_EXPORT enum AstNodeType raviX_expression_type(const struct expression *expression);
-RAVICOMP_EXPORT const struct literal_expression *raviX_literal_expression(const struct expression *expr);
+RAVICOMP_EXPORT const LiteralExpression *raviX_literal_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct symbol_expression *raviX_symbol_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct index_expression *raviX_index_expression(const struct expression *expr);
 RAVICOMP_EXPORT const struct unary_expression *raviX_unary_expression(const struct expression *expr);

@@ -143,7 +143,7 @@ const ForStatement *raviX_for_statement(const Statement *stmt)
 	return &n(stmt)->for_stmt;
 }
 enum AstNodeType raviX_expression_type(const struct expression *expression) { return expression->type; }
-const struct literal_expression *raviX_literal_expression(const struct expression *expr)
+const LiteralExpression *raviX_literal_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_LITERAL);
 	return &n(expr)->literal_expr;
@@ -427,11 +427,11 @@ void raviX_for_statement_body_foreach_statement(const ForStatement *statement, v
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct var_type *raviX_literal_expression_type(const struct literal_expression *expression)
+const struct var_type *raviX_literal_expression_type(const LiteralExpression *expression)
 {
 	return &expression->type;
 }
-const SemInfo *raviX_literal_expression_literal(const struct literal_expression *expression) { return &expression->u; }
+const SemInfo *raviX_literal_expression_literal(const LiteralExpression *expression) { return &expression->u; }
 const struct var_type *raviX_symbol_expression_type(const struct symbol_expression *expression)
 {
 	return &expression->type;

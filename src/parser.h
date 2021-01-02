@@ -220,10 +220,11 @@ struct ForStatement {
 
 #define BASE_EXPRESSION_FIELDS struct var_type type; unsigned truncate_results: 1
 
-struct base_expression {
+typedef struct BaseExpression {
 	BASE_EXPRESSION_FIELDS;
-};
-struct literal_expression {
+} BaseExpression;
+
+struct LiteralExpression {
 	BASE_EXPRESSION_FIELDS;
 	SemInfo u;
 };
@@ -308,7 +309,7 @@ struct Statement {
 */
 struct expression {
 	BASE_AST_FIELDS;
-	struct base_expression common_expr;
+	BaseExpression common_expr;
 };
 
 /* The parse tree is made up of ast_node objects. Some of the ast_nodes reference the appropriate block
@@ -332,8 +333,8 @@ struct ast_node {
 		IfStatement if_stmt;
 		WhileOrRepeatStatement while_or_repeat_stmt;
 		ForStatement for_stmt;
-		struct base_expression common_expr;
-		struct literal_expression literal_expr;
+		BaseExpression common_expr;
+		LiteralExpression literal_expr;
 		struct symbol_expression symbol_expr;
 		struct index_expression index_expr;
 		struct unary_expression unary_expr;

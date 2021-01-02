@@ -291,7 +291,7 @@ static int luaV_flttointeger(lua_Number n, lua_Integer *p, F2Imod mode)
 ** without string coercion.
 ** ("Fast track" handled by macro 'tointegerns'.)
 */
-static int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p, F2Imod mode)
+static int luaV_tointegerns(const LiteralExpression *obj, lua_Integer *p, F2Imod mode)
 {
 	if (ttisfloat(obj))
 		return luaV_flttointeger(fltvalue(obj), p, mode);
@@ -302,8 +302,8 @@ static int luaV_tointegerns(const struct literal_expression *obj, lua_Integer *p
 		return 0;
 }
 
-static int luaO_rawarith(CompilerState *compiler_state, int op, const struct literal_expression *p1,
-			 const struct literal_expression *p2, struct literal_expression *res)
+static int luaO_rawarith(CompilerState *compiler_state, int op, const LiteralExpression *p1,
+			 const LiteralExpression *p2, LiteralExpression *res)
 {
 	switch (op) {
 	case BINOPR_BAND:
@@ -373,7 +373,7 @@ static void process_expression(CompilerState *container, struct ast_node *node)
 		    node->binary_expr.expr_right->type == EXPR_LITERAL && 
 			node->binary_expr.binary_op >= BINOPR_ADD &&
 			node->binary_expr.binary_op <= BINOPR_SHR) {
-			struct literal_expression result = {.type.type_code = RAVI_TANY};
+			LiteralExpression result = {.type.type_code = RAVI_TANY};
 			if (luaO_rawarith(container, node->binary_expr.binary_op,
 					  &node->binary_expr.expr_left->literal_expr,
 					  &node->binary_expr.expr_right->literal_expr, &result)) {
@@ -393,7 +393,7 @@ static void process_expression(CompilerState *container, struct ast_node *node)
 		process_expression(container, node->unary_expr.expr);
 		if (node->unary_expr.expr->type == EXPR_LITERAL && 
 			(node->unary_expr.unary_op == UNOPR_BNOT || node->unary_expr.unary_op == UNOPR_MINUS)) {
-			struct literal_expression result = {.type.type_code = RAVI_TANY};
+			LiteralExpression result = {.type.type_code = RAVI_TANY};
 			if (luaO_rawarith(container, node->unary_expr.unary_op, &node->unary_expr.expr->literal_expr,
 					  &node->unary_expr.expr->literal_expr, &result)) {
 				node->type = EXPR_LITERAL;
