@@ -12,7 +12,7 @@ struct graph {
 	void *userdata;
 };
 
-struct node_link {
+struct GraphNodeLink {
 	nodeId_t node_index;
 	unsigned char edge_type;
 };
@@ -21,7 +21,7 @@ struct node_link {
 struct node_list {
 	unsigned count : 16;	 /* in use */
 	unsigned allocated : 16; /* tracks allocated size of links array */
-	struct node_link *links; /* array[allocated] of links, populated [0..count) */
+	struct GraphNodeLink *links; /* array[allocated] of links, populated [0..count) */
 };
 
 /* A node in the graph. For each node we maintain a list of predecessor nodes and successor nodes.
@@ -63,7 +63,7 @@ static int64_t node_list_search(const struct node_list *node_list, nodeId_t inde
 }
 
 /* Gets the given node or NULL if node does not exist */
-static inline struct node_link *node_list_get(const struct node_list *node_list, nodeId_t index)
+static inline struct GraphNodeLink *node_list_get(const struct node_list *node_list, nodeId_t index)
 {
 	int64_t i = node_list_search(node_list, index);
 	if (i < 0)
@@ -75,7 +75,7 @@ static inline struct node_link *node_list_get(const struct node_list *node_list,
 static void node_list_grow(struct node_list *node_list)
 {
 	unsigned new_size = node_list->allocated + 8u;
-	struct node_link *edges = raviX_realloc_array(node_list->links, sizeof(struct node_link), node_list->allocated,
+	struct GraphNodeLink *edges = raviX_realloc_array(node_list->links, sizeof(struct GraphNodeLink), node_list->allocated,
 						   new_size);
 	node_list->allocated = new_size;
 	node_list->links = edges;
@@ -224,7 +224,7 @@ enum edge_type raviX_get_edge_type(struct graph *g, nodeId_t from, nodeId_t to)
 	struct node *prednode = raviX_get_node(g, from);
 	if (prednode == NULL)
 		return EDGE_TYPE_UNCLASSIFIED;
-	struct node_link *node_link = node_list_get(&prednode->succs, to);
+	struct GraphNodeLink *node_link = node_list_get(&prednode->succs, to);
 	if (node_link == NULL)
 		return EDGE_TYPE_UNCLASSIFIED;
 	return node_link->edge_type;
@@ -295,7 +295,7 @@ static void DFS_classify(struct graph *g, struct node *n, struct classifier_stat
 
 	/* For each successor node */
 	for (unsigned i = 0; i < n->succs.count; i++) {
-		struct node_link *E = &n->succs.links[i];
+		struct GraphNodeLink *E = &n->succs.links[i];
 		struct node *S = g->nodes[E->node_index];
 		if (S->pre == 0) {
 			E->edge_type = EDGE_TYPE_TREE;
@@ -332,7 +332,7 @@ void raviX_classify_edges(struct graph *g)
 			g->nodes[i]->pre = 0;
 			g->nodes[i]->rpost = 0;
 			for (unsigned i = 0; i < g->nodes[i]->succs.count; i++) {
-				struct node_link *E = &g->nodes[i]->succs.links[i];
+				struct GraphNodeLink *E = &g->nodes[i]->succs.links[i];
 				E->edge_type = 0;
 			}
 		}
