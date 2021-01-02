@@ -142,54 +142,54 @@ const ForStatement *raviX_for_statement(const Statement *stmt)
 	assert(stmt->type == STMT_FOR_IN || stmt->type == STMT_FOR_NUM);
 	return &n(stmt)->for_stmt;
 }
-enum AstNodeType raviX_expression_type(const struct expression *expression) { return expression->type; }
-const LiteralExpression *raviX_literal_expression(const struct expression *expr)
+enum AstNodeType raviX_expression_type(const Expression *expression) { return expression->type; }
+const LiteralExpression *raviX_literal_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_LITERAL);
 	return &n(expr)->literal_expr;
 }
-const SymbolExpression *raviX_symbol_expression(const struct expression *expr)
+const SymbolExpression *raviX_symbol_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_SYMBOL);
 	return &n(expr)->symbol_expr;
 }
-const IndexExpression *raviX_index_expression(const struct expression *expr)
+const IndexExpression *raviX_index_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_Y_INDEX || expr->type == EXPR_FIELD_SELECTOR);
 	return &n(expr)->index_expr;
 }
-const UnaryExpression *raviX_unary_expression(const struct expression *expr)
+const UnaryExpression *raviX_unary_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_UNARY);
 	return &n(expr)->unary_expr;
 }
-const BinaryExpression *raviX_binary_expression(const struct expression *expr)
+const BinaryExpression *raviX_binary_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_BINARY);
 	return &n(expr)->binary_expr;
 }
-const FunctionExpression *raviX_function_expression(const struct expression *expr)
+const FunctionExpression *raviX_function_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_FUNCTION);
 	return &n(expr)->function_expr;
 }
 const TableElementAssignmentExpression *
-raviX_table_element_assignment_expression(const struct expression *expr)
+raviX_table_element_assignment_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_TABLE_ELEMENT_ASSIGN);
 	return &n(expr)->table_elem_assign_expr;
 }
-const TableLiteralExpression *raviX_table_literal_expression(const struct expression *expr)
+const TableLiteralExpression *raviX_table_literal_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_TABLE_LITERAL);
 	return &n(expr)->table_expr;
 }
-const SuffixedExpression *raviX_suffixed_expression(const struct expression *expr)
+const SuffixedExpression *raviX_suffixed_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_SUFFIXED);
 	return &n(expr)->suffixed_expr;
 }
-const FunctionCallExpression *raviX_function_call_expression(const struct expression *expr)
+const FunctionCallExpression *raviX_function_call_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_FUNCTION_CALL);
 	return &n(expr)->function_call_expr;
@@ -197,13 +197,13 @@ const FunctionCallExpression *raviX_function_call_expression(const struct expres
 #undef n
 
 void raviX_return_statement_foreach_expression(const ReturnStatement *statement, void *userdata,
-					       void (*callback)(void *, const struct expression *expr))
+					       void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -228,13 +228,13 @@ const struct block_scope *raviX_goto_statement_scope(const GotoStatement *statem
 bool raviX_goto_statement_is_break(const GotoStatement *statement) { return statement->is_break; }
 
 void raviX_local_statement_foreach_expression(const LocalStatement *statement, void *userdata,
-					      void (*callback)(void *, const struct expression *expr))
+					      void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -250,24 +250,24 @@ void raviX_local_statement_foreach_symbol(const LocalStatement *statement, void 
 	END_FOR_EACH_PTR(node)
 }
 void raviX_expression_statement_foreach_lhs_expression(const ExpressionStatement *statement, void *userdata,
-						       void (*callback)(void *, const struct expression *expr))
+						       void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->var_expr_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
 void raviX_expression_statement_foreach_rhs_expression(const ExpressionStatement *statement, void *userdata,
-						       void (*callback)(void *, const struct expression *expr))
+						       void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -332,10 +332,10 @@ void raviX_test_then_statement_foreach_statement(const TestThenStatement *statem
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct expression *raviX_test_then_statement_condition(const TestThenStatement *statement)
+const Expression *raviX_test_then_statement_condition(const TestThenStatement *statement)
 {
 	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
-	return (struct expression *)statement->condition;
+	return (Expression *)statement->condition;
 }
 void raviX_if_statement_foreach_test_then_statement(const IfStatement *statement, void *userdata,
 						    void (*callback)(void *, const TestThenStatement *stmt))
@@ -364,10 +364,10 @@ void raviX_if_statement_foreach_else_statement(const IfStatement *statement, voi
 	END_FOR_EACH_PTR(node)
 }
 
-const struct expression *raviX_while_or_repeat_statement_condition(const WhileOrRepeatStatement *statement)
+const Expression *raviX_while_or_repeat_statement_condition(const WhileOrRepeatStatement *statement)
 {
 	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
-	return (struct expression *)statement->condition;
+	return (Expression *)statement->condition;
 }
 const struct block_scope *raviX_while_or_repeat_statement_scope(const WhileOrRepeatStatement *statement)
 {
@@ -402,13 +402,13 @@ void raviX_for_statement_foreach_symbol(const ForStatement *statement, void *use
 	END_FOR_EACH_PTR(node)
 }
 void raviX_for_statement_foreach_expression(const ForStatement *statement, void *userdata,
-					    void (*callback)(void *, const struct expression *expr))
+					    void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->expr_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -444,19 +444,19 @@ const struct var_type *raviX_index_expression_type(const IndexExpression *expres
 {
 	return &expression->type;
 }
-const struct expression *raviX_index_expression_expression(const IndexExpression *expression)
+const Expression *raviX_index_expression_expression(const IndexExpression *expression)
 {
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->expr;
+	return (const Expression *)expression->expr;
 }
 const struct var_type *raviX_unary_expression_type(const UnaryExpression *expression)
 {
 	return &expression->type;
 }
-const struct expression *raviX_unary_expression_expression(const UnaryExpression *expression)
+const Expression *raviX_unary_expression_expression(const UnaryExpression *expression)
 {
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->expr;
+	return (const Expression *)expression->expr;
 }
 UnaryOperatorType raviX_unary_expression_operator(const UnaryExpression *expression)
 {
@@ -466,15 +466,15 @@ const struct var_type *raviX_binary_expression_type(const BinaryExpression *expr
 {
 	return &expression->type;
 }
-const struct expression *raviX_binary_expression_left_expression(const BinaryExpression *expression)
+const Expression *raviX_binary_expression_left_expression(const BinaryExpression *expression)
 {
 	assert(expression->expr_left->type >= EXPR_LITERAL && expression->expr_left->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->expr_left;
+	return (const Expression *)expression->expr_left;
 }
-const struct expression *raviX_binary_expression_right_expression(const BinaryExpression *expression)
+const Expression *raviX_binary_expression_right_expression(const BinaryExpression *expression)
 {
 	assert(expression->expr_right->type >= EXPR_LITERAL && expression->expr_right->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->expr_right;
+	return (const Expression *)expression->expr_right;
 }
 BinaryOperatorType raviX_binary_expression_operator(const BinaryExpression *expression)
 {
@@ -485,19 +485,19 @@ raviX_table_element_assignment_expression_type(const TableElementAssignmentExpre
 {
 	return &expression->type;
 }
-const struct expression *
+const Expression *
 raviX_table_element_assignment_expression_key(const TableElementAssignmentExpression *expression)
 {
 	if (!expression->key_expr)
 		return NULL;
 	assert(expression->key_expr->type >= EXPR_LITERAL && expression->key_expr->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->key_expr;
+	return (const Expression *)expression->key_expr;
 }
-const struct expression *
+const Expression *
 raviX_table_element_assignment_expression_value(const TableElementAssignmentExpression *expression)
 {
 	assert(expression->value_expr->type >= EXPR_LITERAL && expression->value_expr->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->value_expr;
+	return (const Expression *)expression->value_expr;
 }
 const struct var_type *raviX_table_literal_expression_type(const TableLiteralExpression *expression)
 {
@@ -520,19 +520,19 @@ const struct var_type *raviX_suffixed_expression_type(const SuffixedExpression *
 {
 	return &expression->type;
 }
-const struct expression *raviX_suffixed_expression_primary(const SuffixedExpression *expression)
+const Expression *raviX_suffixed_expression_primary(const SuffixedExpression *expression)
 {
 	assert(expression->primary_expr->type >= EXPR_LITERAL && expression->primary_expr->type <= EXPR_FUNCTION_CALL);
-	return (const struct expression *)expression->primary_expr;
+	return (const Expression *)expression->primary_expr;
 }
 void raviX_suffixed_expression_foreach_suffix(const SuffixedExpression *expression, void *userdata,
-					      void (*callback)(void *, const struct expression *expr))
+					      void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->suffix_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }
@@ -548,13 +548,13 @@ raviX_function_call_expression_method_name(const FunctionCallExpression *express
 	return expression->method_name;
 }
 void raviX_function_call_expression_foreach_argument(const FunctionCallExpression *expression, void *userdata,
-						     void (*callback)(void *, const struct expression *expr))
+						     void (*callback)(void *, const Expression *expr))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(expression->arg_list, node)
 	{
 		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_FUNCTION_CALL);
-		callback(userdata, (struct expression *)node);
+		callback(userdata, (Expression *)node);
 	}
 	END_FOR_EACH_PTR(node)
 }

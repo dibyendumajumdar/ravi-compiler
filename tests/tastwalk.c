@@ -15,7 +15,7 @@
 #include <string.h>
 
 static void walk_statement(void *data, const Statement *statement);
-static void walk_expression(void *data, const struct expression *expression);
+static void walk_expression(void *data, const Expression *expression);
 static void walk_function(void *data, const FunctionExpression *function);
 
 struct ast_state {
@@ -84,7 +84,7 @@ walk_table_assignment_expression(void *data,
 	const struct var_type *type =
 	    raviX_table_element_assignment_expression_type(table_element_assignment_expression);
 	(void)type;
-	const struct expression *key_expression =
+	const Expression *key_expression =
 	    raviX_table_element_assignment_expression_key(table_element_assignment_expression);
 	if (key_expression) {
 		walk_expression(data,
@@ -93,7 +93,7 @@ walk_table_assignment_expression(void *data,
 	walk_expression(data, raviX_table_element_assignment_expression_value(table_element_assignment_expression));
 }
 
-static void walk_expression(void *data, const struct expression *expression)
+static void walk_expression(void *data, const Expression *expression)
 {
 	switch (raviX_expression_type(expression)) {
 	case EXPR_SYMBOL:

@@ -47,14 +47,14 @@ extern "C" {
 
 /* structure of a node */
 #define DECLARE_PTR_LIST(listname, type)                                       \
-	struct listname {                                                      \
+	typedef struct listname {                                                      \
 		int nr_ : 8;                                                   \
 		int rm_ : 8;                                                   \
 		struct listname *prev_;                                        \
 		struct listname *next_;                                        \
 		struct allocator *allocator_;                                  \
 		type *list_[LIST_NODE_NR];                                     \
-	}
+	} listname
 
 /* Each node in the list */
 DECLARE_PTR_LIST(ptr_list, void);
