@@ -44,12 +44,12 @@ static struct basic_block *create_block(struct proc *proc);
 static void start_block(struct proc *proc, struct basic_block *bb);
 static void linearize_statement(struct proc *proc, struct ast_node *node);
 static void linearize_statement_list(struct proc *proc, struct ast_node_list *list);
-static void start_scope(struct linearizer_state *linearizer, struct proc *proc, struct block_scope *scope);
-static void end_scope(struct linearizer_state *linearizer, struct proc *proc);
+static void start_scope(LinearizerState *linearizer, struct proc *proc, struct block_scope *scope);
+static void end_scope(LinearizerState *linearizer, struct proc *proc);
 static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
-static void linearize_function(struct linearizer_state *linearizer);
+static void linearize_function(LinearizerState *linearizer);
 static struct instruction *allocate_instruction(struct proc *proc, enum opcode op);
 static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free_temp_pseudo);
 
@@ -83,9 +83,9 @@ static inline void free_register(struct proc *proc, struct pseudo_generator *gen
 }
 
 /* Linearizer initialization  */
-struct linearizer_state *raviX_init_linearizer(CompilerState *container)
+LinearizerState *raviX_init_linearizer(CompilerState *container)
 {
-	struct linearizer_state *linearizer = (struct linearizer_state *)calloc(1, sizeof(struct linearizer_state));
+	LinearizerState *linearizer = (LinearizerState *)calloc(1, sizeof(LinearizerState));
 	linearizer->ast_container = container;
 	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(struct instruction),
 			     sizeof(double), sizeof(struct instruction) * 128);
@@ -104,7 +104,7 @@ struct linearizer_state *raviX_init_linearizer(CompilerState *container)
 	return linearizer;
 }
 
-void raviX_destroy_linearizer(struct linearizer_state *linearizer)
+void raviX_destroy_linearizer(LinearizerState *linearizer)
 {
 	if (linearizer == NULL)
 		return;
@@ -427,7 +427,7 @@ static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free
  * Allocate a new Proc. If there is a current Proc, then the new Proc gets added to the
  * current Proc's children.
  */
-static struct proc *allocate_proc(struct linearizer_state *linearizer, struct ast_node *function_expr)
+static struct proc *allocate_proc(LinearizerState *linearizer, struct ast_node *function_expr)
 {
 	assert(function_expr->type == EXPR_FUNCTION);
 	struct proc *proc = raviX_allocator_allocate(&linearizer->proc_allocator, 0);
@@ -445,7 +445,7 @@ static struct proc *allocate_proc(struct linearizer_state *linearizer, struct as
 	return proc;
 }
 
-static void set_main_proc(struct linearizer_state *linearizer, struct proc *proc)
+static void set_main_proc(LinearizerState *linearizer, struct proc *proc)
 {
 	assert(linearizer->main_proc == NULL);
 	assert(linearizer->current_proc == NULL);
@@ -453,7 +453,7 @@ static void set_main_proc(struct linearizer_state *linearizer, struct proc *proc
 	assert(proc->function_expr->function_expr.parent_function == NULL);
 }
 
-static inline void set_current_proc(struct linearizer_state *linearizer, struct proc *proc)
+static inline void set_current_proc(LinearizerState *linearizer, struct proc *proc)
 {
 	linearizer->current_proc = proc;
 }
@@ -500,7 +500,7 @@ static void instruct_totype(struct proc *proc, struct pseudo *target, const stru
 	add_instruction(proc, insn);
 }
 
-static void linearize_function_args(struct linearizer_state *linearizer)
+static void linearize_function_args(LinearizerState *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
 	struct ast_node *func_expr = proc->function_expr;
@@ -2322,7 +2322,7 @@ static void initialize_graph(struct proc *proc)
 /**
  * Makes given scope the current scope, and allocates registers for locals.
  */
-static void start_scope(struct linearizer_state *linearizer, struct proc *proc, struct block_scope *scope)
+static void start_scope(LinearizerState *linearizer, struct proc *proc, struct block_scope *scope)
 {
 	proc->current_scope = scope;
 	struct lua_symbol *sym;
@@ -2356,7 +2356,7 @@ static void start_scope(struct linearizer_state *linearizer, struct proc *proc, 
  * so that we have a stack discipline, and then changes current scope to be the
  * parent scope.
  */
-static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
+static void end_scope(LinearizerState *linearizer, struct proc *proc)
 {
 	struct block_scope *scope = proc->current_scope;
 	struct lua_symbol *sym;
@@ -2385,7 +2385,7 @@ static void end_scope(struct linearizer_state *linearizer, struct proc *proc)
 	proc->current_scope = scope->parent;
 }
 
-static void linearize_function(struct linearizer_state *linearizer)
+static void linearize_function(LinearizerState *linearizer)
 {
 	struct proc *proc = linearizer->current_proc;
 	assert(proc != NULL);
@@ -2575,7 +2575,7 @@ static void output_proc(struct proc *proc, buffer_t *mb)
 	}
 }
 
-int raviX_ast_linearize(struct linearizer_state *linearizer)
+int raviX_ast_linearize(LinearizerState *linearizer)
 {
 	struct proc *proc = allocate_proc(linearizer, linearizer->ast_container->main_function);
 	set_main_proc(linearizer, proc);
@@ -2590,7 +2590,7 @@ int raviX_ast_linearize(struct linearizer_state *linearizer)
 	return rc;
 }
 
-void raviX_show_linearizer(struct linearizer_state *linearizer, buffer_t *mb)
+void raviX_show_linearizer(LinearizerState *linearizer, buffer_t *mb)
 {
 	output_proc(linearizer->main_proc, mb);
 	struct proc *proc;
@@ -2603,7 +2603,7 @@ void raviX_show_linearizer(struct linearizer_state *linearizer, buffer_t *mb)
 	END_FOR_EACH_PTR(proc)
 }
 
-void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp)
+void raviX_output_linearizer(LinearizerState *linearizer, FILE *fp)
 {
 	buffer_t mb;
 	raviX_buffer_init(&mb, 4096);

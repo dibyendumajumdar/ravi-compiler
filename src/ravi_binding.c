@@ -33,7 +33,7 @@ int raviX_compile(struct Ravi_CompilerInterface *compiler_interface)
 		compiler_interface->error_message(compiler_interface->context, raviX_get_last_error(container));
 		goto L_exit;
 	}
-	struct linearizer_state *linearizer = raviX_init_linearizer(container);
+	LinearizerState *linearizer = raviX_init_linearizer(container);
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
 		compiler_interface->error_message(compiler_interface->context, raviX_get_last_error(container));

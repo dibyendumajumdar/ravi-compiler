@@ -18,7 +18,7 @@ Copyright 2018-2020 Dibyendu Majumdar
 
 typedef struct CompilerState CompilerState;
 typedef struct LexerState LexerState;
-struct linearizer_state;
+typedef struct LinearizerState LinearizerState;
 
 typedef long long lua_Integer;
 typedef double lua_Number;
@@ -197,15 +197,15 @@ raviX_ast_typecheck(CompilerState *compiler_state); /* Perform type checks and a
  * The goal of this component is to convert the AST to a linear IR.
  * This is work in progress, therefore the IR is not yet publicly exposed.
  */
-RAVICOMP_EXPORT struct linearizer_state *raviX_init_linearizer(CompilerState *compiler_state);
+RAVICOMP_EXPORT LinearizerState *raviX_init_linearizer(CompilerState *compiler_state);
 /* Attempts to create linear IR for given AST.
  * Returns 0 on success.
  */
-RAVICOMP_EXPORT int raviX_ast_linearize(struct linearizer_state *linearizer);
+RAVICOMP_EXPORT int raviX_ast_linearize(LinearizerState *linearizer);
 /* Prints out the content of the linear IR */
-RAVICOMP_EXPORT void raviX_output_linearizer(struct linearizer_state *linearizer, FILE *fp);
+RAVICOMP_EXPORT void raviX_output_linearizer(LinearizerState *linearizer, FILE *fp);
 /* Cleanup the linearizer */
-RAVICOMP_EXPORT void raviX_destroy_linearizer(struct linearizer_state *linearizer);
+RAVICOMP_EXPORT void raviX_destroy_linearizer(LinearizerState *linearizer);
 
 /* utilies */
 RAVICOMP_EXPORT const char *raviX_get_last_error(CompilerState *compiler_state);

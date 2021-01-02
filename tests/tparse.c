@@ -60,7 +60,7 @@ int main(int argc, const char *argv[])
 			raviX_output_ast(container, stdout);
 		}
 	}
-	struct linearizer_state *linearizer = raviX_init_linearizer(container);
+	LinearizerState *linearizer = raviX_init_linearizer(container);
 
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {

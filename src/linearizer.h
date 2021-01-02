@@ -196,7 +196,7 @@ struct proc {
 	unsigned allocated;
 	struct basic_block **nodes;
 	uint32_t id; /* ID for the proc */
-	struct linearizer_state *linearizer;
+	LinearizerState *linearizer;
 	struct proc_list *procs;	/* procs defined in this proc */
 	struct proc *parent;		/* enclosing proc */
 	struct ast_node *function_expr; /* function ast that we are compiling */
@@ -218,7 +218,7 @@ struct proc {
 	void *userdata; /* For use by code generator */
 };
 
-struct linearizer_state {
+struct LinearizerState {
 	struct allocator instruction_allocator;
 	struct allocator pseudo_allocator;
 	struct allocator ptrlist_allocator;
@@ -233,7 +233,7 @@ struct linearizer_state {
 	uint32_t proc_id;
 };
 
-void raviX_show_linearizer(struct linearizer_state *linearizer, buffer_t *mb);
+void raviX_show_linearizer(LinearizerState *linearizer, buffer_t *mb);
 void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, buffer_t *mb);
 
 struct instruction *raviX_last_instruction(struct basic_block *block);

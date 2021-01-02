@@ -2652,7 +2652,7 @@ static struct Ravi_CompilerInterface stub_compilerInterface = {.context = NULL,
 							       .debug_message = debug_message};
 
 /* Generate and compile C code */
-int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface)
+int raviX_generate_C(LinearizerState *linearizer, buffer_t *mb, struct Ravi_CompilerInterface *ravi_interface)
 {
 	if (ravi_interface == NULL)
 		ravi_interface = &stub_compilerInterface;
@@ -2675,7 +2675,7 @@ int raviX_generate_C(struct linearizer_state *linearizer, buffer_t *mb, struct R
 	return 0;
 }
 
-void raviX_generate_C_tofile(struct linearizer_state *linearizer, const char *mainfunc, FILE *fp)
+void raviX_generate_C_tofile(LinearizerState *linearizer, const char *mainfunc, FILE *fp)
 {
 	struct Ravi_CompilerInterface *ravi_interface = &stub_compilerInterface;
 	raviX_string_copy(ravi_interface->main_func_name, (mainfunc != NULL ? mainfunc : "setup"),

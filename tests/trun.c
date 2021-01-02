@@ -132,7 +132,7 @@ static int do_code(const char *code, const struct arguments *args)
 			raviX_output_ast(container, stdout);
 		}
 	}
-	struct linearizer_state *linearizer = raviX_init_linearizer(container);
+	LinearizerState *linearizer = raviX_init_linearizer(container);
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));

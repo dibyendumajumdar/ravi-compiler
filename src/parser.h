@@ -34,7 +34,6 @@ typedef unsigned char lu_byte;
 //////////////////////////
 
 struct lua_symbol_list;
-struct linearizer_state;
 
 /*
  * Encapsulate all the compiler state.
@@ -50,7 +49,7 @@ struct CompilerState {
 	struct allocator string_object_allocator;
 	struct set *strings;
 	struct ast_node *main_function;
-	struct linearizer_state *linearizer;
+	LinearizerState *linearizer;
 	int (*error_handler)(const char *fmt, ...);
 	buffer_t buff;		 /* temp storage for literals, used by the lexer and parser */
 	jmp_buf env;		 /* For error handling */

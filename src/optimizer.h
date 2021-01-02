@@ -5,6 +5,6 @@
  * Remove blocks that are unreachable. Blocks ae logically deleted by removing
  * all instructions, rather than being physically removed.
  */
-extern int raviX_remove_unreachable_blocks(struct linearizer_state *linearizer);
+extern int raviX_remove_unreachable_blocks(LinearizerState *linearizer);
 
 #endif

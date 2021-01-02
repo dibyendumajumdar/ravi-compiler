@@ -12,7 +12,7 @@
  * Check if a basic block has 0 predecessors. If so we can remove it from the CFG.
  * We also remove all the instructions in the basic block
  */
-static int process_block(struct linearizer_state *linearizer, struct proc *proc, struct basic_block *bb)
+static int process_block(LinearizerState *linearizer, struct proc *proc, struct basic_block *bb)
 {
 	struct node *node = raviX_graph_node(proc->cfg, bb->index);
 	struct node_list *predecessors = raviX_predecessors(node);
@@ -46,7 +46,7 @@ static int process_block(struct linearizer_state *linearizer, struct proc *proc,
 	return 1; // We changed something
 }
 
-static int process_proc(struct linearizer_state *linearizer, struct proc *proc)
+static int process_proc(LinearizerState *linearizer, struct proc *proc)
 {
 	if (proc->cfg == NULL) {
 		if (raviX_construct_cfg(proc) != 0) {
@@ -67,7 +67,7 @@ static int process_proc(struct linearizer_state *linearizer, struct proc *proc)
 	return 0;
 }
 
-int raviX_remove_unreachable_blocks(struct linearizer_state *linearizer)
+int raviX_remove_unreachable_blocks(LinearizerState *linearizer)
 {
 	struct proc *proc;
 	FOR_EACH_PTR(linearizer->all_procs, proc)
