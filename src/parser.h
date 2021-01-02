@@ -41,12 +41,12 @@ typedef struct AstNode AstNode;
  * the object is destroyed.
  */
 struct CompilerState {
-	struct allocator ast_node_allocator;
-	struct allocator ptrlist_allocator;
-	struct allocator block_scope_allocator;
-	struct allocator symbol_allocator;
-	struct allocator string_allocator;
-	struct allocator string_object_allocator;
+	Allocator ast_node_allocator;
+	Allocator ptrlist_allocator;
+	Allocator block_scope_allocator;
+	Allocator symbol_allocator;
+	Allocator string_allocator;
+	Allocator string_object_allocator;
 	struct set *strings;
 	AstNode *main_function;
 	LinearizerState *linearizer;

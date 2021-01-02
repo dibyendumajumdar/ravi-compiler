@@ -6,7 +6,7 @@
 struct Graph {
 	unsigned allocated;  /* tracks allocated size of nodes */
 	GraphNode **nodes; /* array[allocated] indexed by nodeId_t, note user must check if nodes[i] != NULL */
-	struct allocator node_allocator;
+	Allocator node_allocator;
 	nodeId_t entry, exit; /* entry and exit nodes */
 	void *userdata;
 };

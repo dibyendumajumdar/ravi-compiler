@@ -25,7 +25,7 @@ static int N_ = LIST_NODE_NR;
 void ptrlist_split_node(struct ptr_list *head)
 {
 	int old = head->nr_, nr = old / 2;
-	struct allocator *alloc = head->allocator_;
+	Allocator *alloc = head->allocator_;
 	assert(alloc);
 	struct ptr_list *newlist = (struct ptr_list *)raviX_allocator_allocate(alloc, 0);
 	struct ptr_list *next = head->next_;
@@ -181,7 +181,7 @@ int ptrlist_size(const struct ptr_list *head)
 	return nr;
 }
 
-void **ptrlist_add(struct ptr_list **listp, void *ptr, struct allocator *alloc)
+void **ptrlist_add(struct ptr_list **listp, void *ptr, Allocator *alloc)
 {
 	struct ptr_list *list = *listp;
 	struct ptr_list *last = NULL;
@@ -382,7 +382,7 @@ void *ptrlist_delete_last(struct ptr_list **head)
 
 void ptrlist_concat(struct ptr_list *a, struct ptr_list **b)
 {
-	struct allocator *alloc = NULL;
+	Allocator *alloc = NULL;
 	struct ptr_list_iter iter = ptrlist_forward_iterator(a);
 	if (a)
 		alloc = a->allocator_;
@@ -663,10 +663,10 @@ static int test_sort()
 	for (i = 0; i < 1000; i++)
 		(void)rand();
 
-	struct allocator ptrlist_allocator;
+	Allocator ptrlist_allocator;
 	raviX_allocator_init(&ptrlist_allocator, "ptrlist_nodes", sizeof(struct ptr_list), __alignof__(struct ptr_list),
 			     CHUNK);
-	struct allocator int_allocator;
+	Allocator int_allocator;
 	raviX_allocator_init(&int_allocator, "ints", sizeof(int), __alignof__(int), CHUNK);
 	struct ptr_list *int_list = NULL;
 
@@ -737,10 +737,10 @@ struct mytoken {
 
 static int test_ptrlist_basics()
 {
-	struct allocator ptrlist_allocator;
+	Allocator ptrlist_allocator;
 	raviX_allocator_init(&ptrlist_allocator, "ptrlist_nodes", sizeof(struct ptr_list), __alignof__(struct ptr_list),
 			     CHUNK);
-	struct allocator token_allocator;
+	Allocator token_allocator;
 	raviX_allocator_init(&token_allocator, "ptr_list_tokens", sizeof(struct mytoken), __alignof__(struct mytoken),
 			     CHUNK);
 	struct ptr_list *token_list = NULL;
@@ -843,7 +843,7 @@ static int test_ptrlist_basics()
 	if (ptrlist_last(token_list) != tok5)
 		return 1;
 
-	struct allocator mystruct_allocator;
+	Allocator mystruct_allocator;
 	raviX_allocator_init(&mystruct_allocator, "mystructs", sizeof(struct mystruct), __alignof__(struct mystruct),
 			     CHUNK);
 	struct ptr_list *mystruct_list = NULL;

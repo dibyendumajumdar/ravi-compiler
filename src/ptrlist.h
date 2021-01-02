@@ -52,7 +52,7 @@ extern "C" {
 		int rm_ : 8;                                                   \
 		struct listname *prev_;                                        \
 		struct listname *next_;                                        \
-		struct allocator *allocator_;                                  \
+		Allocator *allocator_;                                  \
 		type *list_[LIST_NODE_NR];                                     \
 	} listname
 
@@ -68,7 +68,7 @@ struct ptr_list_iter {
 
 /* The ptr list */
 extern int ptrlist_size(const struct ptr_list *self);
-extern void **ptrlist_add(struct ptr_list **self, void *ptr, struct allocator *ptr_list_allocator);
+extern void **ptrlist_add(struct ptr_list **self, void *ptr, Allocator *ptr_list_allocator);
 extern void *ptrlist_nth_entry(struct ptr_list *list, unsigned int idx);
 extern void *ptrlist_first(struct ptr_list *list);
 extern void *ptrlist_last(struct ptr_list *list);

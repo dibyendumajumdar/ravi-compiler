@@ -61,7 +61,7 @@ struct AllocationBlob {
  */
 #define CHUNK 32768
 
-struct allocator {
+typedef struct Allocator {
 	const char *name_;
 	AllocationBlob *blobs_;
 	size_t size_;
@@ -69,22 +69,22 @@ struct allocator {
 	unsigned int chunking_;
 	void *freelist_;
 	size_t allocations, total_bytes, useful_bytes;
-};
+} Allocator;
 
-extern void raviX_allocator_init(struct allocator *A, const char *name, size_t size, unsigned int alignment,
+extern void raviX_allocator_init(Allocator *A, const char *name, size_t size, unsigned int alignment,
 				 unsigned int chunking);
 
-extern void *raviX_allocator_allocate(struct allocator *A, size_t extra);
+extern void *raviX_allocator_allocate(Allocator *A, size_t extra);
 
-extern void raviX_allocator_free(struct allocator *A, void *entry);
+extern void raviX_allocator_free(Allocator *A, void *entry);
 
-extern void raviX_allocator_show_allocations(struct allocator *A);
+extern void raviX_allocator_show_allocations(Allocator *A);
 
-extern void raviX_allocator_drop_all_allocations(struct allocator *A);
+extern void raviX_allocator_drop_all_allocations(Allocator *A);
 
-extern void raviX_allocator_destroy(struct allocator *A);
+extern void raviX_allocator_destroy(Allocator *A);
 
-extern void raviX_allocator_transfer(struct allocator *A, struct allocator *transfer_to);
+extern void raviX_allocator_transfer(Allocator *A, Allocator *transfer_to);
 
 /*
 Reallocate array from old_n to new_n. If new_n is 0 then array memory is freed.

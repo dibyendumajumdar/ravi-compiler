@@ -19,8 +19,8 @@
 DECLARE_PTR_LIST(string_list, char);
 
 struct chunk_data {
-	struct allocator string_allocator;
-	struct allocator ptrlist_allocator;
+	Allocator string_allocator;
+	Allocator ptrlist_allocator;
 	struct string_list *list;
 };
 
