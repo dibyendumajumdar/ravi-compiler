@@ -13,12 +13,12 @@
 Linearizer component is responsible for translating the abstract syntax tree to
 a Linear intermediate representation (IR).
 */
-struct instruction;
+typedef struct Instruction Instruction;
 struct basic_block;
 struct proc;
 struct constant;
 
-DECLARE_PTR_LIST(InstructionList, struct instruction);
+DECLARE_PTR_LIST(InstructionList, Instruction);
 DECLARE_PTR_LIST(PseudoList, struct pseudo);
 DECLARE_PTR_LIST(ProcList, struct proc);
 
@@ -146,7 +146,7 @@ enum PseudoType {
 /* pseudo represents a pseudo (virtual) register */
 struct pseudo {
 	unsigned type : 4, regnum : 16, freed : 1;
-	struct instruction *insn; /* instruction that created this pseudo */
+	Instruction *insn; /* instruction that created this pseudo */
 	union {
 		LuaSymbol *symbol;	 /* PSEUDO_SYMBOL */
 		const struct constant *constant; /* PSEUDO_CONSTANT */
@@ -159,7 +159,7 @@ struct pseudo {
 };
 
 /* single instruction */
-struct instruction {
+struct Instruction {
 	unsigned opcode : 8;
 	PseudoList *operands;
 	PseudoList *targets;
@@ -236,7 +236,7 @@ struct LinearizerState {
 void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
 void raviX_output_basic_block_as_table(struct proc *proc, struct basic_block *bb, TextBuffer *mb);
 
-struct instruction *raviX_last_instruction(struct basic_block *block);
+Instruction *raviX_last_instruction(struct basic_block *block);
 struct pseudo* raviX_allocate_stack_pseudo(struct proc* proc, unsigned reg);
 const char *raviX_opcode_name(unsigned int opcode);
 

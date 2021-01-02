@@ -50,7 +50,7 @@ static void instruct_br(struct proc *proc, struct pseudo *pseudo);
 static bool is_block_terminated(struct basic_block *block);
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src);
 static void linearize_function(LinearizerState *linearizer);
-static struct instruction *allocate_instruction(struct proc *proc, enum opcode op);
+static Instruction *allocate_instruction(struct proc *proc, enum opcode op);
 static void free_temp_pseudo(struct proc *proc, struct pseudo *pseudo, bool free_temp_pseudo);
 
 /**
@@ -87,8 +87,8 @@ LinearizerState *raviX_init_linearizer(CompilerState *container)
 {
 	LinearizerState *linearizer = (LinearizerState *)calloc(1, sizeof(LinearizerState));
 	linearizer->ast_container = container;
-	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(struct instruction),
-			     sizeof(double), sizeof(struct instruction) * 128);
+	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(Instruction),
+			     sizeof(double), sizeof(Instruction) * 128);
 	raviX_allocator_init(&linearizer->ptrlist_allocator, "ptrlist_allocator", sizeof(struct ptr_list),
 			     sizeof(double), sizeof(struct ptr_list) * 64);
 	raviX_allocator_init(&linearizer->pseudo_allocator, "pseudo_allocator", sizeof(struct pseudo), sizeof(double),
@@ -222,48 +222,48 @@ static const struct constant *allocate_integer_constant(struct proc *proc, int i
 	return add_constant(proc, &c);
 }
 
-static inline void add_instruction_operand(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
+static inline void add_instruction_operand(struct proc *proc, Instruction *insn, struct pseudo *pseudo)
 {
 	ptrlist_add((struct ptr_list **)&insn->operands, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
-static inline void add_instruction_target(struct proc *proc, struct instruction *insn, struct pseudo *pseudo)
+static inline void add_instruction_target(struct proc *proc, Instruction *insn, struct pseudo *pseudo)
 {
 	ptrlist_add((struct ptr_list **)&insn->targets, pseudo, &proc->linearizer->ptrlist_allocator);
 }
 
-static struct instruction *allocate_instruction(struct proc *proc, enum opcode op)
+static Instruction *allocate_instruction(struct proc *proc, enum opcode op)
 {
-	struct instruction *insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
+	Instruction *insn = raviX_allocator_allocate(&proc->linearizer->instruction_allocator, 0);
 	insn->opcode = op;
 	return insn;
 }
 
-static void free_instruction_operand_pseudos(struct proc *proc, struct instruction *insn)
+static void free_instruction_operand_pseudos(struct proc *proc, Instruction *insn)
 {
 	struct pseudo *operand;
 	FOR_EACH_PTR_REVERSE(insn->operands, operand) { free_temp_pseudo(proc, operand, false); }
 	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
-static inline void add_instruction(struct proc *proc, struct instruction *insn)
+static inline void add_instruction(struct proc *proc, Instruction *insn)
 {
 	assert(insn->block == NULL || insn->block == proc->current_bb);
 	ptrlist_add((struct ptr_list **)&proc->current_bb->insns, insn, &proc->linearizer->ptrlist_allocator);
 	insn->block = proc->current_bb;
 }
 
-static inline void remove_instruction(struct basic_block *block, struct instruction *insn)
+static inline void remove_instruction(struct basic_block *block, Instruction *insn)
 {
 	ptrlist_remove((struct ptr_list **)&block->insns, insn, 1);
 	insn->block = NULL;
 }
 
-struct instruction *raviX_last_instruction(struct basic_block *block)
+Instruction *raviX_last_instruction(struct basic_block *block)
 {
 	if (ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
-	return (struct instruction *)ptrlist_last((struct ptr_list *)block->insns);
+	return (Instruction *)ptrlist_last((struct ptr_list *)block->insns);
 }
 
 static const struct constant *allocate_string_constant(struct proc *proc, const StringObject *s)
@@ -489,7 +489,7 @@ static void instruct_totype(struct proc *proc, struct pseudo *target, const Vari
 	default:
 		return;
 	}
-	struct instruction *insn = allocate_instruction(proc, targetop);
+	Instruction *insn = allocate_instruction(proc, targetop);
 	if (targetop == op_totype) {
 		assert(vtype->type_name);
 		const struct constant *tname_constant = allocate_string_constant(proc, vtype->type_name);
@@ -618,7 +618,7 @@ static struct pseudo *linearize_unary_operator(struct proc *proc, AstNode *node)
 	if (targetop == op_nop) {
 		return subexpr;
 	}
-	struct instruction *insn = allocate_instruction(proc, targetop);
+	Instruction *insn = allocate_instruction(proc, targetop);
 	struct pseudo *target = subexpr;
 	if (op == UNOPR_TO_TYPE) {
 		const struct constant *tname_constant = allocate_string_constant(proc, node->unary_expr.type.type_name);
@@ -639,7 +639,7 @@ static struct pseudo *linearize_unary_operator(struct proc *proc, AstNode *node)
 static struct pseudo *instruct_move(struct proc *proc, enum opcode op, struct pseudo *target, struct pseudo *src)
 {
 	// TODO we should use type specific MOVE instructions
-	struct instruction *mov = allocate_instruction(proc, op);
+	Instruction *mov = allocate_instruction(proc, op);
 	add_instruction_operand(proc, mov, src);
 	add_instruction_target(proc, mov, target);
 	add_instruction(proc, mov);
@@ -651,7 +651,7 @@ static void instruct_cbr(struct proc *proc, struct pseudo *condition_pseudo, str
 {
 	struct pseudo *true_pseudo = allocate_block_pseudo(proc, true_block);
 	struct pseudo *false_pseudo = allocate_block_pseudo(proc, false_block);
-	struct instruction *insn = allocate_instruction(proc, op_cbr);
+	Instruction *insn = allocate_instruction(proc, op_cbr);
 	add_instruction_operand(proc, insn, condition_pseudo);
 	add_instruction_target(proc, insn, true_pseudo);
 	add_instruction_target(proc, insn, false_pseudo);
@@ -664,7 +664,7 @@ static void instruct_br(struct proc *proc, struct pseudo *pseudo)
 	if (is_block_terminated(proc->current_bb)) {
 		start_block(proc, create_block(proc));
 	}
-	struct instruction *insn = allocate_instruction(proc, op_br);
+	Instruction *insn = allocate_instruction(proc, op_br);
 	add_instruction_target(proc, insn, pseudo);
 	add_instruction(proc, insn);
 }
@@ -732,7 +732,7 @@ static struct pseudo *linearize_bool(struct proc *proc, AstNode *node, bool is_a
 static void create_binary_instruction(struct proc *proc, enum opcode targetop, struct pseudo *operand1,
 				      struct pseudo *operand2, struct pseudo *target)
 {
-	struct instruction *insn = allocate_instruction(proc, targetop);
+	Instruction *insn = allocate_instruction(proc, targetop);
 	add_instruction_operand(proc, insn, operand1);
 	add_instruction_operand(proc, insn, operand2);
 	add_instruction_target(proc, insn, target);
@@ -910,7 +910,7 @@ static struct pseudo *linearize_function_expr(struct proc *proc, AstNode *expr)
 	ravitype_t target_type = expr->function_expr.type.type_code;
 	struct pseudo *target = allocate_temp_pseudo(proc, target_type);
 	struct pseudo *operand = allocate_closure_pseudo(newproc);
-	struct instruction *insn = allocate_instruction(proc, op_closure);
+	Instruction *insn = allocate_instruction(proc, op_closure);
 	add_instruction_operand(proc, insn, operand);
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
@@ -927,7 +927,7 @@ static struct pseudo *linearize_symbol_expression(struct proc *proc, AstNode *ex
 		const struct constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		struct pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		struct pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
-		struct instruction *insn = allocate_instruction(proc, op_loadglobal);
+		Instruction *insn = allocate_instruction(proc, op_loadglobal);
 		target->insn = insn;
 		add_instruction_operand(proc, insn, operand_env);
 		add_instruction_operand(proc, insn, operand_varname);
@@ -979,7 +979,7 @@ static struct pseudo *instruct_indexed_load(struct proc *proc, ravitype_t contai
 		break;
 	}
 	struct pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
-	struct instruction *insn = allocate_instruction(proc, op);
+	Instruction *insn = allocate_instruction(proc, op);
 	add_instruction_operand(proc, insn, container_pseudo);
 	add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target_pseudo);
@@ -1018,14 +1018,14 @@ static void instruct_indexed_store(struct proc *proc, ravitype_t table_type, str
 		break;
 	}
 
-	struct instruction *insn = allocate_instruction(proc, op);
+	Instruction *insn = allocate_instruction(proc, op);
 	add_instruction_target(proc, insn, table);
 	add_instruction_target(proc, insn, index_pseudo);
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
 
-static void convert_loadglobal_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
+static void convert_loadglobal_to_store(struct proc *proc, Instruction *insn, struct pseudo *value_pseudo,
 					ravitype_t value_type)
 {
 	assert(insn->opcode == op_loadglobal);
@@ -1044,7 +1044,7 @@ static void convert_loadglobal_to_store(struct proc *proc, struct instruction *i
 	add_instruction(proc, insn);
 }
 
-static void convert_indexed_load_to_store(struct proc *proc, struct instruction *insn, struct pseudo *value_pseudo,
+static void convert_indexed_load_to_store(struct proc *proc, Instruction *insn, struct pseudo *value_pseudo,
 					  ravitype_t value_type)
 {
 	enum opcode putop;
@@ -1102,7 +1102,7 @@ static void convert_indexed_load_to_store(struct proc *proc, struct instruction 
 static struct pseudo *linearize_function_call_expression(struct proc *proc, AstNode *expr,
 							 AstNode *callsite_expr, struct pseudo *callsite_pseudo)
 {
-	struct instruction *insn = allocate_instruction(proc, op_call);
+	Instruction *insn = allocate_instruction(proc, op_call);
 	struct pseudo *self_arg = NULL; /* For method call */
 	if (expr->function_call_expr.method_name) {
 		const struct constant *name_constant =
@@ -1215,7 +1215,7 @@ static struct pseudo *linearize_table_constructor(struct proc *proc, AstNode *ex
 		op = op_newiarray;
 	else if (expr->table_expr.type.type_code == RAVI_TARRAYFLT)
 		op = op_newfarray;
-	struct instruction *insn = allocate_instruction(proc, op);
+	Instruction *insn = allocate_instruction(proc, op);
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 
@@ -1447,7 +1447,7 @@ static struct pseudo *linearize_expression(struct proc *proc, AstNode *expr)
 	return result;
 }
 
-static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struct instruction *insn,
+static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, Instruction *insn,
 				PseudoList **pseudo_list)
 {
 	AstNode *expr;
@@ -1467,7 +1467,7 @@ static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struc
 static void linearize_return(struct proc *proc, AstNode *node)
 {
 	assert(node->type == STMT_RETURN);
-	struct instruction *insn = allocate_instruction(proc, op_ret);
+	Instruction *insn = allocate_instruction(proc, op_ret);
 	linearize_expr_list(proc, node->return_stmt.expr_list, insn, &insn->operands);
 	add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 	add_instruction(proc, insn);
@@ -1477,7 +1477,7 @@ static void linearize_return(struct proc *proc, AstNode *node)
    a return or a branch */
 static bool is_block_terminated(struct basic_block *block)
 {
-	struct instruction *last_insn = raviX_last_instruction(block);
+	Instruction *last_insn = raviX_last_instruction(block);
 	if (last_insn == NULL)
 		return false;
 	if (last_insn->opcode == op_ret || last_insn->opcode == op_cbr || last_insn->opcode == op_br)
@@ -1716,7 +1716,7 @@ static Scope *find_min_closing_block(Scope *block, Scope *target_block)
  */
 static bool is_already_closed(struct proc *proc, struct basic_block *block)
 {
-	struct instruction *last_insn = raviX_last_instruction(block);
+	Instruction *last_insn = raviX_last_instruction(block);
 	if (last_insn == NULL)
 		return false;
 	if (last_insn->opcode == op_ret)
@@ -1752,7 +1752,7 @@ static void instruct_close(struct proc *proc, struct basic_block *block, Scope *
 		 */
 		if (symbol->symbol_type == SYM_LOCAL && symbol->variable.escaped) {
 			assert(symbol->variable.pseudo);
-			struct instruction *insn = allocate_instruction(proc, op_close);
+			Instruction *insn = allocate_instruction(proc, op_close);
 			add_instruction_operand(proc, insn, symbol->variable.pseudo);
 			add_instruction(proc, insn);
 			break;
@@ -2401,7 +2401,7 @@ static void linearize_function(LinearizerState *linearizer)
 	end_scope(linearizer, proc);
 	if (!is_block_terminated(proc->current_bb)) {
 		//instruct_br(proc, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
-		struct instruction *insn = allocate_instruction(proc, op_ret);
+		Instruction *insn = allocate_instruction(proc, op_ret);
 		add_instruction_target(proc, insn, allocate_block_pseudo(proc, proc->nodes[EXIT_BLOCK]));
 		add_instruction(proc, insn);
 	}
@@ -2524,7 +2524,7 @@ const char *raviX_opcode_name(unsigned int opcode) {
 	return op_codenames[opcode];
 }
 
-static void output_instruction(struct instruction *insn, TextBuffer *mb, const char *prefix, const char *suffix)
+static void output_instruction(Instruction *insn, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	raviX_buffer_add_fstring(mb, "%s%s", prefix, op_codenames[insn->opcode]);
 	if (insn->operands) {
@@ -2538,7 +2538,7 @@ static void output_instruction(struct instruction *insn, TextBuffer *mb, const c
 
 static void output_instructions(InstructionList *list, TextBuffer *mb, const char *prefix, const char *suffix)
 {
-	struct instruction *insn;
+	Instruction *insn;
 	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb, prefix, suffix); }
 	END_FOR_EACH_PTR(insn)
 }

@@ -14,7 +14,7 @@ int raviX_construct_cfg(struct proc *proc)
 	struct graph *g = raviX_init_graph(ENTRY_BLOCK, EXIT_BLOCK, proc);
 	for (unsigned i = 0; i < proc->node_count; i++) {
 		struct basic_block *block = proc->nodes[i];
-		struct instruction *insn = raviX_last_instruction(block);
+		Instruction *insn = raviX_last_instruction(block);
 		if (insn == NULL)
 			continue;
 		if (insn->opcode == op_br || insn->opcode == op_cbr || insn->opcode == op_ret) {

@@ -668,42 +668,42 @@ enum {
 	LUA_OPBNOT = 13
 };
 
-static inline struct pseudo *get_operand(struct instruction *insn, unsigned idx)
+static inline struct pseudo *get_operand(Instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
 }
 
-static inline struct pseudo *get_first_operand(struct instruction *insn)
+static inline struct pseudo *get_first_operand(Instruction *insn)
 {
 	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->operands);
 }
 
-static inline struct pseudo *get_last_operand(struct instruction *insn)
+static inline struct pseudo *get_last_operand(Instruction *insn)
 {
 	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->operands);
 }
 
-static inline struct pseudo *get_target(struct instruction *insn, unsigned idx)
+static inline struct pseudo *get_target(Instruction *insn, unsigned idx)
 {
 	return (struct pseudo *)ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
 }
 
-static inline struct pseudo *get_first_target(struct instruction *insn)
+static inline struct pseudo *get_first_target(Instruction *insn)
 {
 	return (struct pseudo *)ptrlist_first((struct ptr_list *)insn->targets);
 }
 
-static inline struct pseudo *get_last_target(struct instruction *insn)
+static inline struct pseudo *get_last_target(Instruction *insn)
 {
 	return (struct pseudo *)ptrlist_last((struct ptr_list *)insn->targets);
 }
 
-static inline unsigned get_num_operands(struct instruction *insn)
+static inline unsigned get_num_operands(Instruction *insn)
 {
 	return ptrlist_size((const struct ptr_list *)insn->operands);
 }
 
-static inline unsigned get_num_targets(struct instruction *insn)
+static inline unsigned get_num_targets(Instruction *insn)
 {
 	return ptrlist_size((const struct ptr_list *)insn->targets);
 }
@@ -1081,7 +1081,7 @@ static int emit_jump(struct function *fn, struct pseudo *pseudo)
 	return 0;
 }
 
-static int emit_op_cbr(struct function *fn, struct instruction *insn)
+static int emit_op_cbr(struct function *fn, Instruction *insn)
 {
 	assert(insn->opcode == op_cbr);
 	struct pseudo *cond_pseudo = get_operand(insn, 0);
@@ -1110,19 +1110,19 @@ static int emit_op_cbr(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_br(struct function *fn, struct instruction *insn)
+static int emit_op_br(struct function *fn, Instruction *insn)
 {
 	assert(insn->opcode == op_br);
 	return emit_jump(fn, get_target(insn, 0));
 }
 
-static int emit_op_mov(struct function *fn, struct instruction *insn)
+static int emit_op_mov(struct function *fn, Instruction *insn)
 {
 	assert(insn->opcode == op_mov || insn->opcode == op_movi || insn->opcode == op_movf);
 	return emit_move(fn, get_operand(insn, 0), get_target(insn, 0));
 }
 
-static int emit_op_ret(struct function *fn, struct instruction *insn)
+static int emit_op_ret(struct function *fn, Instruction *insn)
 {
 	// TODO Only call luaF_close if needed (i.e. some variable escaped)
 #ifdef RAVI_DEFER_STATEMENT
@@ -1206,7 +1206,7 @@ static int emit_op_ret(struct function *fn, struct instruction *insn)
 }
 
 /* Generate code for various types of load table operations */
-static int emit_op_load_table(struct function *fn, struct instruction *insn)
+static int emit_op_load_table(struct function *fn, Instruction *insn)
 {
 	const char *fname = "luaV_gettable";
 	if (insn->opcode == op_tget_ikey) {
@@ -1236,7 +1236,7 @@ static int emit_op_load_table(struct function *fn, struct instruction *insn)
 }
 
 /* Emit code for a variety of store table operations */
-static int emit_op_store_table(struct function *fn, struct instruction *insn)
+static int emit_op_store_table(struct function *fn, Instruction *insn)
 {
 	// FIXME what happens if key and value are both constants
 	// Our pseudo reg will break I think
@@ -1286,7 +1286,7 @@ static int emit_op_store_table(struct function *fn, struct instruction *insn)
 // Then when we call g() we will put stack[10] = g, stack[11] = x,
 // and stack[12] = stack[10], etc. To do this correctly we need to copy the
 // last argument first.
-static int emit_op_call(struct function *fn, struct instruction *insn)
+static int emit_op_call(struct function *fn, Instruction *insn)
 {
 	assert(get_num_targets(insn) == 2);
 	unsigned int n = get_num_operands(insn);
@@ -1403,7 +1403,7 @@ static void emit_varname_or_constant(struct function *fn, struct pseudo *pseudo)
 	}
 }
 
-static int emit_comp_ii(struct function *fn, struct instruction *insn)
+static int emit_comp_ii(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{ ");
 	struct pseudo *target = get_target(insn, 0);
@@ -1444,7 +1444,7 @@ static int emit_comp_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_bin_ii(struct function *fn, struct instruction *insn)
+static int emit_bin_ii(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
@@ -1510,7 +1510,7 @@ static int emit_bin_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_bitop_ii(struct function *fn, struct instruction *insn)
+static int emit_bitop_ii(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n ");
 	struct pseudo *target = get_target(insn, 0);
@@ -1542,7 +1542,7 @@ static int emit_bitop_ii(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_bin_fi(struct function *fn, struct instruction *insn)
+static int emit_bin_fi(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
@@ -1589,7 +1589,7 @@ static int emit_bin_fi(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_bin_if(struct function *fn, struct instruction *insn)
+static int emit_bin_if(struct function *fn, Instruction *insn)
 {
 	// FIXME - needs to also work with typed function params
 	raviX_buffer_add_string(&fn->body, "{ ");
@@ -1628,7 +1628,7 @@ static int emit_bin_if(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
+static int emit_op_arrayget_ikey(struct function *fn, Instruction *insn)
 {
 	const char *array_type = insn->opcode == op_iaget_ikey ? "lua_Integer *" : "lua_Number *";
 	const char *setterfunc = insn->opcode == op_iaget_ikey ? "setivalue" : "setfltvalue";
@@ -1670,7 +1670,7 @@ static int emit_op_arrayget_ikey(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
+static int emit_op_arrayput_val(struct function *fn, Instruction *insn)
 {
 	const char *array_type = insn->opcode == op_iaput_ival ? "lua_Integer *" : "lua_Number *";
 	const char *getterfunc = insn->opcode == op_iaput_ival ? "ivalue" : "fltvalue";
@@ -1736,7 +1736,7 @@ static int emit_op_arrayput_val(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_totype(struct function *fn, struct instruction *insn)
+static int emit_op_totype(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -1768,7 +1768,7 @@ static int emit_op_totype(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_toflt(struct function *fn, struct instruction *insn)
+static int emit_op_toflt(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -1783,7 +1783,7 @@ static int emit_op_toflt(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_tousertype(struct function *fn, struct instruction *insn)
+static int emit_op_tousertype(struct function *fn, Instruction *insn)
 {
 	struct pseudo *typename = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
@@ -1803,7 +1803,7 @@ static int emit_op_tousertype(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_newtable(struct function *fn, struct instruction *insn)
+static int emit_op_newtable(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
@@ -1815,7 +1815,7 @@ static int emit_op_newtable(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_newarray(struct function *fn, struct instruction *insn)
+static int emit_op_newarray(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target_pseudo = get_first_target(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
@@ -1828,7 +1828,7 @@ static int emit_op_newarray(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_closure(struct function *fn, struct instruction *insn)
+static int emit_op_closure(struct function *fn, Instruction *insn)
 {
 	struct pseudo *closure_pseudo = get_first_operand(insn);
 	struct pseudo *target_pseudo = get_first_target(insn);
@@ -1859,7 +1859,7 @@ static int emit_op_closure(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_close(struct function *fn, struct instruction *insn)
+static int emit_op_close(struct function *fn, Instruction *insn)
 {
 	struct pseudo *pseudo = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n TValue *clsvar = ");
@@ -1875,7 +1875,7 @@ static int emit_op_close(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_len(struct function *fn, struct instruction *insn)
+static int emit_op_len(struct function *fn, Instruction *insn)
 {
 	struct pseudo *obj = get_first_operand(insn);
 	struct pseudo *target = get_first_target(insn);
@@ -1894,7 +1894,7 @@ static int emit_op_len(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_generic_comp(struct function *fn, struct instruction *insn)
+static int emit_generic_comp(struct function *fn, Instruction *insn)
 {
 	const char *oper = "==";
 	if (insn->opcode == op_lt) {
@@ -1936,7 +1936,7 @@ static int emit_generic_comp(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_arith(struct function *fn, struct instruction *insn)
+static int emit_op_arith(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	struct pseudo *target = get_target(insn, 0);
@@ -1990,7 +1990,7 @@ static int emit_op_arith(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_not(struct function *fn, struct instruction *insn)
+static int emit_op_not(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -2003,7 +2003,7 @@ static int emit_op_not(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_bnot(struct function *fn, struct instruction *insn)
+static int emit_op_bnot(struct function *fn, Instruction *insn)
 {
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
@@ -2020,7 +2020,7 @@ static int emit_op_bnot(struct function *fn, struct instruction *insn)
  * Following generates code that uses luaO_arith() calls
  * so not very efficient.
  */
-static int emit_op_binary(struct function *fn, struct instruction *insn)
+static int emit_op_binary(struct function *fn, Instruction *insn)
 {
 	int op = 0;
 	switch (insn->opcode) {
@@ -2068,7 +2068,7 @@ static int emit_op_binary(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_unmi_unmf(struct function *fn, struct instruction *insn)
+static int emit_op_unmi_unmf(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target = get_first_target(insn);
 	struct pseudo *operand = get_first_operand(insn);
@@ -2110,7 +2110,7 @@ static int emit_op_unmi_unmf(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_unm(struct function *fn, struct instruction *insn)
+static int emit_op_unm(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target = get_first_target(insn);
 	struct pseudo *operand = get_first_operand(insn);
@@ -2135,7 +2135,7 @@ static int emit_op_unm(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_movfi(struct function *fn, struct instruction *insn)
+static int emit_op_movfi(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target = get_first_target(insn);
 	struct pseudo *operand = get_first_operand(insn);
@@ -2165,7 +2165,7 @@ static int emit_op_movfi(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int emit_op_movif(struct function *fn, struct instruction *insn)
+static int emit_op_movif(struct function *fn, Instruction *insn)
 {
 	struct pseudo *target = get_first_target(insn);
 	struct pseudo *operand = get_first_operand(insn);
@@ -2195,7 +2195,7 @@ static int emit_op_movif(struct function *fn, struct instruction *insn)
 	return 0;
 }
 
-static int output_instruction(struct function *fn, struct instruction *insn)
+static int output_instruction(struct function *fn, Instruction *insn)
 {
 	int rc = 0;
 	switch (insn->opcode) {
@@ -2392,7 +2392,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 
 static int output_instructions(struct function *fn, InstructionList *list)
 {
-	struct instruction *insn;
+	Instruction *insn;
 	int rc = 0;
 	FOR_EACH_PTR(list, insn)
 	{
