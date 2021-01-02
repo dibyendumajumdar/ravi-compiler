@@ -1448,7 +1448,7 @@ static struct pseudo *linearize_expression(struct proc *proc, struct ast_node *e
 }
 
 static void linearize_expr_list(struct proc *proc, AstNodeList *expr_list, struct instruction *insn,
-				struct pseudo_list **pseudo_list)
+				PseudoList **pseudo_list)
 {
 	struct ast_node *expr;
 	int ne = ptrlist_size((const struct ptr_list *)expr_list);
@@ -2504,7 +2504,7 @@ static const char *op_codenames[] = {
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
     "STOREGLOBAL", "CLOSE", "STRCONCAT"};
 
-static void output_pseudo_list(struct pseudo_list *list, TextBuffer *mb)
+static void output_pseudo_list(PseudoList *list, TextBuffer *mb)
 {
 	struct pseudo *pseudo;
 	raviX_buffer_add_string(mb, " {");
@@ -2536,7 +2536,7 @@ static void output_instruction(struct instruction *insn, TextBuffer *mb, const c
 	raviX_buffer_add_string(mb, suffix);
 }
 
-static void output_instructions(struct instruction_list *list, TextBuffer *mb, const char *prefix, const char *suffix)
+static void output_instructions(InstructionList *list, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	struct instruction *insn;
 	FOR_EACH_PTR(list, insn) { output_instruction(insn, mb, prefix, suffix); }

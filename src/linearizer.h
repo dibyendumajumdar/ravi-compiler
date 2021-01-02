@@ -18,8 +18,8 @@ struct basic_block;
 struct proc;
 struct constant;
 
-DECLARE_PTR_LIST(instruction_list, struct instruction);
-DECLARE_PTR_LIST(pseudo_list, struct pseudo);
+DECLARE_PTR_LIST(InstructionList, struct instruction);
+DECLARE_PTR_LIST(PseudoList, struct pseudo);
 DECLARE_PTR_LIST(proc_list, struct proc);
 
 #define container_of(ptr, type, member) ((type *)((char *)(ptr)-offsetof(type, member)))
@@ -161,15 +161,15 @@ struct pseudo {
 /* single instruction */
 struct instruction {
 	unsigned opcode : 8;
-	struct pseudo_list *operands;
-	struct pseudo_list *targets;
+	PseudoList *operands;
+	PseudoList *targets;
 	struct basic_block *block; /* owning block */
 };
 
 /* Basic block */
 struct basic_block {
 	nodeId_t index; /* The index of the block is a key to enable retrieving the block from its container */
-	struct instruction_list *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
+	InstructionList *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
 };
 DECLARE_PTR_LIST(basic_block_list, struct basic_block);
 

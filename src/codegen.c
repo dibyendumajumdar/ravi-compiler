@@ -2390,7 +2390,7 @@ static int output_instruction(struct function *fn, struct instruction *insn)
 	return rc;
 }
 
-static int output_instructions(struct function *fn, struct instruction_list *list)
+static int output_instructions(struct function *fn, InstructionList *list)
 {
 	struct instruction *insn;
 	int rc = 0;
