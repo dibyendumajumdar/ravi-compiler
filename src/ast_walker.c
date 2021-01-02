@@ -64,7 +64,7 @@ void raviX_function_foreach_local(const FunctionExpression *function_expression,
 	END_FOR_EACH_PTR(symbol)
 }
 void raviX_function_foreach_upvalue(const FunctionExpression *function_expression, void *userdata,
-				    void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol))
+				    void (*callback)(void *userdata, const LuaUpvalueSymbol *symbol))
 {
 	LuaSymbol *symbol;
 	FOR_EACH_PTR(function_expression->upvalues, symbol) { callback(userdata, &symbol->upvalue); }
@@ -580,7 +580,7 @@ const struct lua_variable_symbol *raviX_symbol_variable(const LuaSymbol *symbol)
 	assert(symbol->symbol_type == SYM_GLOBAL || symbol->symbol_type == SYM_LOCAL);
 	return &symbol->variable;
 }
-const struct lua_upvalue_symbol *raviX_symbol_upvalue(const LuaSymbol *symbol)
+const LuaUpvalueSymbol *raviX_symbol_upvalue(const LuaSymbol *symbol)
 {
 	assert(symbol->symbol_type == SYM_UPVALUE);
 	return &symbol->upvalue;
@@ -592,11 +592,11 @@ const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol)
 }
 const StringObject *raviX_label_name(const struct lua_label_symbol *symbol) { return symbol->label_name; }
 const Scope *raviX_label_scope(const struct lua_label_symbol *symbol) { return symbol->block; }
-const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol)
+const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol)
 {
 	return &symbol->value_type;
 }
-const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol)
+const struct lua_variable_symbol *raviX_upvalue_target_variable(const LuaUpvalueSymbol *symbol)
 {
 	if (symbol->target_variable->symbol_type == SYM_ENV) {
 		assert(symbol->target_function == NULL);
@@ -605,7 +605,7 @@ const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua
 	assert(symbol->target_variable->symbol_type == SYM_LOCAL);
 	return &symbol->target_variable->variable;
 }
-const FunctionExpression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
+const FunctionExpression *raviX_upvalue_target_function(const LuaUpvalueSymbol *symbol)
 {
 	if (symbol->target_variable->symbol_type == SYM_ENV) {
 		assert(symbol->target_function == NULL);
@@ -614,4 +614,4 @@ const FunctionExpression *raviX_upvalue_target_function(const struct lua_upvalue
 	assert(symbol->target_function->type == EXPR_FUNCTION);
 	return &symbol->target_function->function_expr;
 }
-unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol) { return symbol->upvalue_index; }
+unsigned raviX_upvalue_index(const LuaUpvalueSymbol *symbol) { return symbol->upvalue_index; }

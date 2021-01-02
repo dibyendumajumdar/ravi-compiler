@@ -129,7 +129,7 @@ struct lua_label_symbol {
 	Scope *block;
 	struct pseudo* pseudo;     /* backend data for the symbol */
 };
-struct lua_upvalue_symbol {
+struct LuaUpvalueSymbol {
 	struct var_type value_type;
 	LuaSymbol *target_variable;	   /* variable reference */
 	struct ast_node *target_function; /* Where the upvalue lives */
@@ -144,7 +144,7 @@ struct LuaSymbol {
 	union {
 		struct lua_variable_symbol variable;
 		struct lua_label_symbol label;
-		struct lua_upvalue_symbol upvalue;
+		LuaUpvalueSymbol upvalue;
 	};
 };
 struct Scope {

@@ -49,7 +49,7 @@ static void walk_symbol(void *data, const LuaSymbol *symbol)
 		break;
 	}
 	case SYM_UPVALUE: {
-		const struct lua_upvalue_symbol *upvalue = raviX_symbol_upvalue(symbol);
+		const LuaUpvalueSymbol *upvalue = raviX_symbol_upvalue(symbol);
 		(void)upvalue;
 		break;
 	}

@@ -324,7 +324,7 @@ enum SymbolType {
 	SYM_ENV	     /* Special symbol type for _ENV */
 };
 typedef struct LuaSymbol LuaSymbol;
-struct lua_upvalue_symbol;
+typedef struct LuaUpvalueSymbol LuaUpvalueSymbol;
 struct lua_variable_symbol;
 struct lua_label_symbol;
 
@@ -467,7 +467,7 @@ RAVICOMP_EXPORT void raviX_function_foreach_local(const FunctionExpression *func
 								   const struct lua_variable_symbol *lua_local_symbol));
 RAVICOMP_EXPORT void
 raviX_function_foreach_upvalue(const FunctionExpression *function_expression, void *userdata,
-			       void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol));
+			       void (*callback)(void *userdata, const LuaUpvalueSymbol *symbol));
 
 /* table element assignment expression */
 RAVICOMP_EXPORT const struct var_type *
@@ -538,7 +538,7 @@ RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userda
 RAVICOMP_EXPORT enum SymbolType raviX_symbol_type(const LuaSymbol *symbol);
 /* symbol downcast */
 RAVICOMP_EXPORT const struct lua_variable_symbol *raviX_symbol_variable(const LuaSymbol *symbol);
-RAVICOMP_EXPORT const struct lua_upvalue_symbol *raviX_symbol_upvalue(const LuaSymbol *symbol);
+RAVICOMP_EXPORT const LuaUpvalueSymbol *raviX_symbol_upvalue(const LuaSymbol *symbol);
 RAVICOMP_EXPORT const struct lua_label_symbol *raviX_symbol_label(const LuaSymbol *symbol);
 
 /* variable symbol - local and global variables */
@@ -554,12 +554,12 @@ RAVICOMP_EXPORT const StringObject *raviX_label_name(const struct lua_label_symb
 RAVICOMP_EXPORT const Scope *raviX_label_scope(const struct lua_label_symbol *symbol);
 
 /* upvalue symbol */
-RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const struct lua_upvalue_symbol *symbol);
+RAVICOMP_EXPORT const struct var_type *raviX_upvalue_symbol_type(const LuaUpvalueSymbol *symbol);
 RAVICOMP_EXPORT const struct lua_variable_symbol *
-raviX_upvalue_target_variable(const struct lua_upvalue_symbol *symbol);
+raviX_upvalue_target_variable(const LuaUpvalueSymbol *symbol);
 RAVICOMP_EXPORT const FunctionExpression *
-raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol);
-RAVICOMP_EXPORT unsigned raviX_upvalue_index(const struct lua_upvalue_symbol *symbol);
+raviX_upvalue_target_function(const LuaUpvalueSymbol *symbol);
+RAVICOMP_EXPORT unsigned raviX_upvalue_index(const LuaUpvalueSymbol *symbol);
 
 /* Utilities */
 #ifdef __GNUC__
