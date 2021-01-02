@@ -239,18 +239,18 @@ struct IndexExpression {
 	struct ast_node *expr; /* '[' expr ']' */
 };
 /* EXPR_UNARY */
-struct unary_expression {
+struct UnaryExpression {
 	BASE_EXPRESSION_FIELDS;
 	UnaryOperatorType unary_op;
 	struct ast_node *expr;
 };
-struct binary_expression {
+struct BinaryExpression {
 	BASE_EXPRESSION_FIELDS;
 	BinaryOperatorType binary_op;
 	struct ast_node *expr_left;
 	struct ast_node *expr_right;
 };
-struct function_expression {
+struct FunctionExpression {
 	BASE_EXPRESSION_FIELDS;
 	unsigned is_vararg : 1;
 	unsigned is_method : 1;
@@ -337,9 +337,9 @@ struct ast_node {
 		LiteralExpression literal_expr;
 		SymbolExpression symbol_expr;
 		IndexExpression index_expr;
-		struct unary_expression unary_expr;
-		struct binary_expression binary_expr;
-		struct function_expression function_expr; /* a literal expression whose result is a value of type function */
+		UnaryExpression unary_expr;
+		BinaryExpression binary_expr;
+		FunctionExpression function_expr; /* a literal expression whose result is a value of type function */
 		struct table_element_assignment_expression table_elem_assign_expr;
 		struct table_literal_expression table_expr;
 		struct suffixed_expression suffixed_expr;

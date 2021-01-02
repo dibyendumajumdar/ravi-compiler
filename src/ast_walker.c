@@ -2,42 +2,42 @@
 
 #include <parser.h>
 
-const struct function_expression *raviX_ast_get_main_function(const CompilerState *compiler_state)
+const FunctionExpression *raviX_ast_get_main_function(const CompilerState *compiler_state)
 {
 	return &compiler_state->main_function->function_expr;
 }
-const struct var_type *raviX_function_type(const struct function_expression *function_expression)
+const struct var_type *raviX_function_type(const FunctionExpression *function_expression)
 {
 	return &function_expression->type;
 }
-bool raviX_function_is_vararg(const struct function_expression *function_expression)
+bool raviX_function_is_vararg(const FunctionExpression *function_expression)
 {
 	return function_expression->is_vararg;
 }
-bool raviX_function_is_method(const struct function_expression *function_expression)
+bool raviX_function_is_method(const FunctionExpression *function_expression)
 {
 	return function_expression->is_method;
 }
-const struct function_expression *raviX_function_parent(const struct function_expression *function_expression)
+const FunctionExpression *raviX_function_parent(const FunctionExpression *function_expression)
 {
 	if (function_expression->parent_function == NULL)
 		return NULL;
 	else
 		return &function_expression->parent_function->function_expr;
 }
-void raviX_function_foreach_child(const struct function_expression *function_expression, void *userdata,
+void raviX_function_foreach_child(const FunctionExpression *function_expression, void *userdata,
 				  void (*callback)(void *userdata,
-						   const struct function_expression *function_expression))
+						   const FunctionExpression *function_expression))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(function_expression->child_functions, node) { callback(userdata, &node->function_expr); }
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_function_scope(const struct function_expression *function_expression)
+const struct block_scope *raviX_function_scope(const FunctionExpression *function_expression)
 {
 	return function_expression->main_block;
 }
-void raviX_function_foreach_statement(const struct function_expression *function_expression, void *userdata,
+void raviX_function_foreach_statement(const FunctionExpression *function_expression, void *userdata,
 				      void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
@@ -49,21 +49,21 @@ void raviX_function_foreach_statement(const struct function_expression *function
 	END_FOR_EACH_PTR(node)
 }
 enum AstNodeType raviX_statement_type(const Statement *statement) { return statement->type; }
-void raviX_function_foreach_argument(const struct function_expression *function_expression, void *userdata,
+void raviX_function_foreach_argument(const FunctionExpression *function_expression, void *userdata,
 				     void (*callback)(void *userdata, const struct lua_variable_symbol *symbol))
 {
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function_expression->args, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
-void raviX_function_foreach_local(const struct function_expression *function_expression, void *userdata,
+void raviX_function_foreach_local(const FunctionExpression *function_expression, void *userdata,
 				  void (*callback)(void *userdata, const struct lua_variable_symbol *lua_local_symbol))
 {
 	struct lua_symbol *symbol;
 	FOR_EACH_PTR(function_expression->locals, symbol) { callback(userdata, &symbol->variable); }
 	END_FOR_EACH_PTR(symbol)
 }
-void raviX_function_foreach_upvalue(const struct function_expression *function_expression, void *userdata,
+void raviX_function_foreach_upvalue(const FunctionExpression *function_expression, void *userdata,
 				    void (*callback)(void *userdata, const struct lua_upvalue_symbol *symbol))
 {
 	struct lua_symbol *symbol;
@@ -158,17 +158,17 @@ const IndexExpression *raviX_index_expression(const struct expression *expr)
 	assert(expr->type == EXPR_Y_INDEX || expr->type == EXPR_FIELD_SELECTOR);
 	return &n(expr)->index_expr;
 }
-const struct unary_expression *raviX_unary_expression(const struct expression *expr)
+const UnaryExpression *raviX_unary_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_UNARY);
 	return &n(expr)->unary_expr;
 }
-const struct binary_expression *raviX_binary_expression(const struct expression *expr)
+const BinaryExpression *raviX_binary_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_BINARY);
 	return &n(expr)->binary_expr;
 }
-const struct function_expression *raviX_function_expression(const struct expression *expr)
+const FunctionExpression *raviX_function_expression(const struct expression *expr)
 {
 	assert(expr->type == EXPR_FUNCTION);
 	return &n(expr)->function_expr;
@@ -300,7 +300,7 @@ void raviX_function_statement_foreach_selector(const FunctionStatement *statemen
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct function_expression *raviX_function_ast(const FunctionStatement *statement)
+const FunctionExpression *raviX_function_ast(const FunctionStatement *statement)
 {
 	assert(statement->function_expr->type == EXPR_FUNCTION);
 	return &statement->function_expr->function_expr;
@@ -449,34 +449,34 @@ const struct expression *raviX_index_expression_expression(const IndexExpression
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr;
 }
-const struct var_type *raviX_unary_expression_type(const struct unary_expression *expression)
+const struct var_type *raviX_unary_expression_type(const UnaryExpression *expression)
 {
 	return &expression->type;
 }
-const struct expression *raviX_unary_expression_expression(const struct unary_expression *expression)
+const struct expression *raviX_unary_expression_expression(const UnaryExpression *expression)
 {
 	assert(expression->expr->type >= EXPR_LITERAL && expression->expr->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr;
 }
-UnaryOperatorType raviX_unary_expression_operator(const struct unary_expression *expression)
+UnaryOperatorType raviX_unary_expression_operator(const UnaryExpression *expression)
 {
 	return expression->unary_op;
 }
-const struct var_type *raviX_binary_expression_type(const struct binary_expression *expression)
+const struct var_type *raviX_binary_expression_type(const BinaryExpression *expression)
 {
 	return &expression->type;
 }
-const struct expression *raviX_binary_expression_left_expression(const struct binary_expression *expression)
+const struct expression *raviX_binary_expression_left_expression(const BinaryExpression *expression)
 {
 	assert(expression->expr_left->type >= EXPR_LITERAL && expression->expr_left->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_left;
 }
-const struct expression *raviX_binary_expression_right_expression(const struct binary_expression *expression)
+const struct expression *raviX_binary_expression_right_expression(const BinaryExpression *expression)
 {
 	assert(expression->expr_right->type >= EXPR_LITERAL && expression->expr_right->type <= EXPR_FUNCTION_CALL);
 	return (const struct expression *)expression->expr_right;
 }
-BinaryOperatorType raviX_binary_expression_operator(const struct binary_expression *expression)
+BinaryOperatorType raviX_binary_expression_operator(const BinaryExpression *expression)
 {
 	return expression->binary_op;
 }
@@ -558,7 +558,7 @@ void raviX_function_call_expression_foreach_argument(const struct function_call_
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct function_expression *raviX_scope_owning_function(const struct block_scope *scope)
+const FunctionExpression *raviX_scope_owning_function(const struct block_scope *scope)
 {
 	assert(scope->function->type == EXPR_FUNCTION);
 	return &scope->function->function_expr;
@@ -605,7 +605,7 @@ const struct lua_variable_symbol *raviX_upvalue_target_variable(const struct lua
 	assert(symbol->target_variable->symbol_type == SYM_LOCAL);
 	return &symbol->target_variable->variable;
 }
-const struct function_expression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
+const FunctionExpression *raviX_upvalue_target_function(const struct lua_upvalue_symbol *symbol)
 {
 	if (symbol->target_variable->symbol_type == SYM_ENV) {
 		assert(symbol->target_function == NULL);

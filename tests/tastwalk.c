@@ -16,7 +16,7 @@
 
 static void walk_statement(void *data, const Statement *statement);
 static void walk_expression(void *data, const struct expression *expression);
-static void walk_function(void *data, const struct function_expression *function);
+static void walk_function(void *data, const FunctionExpression *function);
 
 struct ast_state {
 	int dummy;
@@ -136,7 +136,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		break;
 	}
 	case EXPR_BINARY: {
-		const struct binary_expression *binary_expression = raviX_binary_expression(expression);
+		const BinaryExpression *binary_expression = raviX_binary_expression(expression);
 		const struct var_type *type = raviX_binary_expression_type(binary_expression);
 		(void)type;
 		enum BinaryOperatorType binary_operator = raviX_binary_expression_operator(binary_expression);
@@ -146,7 +146,7 @@ static void walk_expression(void *data, const struct expression *expression)
 		break;
 	}
 	case EXPR_UNARY: {
-		const struct unary_expression *unary_expression = raviX_unary_expression(expression);
+		const UnaryExpression *unary_expression = raviX_unary_expression(expression);
 		const struct var_type *type = raviX_unary_expression_type(unary_expression);
 		(void)type;
 		enum UnaryOperatorType unary_operator = raviX_unary_expression_operator(unary_expression);
@@ -268,7 +268,7 @@ static void walk_statement(void *data, const Statement *statement)
 	}
 }
 
-static void walk_function(void *data, const struct function_expression *function)
+static void walk_function(void *data, const FunctionExpression *function)
 {
 	struct ast_state *state = (struct ast_state *)data;
 	if (raviX_function_is_vararg(function)) {
@@ -288,7 +288,7 @@ static void walk_ast(CompilerState *container)
 	// would maintain state
 	struct ast_state state = {0};
 	// First lets get the main function from the parse tree
-	const struct function_expression *main_function = raviX_ast_get_main_function(container);
+	const FunctionExpression *main_function = raviX_ast_get_main_function(container);
 	walk_function(&state, main_function);
 	// Now walk all the child functions
 	raviX_function_foreach_child(main_function, &state, walk_function);
