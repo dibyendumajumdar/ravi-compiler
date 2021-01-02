@@ -1707,7 +1707,7 @@ CompilerState *raviX_init_compiler()
 			     sizeof(double), sizeof(StringObject) * 64);
 	raviX_buffer_init(&container->buff, 1024);
 	raviX_buffer_init(&container->error_message, 256);
-	container->strings = set_create(string_hash, string_equal);
+	container->strings = raviX_set_create(string_hash, string_equal);
 	container->main_function = NULL;
 	container->killed = false;
 	container->linearizer = NULL;
@@ -1733,7 +1733,7 @@ void raviX_destroy_compiler(CompilerState *container)
 			raviX_destroy_linearizer(container->linearizer);
 			free(container->linearizer);
 		}
-		set_destroy(container->strings, NULL);
+		raviX_set_destroy(container->strings, NULL);
 		raviX_buffer_free(&container->buff);
 		raviX_buffer_free(&container->error_message);
 		raviX_allocator_destroy(&container->symbol_allocator);

@@ -103,8 +103,7 @@ entry_is_present(const SetEntry *entry)
 	return entry->key != NULL && entry->key != deleted_key;
 }
 
-Set *
-set_create(uint32_t (*hash_function)(const void *key),
+Set *raviX_set_create(uint32_t (*hash_function)(const void *key),
 	   int (*key_equals_function)(const void *a,
 				   const void *b))
 {
@@ -138,8 +137,7 @@ set_create(uint32_t (*hash_function)(const void *key),
  * If delete_function is passed, it gets called on each entry present before
  * freeing.
  */
-void
-set_destroy(Set *set, void (*delete_function)(SetEntry *entry))
+void raviX_set_destroy(Set *set, void (*delete_function)(SetEntry *entry))
 {
 	if (!set)
 		return;
@@ -157,12 +155,11 @@ set_destroy(Set *set, void (*delete_function)(SetEntry *entry))
 
 /* Does the set contain an entry with the given key.
  */
-bool
-set_contains(Set *set, const void *key)
+bool raviX_set_contains(Set *set, const void *key)
 {
 	SetEntry *entry;
 
-	entry = set_search(set, key);
+	entry = raviX_set_search(set, key);
 
 	return entry != NULL;
 }
@@ -172,12 +169,11 @@ set_contains(Set *set, const void *key)
  *
  * Returns NULL if no entry is found.
  */
-SetEntry *
-set_search(Set *set, const void *key)
+SetEntry *raviX_set_search(Set *set, const void *key)
 {
 	uint32_t hash = set->hash_function(key);
 
-	return set_search_pre_hashed (set, hash, key);
+	return raviX_set_search_pre_hashed(set, hash, key);
 }
 
 /**
@@ -185,8 +181,7 @@ set_search(Set *set, const void *key)
  *
  * Returns NULL if no entry is found.
  */
-SetEntry *
-set_search_pre_hashed(Set *set, uint32_t hash, const void *key)
+SetEntry *raviX_set_search_pre_hashed(Set *set, uint32_t hash, const void *key)
 {
 	uint32_t hash_address;
 
@@ -235,8 +230,7 @@ set_rehash(Set *set, int new_size_index)
 	set->entries = 0;
 	set->deleted_entries = 0;
 
-	set_foreach(&old_set, entry) {
-		set_add_pre_hashed(set, entry->hash, entry->key);
+	set_foreach(&old_set, entry) { raviX_set_add_pre_hashed(set, entry->hash, entry->key);
 	}
 
 	free(old_set.table);
@@ -249,8 +243,7 @@ set_rehash(Set *set, int new_size_index)
  * previously found set_entry pointers are no longer valid after this
  * function.
  */
-SetEntry *
-set_add(Set *set, const void *key)
+SetEntry *raviX_set_add(Set *set, const void *key)
 {
 	uint32_t hash = set->hash_function(key);
 
@@ -261,7 +254,7 @@ set_add(Set *set, const void *key)
 	 */
 	assert(key != NULL);
 
-	return set_add_pre_hashed(set, hash, key);
+	return raviX_set_add_pre_hashed(set, hash, key);
 }
 
 /**
@@ -271,8 +264,7 @@ set_add(Set *set, const void *key)
  * previously found set_entry pointers are no longer valid after this
  * function.
  */
-SetEntry *
-set_add_pre_hashed(Set *set, uint32_t hash, const void *key)
+SetEntry *raviX_set_add_pre_hashed(Set *set, uint32_t hash, const void *key)
 {
 	uint32_t hash_address;
 	SetEntry *available_entry = NULL;
@@ -337,17 +329,16 @@ set_add_pre_hashed(Set *set, uint32_t hash, const void *key)
  * This function searches for, and removes an entry from the set.
  *
  * If the caller has previously found a SetEntry pointer,
- * (from calling set_search or remembering it from set_add), then
- * set_remove_entry can be called instead to avoid an extra search.
+ * (from calling raviX_set_search or remembering it from raviX_set_add), then
+ * raviX_set_remove_entry can be called instead to avoid an extra search.
  */
-void
-set_remove(Set *set, const void *key)
+void raviX_set_remove(Set *set, const void *key)
 {
 	SetEntry *entry;
 
-	entry = set_search(set, key);
+	entry = raviX_set_search(set, key);
 
-	set_remove_entry(set, entry);
+	raviX_set_remove_entry(set, entry);
 }
 
 /**
@@ -356,8 +347,7 @@ set_remove(Set *set, const void *key)
  * Note that deletion doesn't otherwise modify the set, so an
  * iteration over the set deleting entries is safe.
  */
-void
-set_remove_entry(Set *set, SetEntry *entry)
+void raviX_set_remove_entry(Set *set, SetEntry *entry)
 {
 	if (!entry)
 		return;
@@ -374,8 +364,7 @@ set_remove_entry(Set *set, SetEntry *entry)
  * Note that an iteration over the set is O(table_size) not
  * O(entries).
  */
-SetEntry *
-set_next_entry(Set *set, SetEntry *entry)
+SetEntry *raviX_set_next_entry(Set *set, SetEntry *entry)
 {
 	if (entry == NULL)
 		entry = set->table;
@@ -392,8 +381,7 @@ set_next_entry(Set *set, SetEntry *entry)
 }
 
 #ifndef _WIN32
-SetEntry *
-set_random_entry(Set *set,
+SetEntry *raviX_set_random_entry(Set *set,
 		 int (*predicate)(SetEntry *entry))
 {
 	SetEntry *entry;

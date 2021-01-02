@@ -130,7 +130,7 @@ is explicit. But all tokens and reserved keywords are expected to be standard C 
 const StringObject *raviX_create_string(CompilerState *compiler_state, const char *input, uint32_t len)
 {
 	StringObject temp = {.len = len, .str = input, .hash = fnv1_hash_data(input, len), .reserved = -1};
-	SetEntry *entry = set_search_pre_hashed(compiler_state->strings, temp.hash, &temp);
+	SetEntry *entry = raviX_set_search_pre_hashed(compiler_state->strings, temp.hash, &temp);
 	if (entry != NULL)
 		/* found the string */
 		return (StringObject *)entry->key;
@@ -154,7 +154,7 @@ const StringObject *raviX_create_string(CompilerState *compiler_state, const cha
                             }
                         }
 		}
-		set_add_pre_hashed(compiler_state->strings, temp.hash, new_string);
+		raviX_set_add_pre_hashed(compiler_state->strings, temp.hash, new_string);
 		return new_string;
 	}
 }

@@ -48,34 +48,25 @@ typedef struct Set {
 	uint32_t deleted_entries;
 } Set;
 
-Set *
-set_create(uint32_t (*hash_function)(const void *key),
+Set *raviX_set_create(uint32_t (*hash_function)(const void *key),
 	   int (*key_equals_function)(const void *a,
 				      const void *b));
-void
-set_destroy(Set *set,
+void raviX_set_destroy(Set *set,
 	    void (*delete_function)(SetEntry *entry));
 
-SetEntry *
-set_add(Set *set, const void *key);
+SetEntry *raviX_set_add(Set *set, const void *key);
 
-bool
-set_contains(Set *set, const void *key);
+bool raviX_set_contains(Set *set, const void *key);
 
-void
-set_remove(Set *set, const void *key);
+void raviX_set_remove(Set *set, const void *key);
 
-SetEntry *
-set_search(Set *set, const void *key);
+SetEntry *raviX_set_search(Set *set, const void *key);
 
-void
-set_remove_entry(Set *set, SetEntry *entry);
+void raviX_set_remove_entry(Set *set, SetEntry *entry);
 
-SetEntry *
-set_next_entry(Set *set, SetEntry *entry);
+SetEntry *raviX_set_next_entry(Set *set, SetEntry *entry);
 
-SetEntry *
-set_random_entry(Set *set,
+SetEntry *raviX_set_random_entry(Set *set,
 		 int (*predicate)(SetEntry *entry));
 
 /**
@@ -84,15 +75,13 @@ set_random_entry(Set *set,
  * (which may rehash the table, making entry a dangling pointer).
  */
 #define set_foreach(ht, entry)					\
-	for (entry = set_next_entry(ht, NULL);			\
+	for (entry = raviX_set_next_entry(ht, NULL);			\
 	     entry != NULL;					\
-	     entry = set_next_entry(ht, entry))
+	     entry = raviX_set_next_entry(ht, entry))
 
 /* Alternate interfaces to reduce repeated calls to hash function. */
-SetEntry *
-set_search_pre_hashed(Set *set, uint32_t hash, const void *key);
+SetEntry *raviX_set_search_pre_hashed(Set *set, uint32_t hash, const void *key);
 
-SetEntry *
-set_add_pre_hashed(Set *set, uint32_t hash, const void *key);
+SetEntry *raviX_set_add_pre_hashed(Set *set, uint32_t hash, const void *key);
 
 #endif

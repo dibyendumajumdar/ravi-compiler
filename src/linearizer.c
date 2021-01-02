@@ -112,7 +112,7 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
 	FOR_EACH_PTR(linearizer->all_procs, proc)
 	{
 		if (proc->constants)
-			set_destroy(proc->constants, NULL);
+			raviX_set_destroy(proc->constants, NULL);
 		if (proc->cfg) 
 			raviX_destroy_graph(proc->cfg);
 	}
@@ -165,7 +165,7 @@ static uint32_t hash_constant(const void *c)
  */
 static const Constant *add_constant(Proc *proc, const Constant *c)
 {
-	SetEntry *entry = set_search(proc->constants, c);
+	SetEntry *entry = raviX_set_search(proc->constants, c);
 	if (entry == NULL) {
 		int reg = 0;
 		/* Assign each type of constant a different range so that if backend
@@ -189,7 +189,7 @@ static const Constant *add_constant(Proc *proc, const Constant *c)
 		assert(c1); // FIXME
 		memcpy(c1, c, sizeof(Constant));
 		c1->index = reg;
-		set_add(proc->constants, c1);
+		raviX_set_add(proc->constants, c1);
 		// printf("Created new constant of type %d and assigned reg %d\n", c->type, reg);
 		return c1;
 	} else {
@@ -440,7 +440,7 @@ static Proc *allocate_proc(LinearizerState *linearizer, AstNode *function_expr)
 		raviX_ptrlist_add((struct ptr_list **)&linearizer->current_proc->procs, proc,
 				  &linearizer->ptrlist_allocator);
 	}
-	proc->constants = set_create(hash_constant, compare_constants);
+	proc->constants = raviX_set_create(hash_constant, compare_constants);
 	proc->linearizer = linearizer;
 	proc->cfg = NULL;
 	return proc;
