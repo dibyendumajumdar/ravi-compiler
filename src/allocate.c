@@ -75,7 +75,7 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra)
 {
 	size_t size = extra + A->size_;
 	size_t alignment = A->alignment_;
-	struct allocation_blob *blob = A->blobs_;
+	AllocationBlob *blob = A->blobs_;
 	void *retval;
 
 	if (size > A->chunking_) {
@@ -103,7 +103,7 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra)
 	size = (size + alignment - 1) & ~(alignment - 1);
 	if (!blob || blob->left < size) {
 		size_t offset, chunking = A->chunking_;
-		struct allocation_blob *newblob = (struct allocation_blob *)blob_alloc(chunking);
+		AllocationBlob *newblob = (AllocationBlob *)blob_alloc(chunking);
 		if (!newblob) {
 			fprintf(stderr, "out of memory\n");
 			exit(1);
@@ -112,10 +112,10 @@ void *raviX_allocator_allocate(struct allocator *A, size_t extra)
 		newblob->next = blob;
 		blob = newblob;
 		A->blobs_ = newblob;
-		offset = offsetof(struct allocation_blob, data);
+		offset = offsetof(AllocationBlob, data);
 		offset = (offset + alignment - 1) & ~(alignment - 1);
 		blob->left = chunking - offset;
-		blob->offset = offset - offsetof(struct allocation_blob, data);
+		blob->offset = offset - offsetof(AllocationBlob, data);
 	}
 	retval = blob->data + blob->offset;
 	blob->offset += size;
@@ -139,14 +139,14 @@ void raviX_allocator_show_allocations(struct allocator *A)
 }
 void raviX_allocator_drop_all_allocations(struct allocator *A)
 {
-	struct allocation_blob *blob = A->blobs_;
+	AllocationBlob *blob = A->blobs_;
 	A->blobs_ = NULL;
 	A->allocations = 0;
 	A->total_bytes = 0;
 	A->useful_bytes = 0;
 	A->freelist_ = NULL;
 	while (blob) {
-		struct allocation_blob *next = blob->next;
+		AllocationBlob *next = blob->next;
 		blob_free(blob, A->chunking_);
 		blob = next;
 	}
@@ -232,7 +232,7 @@ struct foo {
 int raviX_test_allocator() {
   struct allocator alloc;
   raviX_allocator_init(&alloc, "foo", sizeof(struct foo), __alignof__(struct foo),
-                 sizeof(struct allocation_blob) + sizeof(struct foo) * 2);
+                 sizeof(AllocationBlob) + sizeof(struct foo) * 2);
   struct foo *t1 = (struct foo *)raviX_allocator_allocate(&alloc, 0);
   if (t1 == NULL)
     return 1;
@@ -257,11 +257,11 @@ int raviX_test_allocator() {
   struct foo *t5 = (struct foo *)raviX_allocator_allocate(&alloc, 0);
   (void)t5;
   if (alloc.total_bytes !=
-      (sizeof(struct allocation_blob) + sizeof(struct foo) * 2) * 2)
+      (sizeof(AllocationBlob) + sizeof(struct foo) * 2) * 2)
     return 1;
   struct allocator alloc2;
   memset(&alloc2, 0, sizeof alloc2);
-  struct allocation_blob *saved = alloc.blobs_;
+  AllocationBlob *saved = alloc.blobs_;
   raviX_allocator_transfer(&alloc, &alloc2);
   if (alloc.blobs_ != NULL)
 	  return 1;

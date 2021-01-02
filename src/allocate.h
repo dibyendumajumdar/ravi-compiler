@@ -46,9 +46,9 @@
 extern "C" {
 #endif
 
-
-struct allocation_blob {
-	struct allocation_blob *next;
+typedef struct AllocationBlob AllocationBlob;
+struct AllocationBlob {
+	AllocationBlob *next;
 	size_t left, offset;
 	unsigned char data[];
 };
@@ -63,7 +63,7 @@ struct allocation_blob {
 
 struct allocator {
 	const char *name_;
-	struct allocation_blob *blobs_;
+	AllocationBlob *blobs_;
 	size_t size_;
 	unsigned int alignment_;
 	unsigned int chunking_;
