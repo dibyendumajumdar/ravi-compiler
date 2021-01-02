@@ -60,11 +60,11 @@ extern "C" {
 DECLARE_PTR_LIST(ptr_list, void);
 
 /* The iterator strucure is used for looping */
-struct ptr_list_iter {
+typedef struct PtrListIterator {
 	struct ptr_list *__head;
 	struct ptr_list *__list;
 	int __nr;
-};
+} PtrListIterator;
 
 /* The ptr list */
 extern int ptrlist_size(const struct ptr_list *self);
@@ -86,17 +86,17 @@ extern void ptrlist_sort(struct ptr_list **self, void *,
 			 int (*cmp)(void *, const void *, const void *));
 
 /* iterator functions */
-extern struct ptr_list_iter ptrlist_forward_iterator(struct ptr_list *self);
-extern struct ptr_list_iter ptrlist_reverse_iterator(struct ptr_list *self);
-extern void *ptrlist_iter_next(struct ptr_list_iter *self);
-extern void *ptrlist_iter_prev(struct ptr_list_iter *self);
-extern void ptrlist_iter_split_current(struct ptr_list_iter *self);
-extern void ptrlist_iter_insert(struct ptr_list_iter *self, void *newitem);
-extern void ptrlist_iter_remove(struct ptr_list_iter *self);
-extern void ptrlist_iter_set(struct ptr_list_iter *self, void *ptr);
-extern void ptrlist_iter_mark_deleted(struct ptr_list_iter *self);
+extern PtrListIterator ptrlist_forward_iterator(struct ptr_list *self);
+extern PtrListIterator ptrlist_reverse_iterator(struct ptr_list *self);
+extern void *ptrlist_iter_next(PtrListIterator *self);
+extern void *ptrlist_iter_prev(PtrListIterator *self);
+extern void ptrlist_iter_split_current(PtrListIterator *self);
+extern void ptrlist_iter_insert(PtrListIterator *self, void *newitem);
+extern void ptrlist_iter_remove(PtrListIterator *self);
+extern void ptrlist_iter_set(PtrListIterator *self, void *ptr);
+extern void ptrlist_iter_mark_deleted(PtrListIterator *self);
 
-static inline void **ptrlist_iter_this_address(struct ptr_list_iter *self) {
+static inline void **ptrlist_iter_this_address(PtrListIterator *self) {
 	return &self->__list->list_[self->__nr];
 }
 #define ptr_list_empty(x) ((x) == NULL)
@@ -104,21 +104,21 @@ static inline void **ptrlist_iter_this_address(struct ptr_list_iter *self) {
 #define PTR_ENTRY(h,i)	(void *)(PTR_ENTRY_NOTAG(h,i))
 
 #define FOR_EACH_PTR(list, var) \
-	{ struct ptr_list_iter var##iter__ = ptrlist_forward_iterator((struct ptr_list *)list); \
+	{ PtrListIterator var##iter__ = ptrlist_forward_iterator((struct ptr_list *)list); \
 	for (var = ptrlist_iter_next(&var##iter__); var != NULL; var = ptrlist_iter_next(&var##iter__))
 #define END_FOR_EACH_PTR(var) }
 
 #define FOR_EACH_PTR_REVERSE(list, var) \
-	{ struct ptr_list_iter var##iter__ = ptrlist_reverse_iterator((struct ptr_list *)list); \
+	{ PtrListIterator var##iter__ = ptrlist_reverse_iterator((struct ptr_list *)list); \
 	for (var = ptrlist_iter_prev(&var##iter__); var != NULL; var = ptrlist_iter_prev(&var##iter__))
 #define END_FOR_EACH_PTR_REVERSE(var) }
 
 #define RECURSE_PTR_REVERSE(list, var) \
-	{ struct ptr_list_iter var##iter__ = list##iter__; \
+	{ PtrListIterator var##iter__ = list##iter__; \
 	for (var = ptrlist_iter_prev(&var##iter__); var != NULL; var = ptrlist_iter_prev(&var##iter__))
 
 #define PREPARE_PTR_LIST(list, var)	\
-	struct ptr_list_iter var##iter__ = ptrlist_forward_iterator((struct ptr_list *)list); \
+	PtrListIterator var##iter__ = ptrlist_forward_iterator((struct ptr_list *)list); \
 	var = ptrlist_iter_next(&var##iter__)
 
 #define NEXT_PTR_LIST(var) \
