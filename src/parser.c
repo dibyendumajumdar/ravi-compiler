@@ -26,7 +26,7 @@ static struct ast_node *new_literal_expression(struct parser_state *parser, ravi
 static struct ast_node *generate_label(struct parser_state *parser, const StringObject *label);
 static void add_local_symbol_to_current_scope(struct parser_state *parser, LuaSymbol *sym);
 
-static void add_symbol(CompilerState *container, struct lua_symbol_list **list, LuaSymbol *sym)
+static void add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym)
 {
 	ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
 }
@@ -670,7 +670,7 @@ static LuaSymbol *parse_local_variable_declaration(struct parser_state *parser)
 	return new_local_symbol(parser, name, tt, pusertype);
 }
 
-static bool parse_parameter_list(struct parser_state *parser, struct lua_symbol_list **list)
+static bool parse_parameter_list(struct parser_state *parser, LuaSymbolList **list)
 {
 	LexerState *ls = parser->ls;
 	/* parlist -> [ param { ',' param } ] */

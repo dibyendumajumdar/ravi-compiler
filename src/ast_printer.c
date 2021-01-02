@@ -167,7 +167,7 @@ static void print_symbol_name(TextBuffer *buf, LuaSymbol *sym)
 	}
 }
 
-static void print_symbol_list(TextBuffer *buf, struct lua_symbol_list *list, int level, const char *delimiter)
+static void print_symbol_list(TextBuffer *buf, LuaSymbolList *list, int level, const char *delimiter)
 {
 	LuaSymbol *node;
 	bool is_first = true;
@@ -182,7 +182,7 @@ static void print_symbol_list(TextBuffer *buf, struct lua_symbol_list *list, int
 	END_FOR_EACH_PTR(node);
 }
 
-static void print_symbol_names(TextBuffer *buf, struct lua_symbol_list *list)
+static void print_symbol_names(TextBuffer *buf, LuaSymbolList *list)
 {
 	LuaSymbol *node;
 	bool is_first = true;

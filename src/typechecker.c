@@ -351,7 +351,7 @@ static void typecheck_for_num_statment(CompilerState *container, struct ast_node
 	if ((index_type & A) == 0) { /* not any */
 		/* for I+F we use F */
 		ravitype_t symbol_type = index_type == I ? RAVI_TNUMINT : RAVI_TNUMFLT;
-		struct lua_symbol_list *symbols = node->for_stmt.symbols;
+		LuaSymbolList *symbols = node->for_stmt.symbols;
 		LuaSymbol *sym;
 		/* actually there will be only index variable */
 		FOR_EACH_PTR(symbols, sym)

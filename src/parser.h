@@ -33,7 +33,7 @@ typedef unsigned char lu_byte;
 
 //////////////////////////
 
-struct lua_symbol_list;
+struct LuaSymbolList;
 
 /*
  * Encapsulate all the compiler state.
@@ -116,7 +116,7 @@ struct var_type {
 };
 
 struct pseudo;
-DECLARE_PTR_LIST(lua_symbol_list, LuaSymbol);
+DECLARE_PTR_LIST(LuaSymbolList, LuaSymbol);
 
 struct lua_variable_symbol {
 	struct var_type value_type;
@@ -153,7 +153,7 @@ struct LuaSymbol {
 struct Scope {
 	struct ast_node *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	Scope *parent;	     /* parent block, may belong to parent function */
-	struct lua_symbol_list *symbol_list; /* symbols defined in this block */
+	LuaSymbolList *symbol_list; /* symbols defined in this block */
 	unsigned need_close: 1;              /* When we exit scope of this block the upvalues need to be closed */
 };
 
@@ -173,7 +173,7 @@ struct GotoStatement {
 };
 /* STMT_LOCAL local variable declarations */
 struct LocalStatement {
-	struct lua_symbol_list *var_list;
+	LuaSymbolList *var_list;
 	struct ast_node_list *expr_list;
 };
 /* STMT_EXPR: Also covers assignments */
@@ -210,7 +210,7 @@ struct WhileOrRepeatStatement {
 /* Used for both generic and numeric for loops */
 struct ForStatement {
 	Scope* for_scope; /* encapsulates the entire for statement */
-	struct lua_symbol_list *symbols;
+	LuaSymbolList *symbols;
 	struct ast_node_list *expr_list;
 	Scope *for_body;
 	struct ast_node_list *for_statement_list; /* statements in this block */
@@ -259,11 +259,11 @@ struct FunctionExpression {
 	struct ast_node *parent_function;	       /* parent function or NULL if main chunk */
 	Scope *main_block;		       /* the function's main block */
 	struct ast_node_list *function_statement_list; /* statements in this block */
-	struct lua_symbol_list
+	LuaSymbolList
 	    *args; /* arguments, also must be part of the function block's symbol list */
 	struct ast_node_list *child_functions; /* child functions declared in this function */
-	struct lua_symbol_list *upvalues;      /* List of upvalues */
-	struct lua_symbol_list *locals;	       /* List of locals */
+	LuaSymbolList *upvalues;      /* List of upvalues */
+	LuaSymbolList *locals;	       /* List of locals */
 };
 /* Assign values in table constructor */
 /* EXPR_TABLE_ELEMENT_ASSIGN - used in table constructor */
