@@ -10,12 +10,12 @@
 
 #include <string.h>
 
-DECLARE_ARRAY(node_array, GraphNode *);
+DECLARE_ARRAY(GraphNodeArray, GraphNode *);
 
 struct dataflow_context {
 	struct graph *g;
-	struct node_array worklist;
-	struct node_array pending;
+	GraphNodeArray worklist;
+	GraphNodeArray pending;
 	struct bitset_t bb_to_consider;
 	void *userdata;
 };
@@ -40,8 +40,8 @@ void raviX_solve_dataflow(struct graph *g, bool forward_p,
 {
 	unsigned iter;
 	struct dataflow_context ctx;
-	struct node_array *worklist;
-	struct node_array *pending;
+	GraphNodeArray *worklist;
+	GraphNodeArray *pending;
 
 	init_data_flow(&ctx, g);
 	worklist = &ctx.worklist;
@@ -84,7 +84,7 @@ void raviX_solve_dataflow(struct graph *g, bool forward_p,
 		iter++;
 		{
 			/* Swap worklist and pending */
-			struct node_array *t = worklist;
+			GraphNodeArray *t = worklist;
 			worklist = pending;
 			pending = t;
 		}
