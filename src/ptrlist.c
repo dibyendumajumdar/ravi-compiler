@@ -211,7 +211,7 @@ void **raviX_ptrlist_add(struct ptr_list **self, void *ptr, Allocator *ptr_list_
 	return ret;
 }
 
-void *ptrlist_first(struct ptr_list *list)
+void *raviX_ptrlist_first(struct ptr_list *list)
 {
 	if (!list)
 		return NULL;

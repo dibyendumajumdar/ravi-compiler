@@ -675,7 +675,7 @@ static inline Pseudo *get_operand(Instruction *insn, unsigned idx)
 
 static inline Pseudo *get_first_operand(Instruction *insn)
 {
-	return (Pseudo *)ptrlist_first((struct ptr_list *)insn->operands);
+	return (Pseudo *)raviX_ptrlist_first((struct ptr_list *)insn->operands);
 }
 
 static inline Pseudo *get_last_operand(Instruction *insn)
@@ -690,7 +690,7 @@ static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 
 static inline Pseudo *get_first_target(Instruction *insn)
 {
-	return (Pseudo *)ptrlist_first((struct ptr_list *)insn->targets);
+	return (Pseudo *)raviX_ptrlist_first((struct ptr_list *)insn->targets);
 }
 
 static inline Pseudo *get_last_target(Instruction *insn)

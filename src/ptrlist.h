@@ -70,7 +70,7 @@ typedef struct PtrListIterator {
 extern int raviX_ptrlist_size(const struct ptr_list *self);
 extern void **raviX_ptrlist_add(struct ptr_list **self, void *ptr, Allocator *ptr_list_allocator);
 extern void *raviX_ptrlist_nth_entry(struct ptr_list *list, unsigned int idx);
-extern void *ptrlist_first(struct ptr_list *list);
+extern void *raviX_ptrlist_first(struct ptr_list *list);
 extern void *ptrlist_last(struct ptr_list *list);
 extern int ptrlist_linearize(struct ptr_list *head, void **arr, int max);
 extern void ptrlist_split_node(struct ptr_list *head);
