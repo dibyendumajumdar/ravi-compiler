@@ -234,7 +234,7 @@ void *raviX_ptrlist_last(struct ptr_list *list)
  * be "void *x[]", but we want to let people fill in any kind
  * of pointer array, so let's just call it "void **".
  */
-int ptrlist_linearize(struct ptr_list *head, void **arr, int max)
+int raviX_ptrlist_linearize(struct ptr_list *head, void **arr, int max)
 {
 	int nr = 0;
 	if (head && max > 0) {
