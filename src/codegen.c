@@ -1126,7 +1126,7 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 {
 	// TODO Only call luaF_close if needed (i.e. some variable escaped)
 #ifdef RAVI_DEFER_STATEMENT
-	if (ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+	if (raviX_ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
 		raviX_buffer_add_string(&fn->body, "{\nluaF_close(L, base, LUA_OK);\n");
 		raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n");
 		raviX_buffer_add_string(&fn->body, "}\n");

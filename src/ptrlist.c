@@ -42,7 +42,7 @@ void raviX_ptrlist_split_node(struct ptr_list *head)
 	memset(head->list_ + old, 0xf0, nr * sizeof(void *));
 }
 
-PtrListIterator ptrlist_forward_iterator(struct ptr_list *head)
+PtrListIterator raviX_ptrlist_forward_iterator(struct ptr_list *head)
 {
 	PtrListIterator iter;
 	iter.__head = iter.__list = head;
@@ -52,7 +52,7 @@ PtrListIterator ptrlist_forward_iterator(struct ptr_list *head)
 
 // Reverse iterator has to start from previous node not previous entry
 // in the given head
-PtrListIterator ptrlist_reverse_iterator(struct ptr_list *head)
+PtrListIterator raviX_ptrlist_reverse_iterator(struct ptr_list *head)
 {
 	PtrListIterator iter;
 	iter.__head = iter.__list = head ? head->prev_ : NULL;
@@ -60,7 +60,7 @@ PtrListIterator ptrlist_reverse_iterator(struct ptr_list *head)
 	return iter;
 }
 
-void *ptrlist_iter_next(PtrListIterator *self)
+void *raviX_ptrlist_iter_next(PtrListIterator *self)
 {
 	if (self->__head == NULL)
 		return NULL;
@@ -96,7 +96,7 @@ void *raviX_ptrlist_nth_entry(struct ptr_list *list, unsigned int idx)
 	return NULL;
 }
 
-void *ptrlist_iter_prev(PtrListIterator *self)
+void *raviX_ptrlist_iter_prev(PtrListIterator *self)
 {
 	if (self->__head == NULL)
 		return NULL;
@@ -117,7 +117,7 @@ Lretry:
 	return NULL;
 }
 
-void ptrlist_iter_split_current(PtrListIterator *self)
+void raviX_ptrlist_iter_split_current(PtrListIterator *self)
 {
 	if (self->__list->nr_ == N_) {
 		/* full so split */
@@ -129,10 +129,10 @@ void ptrlist_iter_split_current(PtrListIterator *self)
 	}
 }
 
-void ptrlist_iter_insert(PtrListIterator *self, void *newitem)
+void raviX_ptrlist_iter_insert(PtrListIterator *self, void *newitem)
 {
 	assert(self->__nr >= 0);
-	ptrlist_iter_split_current(self);
+	raviX_ptrlist_iter_split_current(self);
 	void **__this = self->__list->list_ + self->__nr;
 	void **__last = self->__list->list_ + self->__list->nr_ - 1;
 	while (__last >= __this) {
@@ -143,7 +143,7 @@ void ptrlist_iter_insert(PtrListIterator *self, void *newitem)
 	self->__list->nr_++;
 }
 
-void ptrlist_iter_remove(PtrListIterator *self)
+void raviX_ptrlist_iter_remove(PtrListIterator *self)
 {
 	assert(self->__nr >= 0);
 	void **__this = self->__list->list_ + self->__nr;
@@ -157,15 +157,15 @@ void ptrlist_iter_remove(PtrListIterator *self)
 	self->__nr--;
 }
 
-void ptrlist_iter_set(PtrListIterator *self, void *ptr)
+void raviX_ptrlist_iter_set(PtrListIterator *self, void *ptr)
 {
 	assert(self->__list && self->__nr >= 0 && self->__nr < self->__list->nr_);
 	self->__list->list_[self->__nr] = ptr;
 }
 
-void ptrlist_iter_mark_deleted(PtrListIterator *self)
+void raviX_ptrlist_iter_mark_deleted(PtrListIterator *self)
 {
-	ptrlist_iter_set(self, NULL);
+	raviX_ptrlist_iter_set(self, NULL);
 	self->__list->rm_++;
 }
 
@@ -310,10 +310,10 @@ void raviX_ptrlist_remove_all(struct ptr_list **self)
 
 int raviX_ptrlist_remove(struct ptr_list **self, void *entry, int count)
 {
-	PtrListIterator iter = ptrlist_forward_iterator(*self);
-	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
+	PtrListIterator iter = raviX_ptrlist_forward_iterator(*self);
+	for (void *ptr = raviX_ptrlist_iter_next(&iter); ptr != NULL; ptr = raviX_ptrlist_iter_next(&iter)) {
 		if (ptr == entry) {
-			ptrlist_iter_remove(&iter);
+			raviX_ptrlist_iter_remove(&iter);
 			if (!--count)
 				goto out;
 		}
@@ -326,10 +326,10 @@ out:
 
 int raviX_ptrlist_replace(struct ptr_list **self, void *old_ptr, void *new_ptr, int count)
 {
-	PtrListIterator iter = ptrlist_forward_iterator(*self);
-	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
+	PtrListIterator iter = raviX_ptrlist_forward_iterator(*self);
+	for (void *ptr = raviX_ptrlist_iter_next(&iter); ptr != NULL; ptr = raviX_ptrlist_iter_next(&iter)) {
 		if (ptr == old_ptr) {
-			ptrlist_iter_set(&iter, new_ptr);
+			raviX_ptrlist_iter_set(&iter, new_ptr);
 			if (!--count)
 				goto out;
 		}
@@ -383,14 +383,14 @@ void *raviX_ptrlist_delete_last(struct ptr_list **self)
 void raviX_ptrlist_concat(struct ptr_list *a, struct ptr_list **self)
 {
 	Allocator *alloc = NULL;
-	PtrListIterator iter = ptrlist_forward_iterator(a);
+	PtrListIterator iter = raviX_ptrlist_forward_iterator(a);
 	if (a)
 		alloc = a->allocator_;
 	else if (*self)
 		alloc = (*self)->allocator_;
 	else
 		return;
-	for (void *ptr = ptrlist_iter_next(&iter); ptr != NULL; ptr = ptrlist_iter_next(&iter)) {
+	for (void *ptr = raviX_ptrlist_iter_next(&iter); ptr != NULL; ptr = raviX_ptrlist_iter_next(&iter)) {
 		raviX_ptrlist_add(self, ptr, alloc);
 	}
 }
@@ -673,18 +673,18 @@ static int test_sort()
 	for (i = 0; i < N; i++) {
 		e = (int *)raviX_allocator_allocate(&int_allocator, 0);
 		*e = rand();
-		ptrlist_add(&int_list, e, &ptrlist_allocator);
+		raviX_ptrlist_add(&int_list, e, &ptrlist_allocator);
 	}
-	if (ptrlist_size(int_list) != N)
+	if (raviX_ptrlist_size(int_list) != N)
 		return 1;
 	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 	// Sort already sorted stuff.
 	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 
 	int *p = NULL;
-	PtrListIterator iter = ptrlist_forward_iterator(int_list);
+	PtrListIterator iter = raviX_ptrlist_forward_iterator(int_list);
 	int count = 0;
-	for (int *k = (int *)ptrlist_iter_next(&iter); k != NULL; k = (int *)ptrlist_iter_next(&iter)) {
+	for (int *k = (int *)raviX_ptrlist_iter_next(&iter); k != NULL; k = (int *)raviX_ptrlist_iter_next(&iter)) {
 		if (p != NULL) {
 			if (*k < *p)
 				return 1;
@@ -709,9 +709,9 @@ static int test_sort()
 	raviX_ptrlist_sort(&int_list, NULL, int_cmp);
 
 	p = NULL;
-	iter = ptrlist_forward_iterator(int_list);
+	iter = raviX_ptrlist_forward_iterator(int_list);
 	count = 0;
-	for (int *k = (int *)ptrlist_iter_next(&iter); k != NULL; k = (int *)ptrlist_iter_next(&iter)) {
+	for (int *k = (int *)raviX_ptrlist_iter_next(&iter); k != NULL; k = (int *)raviX_ptrlist_iter_next(&iter)) {
 		if (p != NULL) {
 			if (*k < *p)
 				return 1;
@@ -721,7 +721,7 @@ static int test_sort()
 	}
 	if (count != expected_count)
 		return 1;
-	ptrlist_remove_all(&int_list);
+	raviX_ptrlist_remove_all(&int_list);
 	raviX_allocator_destroy(&int_allocator);
 	raviX_allocator_destroy(&ptrlist_allocator);
 	return 0;
@@ -744,45 +744,45 @@ static int test_ptrlist_basics()
 	raviX_allocator_init(&token_allocator, "ptr_list_tokens", sizeof(struct mytoken), __alignof__(struct mytoken),
 			     CHUNK);
 	struct ptr_list *token_list = NULL;
-	if (ptrlist_size(token_list) != 0)
+	if (raviX_ptrlist_size(token_list) != 0)
 		return 1;
 	struct mytoken *tok1 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	struct mytoken **tok1p = (struct mytoken **)ptrlist_add(&token_list, tok1, &ptrlist_allocator);
-	if (ptrlist_size(token_list) != 1)
+	struct mytoken **tok1p = (struct mytoken **)raviX_ptrlist_add(&token_list, tok1, &ptrlist_allocator);
+	if (raviX_ptrlist_size(token_list) != 1)
 		return 1;
 	if (tok1 != *tok1p)
 		return 1;
-	if (ptrlist_first(token_list) != tok1)
+	if (raviX_ptrlist_first(token_list) != tok1)
 		return 1;
-	if (ptrlist_last(token_list) != tok1)
+	if (raviX_ptrlist_last(token_list) != tok1)
 		return 1;
 	struct mytoken *tok2 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	struct mytoken **tok2p = (struct mytoken **)ptrlist_add(&token_list, tok2, &ptrlist_allocator);
-	if (ptrlist_size(token_list) != 2)
+	struct mytoken **tok2p = (struct mytoken **)raviX_ptrlist_add(&token_list, tok2, &ptrlist_allocator);
+	if (raviX_ptrlist_size(token_list) != 2)
 		return 1;
 	struct mytoken *tok3 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	ptrlist_add(&token_list, tok3, &ptrlist_allocator);
-	if (ptrlist_size(token_list) != 3)
+	raviX_ptrlist_add(&token_list, tok3, &ptrlist_allocator);
+	if (raviX_ptrlist_size(token_list) != 3)
 		return 1;
 	struct mytoken *tok4 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	ptrlist_add(&token_list, tok4, &ptrlist_allocator);
-	if (ptrlist_size(token_list) != 4)
+	raviX_ptrlist_add(&token_list, tok4, &ptrlist_allocator);
+	if (raviX_ptrlist_size(token_list) != 4)
 		return 1;
 	struct mytoken *tok5 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	struct mytoken **tok5p = (struct mytoken **)ptrlist_add(&token_list, tok5, &ptrlist_allocator);
-	if (ptrlist_size(token_list) != 5)
+	struct mytoken **tok5p = (struct mytoken **)raviX_ptrlist_add(&token_list, tok5, &ptrlist_allocator);
+	if (raviX_ptrlist_size(token_list) != 5)
 		return 1;
 
 	if (tok2 != *tok2p)
 		return 1;
 	if (tok5 != *tok5p)
 		return 1;
-	if (ptrlist_first(token_list) != tok1)
+	if (raviX_ptrlist_first(token_list) != tok1)
 		return 1;
-	if (ptrlist_last(token_list) != tok5)
+	if (raviX_ptrlist_last(token_list) != tok5)
 		return 1;
 	struct mytoken *toks[5];
-	int lin1 = ptrlist_linearize(token_list, (void **)toks, 5);
+	int lin1 = raviX_ptrlist_linearize(token_list, (void **)toks, 5);
 	if (lin1 != 5)
 		return 1;
 	if (toks[0] != tok1)
@@ -795,23 +795,23 @@ static int test_ptrlist_basics()
 		return 1;
 	if (toks[4] != tok5)
 		return 1;
-	if (ptrlist_size(token_list) != 5)
+	if (raviX_ptrlist_size(token_list) != 5)
 		return 1;
-	ptrlist_pack(&token_list);
-	if (ptrlist_size(token_list) != 5)
+	raviX_ptrlist_pack(&token_list);
+	if (raviX_ptrlist_size(token_list) != 5)
 		return 1;
 
-	if (ptrlist_first(token_list) != tok1)
+	if (raviX_ptrlist_first(token_list) != tok1)
 		return 1;
-	if (ptrlist_last(token_list) != tok5)
+	if (raviX_ptrlist_last(token_list) != tok5)
 		return 1;
 
 	const int X = 5 + 1;
 	const int Y = X - 1;
 	const int Z = Y - 1;
-	PtrListIterator iter1 = ptrlist_forward_iterator(token_list);
+	PtrListIterator iter1 = raviX_ptrlist_forward_iterator(token_list);
 	for (int i = 0; i < X; i++) {
-		struct mytoken *tk = (struct mytoken *)ptrlist_iter_next(&iter1);
+		struct mytoken *tk = (struct mytoken *)raviX_ptrlist_iter_next(&iter1);
 		if (tk == NULL) {
 			if (i == Y)
 				break;
@@ -820,9 +820,9 @@ static int test_ptrlist_basics()
 		if (tk != toks[i])
 			return 1;
 	}
-	PtrListIterator iter2 = ptrlist_reverse_iterator(token_list);
+	PtrListIterator iter2 = raviX_ptrlist_reverse_iterator(token_list);
 	for (int i = 0; i < X; i++) {
-		struct mytoken *tk = (struct mytoken *)ptrlist_iter_prev(&iter2);
+		struct mytoken *tk = (struct mytoken *)raviX_ptrlist_iter_prev(&iter2);
 		if (tk == NULL) {
 			if (i == Y)
 				break;
@@ -832,15 +832,15 @@ static int test_ptrlist_basics()
 			return 1;
 	}
 	struct mytoken *tok0 = (struct mytoken *)raviX_allocator_allocate(&token_allocator, 0);
-	PtrListIterator iter3 = ptrlist_forward_iterator(token_list);
-	if (!ptrlist_iter_next(&iter3))
+	PtrListIterator iter3 = raviX_ptrlist_forward_iterator(token_list);
+	if (!raviX_ptrlist_iter_next(&iter3))
 		return 1;
-	ptrlist_iter_insert(&iter3, tok0);
-	if (ptrlist_size(token_list) != 6)
+	raviX_ptrlist_iter_insert(&iter3, tok0);
+	if (raviX_ptrlist_size(token_list) != 6)
 		return 1;
-	if (ptrlist_first(token_list) != tok0)
+	if (raviX_ptrlist_first(token_list) != tok0)
 		return 1;
-	if (ptrlist_last(token_list) != tok5)
+	if (raviX_ptrlist_last(token_list) != tok5)
 		return 1;
 
 	Allocator mystruct_allocator;
@@ -861,30 +861,30 @@ static int test_ptrlist_basics()
 	struct mystruct *s6 = (struct mystruct *)raviX_allocator_allocate(&mystruct_allocator, 0);
 	s6->i = 6;
 
-	ptrlist_add(&mystruct_list, s1, &ptrlist_allocator);
-	ptrlist_add(&mystruct_list, s2, &ptrlist_allocator);
-	ptrlist_add(&mystruct_list, s3, &ptrlist_allocator);
-	ptrlist_add(&mystruct_list, s4, &ptrlist_allocator);
-	ptrlist_add(&mystruct_list, s5, &ptrlist_allocator);
-	ptrlist_add(&mystruct_list, s6, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s1, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s2, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s3, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s4, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s5, &ptrlist_allocator);
+	raviX_ptrlist_add(&mystruct_list, s6, &ptrlist_allocator);
 
 	struct mystruct *serial1_expected[6] = {s1, s2, s3, s4, s5, s6};
 	struct mystruct *serial1_got[6];
-	ptrlist_linearize(mystruct_list, (void **)serial1_got, 6);
+	raviX_ptrlist_linearize(mystruct_list, (void **)serial1_got, 6);
 	for (int i = 0; i < 6; i++) {
 		if (serial1_expected[i] != serial1_got[i])
 			return 1;
 	}
 
-	if (ptrlist_remove(&mystruct_list, s3, 1) != 0)
+	if (raviX_ptrlist_remove(&mystruct_list, s3, 1) != 0)
 		return 1;
-	PtrListIterator iter4 = ptrlist_forward_iterator(mystruct_list);
-	for (struct mystruct *p = (struct mystruct *)ptrlist_iter_next(&iter4); p != NULL;
-	     p = (struct mystruct *)ptrlist_iter_next(&iter4)) {
+	PtrListIterator iter4 = raviX_ptrlist_forward_iterator(mystruct_list);
+	for (struct mystruct *p = (struct mystruct *)raviX_ptrlist_iter_next(&iter4); p != NULL;
+	     p = (struct mystruct *)raviX_ptrlist_iter_next(&iter4)) {
 		if (p->i == 4)
-			ptrlist_iter_remove(&iter4);
+			raviX_ptrlist_iter_remove(&iter4);
 	}
-	if (ptrlist_size(mystruct_list) != 4)
+	if (raviX_ptrlist_size(mystruct_list) != 4)
 		return 1;
 
 	struct mystruct *serial3_expected[4] = {s1, s2, s5, s6};
@@ -960,8 +960,8 @@ static int test_ptrlist_basics()
 			return 1;
 	}
 
-	ptrlist_remove_all(&token_list);
-	ptrlist_remove_all(&mystruct_list);
+	raviX_ptrlist_remove_all(&token_list);
+	raviX_ptrlist_remove_all(&mystruct_list);
 
 	raviX_allocator_destroy(&token_allocator);
 	raviX_allocator_destroy(&mystruct_allocator);
