@@ -173,7 +173,7 @@ static void walk_expression(void *data, const struct expression *expression)
 	}
 }
 
-static void walk_test_then_statement(void *data, const struct test_then_statement *test_then_statement)
+static void walk_test_then_statement(void *data, const TestThenStatement *test_then_statement)
 {
 	walk_expression(data, raviX_test_then_statement_condition(test_then_statement));
 	walk_scope(data, raviX_test_then_statement_scope(test_then_statement));
@@ -184,13 +184,13 @@ static void walk_statement(void *data, const Statement *statement)
 {
 	switch (raviX_statement_type(statement)) {
 	case STMT_DO: {
-		const struct do_statement *do_statement = raviX_do_statement(statement);
+		const DoStatement *do_statement = raviX_do_statement(statement);
 		walk_scope(data, raviX_do_statement_scope(do_statement));
 		raviX_do_statement_foreach_statement(do_statement, data, walk_statement);
 		break;
 	}
 	case STMT_EXPR: {
-		const struct expression_statement *expression_statement = raviX_expression_statement(statement);
+		const ExpressionStatement *expression_statement = raviX_expression_statement(statement);
 		raviX_expression_statement_foreach_lhs_expression(expression_statement, data, walk_expression);
 		raviX_expression_statement_foreach_rhs_expression(expression_statement, data, walk_expression);
 		break;
@@ -206,7 +206,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_FUNCTION: {
-		const struct function_statement *function_statement = raviX_function_statement(statement);
+		const FunctionStatement *function_statement = raviX_function_statement(statement);
 		const struct symbol_expression *name_expression = raviX_function_statement_name(function_statement);
 		walk_symbol_expression(data, name_expression);
 		if (raviX_function_statement_has_selectors(function_statement)) {

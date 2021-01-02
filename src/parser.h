@@ -177,22 +177,22 @@ struct LocalStatement {
 	struct ast_node_list *expr_list;
 };
 /* STMT_EXPR: Also covers assignments */
-struct expression_statement {
+struct ExpressionStatement {
 	struct ast_node_list *var_expr_list; /* Optional var expressions, comma separated */
 	struct ast_node_list *expr_list;     /* Comma separated expressions */
 };
-struct function_statement {
+struct FunctionStatement {
 	struct ast_node *name;		 /* base symbol to be looked up - symbol_expression */
 	struct ast_node_list *selectors; /* Optional list of index_expression(s) */
 	struct ast_node *method_name;	 /* Optional - index_expression */
 	struct ast_node *function_expr;	 /* Function's AST - function_expression */
 };
-struct do_statement {
+struct DoStatement {
 	struct block_scope *scope;		 /* The do statement only creates a new scope */
 	struct ast_node_list *do_statement_list; /* statements in this block */
 };
 /* Used internally in if_stmt, not an independent AST node */
-struct test_then_statement {
+struct TestThenStatement {
 	struct ast_node *condition;
 	struct block_scope *test_then_scope;
 	struct ast_node_list *test_then_statement_list; /* statements in this block */
@@ -325,10 +325,10 @@ struct ast_node {
 		LabelStatement label_stmt; /* STMT_LABEL */
 		GotoStatement goto_stmt; /* STMT_GOTO */
 		LocalStatement local_stmt; /* STMT_LOCAL local variable declarations */
-		struct expression_statement expression_stmt;
-		struct function_statement function_stmt;
-		struct do_statement do_stmt;
-		struct test_then_statement test_then_block;
+		ExpressionStatement expression_stmt;
+		FunctionStatement function_stmt;
+		DoStatement do_stmt;
+		TestThenStatement test_then_block;
 		struct if_statement if_stmt;
 		struct while_or_repeat_statement while_or_repeat_stmt;
 		struct for_statement for_stmt;

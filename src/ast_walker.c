@@ -107,22 +107,22 @@ const LocalStatement *raviX_local_statement(const Statement *stmt)
 	assert(stmt->type == STMT_LOCAL);
 	return &n(stmt)->local_stmt;
 }
-const struct expression_statement *raviX_expression_statement(const Statement *stmt)
+const ExpressionStatement *raviX_expression_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_EXPR);
 	return &n(stmt)->expression_stmt;
 }
-const struct function_statement *raviX_function_statement(const Statement *stmt)
+const FunctionStatement *raviX_function_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_FUNCTION);
 	return &n(stmt)->function_stmt;
 }
-const struct do_statement *raviX_do_statement(const Statement *stmt)
+const DoStatement *raviX_do_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_DO);
 	return &n(stmt)->do_stmt;
 }
-const struct test_then_statement *raviX_test_then_statement(const Statement *stmt)
+const TestThenStatement *raviX_test_then_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_TEST_THEN);
 	return &n(stmt)->test_then_block;
@@ -249,7 +249,7 @@ void raviX_local_statement_foreach_symbol(const LocalStatement *statement, void 
 	}
 	END_FOR_EACH_PTR(node)
 }
-void raviX_expression_statement_foreach_lhs_expression(const struct expression_statement *statement, void *userdata,
+void raviX_expression_statement_foreach_lhs_expression(const ExpressionStatement *statement, void *userdata,
 						       void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;
@@ -260,7 +260,7 @@ void raviX_expression_statement_foreach_lhs_expression(const struct expression_s
 	}
 	END_FOR_EACH_PTR(node)
 }
-void raviX_expression_statement_foreach_rhs_expression(const struct expression_statement *statement, void *userdata,
+void raviX_expression_statement_foreach_rhs_expression(const ExpressionStatement *statement, void *userdata,
 						       void (*callback)(void *, const struct expression *expr))
 {
 	struct ast_node *node;
@@ -271,25 +271,25 @@ void raviX_expression_statement_foreach_rhs_expression(const struct expression_s
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct symbol_expression *raviX_function_statement_name(const struct function_statement *statement)
+const struct symbol_expression *raviX_function_statement_name(const FunctionStatement *statement)
 {
 	assert(statement->name->type == EXPR_SYMBOL);
 	return &statement->name->symbol_expr;
 }
-bool raviX_function_statement_is_method(const struct function_statement *statement)
+bool raviX_function_statement_is_method(const FunctionStatement *statement)
 {
 	return statement->method_name != NULL;
 }
-const struct index_expression *raviX_function_statement_method_name(const struct function_statement *statement)
+const struct index_expression *raviX_function_statement_method_name(const FunctionStatement *statement)
 {
 	assert(statement->method_name->type == EXPR_Y_INDEX || statement->method_name->type == EXPR_FIELD_SELECTOR);
 	return &statement->method_name->index_expr;
 }
-bool raviX_function_statement_has_selectors(const struct function_statement *statement)
+bool raviX_function_statement_has_selectors(const FunctionStatement *statement)
 {
 	return statement->selectors != NULL;
 }
-void raviX_function_statement_foreach_selector(const struct function_statement *statement, void *userdata,
+void raviX_function_statement_foreach_selector(const FunctionStatement *statement, void *userdata,
 					       void (*callback)(void *, const struct index_expression *expr))
 {
 	struct ast_node *node;
@@ -300,13 +300,13 @@ void raviX_function_statement_foreach_selector(const struct function_statement *
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct function_expression *raviX_function_ast(const struct function_statement *statement)
+const struct function_expression *raviX_function_ast(const FunctionStatement *statement)
 {
 	assert(statement->function_expr->type == EXPR_FUNCTION);
 	return &statement->function_expr->function_expr;
 }
-const struct block_scope *raviX_do_statement_scope(const struct do_statement *statement) { return statement->scope; }
-void raviX_do_statement_foreach_statement(const struct do_statement *statement, void *userdata,
+const struct block_scope *raviX_do_statement_scope(const DoStatement *statement) { return statement->scope; }
+void raviX_do_statement_foreach_statement(const DoStatement *statement, void *userdata,
 					  void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
@@ -317,11 +317,11 @@ void raviX_do_statement_foreach_statement(const struct do_statement *statement, 
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct block_scope *raviX_test_then_statement_scope(const struct test_then_statement *statement)
+const struct block_scope *raviX_test_then_statement_scope(const TestThenStatement *statement)
 {
 	return statement->test_then_scope;
 }
-void raviX_test_then_statement_foreach_statement(const struct test_then_statement *statement, void *userdata,
+void raviX_test_then_statement_foreach_statement(const TestThenStatement *statement, void *userdata,
 						 void (*callback)(void *userdata, const Statement *statement))
 {
 	struct ast_node *node;
@@ -332,13 +332,13 @@ void raviX_test_then_statement_foreach_statement(const struct test_then_statemen
 	}
 	END_FOR_EACH_PTR(node)
 }
-const struct expression *raviX_test_then_statement_condition(const struct test_then_statement *statement)
+const struct expression *raviX_test_then_statement_condition(const TestThenStatement *statement)
 {
 	assert(statement->condition->type >= EXPR_LITERAL && statement->condition->type <= EXPR_FUNCTION_CALL);
 	return (struct expression *)statement->condition;
 }
 void raviX_if_statement_foreach_test_then_statement(const struct if_statement *statement, void *userdata,
-						    void (*callback)(void *, const struct test_then_statement *stmt))
+						    void (*callback)(void *, const TestThenStatement *stmt))
 {
 	struct ast_node *node;
 	FOR_EACH_PTR(statement->if_condition_list, node)
