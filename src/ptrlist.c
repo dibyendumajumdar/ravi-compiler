@@ -22,7 +22,7 @@
 /* For testing we change this */
 static int N_ = LIST_NODE_NR;
 
-void ptrlist_split_node(struct ptr_list *head)
+void raviX_ptrlist_split_node(struct ptr_list *head)
 {
 	int old = head->nr_, nr = old / 2;
 	Allocator *alloc = head->allocator_;
@@ -121,7 +121,7 @@ void ptrlist_iter_split_current(PtrListIterator *self)
 {
 	if (self->__list->nr_ == N_) {
 		/* full so split */
-		ptrlist_split_node(self->__list);
+		raviX_ptrlist_split_node(self->__list);
 		if (self->__nr >= self->__list->nr_) {
 			self->__nr -= self->__list->nr_;
 			self->__list = self->__list->next_;

@@ -73,7 +73,7 @@ extern void *raviX_ptrlist_nth_entry(struct ptr_list *list, unsigned int idx);
 extern void *raviX_ptrlist_first(struct ptr_list *list);
 extern void *raviX_ptrlist_last(struct ptr_list *list);
 extern int raviX_ptrlist_linearize(struct ptr_list *head, void **arr, int max);
-extern void ptrlist_split_node(struct ptr_list *head);
+extern void raviX_ptrlist_split_node(struct ptr_list *head);
 extern void ptrlist_pack(struct ptr_list **self);
 extern void ptrlist_remove_all(struct ptr_list **self);
 extern int ptrlist_remove(struct ptr_list **self, void *entry, int count);
