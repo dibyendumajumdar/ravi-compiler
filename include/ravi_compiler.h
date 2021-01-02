@@ -297,9 +297,9 @@ typedef struct ExpressionStatement ExpressionStatement;
 typedef struct FunctionStatement FunctionStatement;
 typedef struct DoStatement DoStatement;
 typedef struct TestThenStatement TestThenStatement;
-struct if_statement;
-struct while_or_repeat_statement;
-struct for_statement;
+typedef struct IfStatement IfStatement;
+typedef struct WhileOrRepeatStatement WhileOrRepeatStatement;
+typedef struct ForStatement ForStatement;
 
 struct expression;
 struct literal_expression;
@@ -386,10 +386,10 @@ RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const DoStatement *sta
  * else block.
  */
 RAVICOMP_EXPORT void
-raviX_if_statement_foreach_test_then_statement(const struct if_statement *statement, void *userdata,
+raviX_if_statement_foreach_test_then_statement(const IfStatement *statement, void *userdata,
 					       void (*callback)(void *, const TestThenStatement *stmt));
-RAVICOMP_EXPORT const struct block_scope *raviX_if_then_statement_else_scope(const struct if_statement *statement);
-RAVICOMP_EXPORT void raviX_if_statement_foreach_else_statement(const struct if_statement *statement, void *userdata,
+RAVICOMP_EXPORT const struct block_scope *raviX_if_then_statement_else_scope(const IfStatement *statement);
+RAVICOMP_EXPORT void raviX_if_statement_foreach_else_statement(const IfStatement *statement, void *userdata,
 							       void (*callback)(void *userdata,
 										const Statement *statement));
 RAVICOMP_EXPORT const struct block_scope *raviX_test_then_statement_scope(const TestThenStatement *statement);
@@ -401,22 +401,22 @@ raviX_test_then_statement_condition(const TestThenStatement *statement);
 
 /* while or repeat statement walking */
 RAVICOMP_EXPORT const struct expression *
-raviX_while_or_repeat_statement_condition(const struct while_or_repeat_statement *statement);
+raviX_while_or_repeat_statement_condition(const WhileOrRepeatStatement *statement);
 RAVICOMP_EXPORT const struct block_scope *
-raviX_while_or_repeat_statement_scope(const struct while_or_repeat_statement *statement);
+raviX_while_or_repeat_statement_scope(const WhileOrRepeatStatement *statement);
 RAVICOMP_EXPORT void
-raviX_while_or_repeat_statement_foreach_statement(const struct while_or_repeat_statement *statement, void *userdata,
+raviX_while_or_repeat_statement_foreach_statement(const WhileOrRepeatStatement *statement, void *userdata,
 						  void (*callback)(void *userdata, const Statement *statement));
 
 /* for statement walking */
-RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_scope(const struct for_statement *statement);
-RAVICOMP_EXPORT void raviX_for_statement_foreach_symbol(const struct for_statement *statement, void *userdata,
+RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_scope(const ForStatement *statement);
+RAVICOMP_EXPORT void raviX_for_statement_foreach_symbol(const ForStatement *statement, void *userdata,
 							void (*callback)(void *,
 									 const struct lua_variable_symbol *expr));
-RAVICOMP_EXPORT void raviX_for_statement_foreach_expression(const struct for_statement *statement, void *userdata,
+RAVICOMP_EXPORT void raviX_for_statement_foreach_expression(const ForStatement *statement, void *userdata,
 							    void (*callback)(void *, const struct expression *expr));
-RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_body_scope(const struct for_statement *statement);
-RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const struct for_statement *statement, void *userdata,
+RAVICOMP_EXPORT const struct block_scope *raviX_for_statement_body_scope(const ForStatement *statement);
+RAVICOMP_EXPORT void raviX_for_statement_body_foreach_statement(const ForStatement *statement, void *userdata,
 								void (*callback)(void *userdata,
 										 const Statement *statement));
 
@@ -512,9 +512,9 @@ RAVICOMP_EXPORT const ExpressionStatement *raviX_expression_statement(const Stat
 RAVICOMP_EXPORT const FunctionStatement *raviX_function_statement(const Statement *stmt);
 RAVICOMP_EXPORT const DoStatement *raviX_do_statement(const Statement *stmt);
 RAVICOMP_EXPORT const TestThenStatement *raviX_test_then_statement(const Statement *stmt);
-RAVICOMP_EXPORT const struct if_statement *raviX_if_statement(const Statement *stmt);
-RAVICOMP_EXPORT const struct while_or_repeat_statement *raviX_while_or_repeat_statement(const Statement *stmt);
-RAVICOMP_EXPORT const struct for_statement *raviX_for_statement(const Statement *stmt);
+RAVICOMP_EXPORT const IfStatement *raviX_if_statement(const Statement *stmt);
+RAVICOMP_EXPORT const WhileOrRepeatStatement *raviX_while_or_repeat_statement(const Statement *stmt);
+RAVICOMP_EXPORT const ForStatement *raviX_for_statement(const Statement *stmt);
 
 /* Convert an expression to the correct type */
 RAVICOMP_EXPORT enum AstNodeType raviX_expression_type(const struct expression *expression);

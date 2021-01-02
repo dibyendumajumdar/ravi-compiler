@@ -197,18 +197,18 @@ struct TestThenStatement {
 	struct block_scope *test_then_scope;
 	struct ast_node_list *test_then_statement_list; /* statements in this block */
 };
-struct if_statement {
+struct IfStatement {
 	struct ast_node_list *if_condition_list; /* Actually a list of test_then_blocks */
 	struct block_scope *else_block;
 	struct ast_node_list *else_statement_list; /* statements in this block */
 };
-struct while_or_repeat_statement {
+struct WhileOrRepeatStatement {
 	struct ast_node *condition;
 	struct block_scope *loop_scope;
 	struct ast_node_list *loop_statement_list; /* statements in this block */
 };
 /* Used for both generic and numeric for loops */
-struct for_statement {
+struct ForStatement {
 	struct block_scope* for_scope; /* encapsulates the entire for statement */
 	struct lua_symbol_list *symbols;
 	struct ast_node_list *expr_list;
@@ -329,9 +329,9 @@ struct ast_node {
 		FunctionStatement function_stmt;
 		DoStatement do_stmt;
 		TestThenStatement test_then_block;
-		struct if_statement if_stmt;
-		struct while_or_repeat_statement while_or_repeat_stmt;
-		struct for_statement for_stmt;
+		IfStatement if_stmt;
+		WhileOrRepeatStatement while_or_repeat_stmt;
+		ForStatement for_stmt;
 		struct base_expression common_expr;
 		struct literal_expression literal_expr;
 		struct symbol_expression symbol_expr;

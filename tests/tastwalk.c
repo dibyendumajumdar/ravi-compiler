@@ -197,7 +197,7 @@ static void walk_statement(void *data, const Statement *statement)
 	}
 	case STMT_FOR_NUM:
 	case STMT_FOR_IN: {
-		const struct for_statement *for_statement = raviX_for_statement(statement);
+		const ForStatement *for_statement = raviX_for_statement(statement);
 		walk_scope(data, raviX_for_statement_scope(for_statement));
 		raviX_for_statement_foreach_symbol(for_statement, data, walk_variable_symbol);
 		raviX_for_statement_foreach_expression(for_statement, data, walk_expression);
@@ -228,7 +228,7 @@ static void walk_statement(void *data, const Statement *statement)
 		break;
 	}
 	case STMT_IF: {
-		const struct if_statement *if_statement = raviX_if_statement(statement);
+		const IfStatement *if_statement = raviX_if_statement(statement);
 		raviX_if_statement_foreach_test_then_statement(if_statement, data, walk_test_then_statement);
 		walk_scope(data, raviX_if_then_statement_else_scope(if_statement));
 		raviX_if_statement_foreach_else_statement(if_statement, data, walk_statement);
@@ -249,7 +249,7 @@ static void walk_statement(void *data, const Statement *statement)
 	}
 	case STMT_REPEAT:
 	case STMT_WHILE: {
-		const struct while_or_repeat_statement *while_or_repeat_statement =
+		const WhileOrRepeatStatement *while_or_repeat_statement =
 		    raviX_while_or_repeat_statement(statement);
 		walk_expression(data, raviX_while_or_repeat_statement_condition(while_or_repeat_statement));
 		walk_scope(data, raviX_while_or_repeat_statement_scope(while_or_repeat_statement));
