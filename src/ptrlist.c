@@ -218,7 +218,7 @@ void *raviX_ptrlist_first(struct ptr_list *list)
 	return list->list_[0];
 }
 
-void *ptrlist_last(struct ptr_list *list)
+void *raviX_ptrlist_last(struct ptr_list *list)
 {
 	if (!list)
 		return NULL;

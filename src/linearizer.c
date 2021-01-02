@@ -263,7 +263,7 @@ Instruction *raviX_last_instruction(BasicBlock *block)
 {
 	if (raviX_ptrlist_size((struct ptr_list *)block->insns) == 0)
 		return NULL;
-	return (Instruction *)ptrlist_last((struct ptr_list *)block->insns);
+	return (Instruction *)raviX_ptrlist_last((struct ptr_list *)block->insns);
 }
 
 static const Constant *allocate_string_constant(Proc *proc, const StringObject *s)

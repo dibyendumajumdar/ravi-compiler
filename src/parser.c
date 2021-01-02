@@ -528,7 +528,7 @@ static AstNode *has_function_call(AstNode *expr)
 	else if (expr->type == EXPR_SUFFIXED) {
 		if (expr->suffixed_expr.suffix_list) {
 			return has_function_call(
-			    (AstNode *)ptrlist_last((struct ptr_list *)expr->suffixed_expr.suffix_list));
+			    (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr->suffixed_expr.suffix_list));
 		} else {
 			return has_function_call(expr->suffixed_expr.primary_expr);
 		}
@@ -542,7 +542,7 @@ static AstNode *has_function_call(AstNode *expr)
  */
 static void set_multireturn(struct parser_state *parser, AstNodeList *expr_list, bool in_table_constructor)
 {
-	AstNode *last_expr = (AstNode *)ptrlist_last((struct ptr_list *)expr_list);
+	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr_list);
 	if (!last_expr)
 		return;
 	if (in_table_constructor) {
@@ -1353,7 +1353,7 @@ static AstNode *parse_local_function_statement(struct parser_state *parser)
 static void limit_function_call_results(struct parser_state *parser, int num_lhs, AstNodeList *expr_list)
 {
 	// FIXME probably doesn't handle var arg case
-	AstNode *last_expr = (AstNode *)ptrlist_last((struct ptr_list *)expr_list);
+	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr_list);
 	AstNode *call_expr = has_function_call(last_expr);
 	if (!call_expr)
 		return;
