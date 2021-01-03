@@ -15,7 +15,7 @@ At the moment we run `tparse` or `trun` on inputs and compare the output as save
 The `trun` utility has the following interface.
 
 ```
-trun [string | -f filename] [--notypecheck] [--nolinearize] [--noastdump] [--noirdump] [--nocodump] [--nocfgdump] [--simplify-ast]
+trun [string | -f filename] [--notypecheck] [--nolinearize] [--noastdump] [--noirdump] [--nocodump] [--nocfgdump] [--simplify-ast] [--gen-C]
 ```
 
 The options have following meanings:
@@ -28,6 +28,7 @@ The options have following meanings:
 * `--nocodump` - stops output of the input code chunk
 * `--nocfgdump` - stops output of the CFG
 * `--simplify-ast` - performs simplifications on the AST such as constant folding
+* `--gen-C` - generates C code that is suitable for JIT or AOT compilation for Ravi
 
 The CFG output is generated in the format supported by the `dot` command in `graphviz`. 
 

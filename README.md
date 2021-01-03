@@ -9,10 +9,11 @@ A compiler for Ravi and Lua that processes Lua/Ravi source code and generates C 
 * Define conventional linear intermediate representation (IR)
 * Generate C code from Lua/Ravi source
 * Support Ahead of time (AOT) compilation
+* The generated code can be executed by Ravi.
 
 ## Modules
 
-The compiler library will consist of distinct modules:
+The compiler library consists of distinct modules:
 
 * lexer (alpha) - responsible for tokenizing an input buffer
 * parser (alpha) - responsible for generating abstract syntax tree (AST).
@@ -26,6 +27,10 @@ The compiler library will consist of distinct modules:
 
 * 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 * 01-Dec-2020 The generated code is now also suitable for AOT compilation but requires special loading facility in Ravi.
+
+## LICENSE
+
+The project is available under MIT license.
 
 ## Documentation
 
@@ -45,7 +50,7 @@ This project will create a new parser and code generator that is not a replaceme
 
 ## Technology
 
-This project is written in C for maximum portability like Lua. It will be translated to Rust at some point - just for fun.
+This project is written in C for maximum portability like Lua. 
 
 ## Building 
 
