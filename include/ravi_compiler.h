@@ -47,7 +47,7 @@ typedef double lua_Number;
 /* Initialize the compiler state */
 /* During compilation all data structures are stored in the compiler state */
 RAVICOMP_EXPORT CompilerState *raviX_init_compiler(void);
-/* Destroy the compiler state */
+/* Destroy the compiler state, and free up all resources */
 RAVICOMP_EXPORT void raviX_destroy_compiler(CompilerState *compiler);
 
 /* ------------------------ LEXICAL ANALYZER API -------------------------------*/
@@ -114,9 +114,9 @@ enum TokenType {
  */
 typedef struct StringObject {
 	uint32_t len;	  /* length of the string */
-	int32_t reserved; /* if is this a keyword then token id else -1 */
+	int32_t reserved; /* if is this a keyword then enum TokenType value else -1 */
 	uint32_t hash;	  /* hash value of the string */
-	const char *str;  /* string data */
+	const char *str;  /* string data, may not be 0 terminated */
 } StringObject;
 
 /*
@@ -130,7 +130,7 @@ typedef union {
 
 typedef struct Token {
 	int token; /* Token value or character value; token values start from FIRST_RESERVED which is 257, values < 256
-		      are characters */
+		      are ascii text characters */
 	SemInfo seminfo; /* Literal associated with the token, only valid when token is a literal or an identifier, i.e.
 			    token is > TOK_EOS */
 } Token;
