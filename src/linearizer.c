@@ -2546,6 +2546,10 @@ const char *raviX_opcode_name(unsigned int opcode) {
 	return op_codenames[opcode];
 }
 
+/* Outputs a single instruction. A prefix and suffix can be prepended/appended for formatting reasons.
+Each instruction is output in following format.
+instruction_name { operands } { targets }
+*/
 static void output_instruction(Instruction *insn, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	raviX_buffer_add_fstring(mb, "%s%s", prefix, op_codenames[insn->opcode]);
@@ -2558,6 +2562,7 @@ static void output_instruction(Instruction *insn, TextBuffer *mb, const char *pr
 	raviX_buffer_add_string(mb, suffix);
 }
 
+/* Outputs linear IR instructions in text format, each instruction is prefixed and suffixed by given strings */
 static void output_instructions(InstructionList *list, TextBuffer *mb, const char *prefix, const char *suffix)
 {
 	Instruction *insn;
@@ -2565,6 +2570,9 @@ static void output_instructions(InstructionList *list, TextBuffer *mb, const cha
 	END_FOR_EACH_PTR(insn)
 }
 
+/* Outputs the linear IR instructions within a basic block
+in textual format.
+*/
 static void output_basic_block(Proc *proc, BasicBlock *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_fstring(mb, "L%d", bb->index);
@@ -2578,6 +2586,9 @@ static void output_basic_block(Proc *proc, BasicBlock *bb, TextBuffer *mb)
 	output_instructions(bb->insns, mb, "\t", "\n");
 }
 
+/* Outputs the basic block and instructions inside it as an HTML table. This is
+meant to be used in .dot files, hence the table is formatted in a way that works
+with graphviz tool */
 void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *mb)
 {
 	raviX_buffer_add_string(mb, "<TABLE BORDER=\"1\" CELLBORDER=\"0\">\n");
@@ -2586,7 +2597,7 @@ void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *m
 	raviX_buffer_add_string(mb, "</TABLE>");
 }
 
-
+/* Outputs the linear IR for the given proc in a text format. */
 static void output_proc(Proc *proc, TextBuffer *mb)
 {
 	BasicBlock *bb;
@@ -2597,6 +2608,10 @@ static void output_proc(Proc *proc, TextBuffer *mb)
 	}
 }
 
+/* 
+Generates the linear IR for the current parse tree (AST).
+Returns 0 on success.
+*/
 int raviX_ast_linearize(LinearizerState *linearizer)
 {
 	Proc *proc = allocate_proc(linearizer, linearizer->ast_container->main_function);
@@ -2605,13 +2620,13 @@ int raviX_ast_linearize(LinearizerState *linearizer)
 	int rc = setjmp(linearizer->ast_container->env);
 	if (rc == 0) {
 		linearize_function(linearizer);
-	} else {
-		// dump it
-		// raviX_output_linearizer(linearizer, stderr);
 	}
 	return rc;
 }
 
+/* Outputs the linear IR in text format to the given text buffer. Procs are output
+recursively starting at the main proc representing the Lua chunk.
+*/
 void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb)
 {
 	output_proc(linearizer->main_proc, mb);
@@ -2625,6 +2640,7 @@ void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb)
 	END_FOR_EACH_PTR(proc)
 }
 
+/* Outputs the linear IR in text format to the given file */
 void raviX_output_linearizer(LinearizerState *linearizer, FILE *fp)
 {
 	TextBuffer mb;
