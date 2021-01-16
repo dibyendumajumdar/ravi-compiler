@@ -1187,7 +1187,7 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 	Pseudo *pseudo;
 	int i = 0;
 	raviX_buffer_add_string(&fn->body, " int j = 0;\n");
-	FOR_EACH_PTR(insn->operands, pseudo)
+	FOR_EACH_PTR(insn->operands, Pseudo, pseudo)
 	{
 		if (pseudo->type != PSEUDO_RANGE) {
 			Pseudo dummy_dest = {.type = PSEUDO_LUASTACK,
@@ -1862,7 +1862,7 @@ static int emit_op_closure(struct function *fn, Instruction *insn)
 	Proc *cursor;
 	int parent_index = -1;
 	int i = 0;
-	FOR_EACH_PTR(parent_proc->procs, cursor)
+	FOR_EACH_PTR(parent_proc->procs, Proc, cursor)
 	{
 		if (cursor->id == proc->id) {
 			assert(cursor == proc);
@@ -2417,7 +2417,7 @@ static int output_instructions(struct function *fn, InstructionList *list)
 {
 	Instruction *insn;
 	int rc = 0;
-	FOR_EACH_PTR(list, insn)
+	FOR_EACH_PTR(list, Instruction, insn)
 	{
 		rc = output_instruction(fn, insn);
 		if (rc != 0)
@@ -2502,7 +2502,7 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 	raviX_buffer_add_fstring(mb, " f->sizeupvalues = %u;\n", get_num_upvalues(proc));
 	int i = 0;
 	LuaSymbol *sym;
-	FOR_EACH_PTR(proc->function_expr->function_expr.upvalues, sym)
+	FOR_EACH_PTR(proc->function_expr->function_expr.upvalues, LuaSymbol, sym)
 	{
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].instack = %u;\n", i, sym->upvalue.is_in_parent_stack);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].idx = %u;\n", i, sym->upvalue.parent_upvalue_index);
@@ -2522,7 +2522,7 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 		raviX_buffer_add_string(mb, "   f->p[i] = NULL;\n");
 		Proc *childproc;
 		i = 0;
-		FOR_EACH_PTR(proc->procs, childproc)
+		FOR_EACH_PTR(proc->procs, Proc, childproc)
 		{
 			raviX_buffer_add_fstring(mb, " f->p[%u] = luaF_newproto(L);\n", i);
 			raviX_buffer_add_string(mb, "{ \n");
@@ -2579,7 +2579,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, Proc *
 		return rc;
 
 	Proc *childproc;
-	FOR_EACH_PTR(proc->procs, childproc)
+	FOR_EACH_PTR(proc->procs, Proc, childproc)
 	{
 		rc = generate_C_code(ravi_interface, childproc, mb);
 		if (rc != 0)
@@ -2619,7 +2619,7 @@ static unsigned get_upvalue_idx(Proc *proc, LuaSymbol *upvalue_symbol, bool *in_
 	/* Search for the upvalue in parent function */
 	LuaSymbol *sym;
 	AstNode *this_function = upvalue_symbol->upvalue.target_function;
-	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
+	FOR_EACH_PTR(this_function->function_expr.upvalues, LuaSymbol, sym)
 	{
 		if (sym->upvalue.target_variable == upvalue_symbol->upvalue.target_variable) {
 			// Same variable
@@ -2638,7 +2638,7 @@ static void compute_upvalue_attributes(Proc *proc)
 {
 	LuaSymbol *sym;
 	AstNode *this_function = proc->function_expr;
-	FOR_EACH_PTR(this_function->function_expr.upvalues, sym)
+	FOR_EACH_PTR(this_function->function_expr.upvalues, LuaSymbol, sym)
 	{
 		bool in_stack = false;
 		unsigned idx = get_upvalue_idx(proc, sym, &in_stack);
@@ -2655,7 +2655,7 @@ static void preprocess_upvalues(Proc *proc)
 {
 	compute_upvalue_attributes(proc);
 	Proc *child_proc;
-	FOR_EACH_PTR(proc->procs, child_proc) { preprocess_upvalues(child_proc); }
+	FOR_EACH_PTR(proc->procs, Proc, child_proc) { preprocess_upvalues(child_proc); }
 	END_FOR_EACH_PTR(childproc);
 }
 

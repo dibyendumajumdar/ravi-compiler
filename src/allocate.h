@@ -52,7 +52,7 @@ typedef struct AllocationBlob AllocationBlob;
 struct AllocationBlob {
 	AllocationBlob *next;
 	size_t left, offset;
-	unsigned char data[];
+	unsigned char data[1];
 };
 
 /*
@@ -108,11 +108,11 @@ extern size_t raviX_del_array_element(void *p, size_t element_size, size_t array
 		unsigned count;                                                                                        \
 		TYPE *data;                                                                                            \
 	} array_type
-#define array_push(A, value)                                                                                           \
+#define array_push(A, type, value)                                                                                           \
 	{                                                                                                              \
 		if ((A)->count == (A)->allocated) {                                                                    \
 			unsigned newsize = (A)->allocated += 10;                                                       \
-			(A)->data = raviX_realloc_array((A)->data, sizeof((A)->data[0]), (A)->allocated, newsize);     \
+			(A)->data = (type *) raviX_realloc_array((A)->data, sizeof((A)->data[0]), (A)->allocated, newsize);     \
 			(A)->allocated = newsize;                                                                      \
 		}                                                                                                      \
 		(A)->data[(A)->count++] = value;                                                                       \

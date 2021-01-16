@@ -199,7 +199,7 @@ void *raviX_realloc_array(void *oldp, size_t element_size, size_t old_n, size_t 
 		abort();
 	}
 	size_t oldsize = old_n * element_size;
-	char *p = newp;
+	char *p = (char *) newp;
 	memset(p + oldsize, 0, newsize - oldsize);
 	return newp;
 }

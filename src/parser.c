@@ -161,7 +161,7 @@ static LuaSymbol *new_local_symbol(struct parser_state *parser, const StringObje
 					   const StringObject *usertype)
 {
 	Scope *scope = parser->current_scope;
-	LuaSymbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+	LuaSymbol *symbol = (LuaSymbol *) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	set_typename(&symbol->variable.value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
 	symbol->variable.block = scope;
@@ -176,7 +176,7 @@ static LuaSymbol *new_label(struct parser_state *parser, const StringObject *nam
 {
 	Scope *scope = parser->current_scope;
 	assert(scope);
-	LuaSymbol *symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+	LuaSymbol *symbol = (LuaSymbol *) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	symbol->symbol_type = SYM_LABEL;
 	symbol->label.block = scope;
 	symbol->label.label_name = name;
@@ -207,7 +207,7 @@ static LuaSymbol *search_for_variable_in_block(Scope *scope, const StringObject 
 	// Should also work with nesting as the function when parsed
 	// will only know about vars declared in parent function until
 	// now.
-	FOR_EACH_PTR_REVERSE(scope->symbol_list, symbol)
+	FOR_EACH_PTR_REVERSE(scope->symbol_list, LuaSymbol, symbol)
 	{
 		switch (symbol->symbol_type) {
 		case SYM_LOCAL: {
@@ -229,7 +229,7 @@ static LuaSymbol *search_for_variable_in_block(Scope *scope, const StringObject 
 static LuaSymbol *search_upvalue_in_function(AstNode *function, const StringObject *name)
 {
 	LuaSymbol *symbol;
-	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
+	FOR_EACH_PTR(function->function_expr.upvalues, LuaSymbol, symbol)
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
@@ -255,7 +255,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, AstNode *functi
 {
 	assert(sym->symbol_type == SYM_LOCAL || sym->symbol_type == SYM_ENV);
 	LuaSymbol *symbol;
-	FOR_EACH_PTR(function->function_expr.upvalues, symbol)
+	FOR_EACH_PTR(function->function_expr.upvalues, LuaSymbol, symbol)
 	{
 		switch (symbol->symbol_type) {
 		case SYM_UPVALUE: {
@@ -271,7 +271,7 @@ static bool add_upvalue_in_function(struct parser_state *parser, AstNode *functi
 		}
 	}
 	END_FOR_EACH_PTR(symbol);
-	LuaSymbol *upvalue = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+	LuaSymbol *upvalue = (LuaSymbol *) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 	upvalue->symbol_type = SYM_UPVALUE;
 	upvalue->upvalue.target_variable = sym;
 	upvalue->upvalue.target_function = function;
@@ -351,7 +351,7 @@ static void add_upvalue_for_ENV(struct parser_state *parser)
 		// No definition of _ENV found
 		// Create special symbol for _ENV - so that upvalues can reference it
 		// Note that this symbol is not added to any scope, however upvalue created below will reference it
-		symbol = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+		symbol = (LuaSymbol *) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 		symbol->symbol_type = SYM_ENV;
 		symbol->variable.var_name = parser->container->_ENV;
 		symbol->variable.block = NULL;
@@ -405,7 +405,7 @@ static AstNode *new_symbol_reference(struct parser_state *parser, const StringOb
 		}
 	} else {
 		// Return global symbol
-		LuaSymbol *global = raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+		LuaSymbol *global = (LuaSymbol * ) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
 		global->symbol_type = SYM_GLOBAL;
 		global->variable.var_name = varname;
 		global->variable.block = NULL;
@@ -613,32 +613,32 @@ static AstNode *parse_table_constructor(struct parser_state *parser)
  * be anchored somewhere else by the time parsing finishes
  */
 static const StringObject *parse_user_defined_type_name(LexerState *ls,
-								const StringObject *typename)
+								const StringObject *type_name)
 {
 	size_t len = 0;
 	if (testnext(ls, '.')) {
 		char buffer[256] = {0};
-		const char *str = typename->str;
+		const char *str = type_name->str;
 		len = strlen(str);
 		if (len >= sizeof buffer) {
 			raviX_syntaxerror(ls, "User defined type name is too long");
-			return typename;
+			return type_name;
 		}
 		snprintf(buffer, sizeof buffer, "%s", str);
 		do {
-			typename = check_name_and_next(ls);
-			str = typename->str;
+			type_name = check_name_and_next(ls);
+			str = type_name->str;
 			size_t newlen = len + strlen(str) + 1;
 			if (newlen >= sizeof buffer) {
 				raviX_syntaxerror(ls, "User defined type name is too long");
-				return typename;
+				return type_name;
 			}
 			snprintf(buffer + len, sizeof buffer - len, ".%s", str);
 			len = newlen;
 		} while (testnext(ls, '.'));
-		typename = raviX_create_string(ls->container, buffer, (uint32_t)strlen(buffer));
+		type_name = raviX_create_string(ls->container, buffer, (uint32_t)strlen(buffer));
 	}
-	return typename;
+	return type_name;
 }
 
 /* RAVI Parse
@@ -654,8 +654,8 @@ static LuaSymbol *parse_local_variable_declaration(struct parser_state *parser)
 	const StringObject *name = check_name_and_next(ls);
 	const StringObject *pusertype = NULL;
 	if (testnext(ls, ':')) {
-		const StringObject *typename = check_name_and_next(ls); /* we expect a type name */
-		const char *str = typename->str;
+		const StringObject *type_name = check_name_and_next(ls); /* we expect a type name */
+		const char *str = type_name->str;
 		/* following is not very nice but easy as
 		 * the lexer doesn't need to be changed
 		 */
@@ -676,9 +676,9 @@ static LuaSymbol *parse_local_variable_declaration(struct parser_state *parser)
 		else {
 			/* default is a userdata type */
 			tt = RAVI_TUSERDATA;
-			typename = parse_user_defined_type_name(ls, typename);
+			type_name = parse_user_defined_type_name(ls, type_name);
 			// str = getstr(typename);
-			pusertype = typename;
+			pusertype = type_name;
 		}
 		if (tt == RAVI_TNUMFLT || tt == RAVI_TNUMINT) {
 			/* if we see [] then it is an array type */
@@ -1409,7 +1409,7 @@ static AstNode *parse_local_statement(struct parser_state *parser)
 	limit_function_call_results(parser, nvars, node->local_stmt.expr_list);
 	/* local symbols are only added to scope at the end of the local statement */
 	LuaSymbol *sym = NULL;
-	FOR_EACH_PTR(node->local_stmt.var_list, sym) { add_local_symbol_to_current_scope(parser, sym); }
+	FOR_EACH_PTR(node->local_stmt.var_list, LuaSymbol, sym) { add_local_symbol_to_current_scope(parser, sym); }
 	END_FOR_EACH_PTR(sym);
 	return node;
 }
@@ -1591,7 +1591,7 @@ static void parse_statement_list(struct parser_state *parser, AstNodeList **list
 static Scope *new_scope(struct parser_state *parser)
 {
 	CompilerState *container = parser->container;
-	Scope *scope = raviX_allocator_allocate(&container->block_scope_allocator, 0);
+	Scope *scope = (Scope *) raviX_allocator_allocate(&container->block_scope_allocator, 0);
 	scope->symbol_list = NULL;
 	// scope->do_statement_list = NULL;
 	scope->function = parser->current_function;

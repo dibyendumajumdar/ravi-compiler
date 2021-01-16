@@ -456,14 +456,14 @@ static void process_expression(CompilerState *container, AstNode *node)
 static void process_expression_list(CompilerState *container, AstNodeList *list)
 {
 	AstNode *node;
-	FOR_EACH_PTR(list, node) { process_expression(container, node); }
+	FOR_EACH_PTR(list, AstNode, node) { process_expression(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
 static void process_statement_list(CompilerState *container, AstNodeList *list)
 {
 	AstNode *node;
-	FOR_EACH_PTR(list, node) { process_statement(container, node); }
+	FOR_EACH_PTR(list, AstNode, node) { process_statement(container, node); }
 	END_FOR_EACH_PTR(node);
 }
 
@@ -495,7 +495,7 @@ static void process_statement(CompilerState *container, AstNode *node)
 		break;
 	case STMT_IF: {
 		AstNode *test_then_block;
-		FOR_EACH_PTR(node->if_stmt.if_condition_list, test_then_block)
+		FOR_EACH_PTR(node->if_stmt.if_condition_list, AstNode, test_then_block)
 		{
 			process_expression(container, test_then_block->test_then_block.condition);
 			process_statement_list(container, test_then_block->test_then_block.test_then_statement_list);

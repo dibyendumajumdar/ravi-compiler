@@ -109,7 +109,7 @@ Set *raviX_set_create(uint32_t (*hash_function)(const void *key),
 {
 	Set *set;
 
-	set = malloc(sizeof(*set));
+	set = (Set *) malloc(sizeof(*set));
 	if (set == NULL)
 		return NULL;
 
@@ -119,7 +119,7 @@ Set *raviX_set_create(uint32_t (*hash_function)(const void *key),
 	set->max_entries = hash_sizes[set->size_index].max_entries;
 	set->hash_function = hash_function;
 	set->key_equals_function = key_equals_function;
-	set->table = calloc(set->size, sizeof(*set->table));
+	set->table = (SetEntry *) calloc(set->size, sizeof(*set->table));
 	set->entries = 0;
 	set->deleted_entries = 0;
 
@@ -216,7 +216,7 @@ set_rehash(Set *set, int new_size_index)
 	if (new_size_index >= ARRAY_SIZE(hash_sizes))
 		return;
 
-	table = calloc(hash_sizes[new_size_index].size, sizeof(*set->table));
+	table = (SetEntry *) calloc(hash_sizes[new_size_index].size, sizeof(*set->table));
 	if (table == NULL)
 		return;
 

@@ -57,7 +57,7 @@ static void init_liveness_data(Proc *proc, struct liveness_data *liveness_data)
 		raviX_bitset_create(&liveness_info->def);
 		raviX_bitset_create(&liveness_info->in);
 		raviX_bitset_create(&liveness_info->out);
-		array_push(&liveness_data->lives, liveness_info);
+		array_push(&liveness_data->lives, struct liveness_info *, liveness_info);
 	}
 }
 
