@@ -1583,7 +1583,8 @@ static void parse_statement_list(struct parser_state *parser, AstNodeList **list
 	}
 }
 
-/* Starts a new scope. If the current function has no main block
+/*
+ * Starts a new scope. If the current function has no main block
  * defined then the new scope becomes its main block. The new scope
  * gets existing scope as its parent even if that belongs to parent
  * function.
@@ -1593,17 +1594,19 @@ static Scope *new_scope(struct parser_state *parser)
 	CompilerState *container = parser->container;
 	Scope *scope = (Scope *) raviX_allocator_allocate(&container->block_scope_allocator, 0);
 	scope->symbol_list = NULL;
-	// scope->do_statement_list = NULL;
 	scope->function = parser->current_function;
-	scope->need_close = 0;
+	scope->need_close = 0; /* Assume we do not need to close upvalues when scope is exited */
 	assert(scope->function && scope->function->type == EXPR_FUNCTION);
-	scope->parent = parser->current_scope;
+	scope->parent = parser->current_scope; /* Note parent scope may be in outer function */
 	parser->current_scope = scope;
 	if (!parser->current_function->function_expr.main_block)
 		parser->current_function->function_expr.main_block = scope;
 	return scope;
 }
 
+/*
+ * Ends current scope and makes the parent scope the current scope.
+ */
 static void end_scope(struct parser_state *parser)
 {
 	assert(parser->current_scope);

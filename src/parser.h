@@ -174,7 +174,7 @@ struct Scope {
 	AstNode *function;	     /* function owning this block - of type FUNCTION_EXPR */
 	Scope *parent;	     /* parent block, may belong to parent function */
 	LuaSymbolList *symbol_list; /* symbols defined in this block */
-	unsigned need_close: 1;              /* When we exit scope of this block the upvalues need to be closed */
+	unsigned need_close: 1;              /* When we exit scope of this block do the upvalues need to be closed? */
 };
 
 /*STMT_RETURN */
