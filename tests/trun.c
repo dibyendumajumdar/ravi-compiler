@@ -65,7 +65,7 @@ static const char *scan_next(const char *cp, const char *endp)
 static void add_chunk(struct chunk_data *chunks, TextBuffer *buf)
 {
 	size_t len = raviX_buffer_len(buf);
-	char *s = raviX_allocator_allocate(&chunks->string_allocator, len + 1);
+	char *s = (char *) raviX_allocator_allocate(&chunks->string_allocator, len + 1);
 	raviX_string_copy(s, raviX_buffer_data(buf), len + 1);
 	raviX_ptrlist_add((struct ptr_list **)&chunks->list, s, &chunks->ptrlist_allocator);
 }

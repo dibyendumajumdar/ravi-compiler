@@ -111,7 +111,7 @@ const char *read_file(const char *filename)
 		fclose(fp);
 		return NULL;
 	}
-	char *buffer = calloc(1, len + 10);
+	char *buffer = (char *)calloc(1, len + 10);
 	size_t n = fread(buffer, 1, len, fp);
 	if (n == 0) {
 		fprintf(stderr, "Failed to read file\n");

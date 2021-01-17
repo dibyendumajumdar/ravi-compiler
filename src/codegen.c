@@ -848,21 +848,22 @@ static unsigned compute_register_from_base(struct function *fn, const Pseudo *ps
 static bool refers_to_same_register(struct function *fn, Pseudo *src, Pseudo *dst)
 {
 	static bool reg_pseudos[] = {
-	    [PSEUDO_SYMBOL] = true,	/* An object of type lua_symbol representing local var or upvalue */
-	    [PSEUDO_TEMP_FLT] = false,	/* A floating point temp - may also be used for locals that don't escape */
-	    [PSEUDO_TEMP_INT] = false,	/* An integer temp - may also be used for locals that don't escape */
-	    [PSEUDO_TEMP_BOOL] = false, /* An (bool) integer temp - may also be used for locals that don't escape */
-	    [PSEUDO_TEMP_ANY] = true,	/* A temp of any type - will always be on Lua stack */
-	    [PSEUDO_CONSTANT] = false,	/* A literal value */
-	    [PSEUDO_PROC] = false,	/* A proc / function */
-	    [PSEUDO_NIL] = false,
-	    [PSEUDO_TRUE] = false,
-	    [PSEUDO_FALSE] = false,
-	    [PSEUDO_BLOCK] = false,	  /* Points to a basic block, used as targets for jumps */
-	    [PSEUDO_RANGE] = true,	  /* Represents a range of registers from a certain starting register */
-	    [PSEUDO_RANGE_SELECT] = true, /* Picks a certain register from a range */
-	    /* TODO we need a type for var args */
-	    [PSEUDO_LUASTACK] = true /* Specifies a Lua stack position - not used by linearizer - for use by codegen */
+	    /* [PSEUDO_SYMBOL] =*/true,	    /* An object of type lua_symbol representing local var or upvalue */
+	    /* [PSEUDO_TEMP_FLT] =*/false,  /* A floating point temp - may also be used for locals that don't escape */
+	    /* [PSEUDO_TEMP_INT] =*/false,  /* An integer temp - may also be used for locals that don't escape */
+	    /* [PSEUDO_TEMP_BOOL] =*/false, /* An (bool) integer temp - may also be used for locals that don't escape */
+	    /* [PSEUDO_TEMP_ANY] =*/true,   /* A temp of any type - will always be on Lua stack */
+	    /* [PSEUDO_CONSTANT] =*/false,  /* A literal value */
+	    /* [PSEUDO_PROC] =*/false,	    /* A proc / function */
+	    /* [PSEUDO_NIL] =*/false,
+	    /* [PSEUDO_TRUE] =*/false,
+	    /* [PSEUDO_FALSE] =*/false,
+	    /* [PSEUDO_BLOCK] =*/false,	      /* Points to a basic block, used as targets for jumps */
+	    /* [PSEUDO_RANGE] =*/true,	      /* Represents a range of registers from a certain starting register */
+	    /* [PSEUDO_RANGE_SELECT] =*/true, /* Picks a certain register from a range */
+					      /* TODO we need a type for var args */
+	    /* [PSEUDO_LUASTACK] =*/true /* Specifies a Lua stack position - not used by linearizer - for use by codegen
+					  */
 	};
 	if (!reg_pseudos[src->type] || !reg_pseudos[dst->type])
 		return false;
@@ -1190,8 +1191,7 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 	FOR_EACH_PTR(insn->operands, Pseudo, pseudo)
 	{
 		if (pseudo->type != PSEUDO_RANGE) {
-			Pseudo dummy_dest = {.type = PSEUDO_LUASTACK,
-						    .stackidx = i}; /* will go to stackbase[i] */
+			Pseudo dummy_dest = {.type = PSEUDO_LUASTACK, .stackidx = i}; /* will go to stackbase[i] */
 			raviX_buffer_add_fstring(&fn->body, " if (%d < wanted) {\n", i);
 			/* FIXME last argument might be a range pseudo */
 			emit_move(fn, pseudo, &dummy_dest);
@@ -1808,13 +1808,13 @@ static int emit_op_toflt(struct function *fn, Instruction *insn)
 
 static int emit_op_tousertype(struct function *fn, Instruction *insn)
 {
-	Pseudo *typename = get_first_operand(insn);
+	Pseudo *type_name = get_first_operand(insn);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 	emit_reg_accessor(fn, get_first_target(insn), 0);
 	raviX_buffer_add_string(&fn->body, ";\n if (!ttisnil(ra)) {\n");
 	raviX_buffer_add_string(&fn->body, "  TValue *rb = ");
-	emit_reg_accessor(fn, typename, 0);
+	emit_reg_accessor(fn, type_name, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
 	raviX_buffer_add_string(&fn->body,
 				"  if (!ttisshrstring(rb) || !raviV_check_usertype(L, tsvalue(rb), ra)) {\n");
@@ -2665,14 +2665,17 @@ static void debug_message(void *context, const char *filename, long long line, c
 }
 static void error_message(void *context, const char *message) { fprintf(stdout, "ERROR: %s\n", message); }
 
-static struct Ravi_CompilerInterface stub_compilerInterface = {.context = NULL,
-							       .source_name = "input",
-							       .source = NULL,
-							       .source_len = 0,
-							       .generated_code = NULL,
-							       .main_func_name = {"setup"},
-							       .error_message = error_message,
-							       .debug_message = debug_message};
+static struct Ravi_CompilerInterface stub_compilerInterface = {
+    .context = NULL,
+    .source = NULL,
+	.source_len = 0,
+	.source_name = "input",
+    .compiler_options = "",
+    .main_func_name = {"setup"},
+    .generated_code = NULL,
+    .debug_message = debug_message,
+    .error_message = error_message,
+};
 
 /* Generate and compile C code */
 int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_CompilerInterface *ravi_interface)

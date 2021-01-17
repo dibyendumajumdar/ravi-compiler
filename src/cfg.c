@@ -98,7 +98,7 @@ void raviX_output_cfg(Proc *proc, FILE *fp)
 	if (!g)
 		return;
 	fprintf(fp, "digraph Proc%d {\n", proc->id);
-	struct CfgArg args = {.proc = proc, .fp = fp};
+	struct CfgArg args = {fp, proc};
 	raviX_for_each_node(g, output_node, &args);
 	fprintf(fp, "}\n");
 }

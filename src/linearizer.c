@@ -227,7 +227,7 @@ static const Constant *add_constant(Proc *proc, const Constant *c)
 static const Constant *allocate_constant(Proc *proc, AstNode *node)
 {
 	assert(node->type == EXPR_LITERAL);
-	Constant c = {.type = node->literal_expr.type.type_code};
+	Constant c = {.type = (uint8_t) node->literal_expr.type.type_code};
 	if (c.type == RAVI_TNUMINT)
 		c.i = node->literal_expr.u.i;
 	else if (c.type == RAVI_TNUMFLT)
