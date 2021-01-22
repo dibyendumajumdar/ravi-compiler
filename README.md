@@ -27,6 +27,7 @@ The compiler library consists of distinct modules:
 
 * 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 * 01-Dec-2020 The generated code is now also suitable for AOT compilation but requires special loading facility in Ravi.
+* 17-Jan-2021 The code is now C++ compliant so we can compile everything in C++ or C.
 
 ## LICENSE
 
