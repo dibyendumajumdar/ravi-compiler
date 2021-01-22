@@ -64,12 +64,12 @@ struct AllocationBlob {
 #define CHUNK 32768
 
 typedef struct Allocator {
-	const char *name_;
-	AllocationBlob *blobs_;
-	size_t size_;
-	unsigned int alignment_;
-	unsigned int chunking_;
-	void *freelist_;
+	const char *name;
+	AllocationBlob *blobs;
+	size_t size;
+	unsigned int alignment;
+	unsigned int chunking;
+	void *freelist;
 	size_t allocations, total_bytes, useful_bytes;
 } Allocator;
 

@@ -112,7 +112,7 @@ static int test3(void)
 	int errcount = 0;
 	Graph *g = make_graph2();
 	raviX_classify_edges(g);
-	struct dominator_tree *tree = raviX_new_dominator_tree(g);
+	DominatorTree *tree = raviX_new_dominator_tree(g);
 	raviX_calculate_dominator_tree(tree);
 	raviX_dominator_tree_output(tree, stdout);
 	raviX_destroy_dominator_tree(tree);
