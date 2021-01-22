@@ -385,12 +385,12 @@ static inline void copy_type(VariableType *a, const VariableType *b)
 	a->type_name = b->type_name;
 }
 
-struct parser_state {
+typedef struct ParserState {
 	LexerState *ls;
 	CompilerState *container;
 	AstNode *current_function;
 	Scope *current_scope;
-};
+} ParserState;
 
 void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level); /* output the AST structure recursively */
 const char *raviX_get_type_name(ravitype_t tt);
