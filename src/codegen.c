@@ -693,52 +693,52 @@ enum {
 
 static inline Pseudo *get_operand(Instruction *insn, unsigned idx)
 {
-	return (Pseudo *)raviX_ptrlist_nth_entry((struct ptr_list *)insn->operands, idx);
+	return (Pseudo *)raviX_ptrlist_nth_entry((PtrList *)insn->operands, idx);
 }
 
 static inline Pseudo *get_first_operand(Instruction *insn)
 {
-	return (Pseudo *)raviX_ptrlist_first((struct ptr_list *)insn->operands);
+	return (Pseudo *)raviX_ptrlist_first((PtrList *)insn->operands);
 }
 
 static inline Pseudo *get_last_operand(Instruction *insn)
 {
-	return (Pseudo *)raviX_ptrlist_last((struct ptr_list *)insn->operands);
+	return (Pseudo *)raviX_ptrlist_last((PtrList *)insn->operands);
 }
 
 static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 {
-	return (Pseudo *)raviX_ptrlist_nth_entry((struct ptr_list *)insn->targets, idx);
+	return (Pseudo *)raviX_ptrlist_nth_entry((PtrList *)insn->targets, idx);
 }
 
 static inline Pseudo *get_first_target(Instruction *insn)
 {
-	return (Pseudo *)raviX_ptrlist_first((struct ptr_list *)insn->targets);
+	return (Pseudo *)raviX_ptrlist_first((PtrList *)insn->targets);
 }
 
 static inline Pseudo *get_last_target(Instruction *insn)
 {
-	return (Pseudo *)raviX_ptrlist_last((struct ptr_list *)insn->targets);
+	return (Pseudo *)raviX_ptrlist_last((PtrList *)insn->targets);
 }
 
 static inline unsigned get_num_operands(Instruction *insn)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)insn->operands);
+	return raviX_ptrlist_size((const PtrList *)insn->operands);
 }
 
 static inline unsigned get_num_targets(Instruction *insn)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)insn->targets);
+	return raviX_ptrlist_size((const PtrList *)insn->targets);
 }
 
 static inline unsigned get_num_instructions(BasicBlock *bb)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)bb->insns);
+	return raviX_ptrlist_size((const PtrList *)bb->insns);
 }
 
 static inline unsigned get_num_childprocs(Proc *proc)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)proc->procs);
+	return raviX_ptrlist_size((const PtrList *)proc->procs);
 }
 
 /**
@@ -1150,13 +1150,13 @@ static int emit_op_ret(struct function *fn, Instruction *insn)
 {
 	// TODO Only call luaF_close if needed (i.e. some variable escaped)
 #ifdef RAVI_DEFER_STATEMENT
-	if (raviX_ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+	if (raviX_ptrlist_size((const PtrList *)fn->proc->procs) > 0) {
 		raviX_buffer_add_string(&fn->body, "{\nluaF_close(L, base, LUA_OK);\n");
 		raviX_buffer_add_string(&fn->body, "base = ci->u.l.base;\n");
 		raviX_buffer_add_string(&fn->body, "}\n");
 	}
 #else
-	if (raviX_ptrlist_size((const struct ptr_list *)fn->proc->procs) > 0) {
+	if (raviX_ptrlist_size((const PtrList *)fn->proc->procs) > 0) {
 		raviX_buffer_add_string(&fn->body, "luaF_close(L, base);\n");
 	}
 #endif
@@ -2456,12 +2456,12 @@ static int output_basic_block(struct function *fn, BasicBlock *bb)
 
 static inline unsigned get_num_params(Proc *proc)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.args);
+	return raviX_ptrlist_size((const PtrList *)proc->function_expr->function_expr.args);
 }
 
 static inline unsigned get_num_upvalues(Proc *proc)
 {
-	return raviX_ptrlist_size((const struct ptr_list *)proc->function_expr->function_expr.upvalues);
+	return raviX_ptrlist_size((const PtrList *)proc->function_expr->function_expr.upvalues);
 }
 
 /* Generate code for setting up a Lua Proto structure, recursively for each child function */

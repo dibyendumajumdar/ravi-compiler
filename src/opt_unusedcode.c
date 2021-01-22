@@ -64,7 +64,7 @@ static int process_block(LinearizerState *linearizer, Proc *proc, BasicBlock *bb
 	assert(raviX_node_list_size(successors) == 0); // All should be gone
 	// Now clear out this bb
 	// FIXME deallocate instructions
-	raviX_ptrlist_remove_all((struct ptr_list **)&bb->insns);
+	raviX_ptrlist_remove_all((PtrList **)&bb->insns);
 	// FIXME do we deallocate bb?
 	return 1; // We changed something
 }

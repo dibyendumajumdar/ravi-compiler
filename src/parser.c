@@ -49,12 +49,12 @@ static void add_local_symbol_to_current_scope(ParserState *parser, LuaSymbol *sy
 
 static void add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym)
 {
-	raviX_ptrlist_add((struct ptr_list **)list, sym, &container->ptrlist_allocator);
+	raviX_ptrlist_add((PtrList **)list, sym, &container->ptrlist_allocator);
 }
 
 static void add_ast_node(CompilerState *container, AstNodeList **list, AstNode *node)
 {
-	raviX_ptrlist_add((struct ptr_list **)list, node, &container->ptrlist_allocator);
+	raviX_ptrlist_add((PtrList **)list, node, &container->ptrlist_allocator);
 }
 
 static AstNode *allocate_ast_node(ParserState *parser, enum AstNodeType type)
@@ -276,7 +276,7 @@ static bool add_upvalue_in_function(ParserState *parser, AstNode *function, LuaS
 	upvalue->upvalue.target_variable = sym;
 	upvalue->upvalue.target_function = function;
 	upvalue->upvalue.upvalue_index = raviX_ptrlist_size(
-	    (const struct ptr_list *)function->function_expr.upvalues); /* position of upvalue in function */
+	    (const PtrList *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
 	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
 	if (sym->symbol_type == SYM_LOCAL) {
@@ -549,7 +549,7 @@ static AstNode *has_function_call(AstNode *expr)
 	else if (expr->type == EXPR_SUFFIXED) {
 		if (expr->suffixed_expr.suffix_list) {
 			return has_function_call(
-			    (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr->suffixed_expr.suffix_list));
+			    (AstNode *)raviX_ptrlist_last((PtrList *)expr->suffixed_expr.suffix_list));
 		} else {
 			return has_function_call(expr->suffixed_expr.primary_expr);
 		}
@@ -563,7 +563,7 @@ static AstNode *has_function_call(AstNode *expr)
  */
 static void set_multireturn(ParserState *parser, AstNodeList *expr_list, bool in_table_constructor)
 {
-	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr_list);
+	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((PtrList *)expr_list);
 	if (!last_expr)
 		return;
 	if (in_table_constructor) {
@@ -1374,11 +1374,11 @@ static AstNode *parse_local_function_statement(ParserState *parser)
 static void limit_function_call_results(ParserState *parser, int num_lhs, AstNodeList *expr_list)
 {
 	// FIXME probably doesn't handle var arg case
-	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((struct ptr_list *)expr_list);
+	AstNode *last_expr = (AstNode *)raviX_ptrlist_last((PtrList *)expr_list);
 	AstNode *call_expr = has_function_call(last_expr);
 	if (!call_expr)
 		return;
-	int num_expr = raviX_ptrlist_size((const struct ptr_list *)expr_list);
+	int num_expr = raviX_ptrlist_size((const PtrList *)expr_list);
 	if (num_expr < num_lhs) {
 		call_expr->function_call_expr.num_results = (num_lhs - num_expr) + 1;
 	}
@@ -1468,7 +1468,7 @@ static AstNode *parse_expression_statement(ParserState *parser)
 		current_list = NULL;
 		parse_expression_list(parser, &current_list);
 		limit_function_call_results(
-		    parser, raviX_ptrlist_size((const struct ptr_list *)stmt->expression_stmt.var_expr_list), current_list);
+		    parser, raviX_ptrlist_size((const PtrList *)stmt->expression_stmt.var_expr_list), current_list);
 	}
 	stmt->expression_stmt.expr_list = current_list;
 	// TODO Check that if not assignment then it is a function call
@@ -1720,8 +1720,8 @@ CompilerState *raviX_init_compiler()
 	CompilerState *container = (CompilerState *)calloc(1, sizeof(CompilerState));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(AstNode), sizeof(double),
 			     sizeof(AstNode) * 32);
-	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
-			     sizeof(struct ptr_list) * 32);
+	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(PtrList), sizeof(double),
+			     sizeof(PtrList) * 32);
 	raviX_allocator_init(&container->block_scope_allocator, "block scopes", sizeof(Scope),
 			     sizeof(double), sizeof(Scope) * 32);
 	raviX_allocator_init(&container->symbol_allocator, "symbols", sizeof(LuaSymbol), sizeof(double),

@@ -67,7 +67,7 @@ static void add_chunk(struct chunk_data *chunks, TextBuffer *buf)
 	size_t len = raviX_buffer_len(buf);
 	char *s = (char *) raviX_allocator_allocate(&chunks->string_allocator, len + 1);
 	raviX_string_copy(s, raviX_buffer_data(buf), len + 1);
-	raviX_ptrlist_add((struct ptr_list **)&chunks->list, s, &chunks->ptrlist_allocator);
+	raviX_ptrlist_add((PtrList **)&chunks->list, s, &chunks->ptrlist_allocator);
 }
 
 /* Input text is supposed to contain multiple chunks
@@ -105,8 +105,8 @@ static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const 
 
 static void init_chunks(struct chunk_data *chunks)
 {
-	raviX_allocator_init(&chunks->ptrlist_allocator, "ptrlists", sizeof(struct ptr_list), sizeof(double),
-			     sizeof(struct ptr_list) * 32);
+	raviX_allocator_init(&chunks->ptrlist_allocator, "ptrlists", sizeof(PtrList), sizeof(double),
+			     sizeof(PtrList) * 32);
 	raviX_allocator_init(&chunks->string_allocator, "strings", 0, sizeof(double), 1024 * 1024);
 	chunks->list = NULL;
 }

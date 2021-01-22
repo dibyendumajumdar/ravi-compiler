@@ -77,7 +77,7 @@ static void output_node(void *arg, Graph *g, uint32_t nodeid)
 	if (!successors)
 		return;
 	BasicBlock *block = proc->nodes[nodeid];
-	if (raviX_ptrlist_size((const struct ptr_list *)block->insns) > 0) {
+	if (raviX_ptrlist_size((const PtrList *)block->insns) > 0) {
 		TextBuffer buf;
 		raviX_buffer_init(&buf, 1024);
 		raviX_output_basic_block_as_table(proc, block, &buf);
