@@ -726,20 +726,11 @@ static inline unsigned get_num_operands(Instruction *insn)
 	return raviX_ptrlist_size((const PtrList *)insn->operands);
 }
 
-static inline unsigned get_num_targets(Instruction *insn)
-{
-	return raviX_ptrlist_size((const PtrList *)insn->targets);
-}
+static inline unsigned get_num_targets(Instruction *insn) { return raviX_ptrlist_size((const PtrList *)insn->targets); }
 
-static inline unsigned get_num_instructions(BasicBlock *bb)
-{
-	return raviX_ptrlist_size((const PtrList *)bb->insns);
-}
+static inline unsigned get_num_instructions(BasicBlock *bb) { return raviX_ptrlist_size((const PtrList *)bb->insns); }
 
-static inline unsigned get_num_childprocs(Proc *proc)
-{
-	return raviX_ptrlist_size((const PtrList *)proc->procs);
-}
+static inline unsigned get_num_childprocs(Proc *proc) { return raviX_ptrlist_size((const PtrList *)proc->procs); }
 
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
@@ -2668,8 +2659,8 @@ static void error_message(void *context, const char *message) { fprintf(stdout, 
 static struct Ravi_CompilerInterface stub_compilerInterface = {
     .context = NULL,
     .source = NULL,
-	.source_len = 0,
-	.source_name = "input",
+    .source_len = 0,
+    .source_name = "input",
     .compiler_options = "",
     .main_func_name = {"setup"},
     .generated_code = NULL,
