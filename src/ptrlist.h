@@ -16,9 +16,9 @@
 #include <assert.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 /*
  * The ptrlist data structure is copied from the Linux Sparse project.
@@ -135,8 +135,8 @@ static inline void **raviX_ptrlist_iter_this_address(PtrListIterator *self) { re
 
 #define MARK_CURRENT_DELETED(PTR_TYPE, var) raviX_ptrlist_iter_mark_deleted(&var##iter__)
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif

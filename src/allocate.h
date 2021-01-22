@@ -44,9 +44,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 typedef struct AllocationBlob AllocationBlob;
 struct AllocationBlob {
@@ -129,9 +129,9 @@ extern size_t raviX_del_array_element(void *p, size_t element_size, size_t array
 		(A)->count = 0;                                                                                        \
 	}
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif
 
