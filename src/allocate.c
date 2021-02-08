@@ -42,19 +42,53 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void *blob_alloc(size_t size)
+void *raviX_malloc(size_t size)
 {
 	void *ptr;
 	ptr = malloc(size);
-	if (ptr != NULL)
-		memset(ptr, 0, size);
+        if (!ptr) {
+                fprintf(stderr, "out of memory\n");
+                exit(1);
+        }
 	return ptr;
+}
+
+void *raviX_calloc(size_t nmemb, size_t size)
+{
+	void *ptr;
+	ptr = calloc(nmemb, size);
+        if (!ptr) {
+                fprintf(stderr, "out of memory\n");
+                exit(1);
+        }
+	return ptr;
+}
+
+void *raviX_realloc(void *p, size_t size)
+{
+	void *ptr;
+	ptr = realloc(p, size);
+        if (!ptr) {
+                fprintf(stderr, "out of memory\n");
+                exit(1);
+        }
+	return ptr;
+}
+
+void raviX_free(void *ptr)
+{
+    free(ptr);
+}
+
+static void *blob_alloc(size_t size)
+{
+	return raviX_malloc(size);
 }
 
 static void blob_free(void *addr, size_t size)
 {
 	(void)size;
-	free(addr);
+	raviX_free(addr);
 }
 
 void raviX_allocator_init(Allocator *A, const char *name, size_t size, unsigned int alignment, unsigned int chunking)
@@ -103,10 +137,6 @@ void *raviX_allocator_allocate(Allocator *A, size_t extra)
 	if (!blob || blob->left < size) {
 		size_t offset, chunking = A->chunking;
 		AllocationBlob *newblob = (AllocationBlob *)blob_alloc(chunking);
-		if (!newblob) {
-			fprintf(stderr, "out of memory\n");
-			exit(1);
-		}
 		A->total_bytes += chunking;
 		newblob->next = blob;
 		blob = newblob;

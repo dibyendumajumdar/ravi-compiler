@@ -106,7 +106,7 @@ static inline void free_register(Proc *proc, PseudoGenerator *generator, unsigne
 /* Linearizer initialization  */
 LinearizerState *raviX_init_linearizer(CompilerState *container)
 {
-	LinearizerState *linearizer = (LinearizerState *)calloc(1, sizeof(LinearizerState));
+	LinearizerState *linearizer = (LinearizerState *)raviX_calloc(1, sizeof(LinearizerState));
 	linearizer->ast_container = container;
 	raviX_allocator_init(&linearizer->instruction_allocator, "instruction_allocator", sizeof(Instruction),
 			     sizeof(double), sizeof(Instruction) * 128);

@@ -48,6 +48,11 @@
 //extern "C" {
 //#endif
 
+extern void *raviX_malloc(size_t size);
+extern void *raviX_calloc(size_t nmemb, size_t size);
+extern void *raviX_realloc(void *ptr, size_t size);
+extern void raviX_free(void *ptr);
+
 typedef struct AllocationBlob AllocationBlob;
 struct AllocationBlob {
 	AllocationBlob *next;

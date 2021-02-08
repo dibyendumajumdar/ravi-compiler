@@ -1717,7 +1717,7 @@ static uint32_t string_hash(const void *c)
 
 CompilerState *raviX_init_compiler()
 {
-	CompilerState *container = (CompilerState *)calloc(1, sizeof(CompilerState));
+	CompilerState *container = (CompilerState *)raviX_calloc(1, sizeof(CompilerState));
 	raviX_allocator_init(&container->ast_node_allocator, "ast nodes", sizeof(AstNode), sizeof(double),
 			     sizeof(AstNode) * 32);
 	raviX_allocator_init(&container->ptrlist_allocator, "ptrlists", sizeof(PtrList), sizeof(double),

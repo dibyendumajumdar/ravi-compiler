@@ -139,7 +139,7 @@ nodeId_t raviX_node_list_at(GraphNodeList *list, uint32_t i)
 
 Graph *raviX_init_graph(nodeId_t entry, nodeId_t exit, void *userdata)
 {
-	Graph *g = (Graph *)calloc(1, sizeof(Graph));
+	Graph *g = (Graph *)raviX_calloc(1, sizeof(Graph));
 	g->allocated = 0;
 	g->nodes = NULL;
 	raviX_allocator_init(&g->node_allocator, "node_allocator", sizeof(GraphNode), sizeof(double),
@@ -381,7 +381,7 @@ void raviX_sort_nodes_by_RPO(GraphNode **nodes, size_t count, bool forward)
 GraphNode **raviX_graph_nodes_sorted_by_RPO(Graph *g, bool forward)
 {
 	uint32_t N = raviX_graph_size(g);
-	GraphNode **nodes = (GraphNode **) calloc(N, sizeof(GraphNode *));
+	GraphNode **nodes = (GraphNode **) raviX_calloc(N, sizeof(GraphNode *));
 	unsigned j = 0;
 	for (unsigned i = 0; i < g->allocated; i++) {
 		if (g->nodes[i] == NULL)

@@ -59,9 +59,9 @@ struct DominatorTree {
 
 DominatorTree *raviX_new_dominator_tree(Graph *g)
 {
-	DominatorTree *state = (DominatorTree *)calloc(1, sizeof(DominatorTree));
+	DominatorTree *state = (DominatorTree *)raviX_calloc(1, sizeof(DominatorTree));
 	state->N = raviX_graph_size(g);
-	state->IDOM = (GraphNode **)calloc(state->N, sizeof(GraphNode *));
+	state->IDOM = (GraphNode **)raviX_calloc(state->N, sizeof(GraphNode *));
 	state->g = g;
 	return state;
 }
