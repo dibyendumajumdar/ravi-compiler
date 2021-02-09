@@ -69,7 +69,7 @@ void raviX_buffer_reserve(TextBuffer *mb, size_t n)
 		assert(mb->capacity > mb->pos + n);
 	}
 }
-void raviX_buffer_free(TextBuffer *mb) { free(mb->buf); }
+void raviX_buffer_free(TextBuffer *mb) { raviX_free(mb->buf); }
 void raviX_buffer_add_bytes(TextBuffer *mb, const char *str, size_t len)
 {
 	size_t required_size = mb->pos + len + 1; /* extra byte for NULL terminator */

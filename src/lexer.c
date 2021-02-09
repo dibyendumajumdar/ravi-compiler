@@ -297,7 +297,7 @@ void raviX_destroy_lexer(LexerState *ls)
 {
 	if (ls == NULL)
 		return;
-	free(ls);
+	raviX_free(ls);
 }
 
 const LexerInfo *raviX_get_lexer_info(LexerState *ls) { return (LexerInfo *)ls; }

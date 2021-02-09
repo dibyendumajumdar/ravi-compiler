@@ -123,7 +123,7 @@ raviX_hash_table_create(uint32_t (*hash_function)(const void *key),
 	ht->deleted_entries = 0;
 
 	if (ht->table == NULL) {
-		free(ht);
+		raviX_free(ht);
 		return NULL;
 	}
 
@@ -150,8 +150,8 @@ raviX_hash_table_destroy(HashTable *ht,
 			delete_function(entry);
 		}
 	}
-	free(ht->table);
-	free(ht);
+	raviX_free(ht->table);
+	raviX_free(ht);
 }
 
 /**
@@ -228,7 +228,7 @@ hash_table_rehash(HashTable *ht, int new_size_index)
 					     entry->key, entry->data);
 	}
 
-	free(old_ht.table);
+	raviX_free(old_ht.table);
 }
 
 /**

@@ -1755,7 +1755,7 @@ void raviX_destroy_compiler(CompilerState *container)
 		// show_allocations(container);
 		if (container->linearizer) {
 			raviX_destroy_linearizer(container->linearizer);
-			free(container->linearizer);
+			raviX_free(container->linearizer);
 		}
 		raviX_set_destroy(container->strings, NULL);
 		raviX_buffer_free(&container->buff);
@@ -1768,5 +1768,5 @@ void raviX_destroy_compiler(CompilerState *container)
 		raviX_allocator_destroy(&container->string_object_allocator);
 		container->killed = true;
 	}
-	free(container);
+	raviX_free(container);
 }

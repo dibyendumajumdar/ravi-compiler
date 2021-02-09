@@ -69,7 +69,7 @@ static void node_list_destroy(GraphNodeList *node_list)
 {
 	node_list->count = 0;
 	node_list->allocated = 0;
-	free(node_list->links);
+	raviX_free(node_list->links);
 	node_list->links = NULL;
 }
 
@@ -166,8 +166,8 @@ void raviX_destroy_graph(Graph *g)
 		raviX_destroy_node(g->nodes[i]);
 	}
 	raviX_allocator_destroy(&g->node_allocator);
-	free(g->nodes);
-	free(g);
+	raviX_free(g->nodes);
+	raviX_free(g);
 }
 
 static GraphNode *raviX_get_node(const Graph *g, nodeId_t index)

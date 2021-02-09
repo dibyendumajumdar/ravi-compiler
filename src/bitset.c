@@ -66,7 +66,7 @@ void raviX_bitset_create2(BitSet *bm, size_t init_bits_num) {
 
 void raviX_bitset_destroy(BitSet * bm)
 {
-	free(bm->varr);
+	raviX_free(bm->varr);
 }
 
 static void bitset_expand (BitSet * bm, size_t nb) {

@@ -123,7 +123,7 @@ Set *raviX_set_create(uint32_t (*hash_function)(const void *key),
 	set->deleted_entries = 0;
 
 	if (set->table == NULL) {
-		free(set);
+		raviX_free(set);
 		return NULL;
 	}
 
@@ -148,8 +148,8 @@ void raviX_set_destroy(Set *set, void (*delete_function)(SetEntry *entry))
 			delete_function(entry);
 		}
 	}
-	free(set->table);
-	free(set);
+	raviX_free(set->table);
+	raviX_free(set);
 }
 
 /* Does the set contain an entry with the given key.
@@ -230,7 +230,7 @@ set_rehash(Set *set, int new_size_index)
 	set_foreach(&old_set, entry) { raviX_set_add_pre_hashed(set, entry->hash, entry->key);
 	}
 
-	free(old_set.table);
+	raviX_free(old_set.table);
 }
 
 /**

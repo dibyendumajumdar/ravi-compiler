@@ -145,7 +145,7 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
 	raviX_allocator_destroy(&linearizer->proc_allocator);
 	raviX_allocator_destroy(&linearizer->unsized_allocator);
 	raviX_allocator_destroy(&linearizer->constant_allocator);
-	free(linearizer);
+	raviX_free(linearizer);
 }
 
 /**

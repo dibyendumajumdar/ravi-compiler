@@ -82,7 +82,9 @@ void raviX_free(void *ptr)
 
 static void *blob_alloc(size_t size)
 {
-	return raviX_malloc(size);
+	void *ptr = raviX_malloc(size);
+	memset(ptr, 0, size);
+	return ptr;
 }
 
 static void blob_free(void *addr, size_t size)
@@ -217,7 +219,7 @@ initialized to zeros.
 void *raviX_realloc_array(void *oldp, size_t element_size, size_t old_n, size_t new_n)
 {
 	if (new_n == 0) {
-		free(oldp);
+		raviX_free(oldp);
 		return NULL;
 	}
 	assert(new_n > old_n);

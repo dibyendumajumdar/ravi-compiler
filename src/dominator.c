@@ -68,8 +68,8 @@ DominatorTree *raviX_new_dominator_tree(Graph *g)
 
 void raviX_destroy_dominator_tree(DominatorTree *state)
 {
-	free(state->IDOM);
-	free(state);
+	raviX_free(state->IDOM);
+	raviX_free(state);
 }
 
 /* Finds nearest common ancestor */
@@ -161,7 +161,7 @@ void raviX_calculate_dominator_tree(DominatorTree *state)
 			}
 		}
 	}
-	free(nodes_in_reverse_postorder);
+	raviX_free(nodes_in_reverse_postorder);
 }
 
 void raviX_dominator_tree_output(DominatorTree *tree, FILE *fp)
