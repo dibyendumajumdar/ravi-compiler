@@ -320,6 +320,10 @@ static void walk_ast(CompilerState *container)
 int main(int argc, const char *argv[])
 {
 	struct arguments args;
+        if(argc < 2) {
+		fprintf(stderr, "usage %s ravi_script_file_name\n", argv[0]);
+                return 1;
+        }
 	parse_arguments(&args, argc, argv);
 	const char *code = NULL;
 	if (args.code) {
