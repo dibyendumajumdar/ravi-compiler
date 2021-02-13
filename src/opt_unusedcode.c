@@ -60,7 +60,7 @@ static int process_block(LinearizerState *linearizer, Proc *proc, BasicBlock *bb
 		// Remove edge from bb to the successor node
 		raviX_delete_edge(proc->cfg, bb->index, nodes[i]);
 	}
-	free(nodes);
+	raviX_free(nodes);
 	assert(raviX_node_list_size(successors) == 0); // All should be gone
 	// Now clear out this bb
 	// FIXME deallocate instructions

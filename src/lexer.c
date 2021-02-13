@@ -273,7 +273,7 @@ static void inclinenumber(LexerState *ls)
 LexerState *raviX_init_lexer(CompilerState *container, const char *buf, size_t buflen,
 				     const char *source)
 {
-	LexerState *ls = (LexerState *)calloc(1, sizeof(LexerState));
+	LexerState *ls = (LexerState *)raviX_calloc(1, sizeof(LexerState));
 	ls->container = container;
 	ls->t.token = 0;
 	ls->buf = buf;
@@ -297,7 +297,7 @@ void raviX_destroy_lexer(LexerState *ls)
 {
 	if (ls == NULL)
 		return;
-	free(ls);
+	raviX_free(ls);
 }
 
 const LexerInfo *raviX_get_lexer_info(LexerState *ls) { return (LexerInfo *)ls; }

@@ -112,6 +112,10 @@ const char *read_file(const char *filename)
 		return NULL;
 	}
 	char *buffer = (char *)calloc(1, len + 10);
+        if(!buffer) {
+                fprintf(stderr, "out of memory\n");
+                exit(1);
+        }
 	size_t n = fread(buffer, 1, len, fp);
 	if (n == 0) {
 		fprintf(stderr, "Failed to read file\n");
