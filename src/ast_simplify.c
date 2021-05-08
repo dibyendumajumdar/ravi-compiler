@@ -28,6 +28,8 @@
 #include <math.h>
 #include <string.h>
 
+extern AstNode *raviX_allocate_expr_ast_node(CompilerState *compiler_state, enum AstNodeType type, int line_number);
+
 static void process_expression_list(CompilerState *container, AstNodeList *node);
 static void process_statement_list(CompilerState *container, AstNodeList *node);
 static void process_statement(CompilerState *container, AstNode *node);
@@ -367,6 +369,23 @@ static int luaO_rawarith(CompilerState *compiler_state, int op, const LiteralExp
 	}
 }
 
+static void walk_binary_expr(AstNode *node, AstNodeList *expr_list) {
+
+}
+
+/* node must be a binary op with op code CONCAT */
+static AstNode *flatten_concat_expression(CompilerState *container, AstNode *node) {
+	assert(node->type == EXPR_BINARY && node->binary_expr.binary_op == BINOPR_CONCAT);
+
+	AstNode *concat_expr = raviX_allocate_expr_ast_node(container, EXPR_CONCAT, node->line_number);
+	copy_type(&concat_expr->common_expr.type, &node->common_expr.type); // The concat expr type will be same as the binary node
+
+
+}
+
+
+
+
 static void process_expression(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
@@ -409,6 +428,9 @@ static void process_expression(CompilerState *container, AstNode *node)
 				}
 				// TODO free expr_left and expr_right
 			}
+		}
+		else if (node->binary_expr.binary_op == BINOPR_CONCAT) {
+			printf("");
 		}
 		break;
 	case EXPR_UNARY:

@@ -545,6 +545,9 @@ void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%p} %c\n", level, "[table constructor end]");
 		break;
 	}
+	case EXPR_CONCAT: {
+		assert(0);
+	}
 	default:
 		printf_buf(buf, "%pUnsupported node type %d\n", level, node->type);
 		assert(0);

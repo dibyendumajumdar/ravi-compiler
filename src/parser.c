@@ -67,11 +67,25 @@ static AstNode *allocate_ast_node(ParserState *parser, enum AstNodeType type)
 
 static AstNode *allocate_expr_ast_node(ParserState *parser, enum AstNodeType type)
 {
+	assert(type >= EXPR_LITERAL && type <= EXPR_CONCAT);
 	AstNode *node = allocate_ast_node(parser, type);
 	node->common_expr.truncate_results = 0;
 	set_typecode(&node->common_expr.type, RAVI_TANY);
 	return node;
 }
+
+AstNode *raviX_allocate_expr_ast_node(CompilerState *compiler_state, enum AstNodeType type, int line_number)
+{
+	// TODO Code is duplicated from above 2 functions so we should refactor
+	assert(type >= EXPR_LITERAL && type <= EXPR_CONCAT);
+	AstNode *node = (AstNode *)raviX_allocator_allocate(&compiler_state->ast_node_allocator, 0);
+	node->type = type;
+	node->line_number = line_number;
+	node->common_expr.truncate_results = 0;
+	set_typecode(&node->common_expr.type, RAVI_TANY);
+	return node;
+}
+
 
 static void error_expected(LexerState *ls, int token)
 {
