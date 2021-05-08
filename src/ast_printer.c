@@ -546,7 +546,10 @@ void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_CONCAT: {
-		assert(0);
+		printf_buf(buf, "%p%c %T\n", level, "[concat start]", &node->string_concatenation_expr.type);
+		print_ast_node_list(buf, node->string_concatenation_expr.expr_list, level + 1, ",");
+		printf_buf(buf, "%p%c\n", level, "[concat end]");
+		break;
 	}
 	default:
 		printf_buf(buf, "%pUnsupported node type %d\n", level, node->type);

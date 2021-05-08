@@ -28,8 +28,6 @@
 #include <math.h>
 #include <string.h>
 
-extern AstNode *raviX_allocate_expr_ast_node(CompilerState *compiler_state, enum AstNodeType type, int line_number);
-
 static void process_expression_list(CompilerState *container, AstNodeList *node);
 static void process_statement_list(CompilerState *container, AstNodeList *node);
 static void process_statement(CompilerState *container, AstNode *node);
@@ -386,17 +384,27 @@ static void walk_binary_expr(CompilerState *container, AstNode *node, AstNodeLis
 }
 
 /* node must be a binary op with op code CONCAT */
-static AstNode *flatten_concat_expression(CompilerState *container, AstNode *node) {
+static void flatten_concat_expression(CompilerState *container, AstNode *node) {
 	assert(node->type == EXPR_BINARY && node->binary_expr.binary_op == BINOPR_CONCAT);
-
-	AstNode *concat_expr = raviX_allocate_expr_ast_node(container, EXPR_CONCAT, node->line_number);
-	copy_type(&concat_expr->common_expr.type, &node->common_expr.type); // The concat expr type will be same as the binary node
-
-	walk_binary_expr(container, node, &concat_expr->string_concatenation_expr.expr_list);
-
-	return concat_expr;
+	AstNodeList  *expr_list = NULL;
+	walk_binary_expr(container, node, &expr_list);
+	node->type = EXPR_CONCAT;
+	node->binary_expr.expr_left = NULL;
+	node->binary_expr.expr_left = NULL;
+	node->string_concatenation_expr.expr_list = expr_list;
+	node->common_expr.type.type_code = RAVI_TSTRING; /* assume string  */
+	AstNode *e;
+	FOR_EACH_PTR(expr_list, AstNode, e) {
+		/* The concat operator converts to string if operands are string or number */
+		if (e->common_expr.type.type_code != RAVI_TSTRING &&
+		    e->common_expr.type.type_code != RAVI_TNUMFLT &&
+		    e->common_expr.type.type_code != RAVI_TNUMFLT) {
+			node->common_expr.type.type_code = RAVI_TANY;
+			break;
+		}
+	}
+	END_FOR_EACH_PTR(node);
 }
-
 
 static void process_expression(CompilerState *container, AstNode *node)
 {
@@ -422,6 +430,7 @@ static void process_expression(CompilerState *container, AstNode *node)
 	case EXPR_BINARY:
 		if (node->binary_expr.binary_op == BINOPR_CONCAT) {
 			flatten_concat_expression(container, node);
+			goto L_string_concat;
 		}
 		process_expression(container, node->binary_expr.expr_left);
 		process_expression(container, node->binary_expr.expr_right);
@@ -444,6 +453,10 @@ static void process_expression(CompilerState *container, AstNode *node)
 				// TODO free expr_left and expr_right
 			}
 		}
+		break;
+	case EXPR_CONCAT:
+	L_string_concat:
+		process_expression_list(container, node->string_concatenation_expr.expr_list);
 		break;
 	case EXPR_UNARY:
 		process_expression(container, node->unary_expr.expr);
