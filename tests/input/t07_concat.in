@@ -1,0 +1,5 @@
+#
+local a = b .. c
+#
+local hello = 'hello ' .. 'world'
+#
