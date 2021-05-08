@@ -369,8 +369,20 @@ static int luaO_rawarith(CompilerState *compiler_state, int op, const LiteralExp
 	}
 }
 
-static void walk_binary_expr(AstNode *node, AstNodeList *expr_list) {
-
+static void walk_binary_expr(CompilerState *container, AstNode *node, AstNodeList **expr_list) { 
+	assert(node->type == EXPR_BINARY && node->binary_expr.binary_op == BINOPR_CONCAT);
+	AstNode *left = node->binary_expr.expr_left;
+	AstNode *right = node->binary_expr.expr_right;
+	if (left->type == EXPR_BINARY && left->binary_expr.binary_op == BINOPR_CONCAT) {
+		walk_binary_expr(container, left, expr_list);
+	} else {
+		raviX_ptrlist_add((PtrList **)expr_list, left, &container->ptrlist_allocator);
+	}
+	if (right->type == EXPR_BINARY && right->binary_expr.binary_op == BINOPR_CONCAT) {
+		walk_binary_expr(container, right, expr_list);
+	} else {
+		raviX_ptrlist_add((PtrList **)expr_list, right, &container->ptrlist_allocator);
+	}
 }
 
 /* node must be a binary op with op code CONCAT */
@@ -380,10 +392,10 @@ static AstNode *flatten_concat_expression(CompilerState *container, AstNode *nod
 	AstNode *concat_expr = raviX_allocate_expr_ast_node(container, EXPR_CONCAT, node->line_number);
 	copy_type(&concat_expr->common_expr.type, &node->common_expr.type); // The concat expr type will be same as the binary node
 
+	walk_binary_expr(container, node, &concat_expr->string_concatenation_expr.expr_list);
 
+	return concat_expr;
 }
-
-
 
 
 static void process_expression(CompilerState *container, AstNode *node)
@@ -408,6 +420,9 @@ static void process_expression(CompilerState *container, AstNode *node)
 	case EXPR_SYMBOL:
 		break;
 	case EXPR_BINARY:
+		if (node->binary_expr.binary_op == BINOPR_CONCAT) {
+			flatten_concat_expression(container, node);
+		}
 		process_expression(container, node->binary_expr.expr_left);
 		process_expression(container, node->binary_expr.expr_right);
 		if (node->binary_expr.expr_left->type == EXPR_LITERAL &&
@@ -428,9 +443,6 @@ static void process_expression(CompilerState *container, AstNode *node)
 				}
 				// TODO free expr_left and expr_right
 			}
-		}
-		else if (node->binary_expr.binary_op == BINOPR_CONCAT) {
-			printf("");
 		}
 		break;
 	case EXPR_UNARY:
