@@ -924,6 +924,22 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 	return target;
 }
 
+static Pseudo *linearize_concat_expression(Proc *proc, AstNode *expr)
+{
+	Instruction *insn = allocate_instruction(proc, op_string_concat);
+	ravitype_t target_type = expr->string_concatenation_expr.type.type_code;
+	Pseudo *target = allocate_temp_pseudo(proc, target_type);
+	AstNode *n;
+	FOR_EACH_PTR(expr->string_concatenation_expr.expr_list, AstNode, n) {
+		Pseudo *operand = linearize_expression(proc, n);
+		add_instruction_operand(proc, insn, operand);
+	}
+	END_FOR_EACH_PTR(n)
+	add_instruction_target(proc, insn, target);
+	add_instruction(proc, insn);
+	return target;
+}
+
 /* generates closure instruction - linearizes a Proc, and then adds instruction to create closure from it */
 static Pseudo *linearize_function_expr(Proc *proc, AstNode *expr)
 {
@@ -1459,6 +1475,9 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 	case EXPR_Y_INDEX:
 	case EXPR_FIELD_SELECTOR: {
 		result = linearize_expression(proc, expr->index_expr.expr);
+	} break;
+	case EXPR_CONCAT: {
+		result = linearize_concat_expression(proc, expr);
 	} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
