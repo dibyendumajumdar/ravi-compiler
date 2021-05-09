@@ -924,6 +924,8 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 	return target;
 }
 
+/* The concat opcode attempts to help the efficiency of concatenation
+ */
 static Pseudo *linearize_concat_expression(Proc *proc, AstNode *expr)
 {
 	Instruction *insn = allocate_instruction(proc, op_string_concat);
@@ -2546,7 +2548,7 @@ static const char *op_codenames[] = {
     "PUTik",	  "PUTsk",  "TPUT", "TPUTik", "TPUTsk",	    "IAPUT",	 "IAPUTiv",   "FAPUT",	   "FAPUTfv",
     "CBR",	  "BR",	    "MOV",  "MOVi",   "MOVif",	    "MOVf",	 "MOVfi",     "CALL",	   "GET",
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
-    "STOREGLOBAL", "CLOSE", "STRCONCAT"};
+    "STOREGLOBAL", "CLOSE", "CONCAT"};
 
 static void output_pseudo_list(PseudoList *list, TextBuffer *mb)
 {
