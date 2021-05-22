@@ -832,7 +832,7 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 		targetop = op_pow;
 		break;
 	case BINOPR_CONCAT:
-		targetop = op_string_concat;
+		targetop = op_concat;
 		break;
 	default: {
 		char err[100];
@@ -928,7 +928,7 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
  */
 static Pseudo *linearize_concat_expression(Proc *proc, AstNode *expr)
 {
-	Instruction *insn = allocate_instruction(proc, op_string_concat);
+	Instruction *insn = allocate_instruction(proc, op_concat);
 	ravitype_t target_type = expr->string_concatenation_expr.type.type_code;
 	Pseudo *target = allocate_temp_pseudo(proc, target_type);
 	AstNode *n;
