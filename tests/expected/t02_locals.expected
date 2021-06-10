@@ -61,15 +61,15 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {2 Kint(1)} {local(j, 1)}
 	MOV {1 Kint(0)} {local(i, 0)}
+	MOV {2 Kint(1)} {local(j, 1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {2 Kint(1)} {local(j, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOV {2 Kint(1)} {local(j, 1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -208,8 +208,8 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}
-	MOV {T(1)} {local(b, 1)}
 	MOV {T(0)} {local(a, 0)}
+	MOV {T(1)} {local(b, 1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -217,8 +217,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(1)} {local(b, 1)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(a, 0)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(b, 1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

@@ -136,13 +136,13 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1062,15 +1062,15 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'y' Ks(1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>STOREGLOBAL {1 Kint(0)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {2 Kint(1)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1143,8 +1143,8 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'f' Ks(2)} {T(2)}
 	CALL {T(2)} {T(2..), 2 Kint(0)}
-	STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(2[2..])} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1152,8 +1152,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'f' Ks(2)} {T(2)}</TD></TR>
 <TR><TD>CALL {T(2)} {T(2..), 2 Kint(0)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>STOREGLOBAL {T(2[2..])} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(3[2..])} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1284,10 +1284,10 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(6)}
 	CALL {T(6)} {T(6..), 3 Kint(1)}
-	STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(3)}
-	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(2)}
-	PUTik {T(6[6..])} {T(2), 1 Kint(0)}
 	PUTik {1 Kint(0)} {T(0), 1 Kint(0)}
+	PUTik {T(6[6..])} {T(2), 1 Kint(0)}
+	STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(2)}
+	STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(3)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1297,10 +1297,10 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(2)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(6)}</TD></TR>
 <TR><TD>CALL {T(6)} {T(6..), 3 Kint(1)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(3)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(2)}</TD></TR>
-<TR><TD>PUTik {T(6[6..])} {T(2), 1 Kint(0)}</TD></TR>
 <TR><TD>PUTik {1 Kint(0)} {T(0), 1 Kint(0)}</TD></TR>
+<TR><TD>PUTik {T(6[6..])} {T(2), 1 Kint(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(7[6..])} {Upval(_ENV), 'c' Ks(2)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(8[6..])} {Upval(_ENV), 'd' Ks(3)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1442,10 +1442,10 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(3)}
 	LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(7)}
 	CALL {T(7)} {T(7..), 3 Kint(2)}
-	STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(3)}
-	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(2)}
-	PUTik {T(7[7..])} {T(3), 1 Kint(0)}
 	PUTik {1 Kint(0)} {T(1), 2 Kint(1)}
+	PUTik {T(7[7..])} {T(3), 1 Kint(0)}
+	STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(2)}
+	STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(3)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1456,10 +1456,10 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(3)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'z' Ks(4)} {T(7)}</TD></TR>
 <TR><TD>CALL {T(7)} {T(7..), 3 Kint(2)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(3)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(2)}</TD></TR>
-<TR><TD>PUTik {T(7[7..])} {T(3), 1 Kint(0)}</TD></TR>
 <TR><TD>PUTik {1 Kint(0)} {T(1), 2 Kint(1)}</TD></TR>
+<TR><TD>PUTik {T(7[7..])} {T(3), 1 Kint(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(8[7..])} {Upval(_ENV), 'c' Ks(2)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(9[7..])} {Upval(_ENV), 'd' Ks(3)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1532,8 +1532,8 @@ define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(3)}
-	STOREGLOBAL {T(3)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(2)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {T(3)} {Upval(_ENV), 'y' Ks(1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1541,8 +1541,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(2)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(3)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(3)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>STOREGLOBAL {T(2)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(3)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1640,9 +1640,9 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'z' Ks(2)} {T(3)}
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(4)}
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(5)}
-	STOREGLOBAL {T(5)} {Upval(_ENV), 'z' Ks(2)}
-	STOREGLOBAL {T(4)} {Upval(_ENV), 'y' Ks(1)}
 	STOREGLOBAL {T(3)} {Upval(_ENV), 'x' Ks(0)}
+	STOREGLOBAL {T(4)} {Upval(_ENV), 'y' Ks(1)}
+	STOREGLOBAL {T(5)} {Upval(_ENV), 'z' Ks(2)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1651,9 +1651,9 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'z' Ks(2)} {T(3)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(1)} {T(4)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'x' Ks(0)} {T(5)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(5)} {Upval(_ENV), 'z' Ks(2)}</TD></TR>
-<TR><TD>STOREGLOBAL {T(4)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
 <TR><TD>STOREGLOBAL {T(3)} {Upval(_ENV), 'x' Ks(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(4)} {Upval(_ENV), 'y' Ks(1)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(5)} {Upval(_ENV), 'z' Ks(2)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1775,8 +1775,8 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(4)}
 	ADD {T(4), 1 Kint(1)} {T(5)}
-	PUT {20 Kint(2)} {T(1), T(2)}
 	STOREGLOBAL {T(5)} {Upval(_ENV), 'i' Ks(0)}
+	PUT {20 Kint(2)} {T(1), T(2)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1787,8 +1787,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(2)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'i' Ks(0)} {T(4)}</TD></TR>
 <TR><TD>ADD {T(4), 1 Kint(1)} {T(5)}</TD></TR>
-<TR><TD>PUT {20 Kint(2)} {T(1), T(2)}</TD></TR>
 <TR><TD>STOREGLOBAL {T(5)} {Upval(_ENV), 'i' Ks(0)}</TD></TR>
+<TR><TD>PUT {20 Kint(2)} {T(1), T(2)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
