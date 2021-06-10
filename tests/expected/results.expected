@@ -1391,7 +1391,7 @@ L1 (exit)
 L2
 	ADDii {1 Kint(1), 2 Kint(0)} {Tint(0)}
 	MULii {3 Kint(2), 1 Kint(1)} {Tint(1)}
-	STRCONCAT {Tint(0), Tint(1)} {T(1)}
+	CONCAT {Tint(0), Tint(1)} {T(1)}
 	EQ {T(1), '33' Ks(0)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
@@ -1480,7 +1480,7 @@ L0 (entry)
 	CBR {T(0)} {L2, L3}
 L1 (exit)
 L2
-	STRCONCAT {'a' Ks(0), 'b' Ks(1)} {T(1)}
+	CONCAT {'a' Ks(0), 'b' Ks(1)} {T(1)}
 	LT {'a' Ks(0), T(1)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
@@ -1523,7 +1523,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {'7' Ks(0), 3 Kint(0)} {T(0)}
+	CONCAT {'7' Ks(0), 3 Kint(0)} {T(0)}
 	SHL {T(0), 1 Kint(1)} {T(1)}
 	EQ {T(1), 146 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
@@ -1565,7 +1565,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
+	CONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
 	SHR {10 Kint(0), T(0)} {T(1)}
 	EQ {T(1), 0 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
@@ -1607,7 +1607,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	STRCONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
+	CONCAT {1 Kint(1), '9' Ks(0)} {T(0)}
 	BOR {10 Kint(0), T(0)} {T(1)}
 	EQ {T(1), 27 Kint(2)} {T(0)}
 	RET {T(0)} {L1}
