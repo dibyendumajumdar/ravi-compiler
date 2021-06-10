@@ -1357,7 +1357,7 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 			if (last_val_pseudo != NULL && last_val_pseudo->type == PSEUDO_RANGE) {
 				int pick = i - ne + 1;
 				linearize_store_var(proc, varinfo[i].vartype, varinfo[i].pseudo,
-						    valinfo[i].vartype,
+						    valinfo[ne-1].vartype,
 						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
 			} else {
 				// TODO store NIL
