@@ -7987,7 +7987,8 @@ L4
 	CALL {T(4), Tint(2), 0.000000000000 Kflt(0)} {T(4..), 1 Kint(0)}
 	TOFARRAY {T(4[4..])}
 	MOV {T(4[4..])} {local(xi, 4)}
-	TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}
+	MOV {local(xi, 4)} {T(9)}
+	TPUTik {T(9)} {local(x, 2), Tint(3)}
 	MOV {1 Kint(0)} {Tint(9)}
 	MOV {Tint(2)} {Tint(10)}
 	MOV {1 Kint(0)} {Tint(11)}
@@ -8003,13 +8004,13 @@ L7
 	CBR {Tbool(12)} {L9, L8}
 L8
 	MOV {Tint(9)} {Tint(8)}
-	TGETik {local(a, 0), Tint(3)} {T(8)}
-	TOFARRAY {T(8)}
-	TGETik {local(c, 3), Tint(8)} {T(9)}
+	TGETik {local(a, 0), Tint(3)} {T(9)}
 	TOFARRAY {T(9)}
+	TGETik {local(c, 3), Tint(8)} {T(8)}
+	TOFARRAY {T(8)}
 	MOVf {0.000000000000 Kflt(0)} {Tflt(0)}
-	MOV {T(8)} {local(ai, 5)}
-	MOV {T(9)} {local(cj, 6)}
+	MOV {T(9)} {local(ai, 5)}
+	MOV {T(8)} {local(cj, 6)}
 	MOV {1 Kint(0)} {Tint(14)}
 	MOV {Tint(1)} {Tint(15)}
 	MOV {1 Kint(0)} {Tint(16)}
@@ -8784,7 +8785,8 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	MOV {local(y, 1)} {local(x, 0)}
+	MOV {local(y, 1)} {T(0)}
+	MOV {T(0)} {local(x, 0)}
 	BR {L3}
 L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
