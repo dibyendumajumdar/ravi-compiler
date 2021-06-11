@@ -915,7 +915,8 @@ L3
 	CBR {Tbool(3)} {L5, L4}
 L4
 	MOV {Tint(0)} {local(i, 1)}
-	MOV {local(i, 1)} {local(j, 2)}
+	MOV {local(i, 1)} {T(0)}
+	MOV {T(0)} {local(j, 2)}
 	CLOSURE {Proc%2} {T(0)}
 	CALL {T(0)} {T(0..), 1 Kint(0)}
 	BR {L6}
@@ -1004,7 +1005,8 @@ L0 -> L1
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(0)} {local(i, 1)}</TD></TR>
-<TR><TD>MOV {local(i, 1)} {local(j, 2)}</TD></TR>
+<TR><TD>MOV {local(i, 1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(j, 2)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>

@@ -1935,7 +1935,8 @@ L4
 	CALL {T(4), Tint(2), 0.000000000000 Kflt(0)} {T(4..), 1 Kint(0)}
 	TOFARRAY {T(4[4..])}
 	MOV {T(4[4..])} {local(xi, 4)}
-	TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}
+	MOV {local(xi, 4)} {T(9)}
+	TPUTik {T(9)} {local(x, 2), Tint(3)}
 	MOV {1 Kint(0)} {Tint(9)}
 	MOV {Tint(2)} {Tint(10)}
 	MOV {1 Kint(0)} {Tint(11)}
@@ -1951,13 +1952,13 @@ L7
 	CBR {Tbool(12)} {L9, L8}
 L8
 	MOV {Tint(9)} {Tint(8)}
-	TGETik {local(a, 0), Tint(3)} {T(8)}
-	TOFARRAY {T(8)}
-	TGETik {local(c, 3), Tint(8)} {T(9)}
+	TGETik {local(a, 0), Tint(3)} {T(9)}
 	TOFARRAY {T(9)}
+	TGETik {local(c, 3), Tint(8)} {T(8)}
+	TOFARRAY {T(8)}
 	MOVf {0.000000000000 Kflt(0)} {Tflt(0)}
-	MOV {T(8)} {local(ai, 5)}
-	MOV {T(9)} {local(cj, 6)}
+	MOV {T(9)} {local(ai, 5)}
+	MOV {T(8)} {local(cj, 6)}
 	MOV {1 Kint(0)} {Tint(14)}
 	MOV {Tint(1)} {Tint(15)}
 	MOV {1 Kint(0)} {Tint(16)}
@@ -2049,7 +2050,8 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>CALL {T(4), Tint(2), 0.000000000000 Kflt(0)} {T(4..), 1 Kint(0)}</TD></TR>
 <TR><TD>TOFARRAY {T(4[4..])}</TD></TR>
 <TR><TD>MOV {T(4[4..])} {local(xi, 4)}</TD></TR>
-<TR><TD>TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}</TD></TR>
+<TR><TD>MOV {local(xi, 4)} {T(9)}</TD></TR>
+<TR><TD>TPUTik {T(9)} {local(x, 2), Tint(3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(10)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(11)}</TD></TR>
@@ -2078,13 +2080,13 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(8)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), Tint(3)} {T(8)}</TD></TR>
-<TR><TD>TOFARRAY {T(8)}</TD></TR>
-<TR><TD>TGETik {local(c, 3), Tint(8)} {T(9)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), Tint(3)} {T(9)}</TD></TR>
 <TR><TD>TOFARRAY {T(9)}</TD></TR>
+<TR><TD>TGETik {local(c, 3), Tint(8)} {T(8)}</TD></TR>
+<TR><TD>TOFARRAY {T(8)}</TD></TR>
 <TR><TD>MOVf {0.000000000000 Kflt(0)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {T(8)} {local(ai, 5)}</TD></TR>
-<TR><TD>MOV {T(9)} {local(cj, 6)}</TD></TR>
+<TR><TD>MOV {T(9)} {local(ai, 5)}</TD></TR>
+<TR><TD>MOV {T(8)} {local(cj, 6)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(14)}</TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(15)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(16)}</TD></TR>
@@ -2186,7 +2188,8 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>CALL {T(4), Tint(2), 0.000000000000 Kflt(0)} {T(4..), 1 Kint(0)}</TD></TR>
 <TR><TD>TOFARRAY {T(4[4..])}</TD></TR>
 <TR><TD>MOV {T(4[4..])} {local(xi, 4)}</TD></TR>
-<TR><TD>TPUTik {local(xi, 4)} {local(x, 2), Tint(3)}</TD></TR>
+<TR><TD>MOV {local(xi, 4)} {T(9)}</TD></TR>
+<TR><TD>TPUTik {T(9)} {local(x, 2), Tint(3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(10)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(11)}</TD></TR>
@@ -2215,13 +2218,13 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(8)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), Tint(3)} {T(8)}</TD></TR>
-<TR><TD>TOFARRAY {T(8)}</TD></TR>
-<TR><TD>TGETik {local(c, 3), Tint(8)} {T(9)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), Tint(3)} {T(9)}</TD></TR>
 <TR><TD>TOFARRAY {T(9)}</TD></TR>
+<TR><TD>TGETik {local(c, 3), Tint(8)} {T(8)}</TD></TR>
+<TR><TD>TOFARRAY {T(8)}</TD></TR>
 <TR><TD>MOVf {0.000000000000 Kflt(0)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {T(8)} {local(ai, 5)}</TD></TR>
-<TR><TD>MOV {T(9)} {local(cj, 6)}</TD></TR>
+<TR><TD>MOV {T(9)} {local(ai, 5)}</TD></TR>
+<TR><TD>MOV {T(8)} {local(cj, 6)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(14)}</TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(15)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(16)}</TD></TR>

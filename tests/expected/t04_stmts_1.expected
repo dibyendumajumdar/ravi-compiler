@@ -2332,7 +2332,8 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	MOV {local(y, 1)} {local(x, 0)}
+	MOV {local(y, 1)} {T(0)}
+	MOV {T(0)} {local(x, 0)}
 	BR {L3}
 L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
@@ -2356,7 +2357,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>MOV {local(y, 1)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {local(y, 1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
