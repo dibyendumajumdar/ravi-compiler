@@ -3,3 +3,13 @@ local a = b .. c
 #
 local hello = 'hello ' .. 'world'
 #
+local y = "ab"..(1).."cd"..(1.5)
+#
+local x = 1.
+local y = x .. ' test ' .. x
+#
+local x = 1.
+local y = x .. ' test ' .. x
+local z = 2.
+local a = x+1 .. ' ' .. y .. ' ' .. z+2
+#

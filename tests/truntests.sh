@@ -42,3 +42,9 @@ $command -f input/t06_close.in > results.out
 #cp results.out expected/t06_close.expected
 diff expected/t06_close.expected results.out
 rm results.out
+
+echo "testing t07_concat"
+$command -f input/t07_concat.in > results.out
+#cp results.out expected/t07_concat.expected
+diff expected/t07_concat.expected results.out
+rm results.out
