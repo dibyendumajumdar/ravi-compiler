@@ -1,4 +1,3 @@
-#
 local a = b .. c
 #
 local hello = 'hello ' .. 'world'
@@ -12,4 +11,3 @@ local x = 1.
 local y = x .. ' test ' .. x
 local z = 2.
 local a = x+1 .. ' ' .. y .. ' ' .. z+2
-#
