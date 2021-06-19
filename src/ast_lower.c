@@ -95,10 +95,111 @@ static void process_statement_list(CompilerState *container, AstNodeList *list)
 	END_FOR_EACH_PTR(node);
 }
 
+static void add_ast_node(CompilerState *container, AstNodeList **list, AstNode *node)
+{
+	raviX_ptrlist_add((PtrList **)list, node, &container->ptrlist_allocator);
+}
+
+static AstNode *allocate_expr_ast_node(CompilerState *container, enum AstNodeType type)
+{
+	AstNode *node = raviX_allocate_ast_node_at_line(container, type, 0);
+	node->common_expr.truncate_results = 0;
+	set_typecode(&node->common_expr.type, RAVI_TANY);
+	return node;
+}
+
+static AstNode *true_expression(CompilerState *container)
+{
+	AstNode *expr = allocate_expr_ast_node(container, EXPR_LITERAL);
+	set_type(&expr->literal_expr.type, RAVI_TBOOLEAN);
+	expr->literal_expr.u.i = 1; /* initialize */
+	return expr;
+}
+
+static AstNode *make_symbol_expr(CompilerState *container, LuaSymbol *symbol)
+{
+	AstNode *symbol_expr = allocate_expr_ast_node(container, EXPR_SYMBOL);
+	symbol_expr->symbol_expr.type = symbol->variable.value_type;
+	symbol_expr->symbol_expr.var = symbol;
+	return symbol_expr;
+}
+
+static AstNode *for_expr(CompilerState *container, LuaSymbol *fsym, LuaSymbol *ssym, LuaSymbol *varsym)
+{
+	AstNode *suffixed_expr = allocate_expr_ast_node(container, EXPR_SUFFIXED);
+	suffixed_expr->suffixed_expr.primary_expr = make_symbol_expr(container, fsym);
+	set_type(&suffixed_expr->suffixed_expr.type, RAVI_TANY);
+	suffixed_expr->suffixed_expr.suffix_list = NULL;
+
+	AstNode *call_expr = allocate_expr_ast_node(container, EXPR_FUNCTION_CALL);
+	call_expr->function_call_expr.method_name = NULL;
+	call_expr->function_call_expr.arg_list = NULL;
+	call_expr->function_call_expr.num_results = 1; /* By default we expect one arg */
+	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
+
+	add_ast_node(container, &call_expr->function_call_expr.arg_list, make_symbol_expr(container, ssym));
+	add_ast_node(container, &call_expr->function_call_expr.arg_list, make_symbol_expr(container, varsym));
+
+	add_ast_node(container, &suffixed_expr->suffixed_expr.suffix_list, call_expr);
+
+	return suffixed_expr;
+}
 static void lower_for_in_statement(CompilerState *container, AstNode *node)
 {
 	ForStatement *for_stmt = &node->for_stmt;
-	Scope *scope = for_stmt->for_scope;
+	//Scope *scope = for_stmt->for_scope;
+	AstNode *function = for_stmt->for_scope->function;
+	AstNode *do_stmt = raviX_allocate_ast_node_at_line(container, STMT_DO, node->line_number);
+	do_stmt->do_stmt.do_statement_list = NULL;
+	Scope *do_scope = raviX_allocate_scope(container, function, for_stmt->for_scope->parent);
+	do_stmt->do_stmt.scope = do_scope;
+	// we need three anon vars
+	const char f[] = "(for_f)";
+	const char s[] = "(for_s)";
+	const char var[] = "(for_var)";
+
+	AstNode *local_stmt = raviX_allocate_ast_node_at_line(container, STMT_LOCAL, node->line_number);
+	local_stmt->local_stmt.var_list = NULL;
+	local_stmt->local_stmt.expr_list = for_stmt->expr_list;
+
+	LuaSymbol *fsym = raviX_new_local_symbol(container, do_scope, raviX_create_string(container, f, sizeof f-1), RAVI_TANY, NULL);
+	LuaSymbol *ssym = raviX_new_local_symbol(container, do_scope, raviX_create_string(container, s, sizeof s-1), RAVI_TANY, NULL);
+	LuaSymbol *varsym = raviX_new_local_symbol(container, do_scope, raviX_create_string(container, var, sizeof var-1), RAVI_TANY, NULL);
+
+	raviX_add_symbol(container, &local_stmt->local_stmt.var_list, fsym);
+	raviX_add_symbol(container, &do_scope->symbol_list, fsym);
+	raviX_add_symbol(container, &local_stmt->local_stmt.var_list, ssym);
+	raviX_add_symbol(container, &do_scope->symbol_list, ssym);
+	raviX_add_symbol(container, &local_stmt->local_stmt.var_list, varsym);
+	raviX_add_symbol(container, &do_scope->symbol_list, varsym);
+
+	add_ast_node(container, &do_stmt->do_stmt.do_statement_list, local_stmt);
+
+	AstNode *while_stmt = raviX_allocate_ast_node_at_line(container, STMT_WHILE, node->line_number);
+	Scope *while_scope = for_stmt->for_scope; // Original scope
+	while_scope->parent = do_scope; // change the original scope's parent
+	while_stmt->while_or_repeat_stmt.loop_scope = while_scope;
+	while_stmt->while_or_repeat_stmt.loop_statement_list = NULL;
+	while_stmt->while_or_repeat_stmt.condition = true_expression(container);
+	add_ast_node(container, &do_stmt->do_stmt.do_statement_list, while_stmt);
+
+	AstNode *local_stmt2 = raviX_allocate_ast_node_at_line(container, STMT_LOCAL, node->line_number);
+	local_stmt2->local_stmt.var_list = for_stmt->symbols;
+	local_stmt2->local_stmt.expr_list = NULL;
+	AstNode *call_expr = for_expr(container, fsym, ssym, varsym);
+	add_ast_node(container, &local_stmt2->local_stmt.expr_list, call_expr);
+	add_ast_node(container, &while_stmt->while_or_repeat_stmt.loop_statement_list, local_stmt2);
+
+	// TODO
+	// if var break
+
+	AstNode *n2;
+	FOR_EACH_PTR(for_stmt->for_statement_list, AstNode, n2) {
+		add_ast_node(container, &while_stmt->while_or_repeat_stmt.loop_statement_list, n2);
+	}
+	END_FOR_EACH_PTR(n2)
+
+	*node = *do_stmt;
 }
 
 static void process_statement(CompilerState *container, AstNode *node)

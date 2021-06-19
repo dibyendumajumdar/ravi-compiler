@@ -453,7 +453,11 @@ int raviX_ast_lower(CompilerState *container);
 
 ////////////////////////// Internal stuff
 
-AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type);
+//AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type);
 Scope *raviX_allocate_scope(CompilerState *container, AstNode *function, Scope *parent_scope);
+LuaSymbol *raviX_new_local_symbol(CompilerState *container, Scope *scope, const StringObject *name, ravitype_t tt,
+				  const StringObject *usertype);
+void raviX_add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym);
+AstNode *raviX_allocate_ast_node_at_line(CompilerState *container, enum AstNodeType type, int line_num);
 
 #endif

@@ -47,7 +47,7 @@ static AstNode *new_literal_expression(ParserState *parser, ravitype_t type);
 static AstNode *generate_label(ParserState *parser, const StringObject *label);
 static void add_local_symbol_to_current_scope(ParserState *parser, LuaSymbol *sym);
 
-static void add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym)
+void raviX_add_symbol(CompilerState *container, LuaSymbolList **list, LuaSymbol *sym)
 {
 	raviX_ptrlist_add((PtrList **)list, sym, &container->ptrlist_allocator);
 }
@@ -57,12 +57,16 @@ static void add_ast_node(CompilerState *container, AstNodeList **list, AstNode *
 	raviX_ptrlist_add((PtrList **)list, node, &container->ptrlist_allocator);
 }
 
-AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type)
-{
-	AstNode *node = (AstNode *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
+AstNode *raviX_allocate_ast_node_at_line(CompilerState *container, enum AstNodeType type, int line_num) {
+	AstNode *node = (AstNode *)raviX_allocator_allocate(&container->ast_node_allocator, 0);
 	node->type = type;
-	node->line_number = parser->ls->lastline;
+	node->line_number = line_num;
 	return node;
+}
+
+static AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type)
+{
+	return raviX_allocate_ast_node_at_line(parser->container, type, parser->ls->lastline);
 }
 
 static AstNode *allocate_expr_ast_node(ParserState *parser, enum AstNodeType type)
@@ -156,13 +160,10 @@ static const StringObject *check_name_and_next(LexerState *ls)
 	return ts;
 }
 
-/* create a new local variable in function scope, and set the
- * variable type (RAVI - added type tt) */
-static LuaSymbol *new_local_symbol(ParserState *parser, const StringObject *name, ravitype_t tt,
-					   const StringObject *usertype)
+LuaSymbol *raviX_new_local_symbol(CompilerState *container, Scope *scope, const StringObject *name, ravitype_t tt,
+				   const StringObject *usertype)
 {
-	Scope *scope = parser->current_scope;
-	LuaSymbol *symbol = (LuaSymbol *) raviX_allocator_allocate(&parser->container->symbol_allocator, 0);
+	LuaSymbol *symbol = (LuaSymbol *) raviX_allocator_allocate(&container->symbol_allocator, 0);
 	set_typename(&symbol->variable.value_type, tt, usertype);
 	symbol->symbol_type = SYM_LOCAL;
 	symbol->variable.block = scope;
@@ -170,6 +171,15 @@ static LuaSymbol *new_local_symbol(ParserState *parser, const StringObject *name
 	symbol->variable.pseudo = NULL;
 	symbol->variable.escaped = 0;
 	return symbol;
+}
+
+/* create a new local variable in function scope, and set the
+ * variable type (RAVI - added type tt) */
+static LuaSymbol *new_local_symbol(ParserState *parser, const StringObject *name, ravitype_t tt,
+					   const StringObject *usertype)
+{
+	Scope *scope = parser->current_scope;
+	return raviX_new_local_symbol(parser->container, scope, name, tt, usertype);
 }
 
 /* create a new label */
@@ -184,7 +194,7 @@ static LuaSymbol *new_label(ParserState *parser, const StringObject *name)
 	// Add to the end of the symbol list
 	// Note that Lua allows multiple local declarations of the same name
 	// so a new instance just gets added to the end
-	add_symbol(parser->container, &scope->symbol_list, symbol);
+	raviX_add_symbol(parser->container, &scope->symbol_list, symbol);
 	return symbol;
 }
 
@@ -279,7 +289,7 @@ static bool add_upvalue_in_function(ParserState *parser, AstNode *function, LuaS
 	upvalue->upvalue.upvalue_index = raviX_ptrlist_size(
 	    (const PtrList *)function->function_expr.upvalues); /* position of upvalue in function */
 	copy_type(&upvalue->upvalue.value_type, &sym->variable.value_type);
-	add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
+	raviX_add_symbol(parser->container, &function->function_expr.upvalues, upvalue);
 	if (sym->symbol_type == SYM_LOCAL) {
 		sym->variable.escaped = 1;	     /* mark original variable as having escaped */
 		sym->variable.block->need_close = 1; /* mark block containing variable as needing close operation */
@@ -705,7 +715,7 @@ static bool parse_parameter_list(ParserState *parser, LuaSymbolList **list)
 					 /* RAVI change - add type */
 				LuaSymbol *symbol = parse_local_variable_declaration(parser);
 				symbol->variable.function_parameter = 1;
-				add_symbol(parser->container, list, symbol);
+				raviX_add_symbol(parser->container, list, symbol);
 				add_local_symbol_to_current_scope(parser, symbol);
 				nparams++;
 				break;
@@ -730,7 +740,7 @@ static void parse_function_body(ParserState *parser, AstNode *func_ast, int isme
 	checknext(ls, '(');
 	if (ismethod) {
 		LuaSymbol *symbol = new_localvarliteral(parser, "self"); /* create 'self' parameter */
-		add_symbol(parser->container, &func_ast->function_expr.args, symbol);
+		raviX_add_symbol(parser->container, &func_ast->function_expr.args, symbol);
 	}
 	bool is_vararg = parse_parameter_list(parser, &func_ast->function_expr.args);
 	func_ast->function_expr.is_vararg = is_vararg;
@@ -1111,8 +1121,8 @@ static void add_local_symbol_to_current_scope(ParserState *parser, LuaSymbol *sy
 {
 	// Note that Lua allows multiple local declarations of the same name
 	// so a new instance just gets added to the end
-	add_symbol(parser->container, &parser->current_scope->symbol_list, sym);
-	add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
+	raviX_add_symbol(parser->container, &parser->current_scope->symbol_list, sym);
+	raviX_add_symbol(parser->container, &parser->current_scope->function->function_expr.locals, sym);
 }
 
 static Scope *parse_block(ParserState *parser, AstNodeList **statement_list)
@@ -1231,7 +1241,7 @@ static void parse_fornum_statement(ParserState *parser, AstNode *stmt,
 	LexerState *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
 	LuaSymbol *local = new_local_symbol(parser, varname, RAVI_TANY, NULL);
-	add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+	raviX_add_symbol(parser->container, &stmt->for_stmt.symbols, local);
 	add_local_symbol_to_current_scope(parser, local);
 	checknext(ls, '=');
 	/* get the type of each expression */
@@ -1253,11 +1263,11 @@ static void parse_for_list(ParserState *parser, AstNode *stmt, const StringObjec
 	int nvars = 4; /* gen, state, control, plus at least one declared var */
 	/* create declared variables */
 	LuaSymbol *local = new_local_symbol(parser, indexname, RAVI_TANY, NULL);
-	add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+	raviX_add_symbol(parser->container, &stmt->for_stmt.symbols, local);
 	add_local_symbol_to_current_scope(parser, local);
 	while (testnext(ls, ',')) {
 		local = new_local_symbol(parser, check_name_and_next(ls), RAVI_TANY, NULL);
-		add_symbol(parser->container, &stmt->for_stmt.symbols, local);
+		raviX_add_symbol(parser->container, &stmt->for_stmt.symbols, local);
 		add_local_symbol_to_current_scope(parser, local);
 		nvars++;
 	}
@@ -1363,7 +1373,7 @@ static AstNode *parse_local_function_statement(ParserState *parser)
 	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_LOCAL);
 	stmt->local_stmt.var_list = NULL;
 	stmt->local_stmt.expr_list = NULL;
-	add_symbol(parser->container, &stmt->local_stmt.var_list, symbol);
+	raviX_add_symbol(parser->container, &stmt->local_stmt.var_list, symbol);
 	add_ast_node(parser->container, &stmt->local_stmt.expr_list, function_ast);
 	return stmt;
 }
@@ -1396,7 +1406,7 @@ static AstNode *parse_local_statement(ParserState *parser)
 	do {
 		/* local name : type = value */
 		LuaSymbol *symbol = parse_local_variable_declaration(parser);
-		add_symbol(parser->container, &node->local_stmt.var_list, symbol);
+		raviX_add_symbol(parser->container, &node->local_stmt.var_list, symbol);
 		nvars++;
 		if (nvars >= MAXVARS)
 			raviX_syntaxerror(ls, "too many local variables");
