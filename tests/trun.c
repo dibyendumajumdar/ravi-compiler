@@ -137,7 +137,11 @@ static int do_code(const char *code, const struct arguments *args)
 	if (args->astdump) {
 		raviX_output_ast(container, stdout);
 	}
-	//rc = raviX_ast_lower(container);
+	rc = raviX_ast_lower(container);
+	if (rc != 0) {
+		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		goto L_exit;
+	}
 	rc = raviX_ast_typecheck(container);
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
