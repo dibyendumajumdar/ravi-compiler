@@ -216,6 +216,8 @@ static void lower_for_in_statement(CompilerState *container, AstNode *node)
 	ForStatement *for_stmt = &node->for_stmt;
 	AstNode *function = for_stmt->for_scope->function;
 
+	// FIXME - the for variables must be removed from parent scope
+
 	// Create do block
 	AstNode *do_stmt = raviX_allocate_ast_node_at_line(container, STMT_DO, node->line_number);
 	do_stmt->do_stmt.do_statement_list = NULL;
