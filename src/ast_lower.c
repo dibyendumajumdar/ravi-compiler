@@ -97,7 +97,8 @@ static void process_statement_list(CompilerState *container, AstNodeList *list)
 
 static void lower_for_in_statement(CompilerState *container, AstNode *node)
 {
-
+	ForStatement *for_stmt = &node->for_stmt;
+	Scope *scope = for_stmt->for_scope;
 }
 
 static void process_statement(CompilerState *container, AstNode *node)

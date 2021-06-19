@@ -1584,6 +1584,16 @@ static void parse_statement_list(ParserState *parser, AstNodeList **list)
 	}
 }
 
+Scope *raviX_allocate_scope(CompilerState *container, AstNode *function, Scope *parent_scope) {
+	Scope *scope = (Scope *) raviX_allocator_allocate(&container->block_scope_allocator, 0);
+	scope->symbol_list = NULL;
+	scope->function = function;
+	scope->need_close = 0; /* Assume we do not need to close upvalues when scope is exited */
+	assert(scope->function && scope->function->type == EXPR_FUNCTION);
+	scope->parent = parent_scope; /* Note parent scope may be in outer function */
+	return scope;
+}
+
 /*
  * Starts a new scope. If the current function has no main block
  * defined then the new scope becomes its main block. The new scope
@@ -1593,12 +1603,7 @@ static void parse_statement_list(ParserState *parser, AstNodeList **list)
 static Scope *new_scope(ParserState *parser)
 {
 	CompilerState *container = parser->container;
-	Scope *scope = (Scope *) raviX_allocator_allocate(&container->block_scope_allocator, 0);
-	scope->symbol_list = NULL;
-	scope->function = parser->current_function;
-	scope->need_close = 0; /* Assume we do not need to close upvalues when scope is exited */
-	assert(scope->function && scope->function->type == EXPR_FUNCTION);
-	scope->parent = parser->current_scope; /* Note parent scope may be in outer function */
+	Scope *scope = raviX_allocate_scope(container, parser->current_function, parser->current_scope);
 	parser->current_scope = scope;
 	if (!parser->current_function->function_expr.main_block)
 		parser->current_function->function_expr.main_block = scope;

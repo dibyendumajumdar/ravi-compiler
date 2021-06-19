@@ -454,6 +454,6 @@ int raviX_ast_lower(CompilerState *container);
 ////////////////////////// Internal stuff
 
 AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type);
-
+Scope *raviX_allocate_scope(CompilerState *container, AstNode *function, Scope *parent_scope);
 
 #endif
