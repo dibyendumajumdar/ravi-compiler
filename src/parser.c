@@ -57,7 +57,7 @@ static void add_ast_node(CompilerState *container, AstNodeList **list, AstNode *
 	raviX_ptrlist_add((PtrList **)list, node, &container->ptrlist_allocator);
 }
 
-static AstNode *allocate_ast_node(ParserState *parser, enum AstNodeType type)
+AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType type)
 {
 	AstNode *node = (AstNode *)raviX_allocator_allocate(&parser->container->ast_node_allocator, 0);
 	node->type = type;
@@ -68,7 +68,7 @@ static AstNode *allocate_ast_node(ParserState *parser, enum AstNodeType type)
 static AstNode *allocate_expr_ast_node(ParserState *parser, enum AstNodeType type)
 {
 	assert(type >= EXPR_LITERAL && type <= EXPR_CONCAT);
-	AstNode *node = allocate_ast_node(parser, type);
+	AstNode *node = raviX_allocate_ast_node(parser, type);
 	node->common_expr.truncate_results = 0;
 	set_typecode(&node->common_expr.type, RAVI_TANY);
 	return node;
@@ -1146,7 +1146,7 @@ static AstNode *parse_goto_statment(ParserState *parser)
 		is_break = 1;
 	}
 	// Resolve labels in the end?
-	AstNode *goto_stmt = allocate_ast_node(parser, STMT_GOTO);
+	AstNode *goto_stmt = raviX_allocate_ast_node(parser, STMT_GOTO);
 	goto_stmt->goto_stmt.name = label;
 	goto_stmt->goto_stmt.is_break = is_break;
 	goto_stmt->goto_stmt.goto_scope = parser->current_scope;
@@ -1164,7 +1164,7 @@ static void skip_noop_statements(ParserState *parser)
 static AstNode *generate_label(ParserState *parser, const StringObject *label)
 {
 	LuaSymbol *symbol = new_label(parser, label);
-	AstNode *label_stmt = allocate_ast_node(parser, STMT_LABEL);
+	AstNode *label_stmt = raviX_allocate_ast_node(parser, STMT_LABEL);
 	label_stmt->label_stmt.symbol = symbol;
 	return label_stmt;
 }
@@ -1186,7 +1186,7 @@ static AstNode *parse_while_statement(ParserState *parser, int line)
 	LexerState *ls = parser->ls;
 	/* whilestat -> WHILE cond DO block END */
 	raviX_next(ls); /* skip WHILE */
-	AstNode *stmt = allocate_ast_node(parser, STMT_WHILE);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_WHILE);
 	stmt->while_or_repeat_stmt.loop_scope = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.condition = parse_condition(parser);
@@ -1201,7 +1201,7 @@ static AstNode *parse_repeat_statement(ParserState *parser, int line)
 	LexerState *ls = parser->ls;
 	/* repeatstat -> REPEAT block UNTIL cond */
 	raviX_next(ls); /* skip REPEAT */
-	AstNode *stmt = allocate_ast_node(parser, STMT_REPEAT);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_REPEAT);
 	stmt->while_or_repeat_stmt.condition = NULL;
 	stmt->while_or_repeat_stmt.loop_statement_list = NULL;
 	stmt->while_or_repeat_stmt.loop_scope = new_scope(parser); /* scope block */
@@ -1273,7 +1273,7 @@ static AstNode *parse_for_statement(ParserState *parser, int line)
 	LexerState *ls = parser->ls;
 	/* forstat -> FOR (fornum | forlist) END */
 	const StringObject *varname;
-	AstNode *stmt = allocate_ast_node(parser, AST_NONE);
+	AstNode *stmt = raviX_allocate_ast_node(parser, AST_NONE);
 	stmt->for_stmt.symbols = NULL;
 	stmt->for_stmt.expr_list = NULL;
 	stmt->for_stmt.for_body = NULL;
@@ -1306,7 +1306,7 @@ static AstNode *parse_if_cond_then_block(ParserState *parser)
 	/* test_then_block -> [IF | ELSEIF] cond THEN block */
 	raviX_next(ls); /* skip IF or ELSEIF */
 	AstNode *test_then_block =
-	    allocate_ast_node(parser, STMT_TEST_THEN);			       // This is not an AST node on its own
+	    raviX_allocate_ast_node(parser, STMT_TEST_THEN);			       // This is not an AST node on its own
 	test_then_block->test_then_block.condition = parse_expression(parser); /* read condition */
 	test_then_block->test_then_block.test_then_scope = NULL;
 	test_then_block->test_then_block.test_then_statement_list = NULL;
@@ -1334,7 +1334,7 @@ static AstNode *parse_if_statement(ParserState *parser, int line)
 {
 	LexerState *ls = parser->ls;
 	/* ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END */
-	AstNode *stmt = allocate_ast_node(parser, STMT_IF);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_IF);
 	stmt->if_stmt.if_condition_list = NULL;
 	stmt->if_stmt.else_block = NULL;
 	stmt->if_stmt.else_statement_list = NULL;
@@ -1360,7 +1360,7 @@ static AstNode *parse_local_function_statement(ParserState *parser)
 	AstNode *function_ast = new_function(parser);
 	parse_function_body(parser, function_ast, 0, ls->linenumber); /* function created in next register */
 	end_function(parser);
-	AstNode *stmt = allocate_ast_node(parser, STMT_LOCAL);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_LOCAL);
 	stmt->local_stmt.var_list = NULL;
 	stmt->local_stmt.expr_list = NULL;
 	add_symbol(parser->container, &stmt->local_stmt.var_list, symbol);
@@ -1389,7 +1389,7 @@ static AstNode *parse_local_statement(ParserState *parser)
 {
 	LexerState *ls = parser->ls;
 	/* stat -> LOCAL NAME {',' NAME} ['=' explist] */
-	AstNode *node = allocate_ast_node(parser, STMT_LOCAL);
+	AstNode *node = raviX_allocate_ast_node(parser, STMT_LOCAL);
 	node->local_stmt.var_list = NULL;
 	node->local_stmt.expr_list = NULL;
 	int nvars = 0;
@@ -1421,7 +1421,7 @@ static AstNode *parse_function_name(ParserState *parser)
 {
 	LexerState *ls = parser->ls;
 	/* funcname -> NAME {fieldsel} [':' NAME] */
-	AstNode *function_stmt = allocate_ast_node(parser, STMT_FUNCTION);
+	AstNode *function_stmt = raviX_allocate_ast_node(parser, STMT_FUNCTION);
 	function_stmt->function_stmt.function_expr = NULL;
 	function_stmt->function_stmt.method_name = NULL;
 	function_stmt->function_stmt.selectors = NULL;
@@ -1452,7 +1452,7 @@ static AstNode *parse_function_statement(ParserState *parser, int line)
 /* parse function call with no returns or assignment statement */
 static AstNode *parse_expression_statement(ParserState *parser)
 {
-	AstNode *stmt = allocate_ast_node(parser, STMT_EXPR);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_EXPR);
 	stmt->expression_stmt.var_expr_list = NULL;
 	stmt->expression_stmt.expr_list = NULL;
 	LexerState *ls = parser->ls;
@@ -1480,7 +1480,7 @@ static AstNode *parse_return_statement(ParserState *parser)
 {
 	LexerState *ls = parser->ls;
 	/* stat -> RETURN [explist] [';'] */
-	AstNode *return_stmt = allocate_ast_node(parser, STMT_RETURN);
+	AstNode *return_stmt = raviX_allocate_ast_node(parser, STMT_RETURN);
 	return_stmt->return_stmt.expr_list = NULL;
 	if (block_follow(ls, 1) || ls->t.token == ';')
 		/* nret = 0*/; /* return no values */
@@ -1496,7 +1496,7 @@ static AstNode *parse_return_statement(ParserState *parser)
 static AstNode *parse_do_statement(ParserState *parser, int line)
 {
 	raviX_next(parser->ls); /* skip DO */
-	AstNode *stmt = allocate_ast_node(parser, STMT_DO);
+	AstNode *stmt = raviX_allocate_ast_node(parser, STMT_DO);
 	stmt->do_stmt.do_statement_list = NULL;
 	stmt->do_stmt.scope = parse_block(parser, &stmt->do_stmt.do_statement_list);
 	check_match(parser->ls, TOK_end, TOK_do, line);
