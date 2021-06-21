@@ -31,6 +31,16 @@ static void process_expression_list(CompilerState *container, AstNodeList *node)
 static void process_statement_list(CompilerState *container, AstNodeList *node);
 static void process_statement(CompilerState *container, AstNode *node);
 
+static int astlist_num_nodes(AstNodeList *list)
+{
+	return raviX_ptrlist_size((struct PtrList *) list);
+}
+
+static AstNode* astlist_get(AstNodeList *list, unsigned int i)
+{
+	return (AstNode*) raviX_ptrlist_nth_entry((struct PtrList *) list, i);
+}
+
 static void process_expression(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
@@ -182,6 +192,26 @@ static AstNode *break_statment(CompilerState *container, Scope *goto_scope)
 	return goto_stmt;
 }
 
+static AstNodeList *fix_numresults(AstNodeList *exprlist)
+{
+	if (astlist_num_nodes(exprlist) > 1) {
+		// TODO
+		return exprlist;
+	}
+	AstNode *n = astlist_get(exprlist, 0);
+	if (n->type != EXPR_SUFFIXED) {
+		// TODO not a simple function call
+		return exprlist;
+	}
+	AstNode *expr = astlist_get(n->suffixed_expr.suffix_list, 0);
+	if (expr == NULL || expr->type != EXPR_FUNCTION_CALL) {
+		// TODO not a simple function call
+		return exprlist;
+	}
+	expr->function_call_expr.num_results = 3; // Need
+	return exprlist;
+}
+
 // clang-format off
 /*
 Lower generic for a do block with a while loop as described in Lua 5.3 manual.
@@ -234,7 +264,7 @@ static void lower_for_in_statement(CompilerState *container, AstNode *node)
 
 	AstNode *local_stmt = raviX_allocate_ast_node_at_line(container, STMT_LOCAL, node->line_number);
 	local_stmt->local_stmt.var_list = NULL;
-	local_stmt->local_stmt.expr_list = for_stmt->expr_list;
+	local_stmt->local_stmt.expr_list = fix_numresults(for_stmt->expr_list);
 
 	LuaSymbol *fsym = raviX_new_local_symbol(container, do_scope, raviX_create_string(container, f, sizeof f-1), RAVI_TANY, NULL);
 	LuaSymbol *ssym = raviX_new_local_symbol(container, do_scope, raviX_create_string(container, s, sizeof s-1), RAVI_TANY, NULL);
