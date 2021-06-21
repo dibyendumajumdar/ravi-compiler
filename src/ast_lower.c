@@ -41,6 +41,11 @@ static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 	return (AstNode*) raviX_ptrlist_nth_entry((struct PtrList *) list, i);
 }
 
+static AstNode* astlist_last(AstNodeList *list)
+{
+	return (AstNode*) raviX_ptrlist_last((struct PtrList *) list);
+}
+
 static void process_expression(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
@@ -192,23 +197,29 @@ static AstNode *break_statment(CompilerState *container, Scope *goto_scope)
 	return goto_stmt;
 }
 
+// In generic for loops the exprlist is required to result
+// in 3 values, function, state, and var.
+// Perhaps the parser needs to do this instead of here
+// We try to ensure that exprlist will result in 3 values
 static AstNodeList *fix_numresults(AstNodeList *exprlist)
 {
-	if (astlist_num_nodes(exprlist) > 1) {
-		// TODO
+	if (astlist_num_nodes(exprlist) >= 3) {
+		// already 3 or more values so OK
 		return exprlist;
 	}
-	AstNode *n = astlist_get(exprlist, 0);
+	AstNode *n = astlist_last(exprlist);
 	if (n->type != EXPR_SUFFIXED) {
-		// TODO not a simple function call
+		// TODO last expression is not a simple function call
 		return exprlist;
 	}
 	AstNode *expr = astlist_get(n->suffixed_expr.suffix_list, 0);
 	if (expr == NULL || expr->type != EXPR_FUNCTION_CALL) {
-		// TODO not a simple function call
+		// TODO last expression is not a simple function call
 		return exprlist;
 	}
-	expr->function_call_expr.num_results = 3; // Need
+	// adjust the number of results expected so that the last function call
+	// expr has its results adjusted
+	expr->function_call_expr.num_results = 3-(astlist_num_nodes(exprlist)-1);
 	return exprlist;
 }
 
