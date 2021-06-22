@@ -21,10 +21,11 @@ The compiler library consists of distinct modules:
 * AST simplifier (alpha) - responsible for performing some initial simplifications such as constant folding.
 * linearizer (alpha) - responsible for constructing a linear IR representation of the AST.
 * optimizer (Work in progress) - responsible for improving the code
-* codegenerator (Work in progress) - responsible for generating C code
+* codegenerator (alpha) - responsible for generating C code
 
 ## Status
 
+* 22-Jun-2021 Increased coverage of Lua syntax to cover string contenations and generic for loops
 * 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 * 01-Dec-2020 The generated code is now also suitable for AOT compilation but requires special loading facility in Ravi.
 * 17-Jan-2021 The code is now C++ compliant so we can compile everything in C++ or C.
@@ -40,6 +41,7 @@ Documentation is coming soon.
 For now you can look at following:
 * [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h) - only the lexer and parser API are public for now
 * [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests)
+* [Example Ravi Tests](https://github.com/dibyendumajumdar/ravi/tree/master/tests/comptests)
 * [CFG Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/docs/cfg)
 * See the [Wiki](https://github.com/dibyendumajumdar/ravi-compiler/wiki) for various notes
 
@@ -77,12 +79,10 @@ trun "return 'hello'"
 
 At the moment we have a couple of simple test driver programs: `tparse` and `trun`. These drivers take a string or file input which must be a valid Lua/Ravi chunk of code, and output the AST, the result of type checking, linear IR output if supported, and the CFG as a `dot` file. Example of the output can be found in the `tests/expected` folder.
 
-Suppose `tparse` was built in `build` folder then you can run the tests as follows:
+Suppose `trun` was built in `build` folder then you can run the tests as follows:
 
 ```
-cd tests && sh runtests.sh ../build/tparse
+cd tests && sh truntests.sh ../build/trun
 ```
 
 The test script compares the output to the expected output. Any difference will cause the test script to fail.
-
-The `trun` utility will eventually replace `tparse` as it can handle multiple chunks of code in a single input file. 
