@@ -75,6 +75,12 @@ Example:
 trun "return 'hello'"
 ```
 
+To see the C output, try:
+
+```
+trun --gen-C "print 'hello world'"
+```
+
 ## Testing
 
 At the moment we have a couple of simple test driver programs: `tparse` and `trun`. These drivers take a string or file input which must be a valid Lua/Ravi chunk of code, and output the AST, the result of type checking, linear IR output if supported, and the CFG as a `dot` file. Example of the output can be found in the `tests/expected` folder.
