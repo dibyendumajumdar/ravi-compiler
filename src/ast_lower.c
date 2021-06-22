@@ -31,6 +31,11 @@ static void process_expression_list(CompilerState *container, AstNodeList *node)
 static void process_statement_list(CompilerState *container, AstNodeList *node);
 static void process_statement(CompilerState *container, AstNode *node);
 
+static int symbollist_num_symbols(LuaSymbolList *list)
+{
+	return raviX_ptrlist_size((struct PtrList *) list);
+}
+
 static void process_expression(CompilerState *container, AstNode *node)
 {
 	switch (node->type) {
@@ -135,7 +140,7 @@ static AstNode *make_symbol_expr(CompilerState *container, LuaSymbol *symbol)
 }
 
 /* fsym(ssym, varsym) */
-static AstNode *call_iterator_function(CompilerState *container, LuaSymbol *fsym, LuaSymbol *ssym, LuaSymbol *varsym)
+static AstNode *call_iterator_function(CompilerState *container, LuaSymbol *fsym, LuaSymbol *ssym, LuaSymbol *varsym, int nvars)
 {
 	AstNode *suffixed_expr = allocate_expr_ast_node(container, EXPR_SUFFIXED);
 	suffixed_expr->suffixed_expr.primary_expr = make_symbol_expr(container, fsym);
@@ -145,7 +150,7 @@ static AstNode *call_iterator_function(CompilerState *container, LuaSymbol *fsym
 	AstNode *call_expr = allocate_expr_ast_node(container, EXPR_FUNCTION_CALL);
 	call_expr->function_call_expr.method_name = NULL;
 	call_expr->function_call_expr.arg_list = NULL;
-	call_expr->function_call_expr.num_results = -1; /* We want all results */
+	call_expr->function_call_expr.num_results = nvars; /* We want same number of results as there are variables */
 	set_type(&call_expr->function_call_expr.type, RAVI_TANY);
 
 	add_ast_node(container, &call_expr->function_call_expr.arg_list, make_symbol_expr(container, ssym));
@@ -264,7 +269,7 @@ static void lower_for_in_statement(CompilerState *container, AstNode *node)
 	AstNode *local_stmt2 = raviX_allocate_ast_node_at_line(container, STMT_LOCAL, node->line_number);
 	local_stmt2->local_stmt.var_list = for_stmt->symbols;
 	local_stmt2->local_stmt.expr_list = NULL;
-	AstNode *call_expr = call_iterator_function(container, fsym, ssym, varsym);
+	AstNode *call_expr = call_iterator_function(container, fsym, ssym, varsym, symbollist_num_symbols(for_stmt->symbols));
 	add_ast_node(container, &local_stmt2->local_stmt.expr_list, call_expr);
 	add_ast_node(container, &while_stmt->while_or_repeat_stmt.loop_statement_list, local_stmt2);
 
