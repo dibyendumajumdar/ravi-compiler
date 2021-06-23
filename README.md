@@ -5,23 +5,24 @@ A compiler for Ravi and Lua that processes Lua/Ravi source code and generates C 
 
 ## Goals
 
-* Create a re-usable Lua/Ravi lexer/parser
-* Define conventional linear intermediate representation (IR)
-* Generate C code from Lua/Ravi source
-* Support Ahead of time (AOT) compilation
-* The generated code can be executed by Ravi.
+* Create a re-usable Lua/Ravi lexer/parser.
+* Define conventional linear intermediate representation (IR).
+* Generate C code from Lua/Ravi source.
+* Support Ahead of time (AOT) compilation.
+* The generated code can be executed by Ravi. Since the generated code depends on various VM structures it is not binary compatible with Lua, but in theory one can modify the code relatively easily to work with Lua 5.3. Lua 5.4 has modifications to the call stack used by Lua which makes it harder to port to.
 
 ## Modules
 
 The compiler library consists of distinct modules:
 
-* lexer (alpha) - responsible for tokenizing an input buffer
+* lexer (alpha) - responsible for tokenizing an input buffer.
 * parser (alpha) - responsible for generating abstract syntax tree (AST).
+* AST lowerer (alpha) - currently transforms generic for loops to while loops.
 * typechecker (alpha) - responsible for assigning types to variables when possible.
-* AST simplifier (alpha) - responsible for performing some initial simplifications such as constant folding.
+* AST simplifier (alpha) - responsible for performing some initial simplifications such as constant folding, and string concatenation re-writing.
 * linearizer (alpha) - responsible for constructing a linear IR representation of the AST.
-* optimizer (Work in progress) - responsible for improving the code
-* codegenerator (alpha) - responsible for generating C code
+* optimizer (WIP) - responsible for improving the code, this doesn't do much right now.
+* codegenerator (alpha) - responsible for generating C code. Each input is translated to a standalone C file that can be compiled using any C compiler. Ravi can compile this at runtime using MIR C JIT compiler. For AOT compilation, dynamic library needs to be created and a special loader needs to be used that treats the shared library as a compiled version of Lua chunk. The generated C code doesn't use the Lua C call api, as it is designed to look like Lua code.
 
 ## Status
 
