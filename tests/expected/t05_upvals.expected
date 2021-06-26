@@ -9,7 +9,6 @@ function f()
 end
 
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -63,7 +62,6 @@ function()
     end
 end
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -287,7 +285,6 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -350,7 +347,6 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -662,7 +658,6 @@ end
 ::l3:: ::l3_1:: assert(x == 13)
 
 function()
---locals  x, y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -743,7 +738,6 @@ function()
   --[expression statement end]
 end
 function()
---locals  x, y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -894,7 +888,6 @@ function Message (m)
 end
 
 function()
---locals  msgs
 --upvalues  _ENV*
   local
   --[symbols]
@@ -907,7 +900,6 @@ function()
     function(
       m --local symbol any 
     )
-    --locals  m
     --upvalues  _ENV*, msgs
       if
        --[unary expr start] any
@@ -999,7 +991,6 @@ function()
     end
 end
 function()
---locals  msgs
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1012,7 +1003,6 @@ function()
     function(
       m --local symbol any 
     )
-    --locals  m
     --upvalues  _ENV*, msgs
       if
        --[unary expr start] any
@@ -1228,7 +1218,6 @@ local function z(p1,p2)
 end
 
 function()
---locals  b, z
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1242,7 +1231,6 @@ function()
      ,
       p2 --local symbol any 
     )
-    --locals  p1, p2, x, y, a, x, c, y, t
     --upvalues  b
       do
         local
@@ -1328,7 +1316,6 @@ function()
     end
 end
 function()
---locals  b, z
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1342,7 +1329,6 @@ function()
      ,
       p2 --local symbol any 
     )
-    --locals  p1, p2, x, y, a, x, c, y, t
     --upvalues  b
       do
         local
@@ -1604,7 +1590,6 @@ L0 -> L1
 local _ENV = {}; return function() x = 1 end
 
 function()
---locals  _ENV
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1630,7 +1615,6 @@ function()
     end
 end
 function()
---locals  _ENV
 --upvalues  _ENV*
   local
   --[symbols]

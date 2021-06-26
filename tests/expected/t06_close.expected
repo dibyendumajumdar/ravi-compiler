@@ -19,7 +19,6 @@ L0 -> L1
 local z, a do (function() a =1 end)() end
 
 function()
---locals  z, a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -59,7 +58,6 @@ function()
   end
 end
 function()
---locals  z, a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -149,18 +147,15 @@ function()
     function(
       x --local symbol any 
     )
-    --locals  x
       return
         function(
           y --local symbol any 
         )
-        --locals  y
         --upvalues  x
           return
             function(
               z --local symbol any 
             )
-            --locals  z
             --upvalues  x, y
               return
                 --[binary expr start] any
@@ -195,18 +190,15 @@ function()
     function(
       x --local symbol any 
     )
-    --locals  x
       return
         function(
           y --local symbol any 
         )
-        --locals  y
         --upvalues  x
           return
             function(
               z --local symbol any 
             )
-            --locals  z
             --upvalues  x, y
               return
                 --[binary expr start] any
@@ -394,7 +386,6 @@ end
 x = 20
 
 function()
---locals  a, x, i, j
 --upvalues  _ENV*
   local
   --[symbols]
@@ -477,7 +468,6 @@ function()
   --[expression statement end]
 end
 function()
---locals  a, x, i, j
 --upvalues  _ENV*
   local
   --[symbols]
@@ -695,7 +685,6 @@ end
 print(x)
 
 function()
---locals  x, i, j
 --upvalues  _ENV*
   local
   --[symbols]
@@ -797,7 +786,6 @@ function()
   --[expression statement end]
 end
 function()
---locals  x, i, j
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1114,7 +1102,6 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a, B
     --upvalues  _ENV*
       local
       --[symbols]
@@ -1123,7 +1110,6 @@ function()
         function(
           b --local symbol any 
         )
-        --locals  b, C
         --upvalues  _ENV*, a
           local
           --[symbols]
@@ -1132,7 +1118,6 @@ function()
             function(
               c --local symbol any 
             )
-            --locals  c
             --upvalues  _ENV*, b, a
               return
                 --[binary expr start] any
@@ -1175,7 +1160,6 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a, B
     --upvalues  _ENV*
       local
       --[symbols]
@@ -1184,7 +1168,6 @@ function()
         function(
           b --local symbol any 
         )
-        --locals  b, C
         --upvalues  _ENV*, a
           local
           --[symbols]
@@ -1193,7 +1176,6 @@ function()
             function(
               c --local symbol any 
             )
-            --locals  c
             --upvalues  _ENV*, b, a
               return
                 --[binary expr start] any

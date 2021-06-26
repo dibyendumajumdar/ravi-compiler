@@ -1,7 +1,6 @@
 local a = b .. c
 
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -22,7 +21,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -64,7 +62,6 @@ L0 -> L1
 local hello = 'hello ' .. 'world'
 
 function()
---locals  hello
 --upvalues  _ENV*
   local
   --[symbols]
@@ -77,7 +74,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  hello
 --upvalues  _ENV*
   local
   --[symbols]
@@ -107,7 +103,6 @@ L0 -> L1
 local y = "ab"..(1).."cd"..(1.5)
 
 function()
---locals  y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -136,7 +131,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -187,7 +181,6 @@ local x = 1.
 local y = x .. ' test ' .. x
 
 function()
---locals  x, y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -217,7 +210,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  x, y
 --upvalues  _ENV*
   local
   --[symbols]
@@ -270,7 +262,6 @@ local y = x .. ' test ' .. x
 local z = 2.
 local a = x+1 .. ' ' .. y .. ' ' .. z+2
 function()
---locals  x, y, z, a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -346,7 +337,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  x, y, z, a
 --upvalues  _ENV*
   local
   --[symbols]

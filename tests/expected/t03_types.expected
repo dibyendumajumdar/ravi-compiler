@@ -9,7 +9,6 @@ function()
      ,
       zee --local symbol number[] 
     )
-    --locals  bar, zee
     end
 end
 function()
@@ -21,7 +20,6 @@ function()
      ,
       zee --local symbol number[] 
     )
-    --locals  bar, zee
     end
 end
 define Proc%1
@@ -74,7 +72,6 @@ function()
      ,
       zee --local symbol string 
     )
-    --locals  bar, zee
     end
 end
 function()
@@ -86,7 +83,6 @@ function()
      ,
       zee --local symbol string 
     )
-    --locals  bar, zee
     end
 end
 define Proc%1
@@ -139,7 +135,6 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
-    --locals  bar, zee
     end
 end
 function()
@@ -151,7 +146,6 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
-    --locals  bar, zee
     end
 end
 define Proc%1
@@ -648,7 +642,6 @@ L0 -> L1
 local a: integer return a+3
 
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -665,7 +658,6 @@ function()
     --[binary expr end]
 end
 function()
---locals  a
 --upvalues  _ENV*
   local
   --[symbols]
@@ -697,7 +689,6 @@ L0 -> L1
 local i: integer; return t[i/5]
 
 function()
---locals  i
 --upvalues  _ENV*
   local
   --[symbols]
@@ -725,7 +716,6 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  i
 --upvalues  _ENV*
   local
   --[symbols]
@@ -772,7 +762,6 @@ L0 -> L1
 local t: integer[]; return t[0]
 
 function()
---locals  t
 --upvalues  _ENV*
   local
   --[symbols]
@@ -792,7 +781,6 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  t
 --upvalues  _ENV*
   local
   --[symbols]
@@ -827,7 +815,6 @@ L0 -> L1
 local t: integer[] if (t[1] == 5) then return true end return false
 
 function()
---locals  t
 --upvalues  _ENV*
   local
   --[symbols]
@@ -861,7 +848,6 @@ function()
     false
 end
 function()
---locals  t
 --upvalues  _ENV*
   local
   --[symbols]
@@ -934,7 +920,6 @@ L4 -> L1
 local t: table local len: integer = #t return len
 
 function()
---locals  t, len
 --upvalues  _ENV*
   local
   --[symbols]
@@ -959,7 +944,6 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  t, len
 --upvalues  _ENV*
   local
   --[symbols]
@@ -1010,7 +994,6 @@ function()
      ,
       i --local symbol integer 
     )
-    --locals  t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -1040,7 +1023,6 @@ function()
      ,
       i --local symbol integer 
     )
-    --locals  t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -1135,7 +1117,6 @@ function()
      ,
       b --local symbol table 
     )
-    --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
     --upvalues  _ENV*
       --[expression statement start]
        --[expression list start]
@@ -1512,7 +1493,6 @@ function()
      ,
       b --local symbol table 
     )
-    --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
     --upvalues  _ENV*
       --[expression statement start]
        --[expression list start]
