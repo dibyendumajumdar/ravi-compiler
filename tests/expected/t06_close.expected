@@ -20,6 +20,7 @@ local z, a do (function() a =1 end)() end
 
 function()
 --upvalues  _ENV*
+--[local symbols] z, a
   local
   --[symbols]
     z --local symbol any 
@@ -59,6 +60,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] z, a
   local
   --[symbols]
     z --local symbol any 
@@ -147,16 +149,19 @@ function()
     function(
       x --local symbol any 
     )
+    --[local symbols] x
       return
         function(
           y --local symbol any 
         )
         --upvalues  x
+        --[local symbols] y
           return
             function(
               z --local symbol any 
             )
             --upvalues  x, y
+            --[local symbols] z
               return
                 --[binary expr start] any
                  --[binary expr start] any
@@ -190,16 +195,19 @@ function()
     function(
       x --local symbol any 
     )
+    --[local symbols] x
       return
         function(
           y --local symbol any 
         )
         --upvalues  x
+        --[local symbols] y
           return
             function(
               z --local symbol any 
             )
             --upvalues  x, y
+            --[local symbols] z
               return
                 --[binary expr start] any
                  --[binary expr start] any
@@ -387,6 +395,7 @@ x = 20
 
 function()
 --upvalues  _ENV*
+--[local symbols] a, x
   local
   --[symbols]
     a --local symbol any 
@@ -399,12 +408,14 @@ function()
   --[expressions]
     10
   for
+  --[local symbols] i
     i --local symbol any 
   =
     1
    ,
     2
   do
+  --[local symbols] j
      local
      --[symbols]
        j --local symbol any 
@@ -469,6 +480,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a, x
   local
   --[symbols]
     a --local symbol any 
@@ -481,12 +493,14 @@ function()
   --[expressions]
     10
   for
+  --[local symbols] i
     i --local symbol integer 
   =
     1
    ,
     2
   do
+  --[local symbols] j
      local
      --[symbols]
        j --local symbol any 
@@ -686,6 +700,7 @@ print(x)
 
 function()
 --upvalues  _ENV*
+--[local symbols] x
   local
   --[symbols]
     x --local symbol any 
@@ -693,12 +708,14 @@ function()
     1
   do
     for
+    --[local symbols] i
       i --local symbol any 
     =
       1
      ,
       10
     do
+    --[local symbols] j
        local
        --[symbols]
          j --local symbol any 
@@ -787,6 +804,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] x
   local
   --[symbols]
     x --local symbol any 
@@ -794,12 +812,14 @@ function()
     1
   do
     for
+    --[local symbols] i
       i --local symbol any 
     =
       1
      ,
       10
     do
+    --[local symbols] j
        local
        --[symbols]
          j --local symbol any 
@@ -1103,6 +1123,7 @@ function()
       a --local symbol any 
     )
     --upvalues  _ENV*
+    --[local symbols] a, B
       local
       --[symbols]
         B --local symbol closure 
@@ -1111,6 +1132,7 @@ function()
           b --local symbol any 
         )
         --upvalues  _ENV*, a
+        --[local symbols] b, C
           local
           --[symbols]
             C --local symbol closure 
@@ -1119,6 +1141,7 @@ function()
               c --local symbol any 
             )
             --upvalues  _ENV*, b, a
+            --[local symbols] c
               return
                 --[binary expr start] any
                  --[binary expr start] any
@@ -1161,6 +1184,7 @@ function()
       a --local symbol any 
     )
     --upvalues  _ENV*
+    --[local symbols] a, B
       local
       --[symbols]
         B --local symbol closure 
@@ -1169,6 +1193,7 @@ function()
           b --local symbol any 
         )
         --upvalues  _ENV*, a
+        --[local symbols] b, C
           local
           --[symbols]
             C --local symbol closure 
@@ -1177,6 +1202,7 @@ function()
               c --local symbol any 
             )
             --upvalues  _ENV*, b, a
+            --[local symbols] c
               return
                 --[binary expr start] any
                  --[binary expr start] any

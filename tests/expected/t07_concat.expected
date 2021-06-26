@@ -2,6 +2,7 @@ local a = b .. c
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -22,6 +23,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -63,6 +65,7 @@ local hello = 'hello ' .. 'world'
 
 function()
 --upvalues  _ENV*
+--[local symbols] hello
   local
   --[symbols]
     hello --local symbol any 
@@ -75,6 +78,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] hello
   local
   --[symbols]
     hello --local symbol any 
@@ -104,6 +108,7 @@ local y = "ab"..(1).."cd"..(1.5)
 
 function()
 --upvalues  _ENV*
+--[local symbols] y
   local
   --[symbols]
     y --local symbol any 
@@ -132,6 +137,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] y
   local
   --[symbols]
     y --local symbol any 
@@ -182,6 +188,7 @@ local y = x .. ' test ' .. x
 
 function()
 --upvalues  _ENV*
+--[local symbols] x, y
   local
   --[symbols]
     x --local symbol any 
@@ -211,6 +218,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] x, y
   local
   --[symbols]
     x --local symbol any 
@@ -263,6 +271,7 @@ local z = 2.
 local a = x+1 .. ' ' .. y .. ' ' .. z+2
 function()
 --upvalues  _ENV*
+--[local symbols] x, y, z, a
   local
   --[symbols]
     x --local symbol any 
@@ -338,6 +347,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] x, y, z, a
   local
   --[symbols]
     x --local symbol any 

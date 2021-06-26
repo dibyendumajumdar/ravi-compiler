@@ -2,6 +2,7 @@ local i = 0
 
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol any 
@@ -10,6 +11,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol any 
@@ -33,6 +35,7 @@ local i, j = 1, 2
 
 function()
 --upvalues  _ENV*
+--[local symbols] i, j
   local
   --[symbols]
     i --local symbol any 
@@ -45,6 +48,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] i, j
   local
   --[symbols]
     i --local symbol any 
@@ -74,6 +78,7 @@ local a = a
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -86,6 +91,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -115,6 +121,7 @@ local a = b
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -127,6 +134,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -156,6 +164,7 @@ local a, b = x, y
 
 function()
 --upvalues  _ENV*
+--[local symbols] a, b
   local
   --[symbols]
     a --local symbol any 
@@ -176,6 +185,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a, b
   local
   --[symbols]
     a --local symbol any 
@@ -217,6 +227,7 @@ local a: integer return a+3
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -233,6 +244,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -264,6 +276,7 @@ local i: integer; return t[i/5]
 
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -291,6 +304,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -337,6 +351,7 @@ local t: integer[]; return t[0]
 
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -356,6 +371,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -390,6 +406,7 @@ local t: table local len: integer = #t return len
 
 function()
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -414,6 +431,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -460,6 +478,7 @@ r()[a].name = _g and 'Dibyendu' or 'majumdar'
 
 function()
 --upvalues  _ENV*
+--[local symbols] _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -570,6 +589,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any

@@ -9,6 +9,7 @@ function()
      ,
       zee --local symbol number[] 
     )
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -20,6 +21,7 @@ function()
      ,
       zee --local symbol number[] 
     )
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -72,6 +74,7 @@ function()
      ,
       zee --local symbol string 
     )
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -83,6 +86,7 @@ function()
      ,
       zee --local symbol string 
     )
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -135,6 +139,7 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -146,6 +151,7 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -643,6 +649,7 @@ local a: integer return a+3
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -659,6 +666,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -690,6 +698,7 @@ local i: integer; return t[i/5]
 
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -717,6 +726,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -763,6 +773,7 @@ local t: integer[]; return t[0]
 
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -782,6 +793,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -816,6 +828,7 @@ local t: integer[] if (t[1] == 5) then return true end return false
 
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -849,6 +862,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -921,6 +935,7 @@ local t: table local len: integer = #t return len
 
 function()
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -945,6 +960,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -994,6 +1010,7 @@ function()
      ,
       i --local symbol integer 
     )
+    --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -1023,6 +1040,7 @@ function()
      ,
       i --local symbol integer 
     )
+    --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -1118,6 +1136,7 @@ function()
       b --local symbol table 
     )
     --upvalues  _ENV*
+    --[local symbols] a, b, m, n, p, x, c
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -1244,6 +1263,7 @@ function()
          --[suffix list end]
         --[suffixed expr end]
       for
+      --[local symbols] i
         i --local symbol any 
       =
         1
@@ -1254,6 +1274,7 @@ function()
          --[primary end]
         --[suffixed expr end]
       do
+      --[local symbols] xi
          local
          --[symbols]
            xi --local symbol number[] 
@@ -1308,6 +1329,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] j
            j --local symbol any 
          =
            1
@@ -1318,6 +1340,7 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+         --[local symbols] sum, ai, cj
             local
             --[symbols]
               sum --local symbol number 
@@ -1376,6 +1399,7 @@ function()
                --[suffixed expr end]
               --[unary expr end]
             for
+            --[local symbols] k
               k --local symbol any 
             =
               1
@@ -1494,6 +1518,7 @@ function()
       b --local symbol table 
     )
     --upvalues  _ENV*
+    --[local symbols] a, b, m, n, p, x, c
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -1620,6 +1645,7 @@ function()
          --[suffix list end]
         --[suffixed expr end]
       for
+      --[local symbols] i
         i --local symbol integer 
       =
         1
@@ -1630,6 +1656,7 @@ function()
          --[primary end]
         --[suffixed expr end]
       do
+      --[local symbols] xi
          local
          --[symbols]
            xi --local symbol number[] 
@@ -1684,6 +1711,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] j
            j --local symbol integer 
          =
            1
@@ -1694,6 +1722,7 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+         --[local symbols] sum, ai, cj
             local
             --[symbols]
               sum --local symbol number 
@@ -1752,6 +1781,7 @@ function()
                --[suffixed expr end]
               --[unary expr end]
             for
+            --[local symbols] k
               k --local symbol integer 
             =
               1

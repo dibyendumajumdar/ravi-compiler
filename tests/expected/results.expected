@@ -2619,9 +2619,9 @@ function()
    x --global symbol any 
    =
     function()
-    --locals  i
     --upvalues  _ENV*
       for
+      --[local symbols] i
         i --local symbol any 
       =
         1
@@ -2656,9 +2656,9 @@ function()
    x --global symbol any 
    =
     function()
-    --locals  i
     --upvalues  _ENV*
       for
+      --[local symbols] i
         i --local symbol integer 
       =
         1
@@ -2721,8 +2721,8 @@ function()
    x --global symbol any 
    =
     function()
-    --locals  a
     --upvalues  _ENV*
+    --[local symbols] a
       local
       --[symbols]
         a --local symbol any 
@@ -2750,8 +2750,8 @@ function()
    x --global symbol any 
    =
     function()
-    --locals  a
     --upvalues  _ENV*
+    --[local symbols] a
       local
       --[symbols]
         a --local symbol any 
@@ -5389,8 +5389,8 @@ L0 (entry)
 L1 (exit)
 local i = 0
 function()
---locals  i
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol any 
@@ -5398,8 +5398,8 @@ function()
     0
 end
 function()
---locals  i
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol any 
@@ -5413,8 +5413,8 @@ L0 (entry)
 L1 (exit)
 local i, j = 1, 2
 function()
---locals  i, j
 --upvalues  _ENV*
+--[local symbols] i, j
   local
   --[symbols]
     i --local symbol any 
@@ -5426,8 +5426,8 @@ function()
     2
 end
 function()
---locals  i, j
 --upvalues  _ENV*
+--[local symbols] i, j
   local
   --[symbols]
     i --local symbol any 
@@ -5446,8 +5446,8 @@ L0 (entry)
 L1 (exit)
 local a = a
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -5459,8 +5459,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -5479,8 +5479,8 @@ L0 (entry)
 L1 (exit)
 local a = b
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -5492,8 +5492,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -5512,8 +5512,8 @@ L0 (entry)
 L1 (exit)
 local a, b = x, y
 function()
---locals  a, b
 --upvalues  _ENV*
+--[local symbols] a, b
   local
   --[symbols]
     a --local symbol any 
@@ -5533,8 +5533,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  a, b
 --upvalues  _ENV*
+--[local symbols] a, b
   local
   --[symbols]
     a --local symbol any 
@@ -5563,8 +5563,8 @@ L0 (entry)
 L1 (exit)
 local a: integer return a+3
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -5580,8 +5580,8 @@ function()
     --[binary expr end]
 end
 function()
---locals  a
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol integer 
@@ -5603,8 +5603,8 @@ L0 (entry)
 L1 (exit)
 local i: integer; return t[i/5]
 function()
---locals  i
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -5631,8 +5631,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  i
 --upvalues  _ENV*
+--[local symbols] i
   local
   --[symbols]
     i --local symbol integer 
@@ -5667,8 +5667,8 @@ L0 (entry)
 L1 (exit)
 local t: integer[]; return t[0]
 function()
---locals  t
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5687,8 +5687,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  t
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5809,8 +5809,8 @@ L0 (entry)
 L1 (exit)
 local t: integer[] if (t[1] == 5) then return true end return false
 function()
---locals  t
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5843,8 +5843,8 @@ function()
     false
 end
 function()
---locals  t
 --upvalues  _ENV*
+--[local symbols] t
   local
   --[symbols]
     t --local symbol integer[] 
@@ -5890,8 +5890,8 @@ L4
 	RET {false} {L1}
 local t: table local len: integer = #t return len
 function()
---locals  t, len
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -5915,8 +5915,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  t, len
 --upvalues  _ENV*
+--[local symbols] t, len
   local
   --[symbols]
     t --local symbol table 
@@ -5955,7 +5955,7 @@ function()
      ,
       i --local symbol integer 
     )
-    --locals  t, i
+    --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -5985,7 +5985,7 @@ function()
      ,
       i --local symbol integer 
     )
-    --locals  t, i
+    --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
@@ -6024,6 +6024,7 @@ L1 (exit)
 ::L1:: a = 1; goto L1; return
 function()
 --upvalues  _ENV*
+--[local symbols] L1:
   ::L1::
   --[expression statement start]
    --[var list start]
@@ -6042,6 +6043,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] L1:
   ::L1::
   --[expression statement start]
    --[var list start]
@@ -6068,8 +6070,10 @@ L2
 ::l1:: do goto l1; x = 1; ::l1:: z = 2 end y = 1; goto l1
 function()
 --upvalues  _ENV*
+--[local symbols] l1:
   ::l1::
   do
+  --[local symbols] l1:
     goto l1
     --[expression statement start]
      --[var list start]
@@ -6113,8 +6117,10 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] l1:
   ::l1::
   do
+  --[local symbols] l1:
     goto l1
     --[expression statement start]
      --[var list start]
@@ -6174,6 +6180,7 @@ function()
 --upvalues  _ENV*
   goto l1
   do
+  --[local symbols] l1:
     ::l1::
   end
 end
@@ -6181,6 +6188,7 @@ function()
 --upvalues  _ENV*
   goto l1
   do
+  --[local symbols] l1:
     ::l1::
   end
 end
@@ -6207,7 +6215,7 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  a, y, a, z
+    --[local symbols] a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -6270,7 +6278,7 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  a, y, a, z
+    --[local symbols] a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -6386,7 +6394,7 @@ function()
      ,
       e --local symbol any 
     )
-    --locals  a, b, c, d, e
+    --[local symbols] a, b, c, d, e, l1:, l2:, l3:, l4:
       if
        --[binary expr start] any
         --[suffixed expr start] any
@@ -6476,7 +6484,7 @@ function()
      ,
       e --local symbol any 
     )
-    --locals  a, b, c, d, e
+    --[local symbols] a, b, c, d, e, l1:, l2:, l3:, l4:
       if
        --[binary expr start] any
         --[suffixed expr start] any
@@ -6612,7 +6620,7 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a
+    --[local symbols] a
       while
        --[binary expr start] any
         --[suffixed expr start] any
@@ -6653,7 +6661,7 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a
+    --[local symbols] a
       while
        --[binary expr start] any
         --[suffixed expr start] any
@@ -6714,7 +6722,7 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a
+    --[local symbols] a, L2:, L1:
       ::L2::
       if
        --[unary expr start] any
@@ -6766,7 +6774,7 @@ function()
     function(
       a --local symbol any 
     )
-    --locals  a
+    --[local symbols] a, L2:, L1:
       ::L2::
       if
        --[unary expr start] any
@@ -6953,11 +6961,12 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  sum, j, k
+    --[local symbols] sum
       local
       --[symbols]
         sum --local symbol any 
       for
+      --[local symbols] j
         j --local symbol any 
       =
         1
@@ -6977,6 +6986,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] k
            k --local symbol any 
          =
            1
@@ -7037,11 +7047,12 @@ function()
 --upvalues  _ENV*
   return
     function()
-    --locals  sum, j, k
+    --[local symbols] sum
       local
       --[symbols]
         sum --local symbol any 
       for
+      --[local symbols] j
         j --local symbol integer 
       =
         1
@@ -7061,6 +7072,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] k
            k --local symbol integer 
          =
            1
@@ -7187,8 +7199,8 @@ function()
      ,
       b --local symbol table 
     )
-    --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
     --upvalues  _ENV*
+    --[local symbols] a, b, m, n, p, x, c
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -7315,6 +7327,7 @@ function()
          --[suffix list end]
         --[suffixed expr end]
       for
+      --[local symbols] i
         i --local symbol any 
       =
         1
@@ -7325,6 +7338,7 @@ function()
          --[primary end]
         --[suffixed expr end]
       do
+      --[local symbols] xi
          local
          --[symbols]
            xi --local symbol number[] 
@@ -7379,6 +7393,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] j
            j --local symbol any 
          =
            1
@@ -7389,6 +7404,7 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+         --[local symbols] sum, ai, cj
             local
             --[symbols]
               sum --local symbol number 
@@ -7447,6 +7463,7 @@ function()
                --[suffixed expr end]
               --[unary expr end]
             for
+            --[local symbols] k
               k --local symbol any 
             =
               1
@@ -7564,8 +7581,8 @@ function()
      ,
       b --local symbol table 
     )
-    --locals  a, b, m, n, p, x, c, i, xi, j, sum, ai, cj, k
     --upvalues  _ENV*
+    --[local symbols] a, b, m, n, p, x, c
       --[expression statement start]
        --[expression list start]
          --[suffixed expr start] any
@@ -7692,6 +7709,7 @@ function()
          --[suffix list end]
         --[suffixed expr end]
       for
+      --[local symbols] i
         i --local symbol integer 
       =
         1
@@ -7702,6 +7720,7 @@ function()
          --[primary end]
         --[suffixed expr end]
       do
+      --[local symbols] xi
          local
          --[symbols]
            xi --local symbol number[] 
@@ -7756,6 +7775,7 @@ function()
           --[expression list end]
          --[expression statement end]
          for
+         --[local symbols] j
            j --local symbol integer 
          =
            1
@@ -7766,6 +7786,7 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+         --[local symbols] sum, ai, cj
             local
             --[symbols]
               sum --local symbol number 
@@ -7824,6 +7845,7 @@ function()
                --[suffixed expr end]
               --[unary expr end]
             for
+            --[local symbols] k
               k --local symbol integer 
             =
               1
@@ -8618,12 +8640,13 @@ do
 end
 ::l3:: ::l3_1:: assert(x == 13)
 function()
---locals  x, y
 --upvalues  _ENV*
+--[local symbols] x, l3:, l3_1:
   local
   --[symbols]
     x --local symbol any 
   do
+  --[local symbols] y, l2:, l1:
     local
     --[symbols]
       y --local symbol any 
@@ -8699,12 +8722,13 @@ function()
   --[expression statement end]
 end
 function()
---locals  x, y
 --upvalues  _ENV*
+--[local symbols] x, l3:, l3_1:
   local
   --[symbols]
     x --local symbol any 
   do
+  --[local symbols] y, l2:, l1:
     local
     --[symbols]
       y --local symbol any 
@@ -8803,9 +8827,9 @@ L6
 	BR {L4}
 for i=1,10 do print(i) end
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol any 
   =
     1
@@ -8835,9 +8859,9 @@ function()
   end
 end
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol integer 
   =
     1
@@ -8889,9 +8913,9 @@ L5
 	RET {L1}
 for i=10,1,-1 do print(i) end
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol any 
   =
     10
@@ -8926,9 +8950,9 @@ function()
   end
 end
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol integer 
   =
     10
@@ -9192,9 +9216,9 @@ L5
 	BR {L2}
 for i =1,10 do if i == 2 then break end end return
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol any 
   =
     1
@@ -9218,9 +9242,9 @@ function()
   return
 end
 function()
---locals  i
 --upvalues  _ENV*
   for
+  --[local symbols] i
     i --local symbol integer 
   =
     1
@@ -9280,8 +9304,8 @@ function Message (m)
 end
 
 function()
---locals  msgs
 --upvalues  _ENV*
+--[local symbols] msgs
   local
   --[symbols]
     msgs --local symbol any 
@@ -9293,8 +9317,8 @@ function()
     function(
       m --local symbol any 
     )
-    --locals  m
     --upvalues  _ENV*, msgs
+    --[local symbols] m
       if
        --[unary expr start] any
        not
@@ -9385,8 +9409,8 @@ function()
     end
 end
 function()
---locals  msgs
 --upvalues  _ENV*
+--[local symbols] msgs
   local
   --[symbols]
     msgs --local symbol any 
@@ -9398,8 +9422,8 @@ function()
     function(
       m --local symbol any 
     )
-    --locals  m
     --upvalues  _ENV*, msgs
+    --[local symbols] m
       if
        --[unary expr start] any
        not
@@ -9524,8 +9548,8 @@ Z[1][2] = false or true
 local _g
 r()[a].name = _g and 'Dibyendu' or 'majumdar'
 function()
---locals  _g
 --upvalues  _ENV*
+--[local symbols] _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9635,8 +9659,8 @@ function()
   --[expression statement end]
 end
 function()
---locals  _g
 --upvalues  _ENV*
+--[local symbols] _g
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -9795,7 +9819,7 @@ function()
      ,
       zee --local symbol number[] 
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -9807,7 +9831,7 @@ function()
      ,
       zee --local symbol number[] 
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -9832,7 +9856,7 @@ function()
      ,
       zee --local symbol string 
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -9844,7 +9868,7 @@ function()
      ,
       zee --local symbol string 
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -9869,7 +9893,7 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 function()
@@ -9881,7 +9905,7 @@ function()
      ,
       zee --local symbol userdata My.User.Type
     )
-    --locals  bar, zee
+    --[local symbols] bar, zee
     end
 end
 define Proc%1
@@ -10044,8 +10068,8 @@ L0 (entry)
 L1 (exit)
 local _ENV = {}; return function() x = 1 end
 function()
---locals  _ENV
 --upvalues  _ENV*
+--[local symbols] _ENV
   local
   --[symbols]
     _ENV --local symbol any 
@@ -10070,8 +10094,8 @@ function()
     end
 end
 function()
---locals  _ENV
 --upvalues  _ENV*
+--[local symbols] _ENV
   local
   --[symbols]
     _ENV --local symbol any 

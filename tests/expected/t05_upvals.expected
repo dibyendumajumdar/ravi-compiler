@@ -10,6 +10,7 @@ end
 
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -63,6 +64,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] a
   local
   --[symbols]
     a --local symbol any 
@@ -285,6 +287,7 @@ function()
 --upvalues  _ENV*
   return
     function()
+    --[local symbols] a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -347,6 +350,7 @@ function()
 --upvalues  _ENV*
   return
     function()
+    --[local symbols] a, y, a, z
       local
       --[symbols]
         a --local symbol any 
@@ -659,10 +663,12 @@ end
 
 function()
 --upvalues  _ENV*
+--[local symbols] x, l3:, l3_1:
   local
   --[symbols]
     x --local symbol any 
   do
+  --[local symbols] y, l2:, l1:
     local
     --[symbols]
       y --local symbol any 
@@ -739,10 +745,12 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] x, l3:, l3_1:
   local
   --[symbols]
     x --local symbol any 
   do
+  --[local symbols] y, l2:, l1:
     local
     --[symbols]
       y --local symbol any 
@@ -889,6 +897,7 @@ end
 
 function()
 --upvalues  _ENV*
+--[local symbols] msgs
   local
   --[symbols]
     msgs --local symbol any 
@@ -901,6 +910,7 @@ function()
       m --local symbol any 
     )
     --upvalues  _ENV*, msgs
+    --[local symbols] m
       if
        --[unary expr start] any
        not
@@ -992,6 +1002,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] msgs
   local
   --[symbols]
     msgs --local symbol any 
@@ -1004,6 +1015,7 @@ function()
       m --local symbol any 
     )
     --upvalues  _ENV*, msgs
+    --[local symbols] m
       if
        --[unary expr start] any
        not
@@ -1219,6 +1231,7 @@ end
 
 function()
 --upvalues  _ENV*
+--[local symbols] b, z
   local
   --[symbols]
     b --local symbol any 
@@ -1232,7 +1245,9 @@ function()
       p2 --local symbol any 
     )
     --upvalues  b
+    --[local symbols] p1, p2, a, x, c, y, t
       do
+      --[local symbols] x, y
         local
         --[symbols]
           x --local symbol any 
@@ -1317,6 +1332,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] b, z
   local
   --[symbols]
     b --local symbol any 
@@ -1330,7 +1346,9 @@ function()
       p2 --local symbol any 
     )
     --upvalues  b
+    --[local symbols] p1, p2, a, x, c, y, t
       do
+      --[local symbols] x, y
         local
         --[symbols]
           x --local symbol any 
@@ -1591,6 +1609,7 @@ local _ENV = {}; return function() x = 1 end
 
 function()
 --upvalues  _ENV*
+--[local symbols] _ENV
   local
   --[symbols]
     _ENV --local symbol any 
@@ -1616,6 +1635,7 @@ function()
 end
 function()
 --upvalues  _ENV*
+--[local symbols] _ENV
   local
   --[symbols]
     _ENV --local symbol any 

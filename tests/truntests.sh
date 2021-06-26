@@ -48,3 +48,9 @@ $command -f input/t07_concat.in > results.out
 #cp results.out expected/t07_concat.expected
 diff expected/t07_concat.expected results.out
 rm results.out
+
+echo "testing t08_genericfor"
+$command -f input/t08_genericfor.in > results.out
+#cp results.out expected/t08_genericfor.expected
+diff expected/t08_genericfor.expected results.out
+rm results.out
