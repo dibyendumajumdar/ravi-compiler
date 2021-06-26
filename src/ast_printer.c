@@ -308,11 +308,11 @@ void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 		} else {
 			printf_buf(buf, "%pfunction()\n", level);
 		}
-		if (node->function_expr.locals) {
-			printf_buf(buf, "%p%c ", level, "locals ");
-			print_symbol_names(buf, node->function_expr.locals);
-			printf_buf(buf, "\n");
-		}
+//		if (node->function_expr.locals) {
+//			printf_buf(buf, "%p%c ", level, "locals ");
+//			print_symbol_names(buf, node->function_expr.locals);
+//			printf_buf(buf, "\n");
+//		}
 		if (node->function_expr.upvalues) {
 			printf_buf(buf, "%p%c ", level, "upvalues ");
 			print_symbol_names(buf, node->function_expr.upvalues);
