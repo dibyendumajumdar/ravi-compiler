@@ -19,8 +19,8 @@ for iter=0,100000  do
 end
 return count
 function()
---locals  i, k, prime, count, flags, iter, i, i, k
 --upvalues  _ENV*
+--[local symbols] i, k, prime, count, flags
   local
   --[symbols]
     i --local symbol integer 
@@ -51,6 +51,7 @@ function()
      --[suffix list end]
     --[suffixed expr end]
   for
+  --[local symbols] iter
     iter --local symbol any 
   =
     0
@@ -70,6 +71,7 @@ function()
       --[expression list end]
      --[expression statement end]
      for
+     --[local symbols] i
        i --local symbol any 
      =
        0
@@ -101,6 +103,7 @@ function()
         --[expression statement end]
      end
      for
+     --[local symbols] i
        i --local symbol any 
      =
        0
@@ -158,6 +161,7 @@ function()
            --[expression list end]
           --[expression statement end]
           for
+          --[local symbols] k
             k --local symbol any 
           =
             --[binary expr start] any
@@ -237,8 +241,8 @@ function()
     --[suffixed expr end]
 end
 function()
---locals  i, k, prime, count, flags, iter, i, i, k
 --upvalues  _ENV*
+--[local symbols] i, k, prime, count, flags
   local
   --[symbols]
     i --local symbol integer 
@@ -269,6 +273,7 @@ function()
      --[suffix list end]
     --[suffixed expr end]
   for
+  --[local symbols] iter
     iter --local symbol integer 
   =
     0
@@ -288,6 +293,7 @@ function()
       --[expression list end]
      --[expression statement end]
      for
+     --[local symbols] i
        i --local symbol integer 
      =
        0
@@ -319,6 +325,7 @@ function()
         --[expression statement end]
      end
      for
+     --[local symbols] i
        i --local symbol integer 
      =
        0
@@ -376,6 +383,7 @@ function()
            --[expression list end]
           --[expression statement end]
           for
+          --[local symbols] k
             k --local symbol integer 
           =
             --[binary expr start] integer
@@ -979,22 +987,62 @@ typedef union UUdata {
 	  io->value_ = iu->user_; settt_(io, iu->ttuv_); \
 	  checkliveness(L,io); }
 typedef enum {
-	RAVI_TANY = 0,
-	RAVI_TNUMINT = 1,
-	RAVI_TNUMFLT,
-	RAVI_TARRAYINT,
-	RAVI_TARRAYFLT,
-	RAVI_TFUNCTION,
-	RAVI_TTABLE,
-	RAVI_TSTRING,
-	RAVI_TNIL,
-	RAVI_TBOOLEAN,
-	RAVI_TUSERDATA
+RAVI_TI_NIL,
+RAVI_TI_FALSE,
+RAVI_TI_TRUE,
+RAVI_TI_INTEGER,
+RAVI_TI_FLOAT,
+RAVI_TI_INTEGER_ARRAY,
+RAVI_TI_FLOAT_ARRAY,
+RAVI_TI_TABLE,
+RAVI_TI_STRING,
+RAVI_TI_FUNCTION,
+RAVI_TI_USERDATA,
+RAVI_TI_OTHER
+} ravi_type_index;
+typedef uint32_t ravi_type_map;
+#define RAVI_TM_NIL (((ravi_type_map)1)<<RAVI_TI_NIL)
+#define RAVI_TM_FALSE (((ravi_type_map)1)<<RAVI_TI_FALSE)
+#define RAVI_TM_TRUE (((ravi_type_map)1)<<RAVI_TI_TRUE)
+#define RAVI_TM_INTEGER (((ravi_type_map)1)<<RAVI_TI_INTEGER)
+#define RAVI_TM_FLOAT (((ravi_type_map)1)<<RAVI_TI_FLOAT)
+#define RAVI_TM_INTEGER_ARRAY (((ravi_type_map)1)<<RAVI_TI_INTEGER_ARRAY)
+#define RAVI_TM_FLOAT_ARRAY (((ravi_type_map)1)<<RAVI_TI_FLOAT_ARRAY)
+#define RAVI_TM_TABLE (((ravi_type_map)1)<<RAVI_TI_TABLE)
+#define RAVI_TM_STRING (((ravi_type_map)1)<<RAVI_TI_STRING)
+#define RAVI_TM_FUNCTION (((ravi_type_map)1)<<RAVI_TI_FUNCTION)
+#define RAVI_TM_USERDATA (((ravi_type_map)1)<<RAVI_TI_USERDATA)
+#define RAVI_TM_OTHER (((ravi_type_map)1)<<RAVI_TI_OTHER)
+#define RAVI_TM_FALSISH (RAVI_TM_NIL | RAVI_TM_FALSE)
+#define RAVI_TM_TRUISH (~RAVI_TM_FALSISH)
+#define RAVI_TM_BOOLEAN (RAVI_TM_FALSE | RAVI_TM_TRUE)
+#define RAVI_TM_NUMBER (RAVI_TM_INTEGER | RAVI_TM_FLOAT)
+#define RAVI_TM_INDEXABLE (RAVI_TM_INTEGER_ARRAY | RAVI_TM_FLOAT_ARRAY | RAVI_TM_TABLE)
+#define RAVI_TM_STRING_OR_NIL (RAVI_TM_STRING | RAVI_TM_NIL)
+#define RAVI_TM_FUNCTION_OR_NIL (RAVI_TM_FUNCTION | RAVI_TM_NIL)
+#define RAVI_TM_BOOLEAN_OR_NIL (RAVI_TM_BOOLEAN | RAVI_TM_NIL)
+#define RAVI_TM_USERDATA_OR_NIL (RAVI_TM_USERDATA | RAVI_TM_NIL)
+#define RAVI_TM_ANY (~0)
+typedef enum {
+RAVI_TNIL = RAVI_TM_NIL,           /* NIL */
+RAVI_TNUMINT = RAVI_TM_INTEGER,    /* integer number */
+RAVI_TNUMFLT = RAVI_TM_FLOAT,        /* floating point number */
+RAVI_TNUMBER = RAVI_TM_NUMBER,
+RAVI_TARRAYINT = RAVI_TM_INTEGER_ARRAY,      /* array of ints */
+RAVI_TARRAYFLT = RAVI_TM_FLOAT_ARRAY,      /* array of doubles */
+RAVI_TTABLE = RAVI_TM_TABLE,         /* Lua table */
+RAVI_TSTRING = RAVI_TM_STRING_OR_NIL,        /* string */
+RAVI_TFUNCTION = RAVI_TM_FUNCTION_OR_NIL,      /* Lua or C Function */
+RAVI_TBOOLEAN = RAVI_TM_BOOLEAN_OR_NIL,       /* boolean */
+RAVI_TTRUE = RAVI_TM_TRUE,
+RAVI_TFALSE = RAVI_TM_FALSE,
+RAVI_TUSERDATA = RAVI_TM_USERDATA_OR_NIL,      /* userdata or lightuserdata */
+RAVI_TANY = RAVI_TM_ANY,      /* Lua dynamic type */
 } ravitype_t;
 typedef struct Upvaldesc {
 	TString *name;
 	TString *usertype;
-	lu_byte ravi_type;
+	ravi_type_map ravi_type;
 	lu_byte instack;
 	lu_byte idx;
 } Upvaldesc;
@@ -1003,7 +1051,7 @@ typedef struct LocVar {
 	TString *usertype;
 	int startpc;
 	int endpc;
-	lu_byte ravi_type;
+	ravi_type_map ravi_type;
 } LocVar;
 typedef enum {
 	RAVI_JIT_NOT_COMPILED = 0,
@@ -1232,8 +1280,10 @@ struct UpVal {
   (ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))
 #define tointeger(o,i) \
   (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointeger(o,i,LUA_FLOORN2I))
+#define tointegerns(o, i) (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointegerns(o, i, LUA_FLOORN2I))
 extern int luaV_tonumber_(const TValue *obj, lua_Number *n);
 extern int luaV_tointeger(const TValue *obj, lua_Integer *p, int mode);
+extern int luaV_tointegerns(const TValue *obj, lua_Integer *p, int mode);
 extern void luaF_close (lua_State *L, StkId level);
 extern int luaD_poscall (lua_State *L, CallInfo *ci, StkId firstResult, int nres);
 extern void luaD_growstack (lua_State *L, int n);
@@ -1274,6 +1324,7 @@ extern void raviV_settable_i(lua_State *L, const TValue *t, TValue *key, TValue 
 extern lua_Integer luaV_shiftl(lua_Integer x, lua_Integer y);
 extern void ravi_dump_value(lua_State *L, const struct lua_TValue *v);
 extern void raviV_op_bnot(lua_State *L, TValue *ra, TValue *rb);
+extern void luaV_concat (lua_State *L, int total);
 extern void *luaM_realloc_ (lua_State *L, void *block, size_t osize, size_t nsize);
 extern LClosure *luaF_newLclosure (lua_State *L, int n);
 extern TString *luaS_newlstr (lua_State *L, const char *str, size_t l);
@@ -1516,7 +1567,7 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->upvalues[0].idx = 0;
  f->upvalues[0].name = NULL;
  f->upvalues[0].usertype = NULL;
- f->upvalues[0].ravi_type = 6;
+ f->upvalues[0].ravi_type = 128;
  return cl;
 }
 
