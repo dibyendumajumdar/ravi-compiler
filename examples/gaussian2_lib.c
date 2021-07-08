@@ -7412,7 +7412,7 @@ else goto L24;
 }
 L23:
 {
- TValue *tab = cl->upvals[0]->v;
+ TValue *tab = cl->upvals[6]->v;
  TValue *key = K(0);
  TValue *dst = R(10);
  raviV_gettable_sskey(L, tab, key, dst);
@@ -7759,9 +7759,9 @@ EXPORT LClosure *mymain(lua_State *L) {
  }
  f->upvalues = luaM_newvector(L, 1, Upvaldesc);
  f->sizeupvalues = 1;
- f->upvalues[0].instack = 0;
+ f->upvalues[0].instack = 1;
  f->upvalues[0].idx = 0;
- f->upvalues[0].name = NULL;
+ f->upvalues[0].name = NULL; // _ENV
  f->upvalues[0].usertype = NULL;
  f->upvalues[0].ravi_type = 128;
  f->p = luaM_newvector(L, 4, Proto *);
@@ -7784,7 +7784,7 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->sizeupvalues = 1;
  f->upvalues[0].instack = 1;
  f->upvalues[0].idx = 2;
- f->upvalues[0].name = NULL;
+ f->upvalues[0].name = NULL; // numarray
  f->upvalues[0].usertype = NULL;
  f->upvalues[0].ravi_type = -1;
  f = parent;
@@ -7813,7 +7813,7 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->sizeupvalues = 1;
  f->upvalues[0].instack = 0;
  f->upvalues[0].idx = 0;
- f->upvalues[0].name = NULL;
+ f->upvalues[0].name = NULL; // _ENV
  f->upvalues[0].usertype = NULL;
  f->upvalues[0].ravi_type = 128;
  f = parent;
@@ -7858,42 +7858,42 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->sizeupvalues = 8;
  f->upvalues[0].instack = 1;
  f->upvalues[0].idx = 5;
- f->upvalues[0].name = NULL;
+ f->upvalues[0].name = NULL; // copy
  f->upvalues[0].usertype = NULL;
  f->upvalues[0].ravi_type = 513;
  f->upvalues[1].instack = 1;
  f->upvalues[1].idx = 0;
- f->upvalues[1].name = NULL;
+ f->upvalues[1].name = NULL; // assert
  f->upvalues[1].usertype = NULL;
  f->upvalues[1].ravi_type = -1;
  f->upvalues[2].instack = 1;
  f->upvalues[2].idx = 3;
- f->upvalues[2].name = NULL;
+ f->upvalues[2].name = NULL; // intarray
  f->upvalues[2].usertype = NULL;
  f->upvalues[2].ravi_type = -1;
  f->upvalues[3].instack = 1;
  f->upvalues[3].idx = 1;
- f->upvalues[3].name = NULL;
+ f->upvalues[3].name = NULL; // slice
  f->upvalues[3].usertype = NULL;
  f->upvalues[3].ravi_type = -1;
  f->upvalues[4].instack = 1;
  f->upvalues[4].idx = 6;
- f->upvalues[4].name = NULL;
+ f->upvalues[4].name = NULL; // partial_pivot
  f->upvalues[4].usertype = NULL;
  f->upvalues[4].ravi_type = 513;
  f->upvalues[5].instack = 1;
  f->upvalues[5].idx = 7;
- f->upvalues[5].name = NULL;
+ f->upvalues[5].name = NULL; // dump_matrix
  f->upvalues[5].usertype = NULL;
  f->upvalues[5].ravi_type = 513;
  f->upvalues[6].instack = 0;
  f->upvalues[6].idx = 0;
- f->upvalues[6].name = NULL;
+ f->upvalues[6].name = NULL; // _ENV
  f->upvalues[6].usertype = NULL;
  f->upvalues[6].ravi_type = 128;
  f->upvalues[7].instack = 1;
  f->upvalues[7].idx = 2;
- f->upvalues[7].name = NULL;
+ f->upvalues[7].name = NULL; // numarray
  f->upvalues[7].usertype = NULL;
  f->upvalues[7].ravi_type = -1;
  f = parent;
