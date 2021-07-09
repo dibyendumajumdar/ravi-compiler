@@ -3421,10 +3421,11 @@ L0 (entry)
 L1 (exit)
 L2
 	EQii {1 Kint(0), 1 Kint(0)} {Tbool(0)}
-	CBR {Tbool(0)} {L5, L3}
+	NOT {Tbool(0)} {Tbool(1)}
+	CBR {Tbool(1)} {L5, L3}
 L3
-	LIii {1 Kint(0), 2 Kint(1)} {Tbool(1)}
-	CBR {Tbool(1)} {L6, L4}
+	LIii {1 Kint(0), 2 Kint(1)} {Tbool(0)}
+	CBR {Tbool(0)} {L6, L4}
 L4
 	LIii {1 Kint(0), 2 Kint(1)} {Tbool(2)}
 	CBR {Tbool(2)} {L7, L8}
