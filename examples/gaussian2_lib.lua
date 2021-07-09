@@ -36,7 +36,7 @@ local function partial_pivot(columns: table, nrow: integer[], i: integer, n: int
     error("no unique solution exists")
   end
   if nrow[i] ~= nrow[p] then
-    -- write('Performing row interchange ', i, ' will be swapped with ', p, "\n")
+    write('Performing row interchange ', i, ' will be swapped with ', p, "\\n")
     local temp: integer = nrow[i]
     nrow[i] = nrow[p]
     nrow[p] = temp
@@ -46,9 +46,9 @@ end
 local function dump_matrix(columns: table, m: integer, n: integer, nrow: integer[])
   for i = 1,m do
     for j = 1,n do
-      -- write(columns[j][nrow[i]], ' ')
+      write(columns[j][nrow[i]], ' ')
     end
-    --write("\n")
+    write("\\n")
   end
 end
 
@@ -93,8 +93,8 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
       -- obtain the column j
       local column: number[] = @number[]( columns[j] ) 
       local multiplier: number = column[nrow[i]]/column[nrow[j]]
-      --write('m(' .. i .. ',' .. j .. ') = ', column[nrow[i]], ' / ', column[nrow[j]], "\n")
-      --write('Performing R(' .. i .. ') = R(' .. i .. ') - m(' .. i .. ',' .. j .. ') * R(' .. j .. ')\n')
+      write('m(' .. i .. ',' .. j .. ') = ', column[nrow[i]], ' / ', column[nrow[j]], "\\n")
+      write('Performing R(' .. i .. ') = R(' .. i .. ') - m(' .. i .. ',' .. j .. ') * R(' .. j .. ')\\n')
       -- For the row i, we need to 
       -- do row(i) = row(i) - multipler * row(j)
       for q = j,n+1 do
@@ -103,7 +103,7 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
       end
     end
 
-    --write("Post elimination column ", j, "\n")
+    write("Post elimination column ", j, "\\n")
     dump_matrix(columns, n, n+1, nrow)
   end
 
@@ -116,25 +116,25 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
   local x: number[] = numarray(n, 0.0)
   local a: number[] = @number[]( columns[n] )
 
-  --write('Performing back substitution\n')
+  write('Performing back substitution\\n')
   x[n] = b[nrow[n]] / a[nrow[n]]
-  --write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\n")
+  write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\\n")
   for i = n-1,1,-1 do
     local sum: number
     for j = i+1, n do
       a = @number[]( columns[j] )
       sum = sum + a[nrow[i]] * x[j]
       if j == i+1 then
-        --write('sum = ')
+        write('sum = ')
       else 
-        --write('sum = sum + ')  
+        write('sum = sum + ')
       end
-      --write('a[', i, ', ', j, '] * x[', j, ']', "\n")
+      write('a[', i, ', ', j, '] * x[', j, ']', "\\n")
     end
-    --write('sum = ', sum, '\n')
+    write('sum = ', sum, '\\n')
     a = @number[]( columns[i] )
     x[i] = (b[nrow[i]] - sum) / a[nrow[i]]
-    --write('x[',i,'] = (b[', i, '] - sum) / a[', i, ', ', i, '] = ', x[i], "\n")  
+    write('x[',i,'] = (b[', i, '] - sum) / a[', i, ', ', i, '] = ', x[i], "\\n")
   end  
 
   return x
