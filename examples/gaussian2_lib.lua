@@ -120,7 +120,7 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
   x[n] = b[nrow[n]] / a[nrow[n]]
   write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\\n")
   for i = n-1,1,-1 do
-    local sum: number
+    local sum: number = 0
     for j = i+1, n do
       a = @number[]( columns[j] )
       sum = sum + a[nrow[i]] * x[j]

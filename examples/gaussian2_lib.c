@@ -37,7 +37,7 @@ local function partial_pivot(columns: table, nrow: integer[], i: integer, n: int
     error("no unique solution exists")
   end
   if nrow[i] ~= nrow[p] then
-    -- write('Performing row interchange ', i, ' will be swapped with ', p, "\n")
+    write('Performing row interchange ', i, ' will be swapped with ', p, "\\n")
     local temp: integer = nrow[i]
     nrow[i] = nrow[p]
     nrow[p] = temp
@@ -47,9 +47,9 @@ end
 local function dump_matrix(columns: table, m: integer, n: integer, nrow: integer[])
   for i = 1,m do
     for j = 1,n do
-      -- write(columns[j][nrow[i]], ' ')
+      write(columns[j][nrow[i]], ' ')
     end
-    --write("\n")
+    write("\\n")
   end
 end
 
@@ -94,8 +94,8 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
       -- obtain the column j
       local column: number[] = @number[]( columns[j] ) 
       local multiplier: number = column[nrow[i]]/column[nrow[j]]
-      --write('m(' .. i .. ',' .. j .. ') = ', column[nrow[i]], ' / ', column[nrow[j]], "\n")
-      --write('Performing R(' .. i .. ') = R(' .. i .. ') - m(' .. i .. ',' .. j .. ') * R(' .. j .. ')\n')
+      write('m(' .. i .. ',' .. j .. ') = ', column[nrow[i]], ' / ', column[nrow[j]], "\\n")
+      write('Performing R(' .. i .. ') = R(' .. i .. ') - m(' .. i .. ',' .. j .. ') * R(' .. j .. ')\\n')
       -- For the row i, we need to 
       -- do row(i) = row(i) - multipler * row(j)
       for q = j,n+1 do
@@ -104,7 +104,7 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
       end
     end
 
-    --write("Post elimination column ", j, "\n")
+    write("Post elimination column ", j, "\\n")
     dump_matrix(columns, n, n+1, nrow)
   end
 
@@ -117,25 +117,25 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
   local x: number[] = numarray(n, 0.0)
   local a: number[] = @number[]( columns[n] )
 
-  --write('Performing back substitution\n')
+  write('Performing back substitution\\n')
   x[n] = b[nrow[n]] / a[nrow[n]]
-  --write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\n")
+  write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\\n")
   for i = n-1,1,-1 do
-    local sum: number
+    local sum: number = 0
     for j = i+1, n do
       a = @number[]( columns[j] )
       sum = sum + a[nrow[i]] * x[j]
       if j == i+1 then
-        --write('sum = ')
+        write('sum = ')
       else 
-        --write('sum = sum + ')  
+        write('sum = sum + ')
       end
-      --write('a[', i, ', ', j, '] * x[', j, ']', "\n")
+      write('a[', i, ', ', j, '] * x[', j, ']', "\\n")
     end
-    --write('sum = ', sum, '\n')
+    write('sum = ', sum, '\\n')
     a = @number[]( columns[i] )
     x[i] = (b[nrow[i]] - sum) / a[nrow[i]]
-    --write('x[',i,'] = (b[', i, '] - sum) / a[', i, ', ', i, '] = ', x[i], "\n")  
+    write('x[',i,'] = (b[', i, '] - sum) / a[', i, ', ', i, '] = ', x[i], "\\n")
   end  
 
   return x
@@ -323,7 +323,7 @@ function()
      ,
       n --local symbol integer 
     )
-    --upvalues  _ENV*
+    --upvalues  _ENV*, write
     --[local symbols] columns, nrow, i, n, p, max, a, max_set
       local
       --[symbols]
@@ -630,6 +630,38 @@ function()
         --[suffixed expr end]
        --[binary expr end]
       then
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              write --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 'Performing row interchange '
+                ,
+                 --[suffixed expr start] integer
+                  --[primary start] integer
+                    i --local symbol integer 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 ' will be swapped with '
+                ,
+                 --[suffixed expr start] integer
+                  --[primary start] integer
+                    p --local symbol integer 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 '\n'
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
         local
         --[symbols]
           temp --local symbol integer 
@@ -730,6 +762,7 @@ function()
      ,
       nrow --local symbol integer[] 
     )
+    --upvalues  write
     --[local symbols] columns, m, n, nrow
       for
       --[local symbols] i
@@ -755,7 +788,76 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[suffixed expr start] any
+                      --[primary start] table
+                        columns --local symbol table 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] any
+                           --[primary start] any
+                             j --local symbol any 
+                           --[primary end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] any
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] any
+                              [
+                               --[suffixed expr start] any
+                                --[primary start] any
+                                  i --local symbol any 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     ' '
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
       end
     end
   local
@@ -771,7 +873,7 @@ function()
      ,
       n --local symbol integer 
     )
-    --upvalues  copy, assert, intarray, slice, partial_pivot, dump_matrix, _ENV*, numarray
+    --upvalues  copy, assert, intarray, slice, partial_pivot, dump_matrix, write, _ENV*, numarray
     --[local symbols] A, b, m, n, nrow, columns, x, a
       --[expression statement start]
        --[var list start]
@@ -1271,6 +1373,182 @@ function()
                 --[suffix list end]
                --[suffixed expr end]
               --[binary expr end]
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[binary expr start] any
+                      'm('
+                     ..
+                      --[binary expr start] any
+                       --[suffixed expr start] any
+                        --[primary start] any
+                          i --local symbol any 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ..
+                       --[binary expr start] any
+                        ','
+                       ..
+                        --[binary expr start] any
+                         --[suffixed expr start] any
+                          --[primary start] any
+                            j --local symbol any 
+                          --[primary end]
+                         --[suffixed expr end]
+                        ..
+                         ') = '
+                        --[binary expr end]
+                       --[binary expr end]
+                      --[binary expr end]
+                     --[binary expr end]
+                    ,
+                     --[suffixed expr start] any
+                      --[primary start] number[]
+                        column --local symbol number[] 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] any
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] any
+                              [
+                               --[suffixed expr start] any
+                                --[primary start] any
+                                  i --local symbol any 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     ' / '
+                    ,
+                     --[suffixed expr start] any
+                      --[primary start] number[]
+                        column --local symbol number[] 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] any
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] any
+                              [
+                               --[suffixed expr start] any
+                                --[primary start] any
+                                  j --local symbol any 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     '\n'
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[binary expr start] any
+                      'Performing R('
+                     ..
+                      --[binary expr start] any
+                       --[suffixed expr start] any
+                        --[primary start] any
+                          i --local symbol any 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ..
+                       --[binary expr start] any
+                        ') = R('
+                       ..
+                        --[binary expr start] any
+                         --[suffixed expr start] any
+                          --[primary start] any
+                            i --local symbol any 
+                          --[primary end]
+                         --[suffixed expr end]
+                        ..
+                         --[binary expr start] any
+                          ') - m('
+                         ..
+                          --[binary expr start] any
+                           --[suffixed expr start] any
+                            --[primary start] any
+                              i --local symbol any 
+                            --[primary end]
+                           --[suffixed expr end]
+                          ..
+                           --[binary expr start] any
+                            ','
+                           ..
+                            --[binary expr start] any
+                             --[suffixed expr start] any
+                              --[primary start] any
+                                j --local symbol any 
+                              --[primary end]
+                             --[suffixed expr end]
+                            ..
+                             --[binary expr start] any
+                              ') * R('
+                             ..
+                              --[binary expr start] any
+                               --[suffixed expr start] any
+                                --[primary start] any
+                                  j --local symbol any 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ..
+                               ')\n'
+                              --[binary expr end]
+                             --[binary expr end]
+                            --[binary expr end]
+                           --[binary expr end]
+                          --[binary expr end]
+                         --[binary expr end]
+                        --[binary expr end]
+                       --[binary expr end]
+                      --[binary expr end]
+                     --[binary expr end]
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
             for
             --[local symbols] q
               q --local symbol any 
@@ -1419,6 +1697,30 @@ function()
                --[expression statement end]
             end
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'Post elimination column '
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     j --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
          --[expression statement start]
           --[expression list start]
             --[suffixed expr start] closure
@@ -1571,6 +1873,22 @@ function()
          --[suffixed expr end]
         --[unary expr end]
       --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            write --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'Performing back substitution\n'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
        --[var list start]
          --[suffixed expr start] any
           --[primary start] number[]
@@ -1649,6 +1967,65 @@ function()
          --[binary expr end]
        --[expression list end]
       --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            write --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'x['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] = b['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] / a['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] = '
+              ,
+               --[suffixed expr start] any
+                --[primary start] number[]
+                  x --local symbol number[] 
+                --[primary end]
+                --[suffix list start]
+                  --[Y index start] any
+                   [
+                    --[suffixed expr start] integer
+                     --[primary start] integer
+                       n --local symbol integer 
+                     --[primary end]
+                    --[suffixed expr end]
+                   ]
+                  --[Y index end]
+                --[suffix list end]
+               --[suffixed expr end]
+              ,
+               '\n'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
       for
       --[local symbols] i
         i --local symbol any 
@@ -1674,6 +2051,8 @@ function()
          local
          --[symbols]
            sum --local symbol number 
+         --[expressions]
+           0
          for
          --[local symbols] j
            j --local symbol any 
@@ -1812,9 +2191,107 @@ function()
               --[binary expr end]
              --[binary expr end]
             then
+              --[expression statement start]
+               --[expression list start]
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    write --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[function call start] any
+                     (
+                       'sum = '
+                     )
+                    --[function call end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+               --[expression list end]
+              --[expression statement end]
             else
+              --[expression statement start]
+               --[expression list start]
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    write --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[function call start] any
+                     (
+                       'sum = sum + '
+                     )
+                    --[function call end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+               --[expression list end]
+              --[expression statement end]
             end
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     'a['
+                    ,
+                     --[suffixed expr start] any
+                      --[primary start] any
+                        i --local symbol any 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     ', '
+                    ,
+                     --[suffixed expr start] any
+                      --[primary start] any
+                        j --local symbol any 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     '] * x['
+                    ,
+                     --[suffixed expr start] any
+                      --[primary start] any
+                        j --local symbol any 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     ']'
+                    ,
+                     '\n'
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'sum = '
+                 ,
+                  --[suffixed expr start] number
+                   --[primary start] number
+                     sum --local symbol number 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
          --[expression statement start]
           --[var list start]
             --[suffixed expr start] number[]
@@ -1938,6 +2415,73 @@ function()
               --[suffix list end]
              --[suffixed expr end]
             --[binary expr end]
+          --[expression list end]
+         --[expression statement end]
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'x['
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     i --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] = (b['
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     i --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] - sum) / a['
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     i --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  ', '
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     i --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] = '
+                 ,
+                  --[suffixed expr start] any
+                   --[primary start] number[]
+                     x --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] any
+                      [
+                       --[suffixed expr start] any
+                        --[primary start] any
+                          i --local symbol any 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
           --[expression list end]
          --[expression statement end]
       end
@@ -2145,7 +2689,7 @@ function()
      ,
       n --local symbol integer 
     )
-    --upvalues  _ENV*
+    --upvalues  _ENV*, write
     --[local symbols] columns, nrow, i, n, p, max, a, max_set
       local
       --[symbols]
@@ -2452,6 +2996,38 @@ function()
         --[suffixed expr end]
        --[binary expr end]
       then
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              write --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 'Performing row interchange '
+                ,
+                 --[suffixed expr start] integer
+                  --[primary start] integer
+                    i --local symbol integer 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 ' will be swapped with '
+                ,
+                 --[suffixed expr start] integer
+                  --[primary start] integer
+                    p --local symbol integer 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 '\n'
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
         local
         --[symbols]
           temp --local symbol integer 
@@ -2552,6 +3128,7 @@ function()
      ,
       nrow --local symbol integer[] 
     )
+    --upvalues  write
     --[local symbols] columns, m, n, nrow
       for
       --[local symbols] i
@@ -2577,7 +3154,76 @@ function()
             --[primary end]
            --[suffixed expr end]
          do
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[suffixed expr start] any
+                      --[primary start] table
+                        columns --local symbol table 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] integer
+                           --[primary start] integer
+                             j --local symbol integer 
+                           --[primary end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                        --[Y index start] any
+                         [
+                          --[suffixed expr start] integer
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] integer
+                              [
+                               --[suffixed expr start] integer
+                                --[primary start] integer
+                                  i --local symbol integer 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     ' '
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
       end
     end
   local
@@ -2593,7 +3239,7 @@ function()
      ,
       n --local symbol integer 
     )
-    --upvalues  copy, assert, intarray, slice, partial_pivot, dump_matrix, _ENV*, numarray
+    --upvalues  copy, assert, intarray, slice, partial_pivot, dump_matrix, write, _ENV*, numarray
     --[local symbols] A, b, m, n, nrow, columns, x, a
       --[expression statement start]
        --[var list start]
@@ -3093,6 +3739,182 @@ function()
                 --[suffix list end]
                --[suffixed expr end]
               --[binary expr end]
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[binary expr start] any
+                      'm('
+                     ..
+                      --[binary expr start] any
+                       --[suffixed expr start] integer
+                        --[primary start] integer
+                          i --local symbol integer 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ..
+                       --[binary expr start] any
+                        ','
+                       ..
+                        --[binary expr start] any
+                         --[suffixed expr start] integer
+                          --[primary start] integer
+                            j --local symbol integer 
+                          --[primary end]
+                         --[suffixed expr end]
+                        ..
+                         ') = '
+                        --[binary expr end]
+                       --[binary expr end]
+                      --[binary expr end]
+                     --[binary expr end]
+                    ,
+                     --[suffixed expr start] number
+                      --[primary start] number[]
+                        column --local symbol number[] 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] number
+                         [
+                          --[suffixed expr start] integer
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] integer
+                              [
+                               --[suffixed expr start] integer
+                                --[primary start] integer
+                                  i --local symbol integer 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     ' / '
+                    ,
+                     --[suffixed expr start] number
+                      --[primary start] number[]
+                        column --local symbol number[] 
+                      --[primary end]
+                      --[suffix list start]
+                        --[Y index start] number
+                         [
+                          --[suffixed expr start] integer
+                           --[primary start] integer[]
+                             nrow --local symbol integer[] 
+                           --[primary end]
+                           --[suffix list start]
+                             --[Y index start] integer
+                              [
+                               --[suffixed expr start] integer
+                                --[primary start] integer
+                                  j --local symbol integer 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ]
+                             --[Y index end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ]
+                        --[Y index end]
+                      --[suffix list end]
+                     --[suffixed expr end]
+                    ,
+                     '\n'
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     --[binary expr start] any
+                      'Performing R('
+                     ..
+                      --[binary expr start] any
+                       --[suffixed expr start] integer
+                        --[primary start] integer
+                          i --local symbol integer 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ..
+                       --[binary expr start] any
+                        ') = R('
+                       ..
+                        --[binary expr start] any
+                         --[suffixed expr start] integer
+                          --[primary start] integer
+                            i --local symbol integer 
+                          --[primary end]
+                         --[suffixed expr end]
+                        ..
+                         --[binary expr start] any
+                          ') - m('
+                         ..
+                          --[binary expr start] any
+                           --[suffixed expr start] integer
+                            --[primary start] integer
+                              i --local symbol integer 
+                            --[primary end]
+                           --[suffixed expr end]
+                          ..
+                           --[binary expr start] any
+                            ','
+                           ..
+                            --[binary expr start] any
+                             --[suffixed expr start] integer
+                              --[primary start] integer
+                                j --local symbol integer 
+                              --[primary end]
+                             --[suffixed expr end]
+                            ..
+                             --[binary expr start] any
+                              ') * R('
+                             ..
+                              --[binary expr start] any
+                               --[suffixed expr start] integer
+                                --[primary start] integer
+                                  j --local symbol integer 
+                                --[primary end]
+                               --[suffixed expr end]
+                              ..
+                               ')\n'
+                              --[binary expr end]
+                             --[binary expr end]
+                            --[binary expr end]
+                           --[binary expr end]
+                          --[binary expr end]
+                         --[binary expr end]
+                        --[binary expr end]
+                       --[binary expr end]
+                      --[binary expr end]
+                     --[binary expr end]
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
             for
             --[local symbols] q
               q --local symbol integer 
@@ -3241,6 +4063,30 @@ function()
                --[expression statement end]
             end
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'Post elimination column '
+                 ,
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     j --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
          --[expression statement start]
           --[expression list start]
             --[suffixed expr start] any
@@ -3393,6 +4239,22 @@ function()
          --[suffixed expr end]
         --[unary expr end]
       --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            write --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'Performing back substitution\n'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
        --[var list start]
          --[suffixed expr start] number
           --[primary start] number[]
@@ -3471,6 +4333,65 @@ function()
          --[binary expr end]
        --[expression list end]
       --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            write --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'x['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] = b['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] / a['
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  n --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               '] = '
+              ,
+               --[suffixed expr start] number
+                --[primary start] number[]
+                  x --local symbol number[] 
+                --[primary end]
+                --[suffix list start]
+                  --[Y index start] number
+                   [
+                    --[suffixed expr start] integer
+                     --[primary start] integer
+                       n --local symbol integer 
+                     --[primary end]
+                    --[suffixed expr end]
+                   ]
+                  --[Y index end]
+                --[suffix list end]
+               --[suffixed expr end]
+              ,
+               '\n'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
       for
       --[local symbols] i
         i --local symbol integer 
@@ -3496,6 +4417,8 @@ function()
          local
          --[symbols]
            sum --local symbol number 
+         --[expressions]
+           0
          for
          --[local symbols] j
            j --local symbol integer 
@@ -3634,9 +4557,107 @@ function()
               --[binary expr end]
              --[binary expr end]
             then
+              --[expression statement start]
+               --[expression list start]
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    write --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[function call start] any
+                     (
+                       'sum = '
+                     )
+                    --[function call end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+               --[expression list end]
+              --[expression statement end]
             else
+              --[expression statement start]
+               --[expression list start]
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    write --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[function call start] any
+                     (
+                       'sum = sum + '
+                     )
+                    --[function call end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+               --[expression list end]
+              --[expression statement end]
             end
+            --[expression statement start]
+             --[expression list start]
+               --[suffixed expr start] any
+                --[primary start] any
+                  write --upvalue any 
+                --[primary end]
+                --[suffix list start]
+                  --[function call start] any
+                   (
+                     'a['
+                    ,
+                     --[suffixed expr start] integer
+                      --[primary start] integer
+                        i --local symbol integer 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     ', '
+                    ,
+                     --[suffixed expr start] integer
+                      --[primary start] integer
+                        j --local symbol integer 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     '] * x['
+                    ,
+                     --[suffixed expr start] integer
+                      --[primary start] integer
+                        j --local symbol integer 
+                      --[primary end]
+                     --[suffixed expr end]
+                    ,
+                     ']'
+                    ,
+                     '\n'
+                   )
+                  --[function call end]
+                --[suffix list end]
+               --[suffixed expr end]
+             --[expression list end]
+            --[expression statement end]
          end
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'sum = '
+                 ,
+                  --[suffixed expr start] number
+                   --[primary start] number
+                     sum --local symbol number 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+          --[expression list end]
+         --[expression statement end]
          --[expression statement start]
           --[var list start]
             --[suffixed expr start] number[]
@@ -3760,6 +4781,73 @@ function()
               --[suffix list end]
              --[suffixed expr end]
             --[binary expr end]
+          --[expression list end]
+         --[expression statement end]
+         --[expression statement start]
+          --[expression list start]
+            --[suffixed expr start] any
+             --[primary start] any
+               write --upvalue any 
+             --[primary end]
+             --[suffix list start]
+               --[function call start] any
+                (
+                  'x['
+                 ,
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     i --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] = (b['
+                 ,
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     i --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] - sum) / a['
+                 ,
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     i --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  ', '
+                 ,
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     i --local symbol integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 ,
+                  '] = '
+                 ,
+                  --[suffixed expr start] number
+                   --[primary start] number[]
+                     x --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] number
+                      [
+                       --[suffixed expr start] integer
+                        --[primary start] integer
+                          i --local symbol integer 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ,
+                  '\n'
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
           --[expression list end]
          --[expression statement end]
       end
@@ -3916,14 +5004,16 @@ L16
 L17
 	IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}
 	IAGETik {local(nrow, 1), Tint(0)} {Tint(4)}
-	EQii {Tint(4), Tint(3)} {Tbool(5)}
-	CBR {Tbool(5)} {L18, L19}
+	EQii {Tint(3), Tint(4)} {Tbool(5)}
+	NOT {Tbool(5)} {Tbool(1)}
+	CBR {Tbool(1)} {L18, L19}
 L18
-	IAGETik {local(nrow, 1), local(i, 2)} {Tint(4)}
-	MOVi {Tint(4)} {Tint(3)}
-	IAGETik {local(nrow, 1), Tint(0)} {Tint(1)}
-	IAPUTiv {Tint(1)} {local(nrow, 1), local(i, 2)}
-	IAPUTiv {Tint(3)} {local(nrow, 1), Tint(0)}
+	CALL {Upval(1, Proc%1, write), 'Performing row interchange ' Ks(2), local(i, 2), ' will be swapped with ' Ks(3), Tint(0), '\n' Ks(4)} {T(1..), 1 Kint(0)}
+	IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}
+	MOVi {Tint(3)} {Tint(4)}
+	IAGETik {local(nrow, 1), Tint(0)} {Tint(5)}
+	IAPUTiv {Tint(5)} {local(nrow, 1), local(i, 2)}
+	IAPUTiv {Tint(4)} {local(nrow, 1), Tint(0)}
 	BR {L19}
 L19
 	RET {L1}
@@ -3962,8 +5052,13 @@ L7
 	CBR {Tbool(9)} {L9, L8}
 L8
 	MOV {Tint(6)} {Tint(5)}
+	TGETik {local(columns, 0), Tint(5)} {T(0)}
+	IAGETik {local(nrow, 3), Tint(0)} {Tint(10)}
+	GETik {T(0), Tint(10)} {T(1)}
+	CALL {Upval(0, Proc%1, write), T(1), ' ' Ks(0)} {T(0..), 1 Kint(0)}
 	BR {L6}
 L9
+	CALL {Upval(0, Proc%1, write), '\n' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L2}
 define Proc%5
 L0 (entry)
@@ -4069,35 +5164,56 @@ L16
 	FAGETik {local(column, 8), Tint(14)} {Tflt(2)}
 	DIVff {Tflt(1), Tflt(2)} {Tflt(3)}
 	MOVf {Tflt(3)} {Tflt(0)}
-	MOV {Tint(3)} {Tint(16)}
-	ADDii {local(n, 3), 1 Kint(0)} {Tint(17)}
-	MOV {Tint(17)} {Tint(18)}
-	MOV {1 Kint(0)} {Tint(19)}
-	SUBii {Tint(16), Tint(19)} {Tint(16)}
+	CONCAT {Tint(3), ') = ' Ks(2)} {T(1)}
+	CONCAT {',' Ks(1), T(1)} {T(0)}
+	CONCAT {Tint(7), T(0)} {T(1)}
+	CONCAT {'m(' Ks(0), T(1)} {T(0)}
+	IAGETik {local(nrow, 4), Tint(7)} {Tint(15)}
+	FAGETik {local(column, 8), Tint(15)} {Tflt(3)}
+	IAGETik {local(nrow, 4), Tint(3)} {Tint(16)}
+	FAGETik {local(column, 8), Tint(16)} {Tflt(2)}
+	CALL {Upval(6, Proc%1, write), T(0), Tflt(3), ' / ' Ks(3), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}
+	CONCAT {Tint(3), ')\n' Ks(9)} {T(0)}
+	CONCAT {') * R(' Ks(8), T(0)} {T(1)}
+	CONCAT {Tint(3), T(1)} {T(0)}
+	CONCAT {',' Ks(1), T(0)} {T(1)}
+	CONCAT {Tint(7), T(1)} {T(0)}
+	CONCAT {') - m(' Ks(7), T(0)} {T(1)}
+	CONCAT {Tint(7), T(1)} {T(0)}
+	CONCAT {') = R(' Ks(6), T(0)} {T(1)}
+	CONCAT {Tint(7), T(1)} {T(0)}
+	CONCAT {'Performing R(' Ks(5), T(0)} {T(1)}
+	CALL {Upval(6, Proc%1, write), T(1)} {T(6..), 1 Kint(0)}
+	MOV {Tint(3)} {Tint(18)}
+	ADDii {local(n, 3), 1 Kint(0)} {Tint(19)}
+	MOV {Tint(19)} {Tint(20)}
+	MOV {1 Kint(0)} {Tint(21)}
+	SUBii {Tint(18), Tint(21)} {Tint(18)}
 	BR {L18}
 L17
+	CALL {Upval(6, Proc%1, write), 'Post elimination column ' Ks(10), Tint(3), '\n' Ks(4)} {T(6..), 1 Kint(0)}
 	ADDii {local(n, 3), 1 Kint(0)} {Tint(9)}
 	CALL {Upval(5, Proc%1, dump_matrix), local(columns, 5), local(n, 3), Tint(9), local(nrow, 4)} {T(5..), 1 Kint(0)}
 	BR {L10}
 L18
-	ADDii {Tint(16), Tint(19)} {Tint(16)}
+	ADDii {Tint(18), Tint(21)} {Tint(18)}
 	BR {L19}
 L19
-	LIii {Tint(18), Tint(16)} {Tbool(20)}
-	CBR {Tbool(20)} {L21, L20}
+	LIii {Tint(20), Tint(18)} {Tbool(22)}
+	CBR {Tbool(22)} {L21, L20}
 L20
-	MOV {Tint(16)} {Tint(15)}
-	TGETik {local(columns, 5), Tint(15)} {T(1)}
+	MOV {Tint(18)} {Tint(17)}
+	TGETik {local(columns, 5), Tint(17)} {T(1)}
 	TOFARRAY {T(1)}
 	MOV {T(1)} {local(col, 9)}
-	IAGETik {local(nrow, 4), Tint(7)} {Tint(21)}
-	IAGETik {local(nrow, 4), Tint(7)} {Tint(22)}
-	FAGETik {local(col, 9), Tint(22)} {Tflt(2)}
-	IAGETik {local(nrow, 4), Tint(3)} {Tint(23)}
-	FAGETik {local(col, 9), Tint(23)} {Tflt(1)}
+	IAGETik {local(nrow, 4), Tint(7)} {Tint(23)}
+	IAGETik {local(nrow, 4), Tint(7)} {Tint(24)}
+	FAGETik {local(col, 9), Tint(24)} {Tflt(2)}
+	IAGETik {local(nrow, 4), Tint(3)} {Tint(25)}
+	FAGETik {local(col, 9), Tint(25)} {Tflt(1)}
 	MULff {Tflt(0), Tflt(1)} {Tflt(4)}
 	SUBff {Tflt(2), Tflt(4)} {Tflt(1)}
-	FAPUTfv {Tflt(1)} {local(col, 9), Tint(21)}
+	FAPUTfv {Tflt(1)} {local(col, 9), Tint(23)}
 	BR {L18}
 L21
 	BR {L14}
@@ -4108,22 +5224,25 @@ L22
 	EQ {T(0), 0.000000000000 Kflt(0)} {T(2)}
 	CBR {T(2)} {L23, L24}
 L23
-	LOADGLOBAL {Upval(_ENV), 'error' Ks(0)} {T(0)}
-	CALL {T(0), 'no unique solution exists' Ks(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'error' Ks(11)} {T(0)}
+	CALL {T(0), 'no unique solution exists' Ks(12)} {T(0..), 1 Kint(0)}
 	BR {L24}
 L24
-	CALL {Upval(7, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(7..), 1 Kint(0)}
-	TOFARRAY {T(7[7..])}
-	MOV {T(7[7..])} {local(x, 6)}
+	CALL {Upval(8, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(8..), 1 Kint(0)}
+	TOFARRAY {T(8[8..])}
+	MOV {T(8[8..])} {local(x, 6)}
 	TGETik {local(columns, 5), local(n, 3)} {T(3)}
 	TOFARRAY {T(3)}
 	MOV {T(3)} {local(a, 7)}
+	CALL {Upval(6, Proc%1, write), 'Performing back substitution\n' Ks(13)} {T(6..), 1 Kint(0)}
 	IAGETik {local(nrow, 4), local(n, 3)} {Tint(5)}
 	FAGETik {local(b, 1), Tint(5)} {Tflt(1)}
 	IAGETik {local(nrow, 4), local(n, 3)} {Tint(2)}
 	FAGETik {local(a, 7), Tint(2)} {Tflt(3)}
 	DIVff {Tflt(1), Tflt(3)} {Tflt(4)}
 	FAPUTfv {Tflt(4)} {local(x, 6), local(n, 3)}
+	FAGETik {local(x, 6), local(n, 3)} {Tflt(4)}
+	CALL {Upval(6, Proc%1, write), 'x[' Ks(14), local(n, 3), '] = b[' Ks(15), local(n, 3), '] / a[' Ks(16), local(n, 3), '] = ' Ks(17), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}
 	SUBii {local(n, 3), 1 Kint(0)} {Tint(3)}
 	MOV {Tint(3)} {Tint(9)}
 	MOV {1 Kint(0)} {Tint(10)}
@@ -4136,58 +5255,67 @@ L25
 	ADDii {Tint(9), Tint(12)} {Tint(9)}
 	CBR {Tbool(7)} {L26, L27}
 L26
-	LIii {Tint(10), Tint(9)} {Tbool(16)}
-	CBR {Tbool(16)} {L29, L28}
+	LIii {Tint(10), Tint(9)} {Tbool(18)}
+	CBR {Tbool(18)} {L29, L28}
 L27
-	LIii {Tint(9), Tint(10)} {Tbool(16)}
-	CBR {Tbool(16)} {L29, L28}
+	LIii {Tint(9), Tint(10)} {Tbool(18)}
+	CBR {Tbool(18)} {L29, L28}
 L28
 	MOV {Tint(9)} {Tint(6)}
-	ADDii {Tint(6), 1 Kint(0)} {Tint(19)}
-	MOV {Tint(19)} {Tint(20)}
-	MOV {local(n, 3)} {Tint(15)}
-	MOV {1 Kint(0)} {Tint(24)}
-	SUBii {Tint(20), Tint(24)} {Tint(20)}
+	MOVif {0 Kint(1)} {Tflt(4)}
+	ADDii {Tint(6), 1 Kint(0)} {Tint(21)}
+	MOV {Tint(21)} {Tint(22)}
+	MOV {local(n, 3)} {Tint(17)}
+	MOV {1 Kint(0)} {Tint(26)}
+	SUBii {Tint(22), Tint(26)} {Tint(22)}
 	BR {L30}
 L29
 	RET {local(x, 6)} {L1}
 L30
-	ADDii {Tint(20), Tint(24)} {Tint(20)}
+	ADDii {Tint(22), Tint(26)} {Tint(22)}
 	BR {L31}
 L31
-	LIii {Tint(15), Tint(20)} {Tbool(25)}
-	CBR {Tbool(25)} {L33, L32}
+	LIii {Tint(17), Tint(22)} {Tbool(27)}
+	CBR {Tbool(27)} {L33, L32}
 L32
-	MOV {Tint(20)} {Tint(18)}
-	TGETik {local(columns, 5), Tint(18)} {T(3)}
+	MOV {Tint(22)} {Tint(20)}
+	TGETik {local(columns, 5), Tint(20)} {T(3)}
 	TOFARRAY {T(3)}
 	MOV {T(3)} {local(a, 7)}
-	IAGETik {local(nrow, 4), Tint(6)} {Tint(26)}
-	FAGETik {local(a, 7), Tint(26)} {Tflt(0)}
-	FAGETik {local(x, 6), Tint(18)} {Tflt(3)}
+	IAGETik {local(nrow, 4), Tint(6)} {Tint(28)}
+	FAGETik {local(a, 7), Tint(28)} {Tflt(0)}
+	FAGETik {local(x, 6), Tint(20)} {Tflt(3)}
 	MULff {Tflt(0), Tflt(3)} {Tflt(1)}
 	ADDff {Tflt(4), Tflt(1)} {Tflt(3)}
 	MOVf {Tflt(3)} {Tflt(4)}
 	BR {L34}
 L33
+	CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}
 	TGETik {local(columns, 5), Tint(6)} {T(3)}
 	TOFARRAY {T(3)}
 	MOV {T(3)} {local(a, 7)}
-	IAGETik {local(nrow, 4), Tint(6)} {Tint(20)}
-	FAGETik {local(b, 1), Tint(20)} {Tflt(1)}
+	IAGETik {local(nrow, 4), Tint(6)} {Tint(22)}
+	FAGETik {local(b, 1), Tint(22)} {Tflt(1)}
 	SUBff {Tflt(1), Tflt(4)} {Tflt(0)}
-	IAGETik {local(nrow, 4), Tint(6)} {Tint(15)}
-	FAGETik {local(a, 7), Tint(15)} {Tflt(1)}
+	IAGETik {local(nrow, 4), Tint(6)} {Tint(17)}
+	FAGETik {local(a, 7), Tint(17)} {Tflt(1)}
 	DIVff {Tflt(0), Tflt(1)} {Tflt(2)}
 	FAPUTfv {Tflt(2)} {local(x, 6), Tint(6)}
+	FAGETik {local(x, 6), Tint(6)} {Tflt(2)}
+	CALL {Upval(6, Proc%1, write), 'x[' Ks(14), Tint(6), '] = (b[' Ks(24), Tint(6), '] - sum) / a[' Ks(25), Tint(6), ', ' Ks(21), Tint(6), '] = ' Ks(17), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}
 	BR {L25}
 L34
-	ADDii {Tint(6), 1 Kint(0)} {Tint(27)}
-	EQii {Tint(18), Tint(27)} {Tbool(28)}
-	CBR {Tbool(28)} {L35, L36}
+	ADDii {Tint(6), 1 Kint(0)} {Tint(29)}
+	EQii {Tint(20), Tint(29)} {Tbool(30)}
+	CBR {Tbool(30)} {L35, L36}
 L35
-	BR {L36}
+	CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18)} {T(6..), 1 Kint(0)}
+	BR {L37}
 L36
+	CALL {Upval(6, Proc%1, write), 'sum = sum + ' Ks(19)} {T(6..), 1 Kint(0)}
+	BR {L37}
+L37
+	CALL {Upval(6, Proc%1, write), 'a[' Ks(20), Tint(6), ', ' Ks(21), Tint(20), '] * x[' Ks(22), Tint(20), ']' Ks(23), '\n' Ks(4)} {T(6..), 1 Kint(0)}
 	BR {L30}
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
@@ -4387,18 +5515,20 @@ L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L17</B></TD></TR>
 <TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(4)}</TD></TR>
-<TR><TD>EQii {Tint(4), Tint(3)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L18, L19}</TD></TR>
+<TR><TD>EQii {Tint(3), Tint(4)} {Tbool(5)}</TD></TR>
+<TR><TD>NOT {Tbool(5)} {Tbool(1)}</TD></TR>
+<TR><TD>CBR {Tbool(1)} {L18, L19}</TD></TR>
 </TABLE>>];
 L17 -> L18
 L17 -> L19
 L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L18</B></TD></TR>
-<TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(4)}</TD></TR>
-<TR><TD>MOVi {Tint(4)} {Tint(3)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(1)}</TD></TR>
-<TR><TD>IAPUTiv {Tint(1)} {local(nrow, 1), local(i, 2)}</TD></TR>
-<TR><TD>IAPUTiv {Tint(3)} {local(nrow, 1), Tint(0)}</TD></TR>
+<TR><TD>CALL {Upval(1, Proc%1, write), 'Performing row interchange ' Ks(2), local(i, 2), ' will be swapped with ' Ks(3), Tint(0), '\n' Ks(4)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}</TD></TR>
+<TR><TD>MOVi {Tint(3)} {Tint(4)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(5)}</TD></TR>
+<TR><TD>IAPUTiv {Tint(5)} {local(nrow, 1), local(i, 2)}</TD></TR>
+<TR><TD>IAPUTiv {Tint(4)} {local(nrow, 1), Tint(0)}</TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L18 -> L19
@@ -4466,11 +5596,16 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
+<TR><TD>TGETik {local(columns, 0), Tint(5)} {T(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 3), Tint(0)} {Tint(10)}</TD></TR>
+<TR><TD>GETik {T(0), Tint(10)} {T(1)}</TD></TR>
+<TR><TD>CALL {Upval(0, Proc%1, write), T(1), ' ' Ks(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
 </TABLE>>];
 L8 -> L6
 L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L9</B></TD></TR>
+<TR><TD>CALL {Upval(0, Proc%1, write), '\n' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L9 -> L2
@@ -4628,16 +5763,37 @@ L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>FAGETik {local(column, 8), Tint(14)} {Tflt(2)}</TD></TR>
 <TR><TD>DIVff {Tflt(1), Tflt(2)} {Tflt(3)}</TD></TR>
 <TR><TD>MOVf {Tflt(3)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {Tint(3)} {Tint(16)}</TD></TR>
-<TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(17)}</TD></TR>
-<TR><TD>MOV {Tint(17)} {Tint(18)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(19)}</TD></TR>
-<TR><TD>SUBii {Tint(16), Tint(19)} {Tint(16)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), ') = ' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {',' Ks(1), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'m(' Ks(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(15)}</TD></TR>
+<TR><TD>FAGETik {local(column, 8), Tint(15)} {Tflt(3)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(16)}</TD></TR>
+<TR><TD>FAGETik {local(column, 8), Tint(16)} {Tflt(2)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), T(0), Tflt(3), ' / ' Ks(3), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), ')\n' Ks(9)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') * R(' Ks(8), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {',' Ks(1), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') - m(' Ks(7), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') = R(' Ks(6), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {'Performing R(' Ks(5), T(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), T(1)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {Tint(3)} {Tint(18)}</TD></TR>
+<TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(19)}</TD></TR>
+<TR><TD>MOV {Tint(19)} {Tint(20)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(21)}</TD></TR>
+<TR><TD>SUBii {Tint(18), Tint(21)} {Tint(18)}</TD></TR>
 <TR><TD>BR {L18}</TD></TR>
 </TABLE>>];
 L16 -> L18
 L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L17</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'Post elimination column ' Ks(10), Tint(3), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>CALL {Upval(5, Proc%1, dump_matrix), local(columns, 5), local(n, 3), Tint(9), local(nrow, 4)} {T(5..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L10}</TD></TR>
@@ -4645,31 +5801,31 @@ L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L17 -> L10
 L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L18</B></TD></TR>
-<TR><TD>ADDii {Tint(16), Tint(19)} {Tint(16)}</TD></TR>
+<TR><TD>ADDii {Tint(18), Tint(21)} {Tint(18)}</TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L18 -> L19
 L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L19</B></TD></TR>
-<TR><TD>LIii {Tint(18), Tint(16)} {Tbool(20)}</TD></TR>
-<TR><TD>CBR {Tbool(20)} {L21, L20}</TD></TR>
+<TR><TD>LIii {Tint(20), Tint(18)} {Tbool(22)}</TD></TR>
+<TR><TD>CBR {Tbool(22)} {L21, L20}</TD></TR>
 </TABLE>>];
 L19 -> L21
 L19 -> L20
 L20 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L20</B></TD></TR>
-<TR><TD>MOV {Tint(16)} {Tint(15)}</TD></TR>
-<TR><TD>TGETik {local(columns, 5), Tint(15)} {T(1)}</TD></TR>
+<TR><TD>MOV {Tint(18)} {Tint(17)}</TD></TR>
+<TR><TD>TGETik {local(columns, 5), Tint(17)} {T(1)}</TD></TR>
 <TR><TD>TOFARRAY {T(1)}</TD></TR>
 <TR><TD>MOV {T(1)} {local(col, 9)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(21)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(22)}</TD></TR>
-<TR><TD>FAGETik {local(col, 9), Tint(22)} {Tflt(2)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(23)}</TD></TR>
-<TR><TD>FAGETik {local(col, 9), Tint(23)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(23)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(24)}</TD></TR>
+<TR><TD>FAGETik {local(col, 9), Tint(24)} {Tflt(2)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(25)}</TD></TR>
+<TR><TD>FAGETik {local(col, 9), Tint(25)} {Tflt(1)}</TD></TR>
 <TR><TD>MULff {Tflt(0), Tflt(1)} {Tflt(4)}</TD></TR>
 <TR><TD>SUBff {Tflt(2), Tflt(4)} {Tflt(1)}</TD></TR>
-<TR><TD>FAPUTfv {Tflt(1)} {local(col, 9), Tint(21)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(col, 9), Tint(23)}</TD></TR>
 <TR><TD>BR {L18}</TD></TR>
 </TABLE>>];
 L20 -> L18
@@ -4690,25 +5846,28 @@ L22 -> L23
 L22 -> L24
 L23 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L23</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'error' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>CALL {T(0), 'no unique solution exists' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'error' Ks(11)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'no unique solution exists' Ks(12)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L24}</TD></TR>
 </TABLE>>];
 L23 -> L24
 L24 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L24</B></TD></TR>
-<TR><TD>CALL {Upval(7, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(7..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOFARRAY {T(7[7..])}</TD></TR>
-<TR><TD>MOV {T(7[7..])} {local(x, 6)}</TD></TR>
+<TR><TD>CALL {Upval(8, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(8..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOFARRAY {T(8[8..])}</TD></TR>
+<TR><TD>MOV {T(8[8..])} {local(x, 6)}</TD></TR>
 <TR><TD>TGETik {local(columns, 5), local(n, 3)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'Performing back substitution\n' Ks(13)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 4), local(n, 3)} {Tint(5)}</TD></TR>
 <TR><TD>FAGETik {local(b, 1), Tint(5)} {Tflt(1)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 4), local(n, 3)} {Tint(2)}</TD></TR>
 <TR><TD>FAGETik {local(a, 7), Tint(2)} {Tflt(3)}</TD></TR>
 <TR><TD>DIVff {Tflt(1), Tflt(3)} {Tflt(4)}</TD></TR>
 <TR><TD>FAPUTfv {Tflt(4)} {local(x, 6), local(n, 3)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), local(n, 3)} {Tflt(4)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'x[' Ks(14), local(n, 3), '] = b[' Ks(15), local(n, 3), '] / a[' Ks(16), local(n, 3), '] = ' Ks(17), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>SUBii {local(n, 3), 1 Kint(0)} {Tint(3)}</TD></TR>
 <TR><TD>MOV {Tint(3)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(10)}</TD></TR>
@@ -4728,26 +5887,27 @@ L25 -> L26
 L25 -> L27
 L26 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L26</B></TD></TR>
-<TR><TD>LIii {Tint(10), Tint(9)} {Tbool(16)}</TD></TR>
-<TR><TD>CBR {Tbool(16)} {L29, L28}</TD></TR>
+<TR><TD>LIii {Tint(10), Tint(9)} {Tbool(18)}</TD></TR>
+<TR><TD>CBR {Tbool(18)} {L29, L28}</TD></TR>
 </TABLE>>];
 L26 -> L29
 L26 -> L28
 L27 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L27</B></TD></TR>
-<TR><TD>LIii {Tint(9), Tint(10)} {Tbool(16)}</TD></TR>
-<TR><TD>CBR {Tbool(16)} {L29, L28}</TD></TR>
+<TR><TD>LIii {Tint(9), Tint(10)} {Tbool(18)}</TD></TR>
+<TR><TD>CBR {Tbool(18)} {L29, L28}</TD></TR>
 </TABLE>>];
 L27 -> L29
 L27 -> L28
 L28 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L28</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(6)}</TD></TR>
-<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(19)}</TD></TR>
-<TR><TD>MOV {Tint(19)} {Tint(20)}</TD></TR>
-<TR><TD>MOV {local(n, 3)} {Tint(15)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(24)}</TD></TR>
-<TR><TD>SUBii {Tint(20), Tint(24)} {Tint(20)}</TD></TR>
+<TR><TD>MOVif {0 Kint(1)} {Tflt(4)}</TD></TR>
+<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(21)}</TD></TR>
+<TR><TD>MOV {Tint(21)} {Tint(22)}</TD></TR>
+<TR><TD>MOV {local(n, 3)} {Tint(17)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(26)}</TD></TR>
+<TR><TD>SUBii {Tint(22), Tint(26)} {Tint(22)}</TD></TR>
 <TR><TD>BR {L30}</TD></TR>
 </TABLE>>];
 L28 -> L30
@@ -4758,26 +5918,26 @@ L29 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L29 -> L1
 L30 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L30</B></TD></TR>
-<TR><TD>ADDii {Tint(20), Tint(24)} {Tint(20)}</TD></TR>
+<TR><TD>ADDii {Tint(22), Tint(26)} {Tint(22)}</TD></TR>
 <TR><TD>BR {L31}</TD></TR>
 </TABLE>>];
 L30 -> L31
 L31 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L31</B></TD></TR>
-<TR><TD>LIii {Tint(15), Tint(20)} {Tbool(25)}</TD></TR>
-<TR><TD>CBR {Tbool(25)} {L33, L32}</TD></TR>
+<TR><TD>LIii {Tint(17), Tint(22)} {Tbool(27)}</TD></TR>
+<TR><TD>CBR {Tbool(27)} {L33, L32}</TD></TR>
 </TABLE>>];
 L31 -> L33
 L31 -> L32
 L32 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L32</B></TD></TR>
-<TR><TD>MOV {Tint(20)} {Tint(18)}</TD></TR>
-<TR><TD>TGETik {local(columns, 5), Tint(18)} {T(3)}</TD></TR>
+<TR><TD>MOV {Tint(22)} {Tint(20)}</TD></TR>
+<TR><TD>TGETik {local(columns, 5), Tint(20)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(26)}</TD></TR>
-<TR><TD>FAGETik {local(a, 7), Tint(26)} {Tflt(0)}</TD></TR>
-<TR><TD>FAGETik {local(x, 6), Tint(18)} {Tflt(3)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(28)}</TD></TR>
+<TR><TD>FAGETik {local(a, 7), Tint(28)} {Tflt(0)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), Tint(20)} {Tflt(3)}</TD></TR>
 <TR><TD>MULff {Tflt(0), Tflt(3)} {Tflt(1)}</TD></TR>
 <TR><TD>ADDff {Tflt(4), Tflt(1)} {Tflt(3)}</TD></TR>
 <TR><TD>MOVf {Tflt(3)} {Tflt(4)}</TD></TR>
@@ -4786,37 +5946,48 @@ L32 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L32 -> L34
 L33 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L33</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>TGETik {local(columns, 5), Tint(6)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(20)}</TD></TR>
-<TR><TD>FAGETik {local(b, 1), Tint(20)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(22)}</TD></TR>
+<TR><TD>FAGETik {local(b, 1), Tint(22)} {Tflt(1)}</TD></TR>
 <TR><TD>SUBff {Tflt(1), Tflt(4)} {Tflt(0)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(15)}</TD></TR>
-<TR><TD>FAGETik {local(a, 7), Tint(15)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(17)}</TD></TR>
+<TR><TD>FAGETik {local(a, 7), Tint(17)} {Tflt(1)}</TD></TR>
 <TR><TD>DIVff {Tflt(0), Tflt(1)} {Tflt(2)}</TD></TR>
 <TR><TD>FAPUTfv {Tflt(2)} {local(x, 6), Tint(6)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), Tint(6)} {Tflt(2)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'x[' Ks(14), Tint(6), '] = (b[' Ks(24), Tint(6), '] - sum) / a[' Ks(25), Tint(6), ', ' Ks(21), Tint(6), '] = ' Ks(17), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L25}</TD></TR>
 </TABLE>>];
 L33 -> L25
 L34 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L34</B></TD></TR>
-<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(27)}</TD></TR>
-<TR><TD>EQii {Tint(18), Tint(27)} {Tbool(28)}</TD></TR>
-<TR><TD>CBR {Tbool(28)} {L35, L36}</TD></TR>
+<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(29)}</TD></TR>
+<TR><TD>EQii {Tint(20), Tint(29)} {Tbool(30)}</TD></TR>
+<TR><TD>CBR {Tbool(30)} {L35, L36}</TD></TR>
 </TABLE>>];
 L34 -> L35
 L34 -> L36
 L35 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L35</B></TD></TR>
-<TR><TD>BR {L36}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>BR {L37}</TD></TR>
 </TABLE>>];
-L35 -> L36
+L35 -> L37
 L36 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L36</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = sum + ' Ks(19)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>BR {L37}</TD></TR>
+</TABLE>>];
+L36 -> L37
+L37 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L37</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'a[' Ks(20), Tint(6), ', ' Ks(21), Tint(20), '] * x[' Ks(22), Tint(20), ']' Ks(23), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L30}</TD></TR>
 </TABLE>>];
-L36 -> L30
+L37 -> L30
 }
 digraph Proc2 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
@@ -4986,18 +6157,20 @@ L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L17</B></TD></TR>
 <TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(4)}</TD></TR>
-<TR><TD>EQii {Tint(4), Tint(3)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L18, L19}</TD></TR>
+<TR><TD>EQii {Tint(3), Tint(4)} {Tbool(5)}</TD></TR>
+<TR><TD>NOT {Tbool(5)} {Tbool(1)}</TD></TR>
+<TR><TD>CBR {Tbool(1)} {L18, L19}</TD></TR>
 </TABLE>>];
 L17 -> L18
 L17 -> L19
 L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L18</B></TD></TR>
-<TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(4)}</TD></TR>
-<TR><TD>MOVi {Tint(4)} {Tint(3)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(1)}</TD></TR>
-<TR><TD>IAPUTiv {Tint(1)} {local(nrow, 1), local(i, 2)}</TD></TR>
-<TR><TD>IAPUTiv {Tint(3)} {local(nrow, 1), Tint(0)}</TD></TR>
+<TR><TD>CALL {Upval(1, Proc%1, write), 'Performing row interchange ' Ks(2), local(i, 2), ' will be swapped with ' Ks(3), Tint(0), '\n' Ks(4)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 1), local(i, 2)} {Tint(3)}</TD></TR>
+<TR><TD>MOVi {Tint(3)} {Tint(4)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 1), Tint(0)} {Tint(5)}</TD></TR>
+<TR><TD>IAPUTiv {Tint(5)} {local(nrow, 1), local(i, 2)}</TD></TR>
+<TR><TD>IAPUTiv {Tint(4)} {local(nrow, 1), Tint(0)}</TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L18 -> L19
@@ -5065,11 +6238,16 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
+<TR><TD>TGETik {local(columns, 0), Tint(5)} {T(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 3), Tint(0)} {Tint(10)}</TD></TR>
+<TR><TD>GETik {T(0), Tint(10)} {T(1)}</TD></TR>
+<TR><TD>CALL {Upval(0, Proc%1, write), T(1), ' ' Ks(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
 </TABLE>>];
 L8 -> L6
 L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L9</B></TD></TR>
+<TR><TD>CALL {Upval(0, Proc%1, write), '\n' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L9 -> L2
@@ -5227,16 +6405,37 @@ L16 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>FAGETik {local(column, 8), Tint(14)} {Tflt(2)}</TD></TR>
 <TR><TD>DIVff {Tflt(1), Tflt(2)} {Tflt(3)}</TD></TR>
 <TR><TD>MOVf {Tflt(3)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {Tint(3)} {Tint(16)}</TD></TR>
-<TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(17)}</TD></TR>
-<TR><TD>MOV {Tint(17)} {Tint(18)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(19)}</TD></TR>
-<TR><TD>SUBii {Tint(16), Tint(19)} {Tint(16)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), ') = ' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {',' Ks(1), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'m(' Ks(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(15)}</TD></TR>
+<TR><TD>FAGETik {local(column, 8), Tint(15)} {Tflt(3)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(16)}</TD></TR>
+<TR><TD>FAGETik {local(column, 8), Tint(16)} {Tflt(2)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), T(0), Tflt(3), ' / ' Ks(3), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), ')\n' Ks(9)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') * R(' Ks(8), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(3), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {',' Ks(1), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') - m(' Ks(7), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {') = R(' Ks(6), T(0)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {Tint(7), T(1)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {'Performing R(' Ks(5), T(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), T(1)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {Tint(3)} {Tint(18)}</TD></TR>
+<TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(19)}</TD></TR>
+<TR><TD>MOV {Tint(19)} {Tint(20)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(21)}</TD></TR>
+<TR><TD>SUBii {Tint(18), Tint(21)} {Tint(18)}</TD></TR>
 <TR><TD>BR {L18}</TD></TR>
 </TABLE>>];
 L16 -> L18
 L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L17</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'Post elimination column ' Ks(10), Tint(3), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>ADDii {local(n, 3), 1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>CALL {Upval(5, Proc%1, dump_matrix), local(columns, 5), local(n, 3), Tint(9), local(nrow, 4)} {T(5..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L10}</TD></TR>
@@ -5244,31 +6443,31 @@ L17 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L17 -> L10
 L18 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L18</B></TD></TR>
-<TR><TD>ADDii {Tint(16), Tint(19)} {Tint(16)}</TD></TR>
+<TR><TD>ADDii {Tint(18), Tint(21)} {Tint(18)}</TD></TR>
 <TR><TD>BR {L19}</TD></TR>
 </TABLE>>];
 L18 -> L19
 L19 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L19</B></TD></TR>
-<TR><TD>LIii {Tint(18), Tint(16)} {Tbool(20)}</TD></TR>
-<TR><TD>CBR {Tbool(20)} {L21, L20}</TD></TR>
+<TR><TD>LIii {Tint(20), Tint(18)} {Tbool(22)}</TD></TR>
+<TR><TD>CBR {Tbool(22)} {L21, L20}</TD></TR>
 </TABLE>>];
 L19 -> L21
 L19 -> L20
 L20 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L20</B></TD></TR>
-<TR><TD>MOV {Tint(16)} {Tint(15)}</TD></TR>
-<TR><TD>TGETik {local(columns, 5), Tint(15)} {T(1)}</TD></TR>
+<TR><TD>MOV {Tint(18)} {Tint(17)}</TD></TR>
+<TR><TD>TGETik {local(columns, 5), Tint(17)} {T(1)}</TD></TR>
 <TR><TD>TOFARRAY {T(1)}</TD></TR>
 <TR><TD>MOV {T(1)} {local(col, 9)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(21)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(22)}</TD></TR>
-<TR><TD>FAGETik {local(col, 9), Tint(22)} {Tflt(2)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(23)}</TD></TR>
-<TR><TD>FAGETik {local(col, 9), Tint(23)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(23)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(7)} {Tint(24)}</TD></TR>
+<TR><TD>FAGETik {local(col, 9), Tint(24)} {Tflt(2)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(3)} {Tint(25)}</TD></TR>
+<TR><TD>FAGETik {local(col, 9), Tint(25)} {Tflt(1)}</TD></TR>
 <TR><TD>MULff {Tflt(0), Tflt(1)} {Tflt(4)}</TD></TR>
 <TR><TD>SUBff {Tflt(2), Tflt(4)} {Tflt(1)}</TD></TR>
-<TR><TD>FAPUTfv {Tflt(1)} {local(col, 9), Tint(21)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(col, 9), Tint(23)}</TD></TR>
 <TR><TD>BR {L18}</TD></TR>
 </TABLE>>];
 L20 -> L18
@@ -5289,25 +6488,28 @@ L22 -> L23
 L22 -> L24
 L23 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L23</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'error' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>CALL {T(0), 'no unique solution exists' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'error' Ks(11)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'no unique solution exists' Ks(12)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L24}</TD></TR>
 </TABLE>>];
 L23 -> L24
 L24 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L24</B></TD></TR>
-<TR><TD>CALL {Upval(7, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(7..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOFARRAY {T(7[7..])}</TD></TR>
-<TR><TD>MOV {T(7[7..])} {local(x, 6)}</TD></TR>
+<TR><TD>CALL {Upval(8, Proc%1, numarray), local(n, 3), 0.000000000000 Kflt(0)} {T(8..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOFARRAY {T(8[8..])}</TD></TR>
+<TR><TD>MOV {T(8[8..])} {local(x, 6)}</TD></TR>
 <TR><TD>TGETik {local(columns, 5), local(n, 3)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'Performing back substitution\n' Ks(13)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 4), local(n, 3)} {Tint(5)}</TD></TR>
 <TR><TD>FAGETik {local(b, 1), Tint(5)} {Tflt(1)}</TD></TR>
 <TR><TD>IAGETik {local(nrow, 4), local(n, 3)} {Tint(2)}</TD></TR>
 <TR><TD>FAGETik {local(a, 7), Tint(2)} {Tflt(3)}</TD></TR>
 <TR><TD>DIVff {Tflt(1), Tflt(3)} {Tflt(4)}</TD></TR>
 <TR><TD>FAPUTfv {Tflt(4)} {local(x, 6), local(n, 3)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), local(n, 3)} {Tflt(4)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'x[' Ks(14), local(n, 3), '] = b[' Ks(15), local(n, 3), '] / a[' Ks(16), local(n, 3), '] = ' Ks(17), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>SUBii {local(n, 3), 1 Kint(0)} {Tint(3)}</TD></TR>
 <TR><TD>MOV {Tint(3)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(10)}</TD></TR>
@@ -5327,26 +6529,27 @@ L25 -> L26
 L25 -> L27
 L26 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L26</B></TD></TR>
-<TR><TD>LIii {Tint(10), Tint(9)} {Tbool(16)}</TD></TR>
-<TR><TD>CBR {Tbool(16)} {L29, L28}</TD></TR>
+<TR><TD>LIii {Tint(10), Tint(9)} {Tbool(18)}</TD></TR>
+<TR><TD>CBR {Tbool(18)} {L29, L28}</TD></TR>
 </TABLE>>];
 L26 -> L29
 L26 -> L28
 L27 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L27</B></TD></TR>
-<TR><TD>LIii {Tint(9), Tint(10)} {Tbool(16)}</TD></TR>
-<TR><TD>CBR {Tbool(16)} {L29, L28}</TD></TR>
+<TR><TD>LIii {Tint(9), Tint(10)} {Tbool(18)}</TD></TR>
+<TR><TD>CBR {Tbool(18)} {L29, L28}</TD></TR>
 </TABLE>>];
 L27 -> L29
 L27 -> L28
 L28 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L28</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(6)}</TD></TR>
-<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(19)}</TD></TR>
-<TR><TD>MOV {Tint(19)} {Tint(20)}</TD></TR>
-<TR><TD>MOV {local(n, 3)} {Tint(15)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(24)}</TD></TR>
-<TR><TD>SUBii {Tint(20), Tint(24)} {Tint(20)}</TD></TR>
+<TR><TD>MOVif {0 Kint(1)} {Tflt(4)}</TD></TR>
+<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(21)}</TD></TR>
+<TR><TD>MOV {Tint(21)} {Tint(22)}</TD></TR>
+<TR><TD>MOV {local(n, 3)} {Tint(17)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(26)}</TD></TR>
+<TR><TD>SUBii {Tint(22), Tint(26)} {Tint(22)}</TD></TR>
 <TR><TD>BR {L30}</TD></TR>
 </TABLE>>];
 L28 -> L30
@@ -5357,26 +6560,26 @@ L29 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L29 -> L1
 L30 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L30</B></TD></TR>
-<TR><TD>ADDii {Tint(20), Tint(24)} {Tint(20)}</TD></TR>
+<TR><TD>ADDii {Tint(22), Tint(26)} {Tint(22)}</TD></TR>
 <TR><TD>BR {L31}</TD></TR>
 </TABLE>>];
 L30 -> L31
 L31 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L31</B></TD></TR>
-<TR><TD>LIii {Tint(15), Tint(20)} {Tbool(25)}</TD></TR>
-<TR><TD>CBR {Tbool(25)} {L33, L32}</TD></TR>
+<TR><TD>LIii {Tint(17), Tint(22)} {Tbool(27)}</TD></TR>
+<TR><TD>CBR {Tbool(27)} {L33, L32}</TD></TR>
 </TABLE>>];
 L31 -> L33
 L31 -> L32
 L32 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L32</B></TD></TR>
-<TR><TD>MOV {Tint(20)} {Tint(18)}</TD></TR>
-<TR><TD>TGETik {local(columns, 5), Tint(18)} {T(3)}</TD></TR>
+<TR><TD>MOV {Tint(22)} {Tint(20)}</TD></TR>
+<TR><TD>TGETik {local(columns, 5), Tint(20)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(26)}</TD></TR>
-<TR><TD>FAGETik {local(a, 7), Tint(26)} {Tflt(0)}</TD></TR>
-<TR><TD>FAGETik {local(x, 6), Tint(18)} {Tflt(3)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(28)}</TD></TR>
+<TR><TD>FAGETik {local(a, 7), Tint(28)} {Tflt(0)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), Tint(20)} {Tflt(3)}</TD></TR>
 <TR><TD>MULff {Tflt(0), Tflt(3)} {Tflt(1)}</TD></TR>
 <TR><TD>ADDff {Tflt(4), Tflt(1)} {Tflt(3)}</TD></TR>
 <TR><TD>MOVf {Tflt(3)} {Tflt(4)}</TD></TR>
@@ -5385,37 +6588,48 @@ L32 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L32 -> L34
 L33 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L33</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18), Tflt(4), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>TGETik {local(columns, 5), Tint(6)} {T(3)}</TD></TR>
 <TR><TD>TOFARRAY {T(3)}</TD></TR>
 <TR><TD>MOV {T(3)} {local(a, 7)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(20)}</TD></TR>
-<TR><TD>FAGETik {local(b, 1), Tint(20)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(22)}</TD></TR>
+<TR><TD>FAGETik {local(b, 1), Tint(22)} {Tflt(1)}</TD></TR>
 <TR><TD>SUBff {Tflt(1), Tflt(4)} {Tflt(0)}</TD></TR>
-<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(15)}</TD></TR>
-<TR><TD>FAGETik {local(a, 7), Tint(15)} {Tflt(1)}</TD></TR>
+<TR><TD>IAGETik {local(nrow, 4), Tint(6)} {Tint(17)}</TD></TR>
+<TR><TD>FAGETik {local(a, 7), Tint(17)} {Tflt(1)}</TD></TR>
 <TR><TD>DIVff {Tflt(0), Tflt(1)} {Tflt(2)}</TD></TR>
 <TR><TD>FAPUTfv {Tflt(2)} {local(x, 6), Tint(6)}</TD></TR>
+<TR><TD>FAGETik {local(x, 6), Tint(6)} {Tflt(2)}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'x[' Ks(14), Tint(6), '] = (b[' Ks(24), Tint(6), '] - sum) / a[' Ks(25), Tint(6), ', ' Ks(21), Tint(6), '] = ' Ks(17), Tflt(2), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L25}</TD></TR>
 </TABLE>>];
 L33 -> L25
 L34 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L34</B></TD></TR>
-<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(27)}</TD></TR>
-<TR><TD>EQii {Tint(18), Tint(27)} {Tbool(28)}</TD></TR>
-<TR><TD>CBR {Tbool(28)} {L35, L36}</TD></TR>
+<TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(29)}</TD></TR>
+<TR><TD>EQii {Tint(20), Tint(29)} {Tbool(30)}</TD></TR>
+<TR><TD>CBR {Tbool(30)} {L35, L36}</TD></TR>
 </TABLE>>];
 L34 -> L35
 L34 -> L36
 L35 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L35</B></TD></TR>
-<TR><TD>BR {L36}</TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = ' Ks(18)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>BR {L37}</TD></TR>
 </TABLE>>];
-L35 -> L36
+L35 -> L37
 L36 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L36</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'sum = sum + ' Ks(19)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>BR {L37}</TD></TR>
+</TABLE>>];
+L36 -> L37
+L37 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L37</B></TD></TR>
+<TR><TD>CALL {Upval(6, Proc%1, write), 'a[' Ks(20), Tint(6), ', ' Ks(21), Tint(20), '] * x[' Ks(22), Tint(20), ']' Ks(23), '\n' Ks(4)} {T(6..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L30}</TD></TR>
 </TABLE>>];
-L36 -> L30
+L37 -> L30
 }
 }
 
@@ -6064,6 +7278,9 @@ TValue bval0; settt_(&bval0, LUA_TBOOLEAN);
 TValue ival1; settt_(&ival1, LUA_TNUMINT);
 TValue fval1; settt_(&fval1, LUA_TNUMFLT);
 TValue bval1; settt_(&bval1, LUA_TBOOLEAN);
+TValue ival2; settt_(&ival2, LUA_TNUMINT);
+TValue fval2; settt_(&fval2, LUA_TNUMFLT);
+TValue bval2; settt_(&bval2, LUA_TBOOLEAN);
 TValue nilval; setnilvalue(&nilval);
 L0:
 {
@@ -6248,6 +7465,9 @@ TValue bval0; settt_(&bval0, LUA_TBOOLEAN);
 TValue ival1; settt_(&ival1, LUA_TNUMINT);
 TValue fval1; settt_(&fval1, LUA_TNUMFLT);
 TValue bval1; settt_(&bval1, LUA_TBOOLEAN);
+TValue ival2; settt_(&ival2, LUA_TNUMINT);
+TValue fval2; settt_(&fval2, LUA_TNUMFLT);
+TValue bval2; settt_(&bval2, LUA_TBOOLEAN);
 TValue nilval; setnilvalue(&nilval);
 L0:
 {
@@ -6388,6 +7608,9 @@ TValue bval0; settt_(&bval0, LUA_TBOOLEAN);
 TValue ival1; settt_(&ival1, LUA_TNUMINT);
 TValue fval1; settt_(&fval1, LUA_TNUMFLT);
 TValue bval1; settt_(&bval1, LUA_TBOOLEAN);
+TValue ival2; settt_(&ival2, LUA_TNUMINT);
+TValue fval2; settt_(&fval2, LUA_TNUMFLT);
+TValue bval2; settt_(&bval2, LUA_TBOOLEAN);
 TValue nilval; setnilvalue(&nilval);
 L0:
 {
@@ -6581,30 +7804,77 @@ L17:
  lua_Integer *iptr = (lua_Integer *)arr->data;
  i_4 = iptr[ukey];
 }
-{ i_5 = i_4 == i_3; }
-{ if (i_5 != 0) goto L18; else goto L19; }
+{ i_5 = i_3 == i_4; }
+{ i_1 = (0 == i_5); }
+{ if (i_1 != 0) goto L18; else goto L19; }
 L18:
+ if (stackoverflow(L,7)) { luaD_growstack(L, 7); base = ci->u.l.base; }
+ L->top = R(7) + 6;
+{
+TValue *dst_reg = R(12);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(11);
+setivalue(dst_reg, i_0);
+}
+{
+TValue *dst_reg = R(10);
+TValue *src_reg = K(3);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(2);
+TValue *dst_reg = R(9);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+TValue *dst_reg = R(8);
+TValue *src_reg = K(2);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[1]->v;
+TValue *dst_reg = R(7);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(7);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 {
  RaviArray *arr = arrvalue(R(1));
  lua_Unsigned ukey = (lua_Unsigned) ivalue(R(2));
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_4 = iptr[ukey];
+ i_3 = iptr[ukey];
 }
-i_3 = i_4;
+i_4 = i_3;
 {
  RaviArray *arr = arrvalue(R(1));
  lua_Unsigned ukey = (lua_Unsigned) i_0;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_1 = iptr[ukey];
+ i_5 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(1));
  lua_Unsigned ukey = (lua_Unsigned) ivalue(R(2));
  lua_Integer *iptr = (lua_Integer *)arr->data;
  if (ukey < (lua_Unsigned)(arr->len)) {
- iptr[ukey] = i_1;
+ iptr[ukey] = i_5;
 } else {
- raviH_set_int(L, arr, ukey, i_1);
+ raviH_set_int(L, arr, ukey, i_5);
 }
 }
 {
@@ -6612,9 +7882,9 @@ i_3 = i_4;
  lua_Unsigned ukey = (lua_Unsigned) i_0;
  lua_Integer *iptr = (lua_Integer *)arr->data;
  if (ukey < (lua_Unsigned)(arr->len)) {
- iptr[ukey] = i_3;
+ iptr[ukey] = i_4;
 } else {
- raviH_set_int(L, arr, ukey, i_3);
+ raviH_set_int(L, arr, ukey, i_4);
 }
 }
 goto L19;
@@ -6641,13 +7911,16 @@ CallInfo *ci = L->ci;
 LClosure *cl = clLvalue(ci->func);
 TValue *k = cl->p->k;
 StkId base = ci->u.l.base;
-lua_Integer i_0 = 0, i_1 = 0, i_2 = 0, i_3 = 0, i_4 = 0, i_5 = 0, i_6 = 0, i_7 = 0, i_8 = 0, i_9 = 0;
+lua_Integer i_0 = 0, i_1 = 0, i_2 = 0, i_3 = 0, i_4 = 0, i_5 = 0, i_6 = 0, i_7 = 0, i_8 = 0, i_9 = 0, i_10 = 0;
 TValue ival0; settt_(&ival0, LUA_TNUMINT);
 TValue fval0; settt_(&fval0, LUA_TNUMFLT);
 TValue bval0; settt_(&bval0, LUA_TBOOLEAN);
 TValue ival1; settt_(&ival1, LUA_TNUMINT);
 TValue fval1; settt_(&fval1, LUA_TNUMFLT);
 TValue bval1; settt_(&bval1, LUA_TBOOLEAN);
+TValue ival2; settt_(&ival2, LUA_TNUMINT);
+TValue fval2; settt_(&fval2, LUA_TNUMFLT);
+TValue bval2; settt_(&bval2, LUA_TBOOLEAN);
 TValue nilval; setnilvalue(&nilval);
 L0:
 {
@@ -6730,8 +8003,80 @@ L7:
 { if (i_9 != 0) goto L9; else goto L8; }
 L8:
 i_5 = i_6;
+{
+ TValue *tab = R(0);
+ TValue *key = &ival0; ival0.value_.i = i_5;
+ TValue *dst = R(4);
+ raviV_gettable_i(L, tab, key, dst);
+ base = ci->u.l.base;
+}
+{
+ RaviArray *arr = arrvalue(R(3));
+ lua_Unsigned ukey = (lua_Unsigned) i_0;
+ lua_Integer *iptr = (lua_Integer *)arr->data;
+ i_10 = iptr[ukey];
+}
+{
+ TValue *tab = R(4);
+ TValue *key = &ival0; ival0.value_.i = i_10;
+ TValue *dst = R(5);
+ luaV_gettable(L, tab, key, dst);
+ base = ci->u.l.base;
+}
+ if (stackoverflow(L,4)) { luaD_growstack(L, 4); base = ci->u.l.base; }
+ L->top = R(4) + 3;
+{
+TValue *dst_reg = R(6);
+TValue *src_reg = K(0);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[0]->v;
+TValue *dst_reg = R(4);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(4);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 goto L6;
 L9:
+ if (stackoverflow(L,3)) { luaD_growstack(L, 3); base = ci->u.l.base; }
+ L->top = R(4) + 2;
+{
+TValue *dst_reg = R(5);
+TValue *src_reg = K(1);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[0]->v;
+TValue *dst_reg = R(4);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(4);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 goto L2;
 }
 static int __ravifunc_5(lua_State *L) {
@@ -6741,7 +8086,7 @@ CallInfo *ci = L->ci;
 LClosure *cl = clLvalue(ci->func);
 TValue *k = cl->p->k;
 StkId base = ci->u.l.base;
-lua_Integer i_0 = 0, i_1 = 0, i_2 = 0, i_3 = 0, i_4 = 0, i_5 = 0, i_6 = 0, i_7 = 0, i_8 = 0, i_9 = 0, i_10 = 0, i_11 = 0, i_12 = 0, i_13 = 0, i_14 = 0, i_15 = 0, i_16 = 0, i_17 = 0, i_18 = 0, i_19 = 0, i_20 = 0, i_21 = 0, i_22 = 0, i_23 = 0, i_24 = 0, i_25 = 0, i_26 = 0, i_27 = 0, i_28 = 0;
+lua_Integer i_0 = 0, i_1 = 0, i_2 = 0, i_3 = 0, i_4 = 0, i_5 = 0, i_6 = 0, i_7 = 0, i_8 = 0, i_9 = 0, i_10 = 0, i_11 = 0, i_12 = 0, i_13 = 0, i_14 = 0, i_15 = 0, i_16 = 0, i_17 = 0, i_18 = 0, i_19 = 0, i_20 = 0, i_21 = 0, i_22 = 0, i_23 = 0, i_24 = 0, i_25 = 0, i_26 = 0, i_27 = 0, i_28 = 0, i_29 = 0, i_30 = 0;
 lua_Number f_0 = 0, f_1 = 0, f_2 = 0, f_3 = 0, f_4 = 0;
 TValue ival0; settt_(&ival0, LUA_TNUMINT);
 TValue fval0; settt_(&fval0, LUA_TNUMFLT);
@@ -6749,6 +8094,9 @@ TValue bval0; settt_(&bval0, LUA_TBOOLEAN);
 TValue ival1; settt_(&ival1, LUA_TNUMINT);
 TValue fval1; settt_(&fval1, LUA_TNUMFLT);
 TValue bval1; settt_(&bval1, LUA_TBOOLEAN);
+TValue ival2; settt_(&ival2, LUA_TNUMINT);
+TValue fval2; settt_(&fval2, LUA_TNUMFLT);
+TValue bval2; settt_(&bval2, LUA_TBOOLEAN);
 TValue nilval; setnilvalue(&nilval);
 L0:
 {
@@ -7247,13 +8595,471 @@ dst_reg->value_.n = src_reg->value_.n;
 }
 { f_3 = f_1 / f_2; }
 f_0 = f_3;
-i_16 = i_3;
-{ i_17 = ivalue(R(3)) + 1; }
-i_18 = i_17;
-i_19 = 1;
-{ i_16 = i_16 - i_19; }
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_3);
+}
+{
+TValue *dst_reg = R(15);
+TValue *src_reg = K(2);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(1);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_7);
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(0);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+{
+ RaviArray *arr = arrvalue(R(4));
+ lua_Unsigned ukey = (lua_Unsigned) i_7;
+ lua_Integer *iptr = (lua_Integer *)arr->data;
+ i_15 = iptr[ukey];
+}
+{
+ RaviArray *arr = arrvalue(R(8));
+ lua_Unsigned ukey = (lua_Unsigned) i_15;
+ lua_Number *iptr = (lua_Number *)arr->data;
+ f_3 = iptr[ukey];
+}
+{
+ RaviArray *arr = arrvalue(R(4));
+ lua_Unsigned ukey = (lua_Unsigned) i_3;
+ lua_Integer *iptr = (lua_Integer *)arr->data;
+ i_16 = iptr[ukey];
+}
+{
+ RaviArray *arr = arrvalue(R(8));
+ lua_Unsigned ukey = (lua_Unsigned) i_16;
+ lua_Number *iptr = (lua_Number *)arr->data;
+ f_2 = iptr[ukey];
+}
+ if (stackoverflow(L,7)) { luaD_growstack(L, 7); base = ci->u.l.base; }
+ L->top = R(16) + 6;
+{
+TValue *dst_reg = R(21);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(20);
+setfltvalue(dst_reg, f_2);
+}
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(3);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(18);
+setfltvalue(dst_reg, f_3);
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(17);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_3);
+}
+{
+TValue *dst_reg = R(15);
+TValue *src_reg = K(9);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(8);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_3);
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(1);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_7);
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(7);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_7);
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(6);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+setivalue(dst_reg, i_7);
+}
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(10);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,2)) { luaD_growstack(L, 2); base = ci->u.l.base; }
+{
+{
+TValue *dst_reg = R(14);
+TValue *src_reg = K(5);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(10);
+TValue *dst_reg = R(15);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+ L->top = R(14) + 2;
+ luaV_concat(L, 2);
+ base = ci->u.l.base;
+ L->top = ci->top;
+{
+const TValue *src_reg = R(14);
+TValue *dst_reg = R(11);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+}
+ if (stackoverflow(L,3)) { luaD_growstack(L, 3); base = ci->u.l.base; }
+ L->top = R(16) + 2;
+{
+const TValue *src_reg = R(11);
+TValue *dst_reg = R(17);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
+i_18 = i_3;
+{ i_19 = ivalue(R(3)) + 1; }
+i_20 = i_19;
+i_21 = 1;
+{ i_18 = i_18 - i_21; }
 goto L18;
 L17:
+ if (stackoverflow(L,5)) { luaD_growstack(L, 5); base = ci->u.l.base; }
+ L->top = R(16) + 4;
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(18);
+setivalue(dst_reg, i_3);
+}
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(10);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 { i_9 = ivalue(R(3)) + 1; }
  if (stackoverflow(L,6)) { luaD_growstack(L, 6); base = ci->u.l.base; }
  L->top = R(15) + 5;
@@ -7300,16 +9106,16 @@ dst_reg->value_.n = src_reg->value_.n;
 }
 goto L10;
 L18:
-{ i_16 = i_16 + i_19; }
+{ i_18 = i_18 + i_21; }
 goto L19;
 L19:
-{ i_20 = i_18 < i_16; }
-{ if (i_20 != 0) goto L21; else goto L20; }
+{ i_22 = i_20 < i_18; }
+{ if (i_22 != 0) goto L21; else goto L20; }
 L20:
-i_15 = i_16;
+i_17 = i_18;
 {
  TValue *tab = R(5);
- TValue *key = &ival0; ival0.value_.i = i_15;
+ TValue *key = &ival0; ival0.value_.i = i_17;
  TValue *dst = R(11);
  raviV_gettable_i(L, tab, key, dst);
  base = ci->u.l.base;
@@ -7331,17 +9137,17 @@ dst_reg->value_.n = src_reg->value_.n;
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_7;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_21 = iptr[ukey];
+ i_23 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_7;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_22 = iptr[ukey];
+ i_24 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(9));
- lua_Unsigned ukey = (lua_Unsigned) i_22;
+ lua_Unsigned ukey = (lua_Unsigned) i_24;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_2 = iptr[ukey];
 }
@@ -7349,11 +9155,11 @@ dst_reg->value_.n = src_reg->value_.n;
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_3;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_23 = iptr[ukey];
+ i_25 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(9));
- lua_Unsigned ukey = (lua_Unsigned) i_23;
+ lua_Unsigned ukey = (lua_Unsigned) i_25;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_1 = iptr[ukey];
 }
@@ -7361,7 +9167,7 @@ dst_reg->value_.n = src_reg->value_.n;
 { f_1 = f_2 - f_4; }
 {
  RaviArray *arr = arrvalue(R(9));
- lua_Unsigned ukey = (lua_Unsigned) i_21;
+ lua_Unsigned ukey = (lua_Unsigned) i_23;
  lua_Number *iptr = (lua_Number *)arr->data;
  if (ukey < (lua_Unsigned)(arr->len)) {
  iptr[ukey] = f_1;
@@ -7412,8 +9218,8 @@ else goto L24;
 }
 L23:
 {
- TValue *tab = cl->upvals[6]->v;
- TValue *key = K(0);
+ TValue *tab = cl->upvals[7]->v;
+ TValue *key = K(11);
  TValue *dst = R(10);
  raviV_gettable_sskey(L, tab, key, dst);
  base = ci->u.l.base;
@@ -7422,7 +9228,7 @@ L23:
  L->top = R(10) + 2;
 {
 TValue *dst_reg = R(11);
-TValue *src_reg = K(1);
+TValue *src_reg = K(12);
 dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
 }
 {
@@ -7441,25 +9247,25 @@ dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
 goto L24;
 L24:
  if (stackoverflow(L,4)) { luaD_growstack(L, 4); base = ci->u.l.base; }
- L->top = R(17) + 3;
+ L->top = R(18) + 3;
 {
-TValue *dst_reg = R(19);
+TValue *dst_reg = R(20);
 setfltvalue(dst_reg, 0);
 }
 {
 const TValue *src_reg = R(3);
+TValue *dst_reg = R(19);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+const TValue *src_reg = cl->upvals[8]->v;
 TValue *dst_reg = R(18);
 dst_reg->tt_ = src_reg->tt_;
 dst_reg->value_.n = src_reg->value_.n;
 }
 {
-const TValue *src_reg = cl->upvals[7]->v;
-TValue *dst_reg = R(17);
-dst_reg->tt_ = src_reg->tt_;
-dst_reg->value_.n = src_reg->value_.n;
-}
-{
- TValue *ra = R(17);
+ TValue *ra = R(18);
  int result = luaD_precall(L, ra, 1, 1);
  if (result) {
   if (result == 1 && 1 >= 0)
@@ -7472,14 +9278,14 @@ dst_reg->value_.n = src_reg->value_.n;
  base = ci->u.l.base;
 }
 {
- TValue *ra = R(17);
+ TValue *ra = R(18);
  if (!ttisfarray(ra)) {
   error_code = 3;
   goto Lraise_error;
  }
 }
 {
-const TValue *src_reg = R(17);
+const TValue *src_reg = R(18);
 TValue *dst_reg = R(6);
 dst_reg->tt_ = src_reg->tt_;
 dst_reg->value_.n = src_reg->value_.n;
@@ -7503,6 +9309,32 @@ const TValue *src_reg = R(13);
 TValue *dst_reg = R(7);
 dst_reg->tt_ = src_reg->tt_;
 dst_reg->value_.n = src_reg->value_.n;
+}
+ if (stackoverflow(L,3)) { luaD_growstack(L, 3); base = ci->u.l.base; }
+ L->top = R(16) + 2;
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(13);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
 }
 {
  RaviArray *arr = arrvalue(R(4));
@@ -7539,6 +9371,80 @@ dst_reg->value_.n = src_reg->value_.n;
  raviH_set_float(L, arr, ukey, f_4);
 }
 }
+{
+ RaviArray *arr = arrvalue(R(6));
+ lua_Unsigned ukey = (lua_Unsigned) ivalue(R(3));
+ lua_Number *iptr = (lua_Number *)arr->data;
+ f_4 = iptr[ukey];
+}
+ if (stackoverflow(L,11)) { luaD_growstack(L, 11); base = ci->u.l.base; }
+ L->top = R(16) + 10;
+{
+TValue *dst_reg = R(25);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(24);
+setfltvalue(dst_reg, f_4);
+}
+{
+TValue *dst_reg = R(23);
+TValue *src_reg = K(17);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(3);
+TValue *dst_reg = R(22);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+TValue *dst_reg = R(21);
+TValue *src_reg = K(16);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(3);
+TValue *dst_reg = R(20);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(15);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = R(3);
+TValue *dst_reg = R(18);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(14);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 { i_3 = ivalue(R(3)) - 1; }
 i_9 = i_3;
 i_10 = 1;
@@ -7553,21 +9459,30 @@ L25:
 { i_9 = i_9 + i_12; }
 { if (i_7 != 0) goto L26; else goto L27; }
 L26:
-{ i_16 = i_10 < i_9; }
-{ if (i_16 != 0) goto L29; else goto L28; }
+{ i_18 = i_10 < i_9; }
+{ if (i_18 != 0) goto L29; else goto L28; }
 L27:
-{ i_16 = i_9 < i_10; }
-{ if (i_16 != 0) goto L29; else goto L28; }
+{ i_18 = i_9 < i_10; }
+{ if (i_18 != 0) goto L29; else goto L28; }
 L28:
 i_6 = i_9;
-{ i_19 = i_6 + 1; }
-i_20 = i_19;
+{
+ TValue *rb = &ival0; ival0.value_.i = 0;
+ lua_Number n = 0.0;
+ if (!tonumberns(rb, n)) {
+  error_code = 1;
+  goto Lraise_error;
+ }
+ f_4 = n;
+}
+{ i_21 = i_6 + 1; }
+i_22 = i_21;
 {
 TValue *reg = R(3);
-i_15 = ivalue(reg);
+i_17 = ivalue(reg);
 }
-i_24 = 1;
-{ i_20 = i_20 - i_24; }
+i_26 = 1;
+{ i_22 = i_22 - i_26; }
 goto L30;
 L29:
 {
@@ -7594,16 +9509,16 @@ dst_reg->value_.n = src_reg->value_.n;
 }
 goto L1;
 L30:
-{ i_20 = i_20 + i_24; }
+{ i_22 = i_22 + i_26; }
 goto L31;
 L31:
-{ i_25 = i_15 < i_20; }
-{ if (i_25 != 0) goto L33; else goto L32; }
+{ i_27 = i_17 < i_22; }
+{ if (i_27 != 0) goto L33; else goto L32; }
 L32:
-i_18 = i_20;
+i_20 = i_22;
 {
  TValue *tab = R(5);
- TValue *key = &ival0; ival0.value_.i = i_18;
+ TValue *key = &ival0; ival0.value_.i = i_20;
  TValue *dst = R(13);
  raviV_gettable_i(L, tab, key, dst);
  base = ci->u.l.base;
@@ -7625,17 +9540,17 @@ dst_reg->value_.n = src_reg->value_.n;
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_6;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_26 = iptr[ukey];
+ i_28 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(7));
- lua_Unsigned ukey = (lua_Unsigned) i_26;
+ lua_Unsigned ukey = (lua_Unsigned) i_28;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_0 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(6));
- lua_Unsigned ukey = (lua_Unsigned) i_18;
+ lua_Unsigned ukey = (lua_Unsigned) i_20;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_3 = iptr[ukey];
 }
@@ -7644,6 +9559,41 @@ dst_reg->value_.n = src_reg->value_.n;
 f_4 = f_3;
 goto L34;
 L33:
+ if (stackoverflow(L,5)) { luaD_growstack(L, 5); base = ci->u.l.base; }
+ L->top = R(16) + 4;
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(18);
+setfltvalue(dst_reg, f_4);
+}
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(18);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 {
  TValue *tab = R(5);
  TValue *key = &ival0; ival0.value_.i = i_6;
@@ -7668,11 +9618,11 @@ dst_reg->value_.n = src_reg->value_.n;
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_6;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_20 = iptr[ukey];
+ i_22 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(1));
- lua_Unsigned ukey = (lua_Unsigned) i_20;
+ lua_Unsigned ukey = (lua_Unsigned) i_22;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_1 = iptr[ukey];
 }
@@ -7681,11 +9631,11 @@ dst_reg->value_.n = src_reg->value_.n;
  RaviArray *arr = arrvalue(R(4));
  lua_Unsigned ukey = (lua_Unsigned) i_6;
  lua_Integer *iptr = (lua_Integer *)arr->data;
- i_15 = iptr[ukey];
+ i_17 = iptr[ukey];
 }
 {
  RaviArray *arr = arrvalue(R(7));
- lua_Unsigned ukey = (lua_Unsigned) i_15;
+ lua_Unsigned ukey = (lua_Unsigned) i_17;
  lua_Number *iptr = (lua_Number *)arr->data;
  f_1 = iptr[ukey];
 }
@@ -7700,14 +9650,203 @@ dst_reg->value_.n = src_reg->value_.n;
  raviH_set_float(L, arr, ukey, f_2);
 }
 }
+{
+ RaviArray *arr = arrvalue(R(6));
+ lua_Unsigned ukey = (lua_Unsigned) i_6;
+ lua_Number *iptr = (lua_Number *)arr->data;
+ f_2 = iptr[ukey];
+}
+ if (stackoverflow(L,13)) { luaD_growstack(L, 13); base = ci->u.l.base; }
+ L->top = R(16) + 12;
+{
+TValue *dst_reg = R(27);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(26);
+setfltvalue(dst_reg, f_2);
+}
+{
+TValue *dst_reg = R(25);
+TValue *src_reg = K(17);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(24);
+setivalue(dst_reg, i_6);
+}
+{
+TValue *dst_reg = R(23);
+TValue *src_reg = K(21);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(22);
+setivalue(dst_reg, i_6);
+}
+{
+TValue *dst_reg = R(21);
+TValue *src_reg = K(25);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(20);
+setivalue(dst_reg, i_6);
+}
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(24);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(18);
+setivalue(dst_reg, i_6);
+}
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(14);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 goto L25;
 L34:
-{ i_27 = i_6 + 1; }
-{ i_28 = i_18 == i_27; }
-{ if (i_28 != 0) goto L35; else goto L36; }
+{ i_29 = i_6 + 1; }
+{ i_30 = i_20 == i_29; }
+{ if (i_30 != 0) goto L35; else goto L36; }
 L35:
-goto L36;
+ if (stackoverflow(L,3)) { luaD_growstack(L, 3); base = ci->u.l.base; }
+ L->top = R(16) + 2;
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(18);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
+goto L37;
 L36:
+ if (stackoverflow(L,3)) { luaD_growstack(L, 3); base = ci->u.l.base; }
+ L->top = R(16) + 2;
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(19);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
+goto L37;
+L37:
+ if (stackoverflow(L,10)) { luaD_growstack(L, 10); base = ci->u.l.base; }
+ L->top = R(16) + 9;
+{
+TValue *dst_reg = R(24);
+TValue *src_reg = K(4);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(23);
+TValue *src_reg = K(23);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(22);
+setivalue(dst_reg, i_20);
+}
+{
+TValue *dst_reg = R(21);
+TValue *src_reg = K(22);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(20);
+setivalue(dst_reg, i_20);
+}
+{
+TValue *dst_reg = R(19);
+TValue *src_reg = K(21);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+TValue *dst_reg = R(18);
+setivalue(dst_reg, i_6);
+}
+{
+TValue *dst_reg = R(17);
+TValue *src_reg = K(20);
+dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;
+}
+{
+const TValue *src_reg = cl->upvals[6]->v;
+TValue *dst_reg = R(16);
+dst_reg->tt_ = src_reg->tt_;
+dst_reg->value_.n = src_reg->value_.n;
+}
+{
+ TValue *ra = R(16);
+ int result = luaD_precall(L, ra, 1, 1);
+ if (result) {
+  if (result == 1 && 1 >= 0)
+   L->top = ci->top;
+ }
+ else {  /* Lua function */
+  result = luaV_execute(L);
+  if (result) L->top = ci->top;
+ }
+ base = ci->u.l.base;
+}
 goto L30;
 }
 EXPORT LClosure *mymain(lua_State *L) {
@@ -7797,25 +9936,42 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->numparams = 4;
  f->is_vararg = 0;
  f->maxstacksize = 8;
- f->k = luaM_newvector(L, 2, TValue);
- f->sizek = 2;
- for (int i = 0; i < 2; i++)
+ f->k = luaM_newvector(L, 5, TValue);
+ f->sizek = 5;
+ for (int i = 0; i < 5; i++)
   setnilvalue(&f->k[i]);
+ {
+  TValue *o = &f->k[4];
+  setsvalue2n(L, o, luaS_newlstr(L, "\n", 2));
+ }
  {
   TValue *o = &f->k[1];
   setsvalue2n(L, o, luaS_newlstr(L, "no unique solution exists", 25));
  }
  {
+  TValue *o = &f->k[3];
+  setsvalue2n(L, o, luaS_newlstr(L, " will be swapped with ", 22));
+ }
+ {
   TValue *o = &f->k[0];
   setsvalue2n(L, o, luaS_newlstr(L, "error", 5));
  }
- f->upvalues = luaM_newvector(L, 1, Upvaldesc);
- f->sizeupvalues = 1;
+ {
+  TValue *o = &f->k[2];
+  setsvalue2n(L, o, luaS_newlstr(L, "Performing row interchange ", 27));
+ }
+ f->upvalues = luaM_newvector(L, 2, Upvaldesc);
+ f->sizeupvalues = 2;
  f->upvalues[0].instack = 0;
  f->upvalues[0].idx = 0;
  f->upvalues[0].name = NULL; // _ENV
  f->upvalues[0].usertype = NULL;
  f->upvalues[0].ravi_type = 128;
+ f->upvalues[1].instack = 1;
+ f->upvalues[1].idx = 4;
+ f->upvalues[1].name = NULL; // write
+ f->upvalues[1].usertype = NULL;
+ f->upvalues[1].ravi_type = -1;
  f = parent;
 }
  f->p[2] = luaF_newproto(L);
@@ -7825,13 +9981,26 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->ravi_jit.jit_status = RAVI_JIT_COMPILED;
  f->numparams = 4;
  f->is_vararg = 0;
- f->maxstacksize = 4;
- f->k = luaM_newvector(L, 0, TValue);
- f->sizek = 0;
- for (int i = 0; i < 0; i++)
+ f->maxstacksize = 6;
+ f->k = luaM_newvector(L, 2, TValue);
+ f->sizek = 2;
+ for (int i = 0; i < 2; i++)
   setnilvalue(&f->k[i]);
- f->upvalues = luaM_newvector(L, 0, Upvaldesc);
- f->sizeupvalues = 0;
+ {
+  TValue *o = &f->k[0];
+  setsvalue2n(L, o, luaS_newlstr(L, " ", 1));
+ }
+ {
+  TValue *o = &f->k[1];
+  setsvalue2n(L, o, luaS_newlstr(L, "\n", 2));
+ }
+ f->upvalues = luaM_newvector(L, 1, Upvaldesc);
+ f->sizeupvalues = 1;
+ f->upvalues[0].instack = 1;
+ f->upvalues[0].idx = 4;
+ f->upvalues[0].name = NULL; // write
+ f->upvalues[0].usertype = NULL;
+ f->upvalues[0].ravi_type = -1;
  f = parent;
 }
  f->p[3] = luaF_newproto(L);
@@ -7842,20 +10011,116 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->numparams = 4;
  f->is_vararg = 0;
  f->maxstacksize = 14;
- f->k = luaM_newvector(L, 2, TValue);
- f->sizek = 2;
- for (int i = 0; i < 2; i++)
+ f->k = luaM_newvector(L, 26, TValue);
+ f->sizek = 26;
+ for (int i = 0; i < 26; i++)
   setnilvalue(&f->k[i]);
  {
+  TValue *o = &f->k[10];
+  setsvalue2n(L, o, luaS_newlstr(L, "Post elimination column ", 24));
+ }
+ {
+  TValue *o = &f->k[13];
+  setsvalue2n(L, o, luaS_newlstr(L, "Performing back substitution\n", 30));
+ }
+ {
+  TValue *o = &f->k[5];
+  setsvalue2n(L, o, luaS_newlstr(L, "Performing R(", 13));
+ }
+ {
+  TValue *o = &f->k[4];
+  setsvalue2n(L, o, luaS_newlstr(L, "\n", 2));
+ }
+ {
+  TValue *o = &f->k[8];
+  setsvalue2n(L, o, luaS_newlstr(L, ") * R(", 6));
+ }
+ {
   TValue *o = &f->k[1];
-  setsvalue2n(L, o, luaS_newlstr(L, "no unique solution exists", 25));
+  setsvalue2n(L, o, luaS_newlstr(L, ",", 1));
+ }
+ {
+  TValue *o = &f->k[18];
+  setsvalue2n(L, o, luaS_newlstr(L, "sum = ", 6));
  }
  {
   TValue *o = &f->k[0];
+  setsvalue2n(L, o, luaS_newlstr(L, "m(", 2));
+ }
+ {
+  TValue *o = &f->k[2];
+  setsvalue2n(L, o, luaS_newlstr(L, ") = ", 4));
+ }
+ {
+  TValue *o = &f->k[3];
+  setsvalue2n(L, o, luaS_newlstr(L, " / ", 3));
+ }
+ {
+  TValue *o = &f->k[16];
+  setsvalue2n(L, o, luaS_newlstr(L, "] / a[", 6));
+ }
+ {
+  TValue *o = &f->k[6];
+  setsvalue2n(L, o, luaS_newlstr(L, ") = R(", 6));
+ }
+ {
+  TValue *o = &f->k[23];
+  setsvalue2n(L, o, luaS_newlstr(L, "]", 1));
+ }
+ {
+  TValue *o = &f->k[15];
+  setsvalue2n(L, o, luaS_newlstr(L, "] = b[", 6));
+ }
+ {
+  TValue *o = &f->k[19];
+  setsvalue2n(L, o, luaS_newlstr(L, "sum = sum + ", 12));
+ }
+ {
+  TValue *o = &f->k[14];
+  setsvalue2n(L, o, luaS_newlstr(L, "x[", 2));
+ }
+ {
+  TValue *o = &f->k[12];
+  setsvalue2n(L, o, luaS_newlstr(L, "no unique solution exists", 25));
+ }
+ {
+  TValue *o = &f->k[7];
+  setsvalue2n(L, o, luaS_newlstr(L, ") - m(", 6));
+ }
+ {
+  TValue *o = &f->k[21];
+  setsvalue2n(L, o, luaS_newlstr(L, ", ", 2));
+ }
+ {
+  TValue *o = &f->k[9];
+  setsvalue2n(L, o, luaS_newlstr(L, ")\n", 3));
+ }
+ {
+  TValue *o = &f->k[25];
+  setsvalue2n(L, o, luaS_newlstr(L, "] - sum) / a[", 13));
+ }
+ {
+  TValue *o = &f->k[17];
+  setsvalue2n(L, o, luaS_newlstr(L, "] = ", 4));
+ }
+ {
+  TValue *o = &f->k[22];
+  setsvalue2n(L, o, luaS_newlstr(L, "] * x[", 6));
+ }
+ {
+  TValue *o = &f->k[24];
+  setsvalue2n(L, o, luaS_newlstr(L, "] = (b[", 7));
+ }
+ {
+  TValue *o = &f->k[11];
   setsvalue2n(L, o, luaS_newlstr(L, "error", 5));
  }
- f->upvalues = luaM_newvector(L, 8, Upvaldesc);
- f->sizeupvalues = 8;
+ {
+  TValue *o = &f->k[20];
+  setsvalue2n(L, o, luaS_newlstr(L, "a[", 2));
+ }
+ f->upvalues = luaM_newvector(L, 9, Upvaldesc);
+ f->sizeupvalues = 9;
  f->upvalues[0].instack = 1;
  f->upvalues[0].idx = 5;
  f->upvalues[0].name = NULL; // copy
@@ -7886,16 +10151,21 @@ EXPORT LClosure *mymain(lua_State *L) {
  f->upvalues[5].name = NULL; // dump_matrix
  f->upvalues[5].usertype = NULL;
  f->upvalues[5].ravi_type = 513;
- f->upvalues[6].instack = 0;
- f->upvalues[6].idx = 0;
- f->upvalues[6].name = NULL; // _ENV
+ f->upvalues[6].instack = 1;
+ f->upvalues[6].idx = 4;
+ f->upvalues[6].name = NULL; // write
  f->upvalues[6].usertype = NULL;
- f->upvalues[6].ravi_type = 128;
- f->upvalues[7].instack = 1;
- f->upvalues[7].idx = 2;
- f->upvalues[7].name = NULL; // numarray
+ f->upvalues[6].ravi_type = -1;
+ f->upvalues[7].instack = 0;
+ f->upvalues[7].idx = 0;
+ f->upvalues[7].name = NULL; // _ENV
  f->upvalues[7].usertype = NULL;
- f->upvalues[7].ravi_type = -1;
+ f->upvalues[7].ravi_type = 128;
+ f->upvalues[8].instack = 1;
+ f->upvalues[8].idx = 2;
+ f->upvalues[8].name = NULL; // numarray
+ f->upvalues[8].usertype = NULL;
+ f->upvalues[8].ravi_type = -1;
  f = parent;
 }
  return cl;
