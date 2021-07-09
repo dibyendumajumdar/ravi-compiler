@@ -827,6 +827,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(x, 0)}
 	MOV {12 Kint(0)} {local(y, 1)}
 	BR {L2}
 L1 (exit)
@@ -850,6 +851,7 @@ L6
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(x, 0)}</TD></TR>
 <TR><TD>MOV {12 Kint(0)} {local(y, 1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
@@ -1433,6 +1435,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(b, 0)}
 	CLOSURE {Proc%2} {T(0)}
 	MOV {T(0)} {local(z, 1)}
 	CLOSE {local(b, 0)}
@@ -1440,6 +1443,12 @@ L0 (entry)
 L1 (exit)
 define Proc%2
 L0 (entry)
+	INIT {local(x, 7)}
+	INIT {local(y, 8)}
+	INIT {local(a, 2)}
+	INIT {local(x, 3)}
+	INIT {local(c, 4)}
+	INIT {local(y, 5)}
 	CLOSURE {Proc%3} {T(0)}
 	MOV {T(0)} {local(t, 6)}
 	CLOSE {local(a, 2)}
@@ -1462,6 +1471,7 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(b, 0)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(z, 1)}</TD></TR>
 <TR><TD>CLOSE {local(b, 0)}</TD></TR>
@@ -1471,6 +1481,12 @@ L0 -> L1
 digraph Proc2 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(x, 7)}</TD></TR>
+<TR><TD>INIT {local(y, 8)}</TD></TR>
+<TR><TD>INIT {local(a, 2)}</TD></TR>
+<TR><TD>INIT {local(x, 3)}</TD></TR>
+<TR><TD>INIT {local(c, 4)}</TD></TR>
+<TR><TD>INIT {local(y, 5)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(t, 6)}</TD></TR>
 <TR><TD>CLOSE {local(a, 2)}</TD></TR>
@@ -1539,6 +1555,12 @@ L0 -> L1
 digraph Proc2 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(x, 7)}</TD></TR>
+<TR><TD>INIT {local(y, 8)}</TD></TR>
+<TR><TD>INIT {local(a, 2)}</TD></TR>
+<TR><TD>INIT {local(x, 3)}</TD></TR>
+<TR><TD>INIT {local(c, 4)}</TD></TR>
+<TR><TD>INIT {local(y, 5)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(t, 6)}</TD></TR>
 <TR><TD>CLOSE {local(a, 2)}</TD></TR>

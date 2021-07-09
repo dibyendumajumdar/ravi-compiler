@@ -261,12 +261,14 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {Tint(0)}
 	ADDii {Tint(0), 3 Kint(0)} {Tint(1)}
 	RET {Tint(1)} {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
 <TR><TD>ADDii {Tint(0), 3 Kint(0)} {Tint(1)}</TD></TR>
 <TR><TD>RET {Tint(1)} {L1}</TD></TR>
 </TABLE>>];
@@ -332,6 +334,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {Tint(0)}
 	LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}
 	DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}
 	GET {T(0), Tflt(0)} {T(1)}
@@ -340,6 +343,7 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}</TD></TR>
 <TR><TD>GET {T(0), Tflt(0)} {T(1)}</TD></TR>
@@ -391,12 +395,14 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(t, 0)}
 	IAGETik {local(t, 0), 0 Kint(0)} {Tint(0)}
 	RET {Tint(0)} {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(t, 0)}</TD></TR>
 <TR><TD>IAGETik {local(t, 0), 0 Kint(0)} {Tint(0)}</TD></TR>
 <TR><TD>RET {Tint(0)} {L1}</TD></TR>
 </TABLE>>];
@@ -456,6 +462,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(t, 0)}
 	LEN {local(t, 0)} {T(0)}
 	TOINT {T(0)}
 	MOVi {T(0)} {Tint(0)}
@@ -464,6 +471,7 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(t, 0)}</TD></TR>
 <TR><TD>LEN {local(t, 0)} {T(0)}</TD></TR>
 <TR><TD>TOINT {T(0)}</TD></TR>
 <TR><TD>MOVi {T(0)} {Tint(0)}</TD></TR>
@@ -720,6 +728,7 @@ L4
 	BR {L5}
 L5
 	PUTik {T(3)} {T(0), 2 Kint(1)}
+	INIT {local(_g, 0)}
 	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}
 	CALL {T(3)} {T(3), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}
@@ -774,6 +783,7 @@ L4 -> L5
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
 <TR><TD>PUTik {T(3)} {T(0), 2 Kint(1)}</TD></TR>
+<TR><TD>INIT {local(_g, 0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}</TD></TR>
 <TR><TD>CALL {T(3)} {T(3), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}</TD></TR>

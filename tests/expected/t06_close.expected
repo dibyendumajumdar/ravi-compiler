@@ -100,6 +100,8 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(z, 0)}
+	INIT {local(a, 1)}
 	CLOSURE {Proc%2} {T(0)}
 	CALL {T(0)} {T(0..), 1 Kint(0)}
 	CLOSE {local(a, 1)}
@@ -113,6 +115,8 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(z, 0)}</TD></TR>
+<TR><TD>INIT {local(a, 1)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>CLOSE {local(a, 1)}</TD></TR>

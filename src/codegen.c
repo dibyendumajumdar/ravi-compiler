@@ -2356,6 +2356,7 @@ static int emit_op_init(struct function *fn, Instruction *insn)
 		src.constant = &zeroi;
 		emit_move(fn, &src, dst);
 	} else if (dst->type == PSEUDO_TEMP_ANY || dst->type == PSEUDO_SYMBOL || dst->type == PSEUDO_LUASTACK) {
+		// FIXME we need to check for initialization of integer[], number[] or table
 		emit_move(fn, &src, dst);
 	} else {
 		assert(0);

@@ -5599,6 +5599,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {Tint(0)}
 	ADDii {Tint(0), 3 Kint(0)} {Tint(1)}
 	RET {Tint(1)} {L1}
 L1 (exit)
@@ -5661,6 +5662,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {Tint(0)}
 	LOADGLOBAL {Upval(_ENV), 't' Ks(0)} {T(0)}
 	DIVii {Tint(0), 5 Kint(0)} {Tflt(0)}
 	GET {T(0), Tflt(0)} {T(1)}
@@ -5709,6 +5711,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(t, 0)}
 	IAGETik {local(t, 0), 0 Kint(0)} {Tint(0)}
 	RET {Tint(0)} {L1}
 L1 (exit)
@@ -5879,6 +5882,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(t, 0)}
 	BR {L2}
 L1 (exit)
 L2
@@ -5942,6 +5946,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(t, 0)}
 	LEN {local(t, 0)} {T(0)}
 	TOINT {T(0)}
 	MOVi {T(0)} {Tint(0)}
@@ -7137,6 +7142,7 @@ L0 (entry)
 L1 (exit)
 define Proc%2
 L0 (entry)
+	INIT {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(1)}
 	MOV {500 Kint(1)} {Tint(2)}
 	MOV {1 Kint(0)} {Tint(3)}
@@ -8806,6 +8812,7 @@ function()
 end
 define Proc%1
 L0 (entry)
+	INIT {local(x, 0)}
 	MOV {12 Kint(0)} {local(y, 1)}
 	BR {L2}
 L1 (exit)
@@ -9792,6 +9799,7 @@ L4
 	BR {L5}
 L5
 	PUTik {T(3)} {T(0), 2 Kint(1)}
+	INIT {local(_g, 0)}
 	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(3)}
 	CALL {T(3)} {T(3), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}
