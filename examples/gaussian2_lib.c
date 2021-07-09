@@ -121,7 +121,7 @@ local function gaussian_solve(A: number[], b: number[], m: integer, n: integer)
   x[n] = b[nrow[n]] / a[nrow[n]]
   write('x[', n, '] = b[', n, '] / a[', n, '] = ', x[n], "\\n")
   for i = n-1,1,-1 do
-    local sum: number = 0
+    local sum: number
     for j = i+1, n do
       a = @number[]( columns[j] )
       sum = sum + a[nrow[i]] * x[j]
@@ -2051,8 +2051,6 @@ function()
          local
          --[symbols]
            sum --local symbol number 
-         --[expressions]
-           0
          for
          --[local symbols] j
            j --local symbol any 
@@ -4417,8 +4415,6 @@ function()
          local
          --[symbols]
            sum --local symbol number 
-         --[expressions]
-           0
          for
          --[local symbols] j
            j --local symbol integer 
@@ -5262,7 +5258,7 @@ L27
 	CBR {Tbool(18)} {L29, L28}
 L28
 	MOV {Tint(9)} {Tint(6)}
-	MOVif {0 Kint(1)} {Tflt(4)}
+	INIT {Tflt(4)}
 	ADDii {Tint(6), 1 Kint(0)} {Tint(21)}
 	MOV {Tint(21)} {Tint(22)}
 	MOV {local(n, 3)} {Tint(17)}
@@ -5902,7 +5898,7 @@ L27 -> L28
 L28 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L28</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(6)}</TD></TR>
-<TR><TD>MOVif {0 Kint(1)} {Tflt(4)}</TD></TR>
+<TR><TD>INIT {Tflt(4)}</TD></TR>
 <TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(21)}</TD></TR>
 <TR><TD>MOV {Tint(21)} {Tint(22)}</TD></TR>
 <TR><TD>MOV {local(n, 3)} {Tint(17)}</TD></TR>
@@ -6544,7 +6540,7 @@ L27 -> L28
 L28 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L28</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(6)}</TD></TR>
-<TR><TD>MOVif {0 Kint(1)} {Tflt(4)}</TD></TR>
+<TR><TD>INIT {Tflt(4)}</TD></TR>
 <TR><TD>ADDii {Tint(6), 1 Kint(0)} {Tint(21)}</TD></TR>
 <TR><TD>MOV {Tint(21)} {Tint(22)}</TD></TR>
 <TR><TD>MOV {local(n, 3)} {Tint(17)}</TD></TR>
@@ -9466,15 +9462,7 @@ L27:
 { if (i_18 != 0) goto L29; else goto L28; }
 L28:
 i_6 = i_9;
-{
- TValue *rb = &ival0; ival0.value_.i = 0;
- lua_Number n = 0.0;
- if (!tonumberns(rb, n)) {
-  error_code = 1;
-  goto Lraise_error;
- }
- f_4 = n;
-}
+f_4 = (lua_Number)0;
 { i_21 = i_6 + 1; }
 i_22 = i_21;
 {
