@@ -31,6 +31,7 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include <setjmp.h>
 
 /*
  * Only 64-bits supported right now
@@ -688,7 +689,9 @@ struct function {
 	Proc *proc;
 	TextBuffer prologue;
 	TextBuffer body;
+	TextBuffer tb; // Temp buf
 	struct Ravi_CompilerInterface *api;
+	jmp_buf env;
 };
 
 /* readonly statics */
@@ -804,6 +807,7 @@ static void initfn(struct function *fn, Proc *proc, struct Ravi_CompilerInterfac
 	snprintf(proc->funcname, sizeof proc->funcname, "__ravifunc_%d", proc->id);
 	raviX_buffer_init(&fn->prologue, 4096);
 	raviX_buffer_init(&fn->body, 4096);
+	raviX_buffer_init(&fn->tb, 256);
 	raviX_buffer_add_fstring(&fn->prologue, "static int %s(lua_State *L) {\n", proc->funcname);
 	raviX_buffer_add_string(&fn->prologue, "int error_code = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "int result = 0;\n");
@@ -832,6 +836,7 @@ static void cleanup(struct function *fn)
 {
 	raviX_buffer_free(&fn->prologue);
 	raviX_buffer_free(&fn->body);
+	raviX_buffer_free(&fn->tb);
 }
 
 /* Outputs an l-value/r-value variable name for a primitive C int / float type */
@@ -2748,23 +2753,25 @@ static int generate_lua_closure(Proc *proc, const char *funcname, TextBuffer *mb
 static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, Proc *proc, TextBuffer *mb)
 {
 	int rc = 0;
-	struct function fn;
+	{
+		struct function fn;
+		initfn(&fn, proc, ravi_interface);
+		rc = setjmp(fn.env);
+		if (rc == 0) {
+			BasicBlock *bb;
+			for (int i = 0; i < (int)proc->node_count; i++) {
+				bb = proc->nodes[i];
+				rc = output_basic_block(&fn, bb);
+				if (rc != 0)
+					break;
+			}
 
-	initfn(&fn, proc, ravi_interface);
-
-	BasicBlock *bb;
-	for (int i = 0; i < (int)proc->node_count; i++) {
-		bb = proc->nodes[i];
-		rc = output_basic_block(&fn, bb);
-		if (rc != 0)
-			break;
+			raviX_buffer_add_string(&fn.body, "}\n");
+			raviX_buffer_add_string(mb, fn.prologue.buf);
+			raviX_buffer_add_string(mb, fn.body.buf);
+		}
+		cleanup(&fn);
 	}
-
-	raviX_buffer_add_string(&fn.body, "}\n");
-	raviX_buffer_add_string(mb, fn.prologue.buf);
-	raviX_buffer_add_string(mb, fn.body.buf);
-	cleanup(&fn);
-
 	if (rc != 0)
 		return rc;
 
