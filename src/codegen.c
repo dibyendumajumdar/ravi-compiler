@@ -777,6 +777,7 @@ static inline unsigned get_num_childprocs(Proc *proc) { return raviX_ptrlist_siz
 
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
+ * All are initialized to 0.
  */
 static void emit_vars(const char *type, const char *prefix, PseudoGenerator *gen, TextBuffer *mb)
 {
@@ -794,6 +795,7 @@ static void emit_vars(const char *type, const char *prefix, PseudoGenerator *gen
 	raviX_buffer_add_string(mb, " = 0;\n");
 }
 
+/* Outputs an l-value/r-value variable name for a primitive C int / float type */
 static void emit_varname(const Pseudo *pseudo, TextBuffer *mb)
 {
 	if (pseudo->type == PSEUDO_TEMP_INT || pseudo->type == PSEUDO_TEMP_BOOL) {
@@ -1476,7 +1478,8 @@ static int emit_op_concat(struct function *fn, Instruction *insn) {
 }
 
 /*
- * Output a C stack variable representing int/float value or constant
+ * Outputs an r-value for a C stack variable representing int/float value or constant
+ * or the int/float value from a symbol.
  */
 static void emit_varname_or_constant(struct function *fn, Pseudo *pseudo)
 {
