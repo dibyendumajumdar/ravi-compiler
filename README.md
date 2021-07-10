@@ -43,6 +43,7 @@ For now you can look at following:
 * [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h) - only the lexer and parser API are public for now
 * [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests)
 * [Example Ravi Tests](https://github.com/dibyendumajumdar/ravi/tree/master/tests/comptests)
+* [AOT Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/examples)
 * [CFG Examples](https://github.com/dibyendumajumdar/ravi-compiler/tree/master/docs/cfg)
 * See the [Wiki](https://github.com/dibyendumajumdar/ravi-compiler/wiki) for various notes
 
