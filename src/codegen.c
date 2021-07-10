@@ -894,7 +894,14 @@ Outputs accessor for a pseudo so that the accessor is always of type
 TValue *. Thus for constants, we need to use a temp stack variable of type TValue.
 The issue is what happens if we need two values at the same time and both are constants
 of the same type. This is where the discriminator comes in - to help differentiate.
-The discriminator must be 0,1 or 2 (see initfn())
+The discriminator must be 0,1 or 2 (see initfn()).
+
+Note that for PSEUDO_TEMP_FLT, PSEUDO_TEMP_INT, PSEUDO_TRUE, PSEUDO_FALSE, PSEUDO_TEMP_BOOL
+we use stack allocated TValues - and the way this is set only works when used as in RHS
+of an assignment statement. Code is generated in this form:
+
+... &var; var.field = value
+
 */
 static int emit_reg_accessor(struct function *fn, const Pseudo *pseudo, unsigned discriminator)
 {
