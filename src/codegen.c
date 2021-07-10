@@ -2370,12 +2370,12 @@ static int emit_op_init(struct function *fn, Instruction *insn)
 	Pseudo *dst = get_first_target(insn);
 	Pseudo src = { PSEUDO_NIL };
 	if (dst->type == PSEUDO_TEMP_FLT) {
-		Constant zerof = { RAVI_TNUMINT, 0, { 0.0 }};
+		Constant zerof = { .type = RAVI_TNUMINT, .index = 0, .n = 0.0 };
 		src.type = PSEUDO_CONSTANT;
 		src.constant = &zerof;
 		emit_move(fn, &src, dst);
 	} else if (dst->type == PSEUDO_TEMP_INT || dst->type == PSEUDO_TEMP_BOOL) {
-		Constant zeroi = { RAVI_TNUMINT, 0, { 0 }};
+		Constant zeroi = { .type = RAVI_TNUMINT, .index = 0, .i = 0 };
 		src.type = PSEUDO_CONSTANT;
 		src.constant = &zeroi;
 		emit_move(fn, &src, dst);
