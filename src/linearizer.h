@@ -278,8 +278,12 @@ struct LinearizerState {
 	uint32_t proc_id;
 };
 
+// Output the entire IR in textual form.
 void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
-void raviX_output_instruction(Instruction *insn, TextBuffer *mb);
+// Output an instruction's textual representation to buffer
+void raviX_output_instruction(Instruction *insn, TextBuffer *buffer);
+// Specialized output format that is similar to HTML Table but is
+// designed primarily for graphwiz dot format
 void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *mb);
 
 Instruction *raviX_last_instruction(BasicBlock *block);
