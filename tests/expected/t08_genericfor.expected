@@ -166,22 +166,23 @@ L1 (exit)
 L2
 	CBR {true} {L3, L4}
 L3
-	CALL {local((for_f), 0), local((for_s), 1), local((for_var), 2)} {T(0..), 2 Kint(1)}
-	MOV {T(0[0..])} {local(k, 3)}
-	MOV {T(1[0..])} {local(v, 4)}
+	MOV {local((for_f), 0)} {T(1)}
+	CALL {T(1), local((for_s), 1), local((for_var), 2)} {T(1..), 2 Kint(1)}
+	MOV {T(1[1..])} {local(k, 3)}
+	MOV {T(2[1..])} {local(v, 4)}
 	BR {L5}
 L4
 	RET {L1}
 L5
-	EQ {local(k, 3), nil} {T(1)}
-	CBR {T(1)} {L6, L7}
+	EQ {local(k, 3), nil} {T(2)}
+	CBR {T(2)} {L6, L7}
 L6
 	BR {L4}
 L7
-	MOV {local(k, 3)} {T(2)}
-	MOV {T(2)} {local((for_var), 2)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(2)}
-	CALL {T(2), local(k, 3), local(v, 4)} {T(2..), 1 Kint(2)}
+	MOV {local(k, 3)} {T(3)}
+	MOV {T(3)} {local((for_var), 2)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(3)}
+	CALL {T(3), local(k, 3), local(v, 4)} {T(3..), 1 Kint(2)}
 	BR {L2}
 L8
 	BR {L7}
@@ -205,9 +206,10 @@ L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>CALL {local((for_f), 0), local((for_s), 1), local((for_var), 2)} {T(0..), 2 Kint(1)}</TD></TR>
-<TR><TD>MOV {T(0[0..])} {local(k, 3)}</TD></TR>
-<TR><TD>MOV {T(1[0..])} {local(v, 4)}</TD></TR>
+<TR><TD>MOV {local((for_f), 0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local((for_s), 1), local((for_var), 2)} {T(1..), 2 Kint(1)}</TD></TR>
+<TR><TD>MOV {T(1[1..])} {local(k, 3)}</TD></TR>
+<TR><TD>MOV {T(2[1..])} {local(v, 4)}</TD></TR>
 <TR><TD>BR {L5}</TD></TR>
 </TABLE>>];
 L3 -> L5
@@ -218,8 +220,8 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L4 -> L1
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
-<TR><TD>EQ {local(k, 3), nil} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L6, L7}</TD></TR>
+<TR><TD>EQ {local(k, 3), nil} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L6, L7}</TD></TR>
 </TABLE>>];
 L5 -> L6
 L5 -> L7
@@ -230,10 +232,10 @@ L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L6 -> L4
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>MOV {local(k, 3)} {T(2)}</TD></TR>
-<TR><TD>MOV {T(2)} {local((for_var), 2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(k, 3), local(v, 4)} {T(2..), 1 Kint(2)}</TD></TR>
+<TR><TD>MOV {local(k, 3)} {T(3)}</TD></TR>
+<TR><TD>MOV {T(3)} {local((for_var), 2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(3), local(k, 3), local(v, 4)} {T(3..), 1 Kint(2)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L7 -> L2
