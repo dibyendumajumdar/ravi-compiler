@@ -278,8 +278,12 @@ struct LinearizerState {
 	uint32_t proc_id;
 };
 
+// Get string name of an op code
+const char *raviX_opcode_name(unsigned int opcode);
+// Output a pseudo in textual form
+void raviX_output_pseudo(Pseudo *pseudo, TextBuffer *buffer);
 // Output the entire IR in textual form.
-void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *mb);
+void raviX_show_linearizer(LinearizerState *linearizer, TextBuffer *buffer);
 // Output an instruction's textual representation to buffer
 void raviX_output_instruction(Instruction *insn, TextBuffer *buffer);
 // Specialized output format that is similar to HTML Table but is
@@ -287,6 +291,5 @@ void raviX_output_instruction(Instruction *insn, TextBuffer *buffer);
 void raviX_output_basic_block_as_table(Proc *proc, BasicBlock *bb, TextBuffer *mb);
 
 Instruction *raviX_last_instruction(BasicBlock *block);
-const char *raviX_opcode_name(unsigned int opcode);
 
 #endif
