@@ -2392,6 +2392,13 @@ static int emit_op_init(struct function *fn, Instruction *insn)
 static int output_instruction(struct function *fn, Instruction *insn)
 {
 	int rc = 0;
+
+	// Output the IR instruction we are compiling
+	raviX_buffer_reset(&fn->tb);
+	raviX_output_instruction(insn, &fn->tb);
+	raviX_buffer_add_fstring(&fn->body, "// %s\n", fn->tb.buf);
+	raviX_buffer_reset(&fn->tb);
+
 	switch (insn->opcode) {
 	case op_ret:
 		rc = emit_op_ret(fn, insn);
@@ -2514,10 +2521,6 @@ static int output_instruction(struct function *fn, Instruction *insn)
 	case op_unm:
 		rc = emit_op_unm(fn, insn);
 		break;
-
-		// case op_leni:
-
-		// op_string_concat
 
 	case op_eq:
 	case op_lt:
@@ -2646,6 +2649,7 @@ static inline unsigned get_num_upvalues(Proc *proc)
 static void output_string_literal(TextBuffer *mb, const char *s, unsigned int len)
 {
 	// simplistic escaping of chars
+	// FIXME
 	static const char *scapes[] = {
 	    "\\0",  "\\1",  "\\2",  "\\3",  "\\4",  "\\5",  "\\6",  "\\7",  "\\8",  "\\9",  "\\n",
 	    "\\11", "\\12", "\\r",  "\\14", "\\15", "\\16", "\\17", "\\18", "\\19", "\\20", "\\21",
