@@ -30,7 +30,6 @@
 #include "ravi_api.h"
 
 #include <assert.h>
-#include <stddef.h>
 #include <setjmp.h>
 
 /*
@@ -747,11 +746,6 @@ static inline Pseudo *get_first_operand(Instruction *insn)
 	return (Pseudo *)raviX_ptrlist_first((PtrList *)insn->operands);
 }
 
-static inline Pseudo *get_last_operand(Instruction *insn)
-{
-	return (Pseudo *)raviX_ptrlist_last((PtrList *)insn->operands);
-}
-
 static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 {
 	return (Pseudo *)raviX_ptrlist_nth_entry((PtrList *)insn->targets, idx);
@@ -760,11 +754,6 @@ static inline Pseudo *get_target(Instruction *insn, unsigned idx)
 static inline Pseudo *get_first_target(Instruction *insn)
 {
 	return (Pseudo *)raviX_ptrlist_first((PtrList *)insn->targets);
-}
-
-static inline Pseudo *get_last_target(Instruction *insn)
-{
-	return (Pseudo *)raviX_ptrlist_last((PtrList *)insn->targets);
 }
 
 static inline unsigned get_num_operands(Instruction *insn)
