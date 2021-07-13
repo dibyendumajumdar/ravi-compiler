@@ -767,7 +767,6 @@ static inline unsigned get_num_instructions(BasicBlock *bb) { return raviX_ptrli
 
 static inline unsigned get_num_childprocs(Proc *proc) { return raviX_ptrlist_size((const PtrList *)proc->procs); }
 
-
 /**
  * Helper to generate a list of primitive C variables representing temp int/float values.
  * All are initialized to 0.
@@ -966,7 +965,6 @@ static int emit_reg_accessor(Function *fn, const Pseudo *pseudo, unsigned discri
 	return 0;
 }
 
-
 /*
  * Outputs an r-value for a C stack variable representing int/float value or constant
  * or the int/float value from a symbol.
@@ -1006,7 +1004,6 @@ static void emit_varname_or_constant(Function *fn, Pseudo *pseudo)
 		handle_error(fn, "Unexpected pseudo");
 	}
 }
-
 
 // Check if two pseudos point to the same register
 // note we cannot easily check PSEUDO_LUASTACK type because there may
@@ -1048,7 +1045,6 @@ static bool refers_to_same_register(Function *fn, Pseudo *src, Pseudo *dst)
 	}
 	return compute_register_from_base(fn, src) == compute_register_from_base(fn, dst);
 }
-
 
 /*copy floating point value to a temporary float */
 static int emit_move_flttemp(Function *fn, Pseudo *src, Pseudo *dst)
@@ -1493,10 +1489,11 @@ static int emit_op_call(Function *fn, Instruction *insn)
 // After the call we copy the value to the correct place.
 // This may result in extra copies but the cost of string concatenation
 // outweighs this anyway so it doesn't matter much.
-static int emit_op_concat(Function *fn, Instruction *insn) {
+static int emit_op_concat(Function *fn, Instruction *insn)
+{
 	unsigned int n = get_num_operands(insn);
-	raviX_buffer_add_fstring(
-	    &fn->body, " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n, n);
+	raviX_buffer_add_fstring(&fn->body,
+				 " if (stackoverflow(L,%d)) { luaD_growstack(L, %d); base = ci->u.l.base; }\n", n, n);
 	raviX_buffer_add_string(&fn->body, "{\n");
 	// Copy the rest of the args
 	unsigned start_reg = temp_register_stacktop(fn->proc); // this is L->top, when accessed as TEMP_ANY
@@ -1525,7 +1522,6 @@ static int emit_op_concat(Function *fn, Instruction *insn) {
 	raviX_buffer_add_string(&fn->body, "}\n");
 	return 0;
 }
-
 
 static int emit_comp_ii(Function *fn, Instruction *insn)
 {
@@ -2124,8 +2120,7 @@ static int emit_op_not(Function *fn, Instruction *insn)
 		raviX_buffer_add_string(&fn->body, " = (0 == ");
 		emit_varname_or_constant(fn, operand);
 		raviX_buffer_add_string(&fn->body, "); }\n");
-	}
-	else if (target->type == PSEUDO_TEMP_BOOL && operand->type != PSEUDO_TEMP_BOOL) {
+	} else if (target->type == PSEUDO_TEMP_BOOL && operand->type != PSEUDO_TEMP_BOOL) {
 		assert(operand->type != PSEUDO_TEMP_FLT && operand->type != PSEUDO_TEMP_INT);
 		raviX_buffer_add_string(&fn->body, "{\n");
 		raviX_buffer_add_string(&fn->body, " TValue *rb = ");
@@ -2133,8 +2128,7 @@ static int emit_op_not(Function *fn, Instruction *insn)
 		raviX_buffer_add_string(&fn->body, ";\n ");
 		emit_varname(fn, target);
 		raviX_buffer_add_string(&fn->body, " = l_isfalse(rb);\n}\n");
-	}
-	else {
+	} else {
 		raviX_buffer_add_string(&fn->body, "{\n");
 		raviX_buffer_add_string(&fn->body, " TValue *ra = ");
 		emit_reg_accessor(fn, target, 0);
@@ -2215,11 +2209,9 @@ static int emit_op_binary(Function *fn, Instruction *insn)
 		raviX_buffer_add_string(&fn->body, " = ");
 		if (target->type == PSEUDO_TEMP_FLT) {
 			raviX_buffer_add_string(&fn->body, " fltvalue(ra);\n");
-		}
-		else if (target->type == PSEUDO_TEMP_INT) {
+		} else if (target->type == PSEUDO_TEMP_INT) {
 			raviX_buffer_add_string(&fn->body, " ivalue(ra);\n");
-		}
-		else {
+		} else {
 			raviX_buffer_add_string(&fn->body, " bvalue(ra);\n");
 		}
 	}
@@ -2357,14 +2349,14 @@ static int emit_op_movif(Function *fn, Instruction *insn)
 static int emit_op_init(Function *fn, Instruction *insn)
 {
 	Pseudo *dst = get_first_target(insn);
-	Pseudo src = { PSEUDO_NIL };
+	Pseudo src = {PSEUDO_NIL};
 	if (dst->type == PSEUDO_TEMP_FLT) {
-		Constant zerof = { .type = RAVI_TNUMINT, .index = 0, .n = 0.0 };
+		Constant zerof = {.type = RAVI_TNUMINT, .index = 0, .n = 0.0};
 		src.type = PSEUDO_CONSTANT;
 		src.constant = &zerof;
 		emit_move(fn, &src, dst);
 	} else if (dst->type == PSEUDO_TEMP_INT || dst->type == PSEUDO_TEMP_BOOL) {
-		Constant zeroi = { .type = RAVI_TNUMINT, .index = 0, .i = 0 };
+		Constant zeroi = {.type = RAVI_TNUMINT, .index = 0, .i = 0};
 		src.type = PSEUDO_CONSTANT;
 		src.constant = &zeroi;
 		emit_move(fn, &src, dst);
@@ -2682,8 +2674,7 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 			} else {
 				raviX_buffer_add_string(mb, "  setsvalue2n(L, o, luaS_newlstr(L, \"");
 				output_string_literal(mb, constant->s->str, constant->s->len);
-				raviX_buffer_add_fstring(mb, "\", %u));\n",
-							 constant->s->len);
+				raviX_buffer_add_fstring(mb, "\", %u));\n", constant->s->len);
 			}
 			raviX_buffer_add_string(mb, " }\n");
 		}
@@ -2698,7 +2689,8 @@ static int generate_lua_proc(Proc *proc, TextBuffer *mb)
 	{
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].instack = %u;\n", i, sym->upvalue.is_in_parent_stack);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].idx = %u;\n", i, sym->upvalue.parent_upvalue_index);
-		raviX_buffer_add_fstring(mb, " f->upvalues[%u].name = NULL; // %s\n", i, sym->upvalue.target_variable->variable.var_name->str);
+		raviX_buffer_add_fstring(mb, " f->upvalues[%u].name = NULL; // %s\n", i,
+					 sym->upvalue.target_variable->variable.var_name->str);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].usertype = NULL;\n", i);
 		raviX_buffer_add_fstring(mb, " f->upvalues[%u].ravi_type = %d;\n", i,
 					 sym->upvalue.value_type.type_code);
