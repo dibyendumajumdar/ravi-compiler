@@ -1120,61 +1120,61 @@ static int emit_move(Function *fn, Pseudo *src, Pseudo *dst)
 		    src->type == PSEUDO_RANGE_SELECT) {
 			// Only emit a move if we are not referencing the same register
 			if (!refers_to_same_register(fn, src, dst)) {
-				raviX_buffer_add_string(&fn->body, "{\nconst TValue *src_reg = ");
+				raviX_buffer_add_string(&fn->body, "{\n const TValue *src_reg = ");
 				emit_reg_accessor(fn, src, 0);
-				raviX_buffer_add_string(&fn->body, ";\nTValue *dst_reg = ");
+				raviX_buffer_add_string(&fn->body, ";\n TValue *dst_reg = ");
 				emit_reg_accessor(fn, dst, 0);
 				// FIXME - check value assignment approach
 				raviX_buffer_add_string(
 				    &fn->body,
-				    ";\ndst_reg->tt_ = src_reg->tt_;\ndst_reg->value_.n = src_reg->value_.n;\n}\n");
+				    ";\n dst_reg->tt_ = src_reg->tt_;\n dst_reg->value_.n = src_reg->value_.n;\n}\n");
 			}
 		} else if (src->type == PSEUDO_TEMP_INT) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
-			raviX_buffer_add_string(&fn->body, ";\nsetivalue(dst_reg, ");
+			raviX_buffer_add_string(&fn->body, ";\n setivalue(dst_reg, ");
 			emit_varname(fn, src);
 			raviX_buffer_add_string(&fn->body, ");\n}\n");
 		} else if (src->type == PSEUDO_TEMP_FLT) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
-			raviX_buffer_add_string(&fn->body, ";\nsetfltvalue(dst_reg, ");
+			raviX_buffer_add_string(&fn->body, ";\n setfltvalue(dst_reg, ");
 			emit_varname(fn, src);
 			raviX_buffer_add_string(&fn->body, ");\n}\n");
 		} else if (src->type == PSEUDO_TRUE || src->type == PSEUDO_FALSE) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
-			raviX_buffer_add_fstring(&fn->body, ";\nsetbvalue(dst_reg, %d);\n}\n",
+			raviX_buffer_add_fstring(&fn->body, ";\n setbvalue(dst_reg, %d);\n}\n",
 						 src->type == PSEUDO_TRUE ? 1 : 0);
 		} else if (src->type == PSEUDO_TEMP_BOOL) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
-			raviX_buffer_add_string(&fn->body, ";\nsetbvalue(dst_reg, ");
+			raviX_buffer_add_string(&fn->body, ";\n setbvalue(dst_reg, ");
 			emit_varname(fn, src);
 			raviX_buffer_add_string(&fn->body, ");\n}\n");
 		} else if (src->type == PSEUDO_NIL) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
-			raviX_buffer_add_string(&fn->body, ";\nsetnilvalue(dst_reg);\n}\n");
+			raviX_buffer_add_string(&fn->body, ";\n setnilvalue(dst_reg);\n}\n");
 		} else if (src->type == PSEUDO_CONSTANT) {
-			raviX_buffer_add_string(&fn->body, "{\nTValue *dst_reg = ");
+			raviX_buffer_add_string(&fn->body, "{\n TValue *dst_reg = ");
 			emit_reg_accessor(fn, dst, 0);
 			raviX_buffer_add_string(&fn->body, ";\n");
 			if (src->constant->type == RAVI_TNUMINT) {
-				raviX_buffer_add_fstring(&fn->body, "setivalue(dst_reg, %lld);\n", src->constant->i);
+				raviX_buffer_add_fstring(&fn->body, " setivalue(dst_reg, %lld);\n", src->constant->i);
 			} else if (src->constant->type == RAVI_TNUMFLT) {
-				raviX_buffer_add_fstring(&fn->body, "setfltvalue(dst_reg, %g);\n", src->constant->n);
+				raviX_buffer_add_fstring(&fn->body, " setfltvalue(dst_reg, %g);\n", src->constant->n);
 			} else if (src->constant->type == RAVI_TBOOLEAN) {
-				raviX_buffer_add_fstring(&fn->body, "setbvalue(dst_reg, %i);\n", (int)src->constant->i);
+				raviX_buffer_add_fstring(&fn->body, " setbvalue(dst_reg, %i);\n", (int)src->constant->i);
 			} else if (src->constant->type == RAVI_TNIL) {
-				raviX_buffer_add_string(&fn->body, "setnilvalue(dst_reg);\n");
+				raviX_buffer_add_string(&fn->body, " setnilvalue(dst_reg);\n");
 			} else if (src->constant->type == RAVI_TSTRING) {
-				raviX_buffer_add_string(&fn->body, "TValue *src_reg = ");
+				raviX_buffer_add_string(&fn->body, " TValue *src_reg = ");
 				emit_reg_accessor(fn, src, 0);
 				raviX_buffer_add_string(&fn->body, ";\n");
 				raviX_buffer_add_string(
 				    &fn->body,
-				    "dst_reg->tt_ = src_reg->tt_; dst_reg->value_.gc = src_reg->value_.gc;\n");
+				    " dst_reg->tt_ = src_reg->tt_;\n dst_reg->value_.gc = src_reg->value_.gc;\n");
 			} else {
 				handle_error(fn, "Unexpected pseudo");
 				return -1;
