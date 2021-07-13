@@ -2804,13 +2804,14 @@ static unsigned get_upvalue_idx(Proc *proc, LuaSymbol *upvalue_symbol, bool *in_
 	}
 	/* Search for the upvalue in parent function */
 	LuaSymbol *sym;
-	AstNode *this_function = get_parent_function_of_upvalue(upvalue_symbol);
-	if (this_function == NULL) {
+	AstNode *parent_function = get_parent_function_of_upvalue(upvalue_symbol);
+	if (parent_function == NULL) {
+		// Only upvalue that has no function is SYM_ENV
 		assert(underlying->symbol_type == SYM_ENV);
 		*in_stack = true;
-		return 0;
+		return 0; // First upvalue in the chunk
 	}
-	FOR_EACH_PTR(this_function->function_expr.upvalues, LuaSymbol, sym)
+	FOR_EACH_PTR(parent_function->function_expr.upvalues, LuaSymbol, sym)
 	{
 		if (sym->upvalue.target_variable == upvalue_symbol->upvalue.target_variable) {
 			// Same variable
