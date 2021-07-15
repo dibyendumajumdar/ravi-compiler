@@ -30,6 +30,7 @@ The parser retains the syntactic structure - including constant expressions and 
 syntax nodes because these are useful for testing and understanding.
 
 A later pass simplifies the AST - see ast_simplify.c
+Generic for loops are transformed to while loops in ast_lower.c
 */
 
 #include "fnv_hash.h"
