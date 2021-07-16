@@ -248,7 +248,7 @@ static LuaSymbol *search_for_variable_in_block(Scope *scope, const StringObject 
 			break;
 		}
 	}
-	END_FOR_EACH_PTR_REVERSE(symbol);
+	END_FOR_EACH_PTR_REVERSE(symbol)
 	return NULL;
 }
 
@@ -272,7 +272,7 @@ static LuaSymbol *search_upvalue_in_function(AstNode *function, const StringObje
 			break;
 		}
 	}
-	END_FOR_EACH_PTR(symbol);
+	END_FOR_EACH_PTR(symbol)
 	return NULL;
 }
 
@@ -1468,7 +1468,7 @@ static AstNode *parse_local_statement(ParserState *parser)
 	/* local symbols are only added to scope at the end of the local statement */
 	LuaSymbol *sym = NULL;
 	FOR_EACH_PTR(node->local_stmt.var_list, LuaSymbol, sym) { add_local_symbol_to_current_scope(parser, sym); }
-	END_FOR_EACH_PTR(sym);
+	END_FOR_EACH_PTR(sym)
 	return node;
 }
 
