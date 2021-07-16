@@ -201,11 +201,10 @@ struct LuaLabelSymbol {
 struct LuaUpvalueSymbol {
 	VariableType value_type;
 	LuaSymbol *target_variable;	   /* variable reference */
-	AstNode *target_function; /* Where the upvalue lives */
+	AstNode *target_variable_function; /* Where the target variable lives */
 	unsigned upvalue_index : 16,   /* index of the upvalue in the function where this upvalue occurs */
 	    is_in_parent_stack : 1,    /* 1 if yes - populated by code generator only */
 	    parent_upvalue_index : 15; /* if !is_in_parent_stack then upvalue index in parent - populated by code generator only */
-	/*TODO add pseudo ?*/
 };
 /* A symbol is a name recognised in Ravi/Lua code*/
 struct LuaSymbol {

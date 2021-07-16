@@ -2777,7 +2777,7 @@ static int generate_C_code(struct Ravi_CompilerInterface *ravi_interface, Proc *
 
 static inline AstNode *get_parent_function_of_upvalue(LuaSymbol *symbol)
 {
-	AstNode *upvalue_function = symbol->upvalue.target_function;
+	AstNode *upvalue_function = symbol->upvalue.target_variable_function;
 	AstNode *parent_function = upvalue_function->function_expr.parent_function;
 	return parent_function;
 }
