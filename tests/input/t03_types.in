@@ -20,9 +20,9 @@ return @number 54.4
 #
 return @User.Type a
 #
-return @integer[]{[1] = 5.5, [2] = 4}
+return @integer[] {5, 4}
 #
-return @number[] {[1] = 4, [2] = 5.4}
+return @number[] {4.0, 5.4}
 #
 local a: integer return a+3
 #

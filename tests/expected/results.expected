@@ -3148,34 +3148,20 @@ L0 (entry)
 	TPUTsk {T(1)} {T(0), 'a' Ks(0)}
 	RET {T(0)} {L1}
 L1 (exit)
-return @integer[]{[1] = 5.5, [2] = 4}
+return @integer[] { 5, 4}
 function()
 --upvalues  _ENV*
   return
     --[unary expr start] any
     @integer[]
      { --[table constructor start] table
-       --[indexed assign start] number
-       --[index start]
-        --[Y index start] any
-         [
-          1
-         ]
-        --[Y index end]
-       --[index end]
+       --[indexed assign start] integer
        --[value start]
-        5.5000000000000000
+        5
        --[value end]
        --[indexed assign end]
       ,
        --[indexed assign start] integer
-       --[index start]
-        --[Y index start] any
-         [
-          2
-         ]
-        --[Y index end]
-       --[index end]
        --[value start]
         4
        --[value end]
@@ -3189,27 +3175,13 @@ function()
     --[unary expr start] integer[]
     @integer[]
      { --[table constructor start] integer[]
-       --[indexed assign start] number
-       --[index start]
-        --[Y index start] any
-         [
-          1
-         ]
-        --[Y index end]
-       --[index end]
+       --[indexed assign start] integer
        --[value start]
-        5.5000000000000000
+        5
        --[value end]
        --[indexed assign end]
       ,
        --[indexed assign start] integer
-       --[index start]
-        --[Y index start] any
-         [
-          2
-         ]
-        --[Y index end]
-       --[index end]
        --[value start]
         4
        --[value end]
@@ -3220,38 +3192,24 @@ end
 define Proc%1
 L0 (entry)
 	NEWIARRAY {T(0)}
-	IAPUT {5.500000000000 Kflt(0)} {T(0), 1 Kint(0)}
-	IAPUTiv {4 Kint(2)} {T(0), 2 Kint(1)}
+	IAPUTiv {5 Kint(1)} {T(0), 1 Kint(0)}
+	IAPUTiv {4 Kint(3)} {T(0), 2 Kint(2)}
 	RET {T(0)} {L1}
 L1 (exit)
-return @number[] {[1] = 4, [2] = 5.4}
+return @number[] { 4.0, 5.4}
 function()
 --upvalues  _ENV*
   return
     --[unary expr start] any
     @number[]
      { --[table constructor start] table
-       --[indexed assign start] integer
-       --[index start]
-        --[Y index start] any
-         [
-          1
-         ]
-        --[Y index end]
-       --[index end]
+       --[indexed assign start] number
        --[value start]
-        4
+        4.0000000000000000
        --[value end]
        --[indexed assign end]
       ,
        --[indexed assign start] number
-       --[index start]
-        --[Y index start] any
-         [
-          2
-         ]
-        --[Y index end]
-       --[index end]
        --[value start]
         5.4000000000000004
        --[value end]
@@ -3265,27 +3223,13 @@ function()
     --[unary expr start] number[]
     @number[]
      { --[table constructor start] number[]
-       --[indexed assign start] integer
-       --[index start]
-        --[Y index start] any
-         [
-          1
-         ]
-        --[Y index end]
-       --[index end]
+       --[indexed assign start] number
        --[value start]
-        4
+        4.0000000000000000
        --[value end]
        --[indexed assign end]
       ,
        --[indexed assign start] number
-       --[index start]
-        --[Y index start] any
-         [
-          2
-         ]
-        --[Y index end]
-       --[index end]
        --[value start]
         5.4000000000000004
        --[value end]
@@ -3296,8 +3240,8 @@ end
 define Proc%1
 L0 (entry)
 	NEWFARRAY {T(0)}
-	FAPUT {4 Kint(1)} {T(0), 1 Kint(0)}
-	FAPUTfv {5.400000000000 Kflt(0)} {T(0), 2 Kint(2)}
+	FAPUTfv {4.000000000000 Kflt(0)} {T(0), 1 Kint(0)}
+	FAPUTfv {5.400000000000 Kflt(1)} {T(0), 2 Kint(1)}
 	RET {T(0)} {L1}
 L1 (exit)
 if 1 == 1 then return true else return false end

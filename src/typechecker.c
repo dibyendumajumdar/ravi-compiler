@@ -81,33 +81,67 @@ static void typecheck_unary_operator(CompilerState *container, AstNode *function
 		}
 		break;
 	case UNOPR_TO_INTEGER:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TNUMINT) {
+			handle_error(container, "Cannot convert type to integer");
+		}
 		set_type(&node->unary_expr.type, RAVI_TNUMINT);
 		break;
 	case UNOPR_TO_NUMBER:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TNUMINT &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TNUMFLT) {
+			handle_error(container, "Cannot convert type to number");
+		}
 		set_type(&node->unary_expr.type, RAVI_TNUMFLT);
 		break;
 	case UNOPR_TO_CLOSURE:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TFUNCTION) {
+			handle_error(container, "Cannot convert type to function");
+		}
 		set_type(&node->unary_expr.type, RAVI_TFUNCTION);
 		break;
 	case UNOPR_TO_STRING:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TSTRING) {
+			handle_error(container, "Cannot convert type to string");
+		}
 		set_type(&node->unary_expr.type, RAVI_TSTRING);
 		break;
 	case UNOPR_TO_INTARRAY:
-		set_type(&node->unary_expr.type, RAVI_TARRAYINT);
-		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL) {
+		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL &&
+		    (node->unary_expr.expr->table_expr.inferred_type_code == RAVI_TARRAYINT ||
+		     raviX_ptrlist_size((PtrList *)node->unary_expr.expr->table_expr.expr_list) == 0)) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYINT);
+		} else if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+			   node->unary_expr.expr->common_expr.type.type_code != RAVI_TARRAYINT) {
+			handle_error(container, "Cannot convert type to integer[]");
 		}
+		set_type(&node->unary_expr.type, RAVI_TARRAYINT);
 		break;
 	case UNOPR_TO_NUMARRAY:
-		set_type(&node->unary_expr.type, RAVI_TARRAYFLT);
-		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL) {
+		if (node->unary_expr.expr->type == EXPR_TABLE_LITERAL &&
+		    (node->unary_expr.expr->table_expr.inferred_type_code == RAVI_TARRAYFLT ||
+		     raviX_ptrlist_size((PtrList *)node->unary_expr.expr->table_expr.expr_list) == 0)) {
 			set_type(&node->unary_expr.expr->table_expr.type, RAVI_TARRAYFLT);
+		} else if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+			   node->unary_expr.expr->common_expr.type.type_code != RAVI_TARRAYFLT) {
+			handle_error(container, "Cannot convert type to number[]");
 		}
+		set_type(&node->unary_expr.type, RAVI_TARRAYFLT);
 		break;
 	case UNOPR_TO_TABLE:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TTABLE) {
+			handle_error(container, "Cannot convert type to table");
+		}
 		set_type(&node->unary_expr.type, RAVI_TTABLE);
 		break;
 	case UNOPR_TO_TYPE:
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY) {
+			handle_error(container, "Cannot convert type to usertype");
+		}
 		assert(node->unary_expr.type.type_name != NULL); // Should already be set by the parser
 		set_typecode(&node->unary_expr.type, RAVI_TUSERDATA);
 		break;
@@ -285,17 +319,14 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 		return;
 	}
 	if (var_type->type_code == RAVI_TARRAYFLT) {
-		if (expr->type == EXPR_TABLE_LITERAL &&
-		    expr_type->type_code == RAVI_TTABLE &&
+		if (expr->type == EXPR_TABLE_LITERAL && expr_type->type_code == RAVI_TTABLE &&
 		    (expr->table_expr.inferred_type_code == RAVI_TARRAYFLT ||
 		     raviX_ptrlist_size((PtrList *)expr->table_expr.expr_list) == 0)) {
 			// Note following updates the AST node too
 			expr_type->type_code = RAVI_TARRAYFLT;
 		}
-	}
-	else if (var_type->type_code == RAVI_TARRAYINT) {
-		if (expr->type == EXPR_TABLE_LITERAL &&
-		    expr_type->type_code == RAVI_TTABLE &&
+	} else if (var_type->type_code == RAVI_TARRAYINT) {
+		if (expr->type == EXPR_TABLE_LITERAL && expr_type->type_code == RAVI_TTABLE &&
 		    (expr->table_expr.inferred_type_code == RAVI_TARRAYINT ||
 		     raviX_ptrlist_size((PtrList *)expr->table_expr.expr_list) == 0)) {
 			// Note following updates the AST node too
@@ -441,9 +472,9 @@ static void infer_table_type(CompilerState *compiler_state, AstNode *function, A
 {
 	AstNode *node;
 	unsigned values_tag = 0;
-	FOR_EACH_PTR(table_expr->table_expr.expr_list, AstNode, node) {
-		if (node->type != EXPR_TABLE_ELEMENT_ASSIGN ||
-		    node->table_elem_assign_expr.key_expr != NULL) {
+	FOR_EACH_PTR(table_expr->table_expr.expr_list, AstNode, node)
+	{
+		if (node->type != EXPR_TABLE_ELEMENT_ASSIGN || node->table_elem_assign_expr.key_expr != NULL) {
 			values_tag |= 4;
 			continue;
 		}
