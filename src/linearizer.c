@@ -1287,6 +1287,23 @@ static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
 	return target;
 }
 
+/* Used for local variable declarations without an initializer.
+ * The Ravi parser doesn't allow this; it requires explicit table
+ * constructor. So this is an enhancement.
+ */
+static Pseudo *linearize_table_constructor_inplace(Proc *proc, Pseudo *target, ravitype_t type_code)
+{
+	enum opcode op = op_newtable;
+	if (type_code == RAVI_TARRAYINT)
+		op = op_newiarray;
+	else if (type_code == RAVI_TARRAYFLT)
+		op = op_newfarray;
+	Instruction *insn = allocate_instruction(proc, op);
+	add_instruction_target(proc, insn, target);
+	add_instruction(proc, insn);
+	return target;
+}
+
 /** Is the type NIL-able */
 static bool is_nillable(const VariableType *var_type)
 {
@@ -1410,7 +1427,14 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 						    valinfo[ne-1].vartype,
 						    allocate_range_select_pseudo(proc, last_val_pseudo, pick));
 			} else {
-				linearize_init(proc, varinfo[i].pseudo);
+				if (varinfo[i].vartype->type_code == RAVI_TTABLE ||
+				    varinfo[i].vartype->type_code == RAVI_TARRAYFLT ||
+				    varinfo[i].vartype->type_code == RAVI_TARRAYINT) {
+					linearize_table_constructor_inplace(proc, varinfo[i].pseudo, varinfo[i].vartype->type_code);
+				}
+				else {
+					linearize_init(proc, varinfo[i].pseudo);
+				}
 			}
 		}
 		else {

@@ -5655,7 +5655,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	INIT {local(t, 0)}
+	NEWIARRAY {local(t, 0)}
 	IAGETik {local(t, 0), 0 Kint(0)} {Tint(0)}
 	RET {Tint(0)} {L1}
 L1 (exit)
@@ -5826,7 +5826,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	INIT {local(t, 0)}
+	NEWIARRAY {local(t, 0)}
 	BR {L2}
 L1 (exit)
 L2
@@ -5890,7 +5890,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	INIT {local(t, 0)}
+	NEWTABLE {local(t, 0)}
 	LEN {local(t, 0)} {T(0)}
 	TOINT {T(0)}
 	MOVi {T(0)} {Tint(0)}
