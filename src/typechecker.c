@@ -259,7 +259,10 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 			/* Okay, but backend must do appropriate conversion */
 			;
 		} else if (expr_type->type_code != RAVI_TNUMINT) {
-			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
+			char tempbuf[256];
+			snprintf(tempbuf, sizeof tempbuf, "%d: Assignment to local symbol %s is not type compatible\n",
+				 expr->line_number, variable_name);
+			handle_error(container, tempbuf);
 		}
 		return;
 	}
@@ -268,13 +271,37 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 			/* Okay, but backend must do appropriate conversion */
 			;
 		} else if (expr_type->type_code != RAVI_TNUMFLT) {
-			fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
+			char tempbuf[256];
+			snprintf(tempbuf, sizeof tempbuf, "%d: Assignment to local symbol %s is not type compatible\n",
+				 expr->line_number, variable_name);
+			handle_error(container, tempbuf);
 		}
 		return;
 	}
+	if (var_type->type_code == RAVI_TARRAYFLT) {
+		if (expr->type == EXPR_TABLE_LITERAL &&
+		    expr_type->type_code == RAVI_TTABLE &&
+		    (expr->table_expr.inferred_type_code == RAVI_TARRAYFLT ||
+		     raviX_ptrlist_size((PtrList *)expr->table_expr.expr_list) == 0)) {
+			// Note following updates the AST node too
+			expr_type->type_code = RAVI_TARRAYFLT;
+		}
+	}
+	else if (var_type->type_code == RAVI_TARRAYINT) {
+		if (expr->type == EXPR_TABLE_LITERAL &&
+		    expr_type->type_code == RAVI_TTABLE &&
+		    (expr->table_expr.inferred_type_code == RAVI_TARRAYINT ||
+		     raviX_ptrlist_size((PtrList *)expr->table_expr.expr_list) == 0)) {
+			// Note following updates the AST node too
+			expr_type->type_code = RAVI_TARRAYINT;
+		}
+	}
 	// all other types must strictly match
 	if (!is_type_same(var_type, expr_type)) { // We should probably check type convert-ability here
-		fprintf(stderr, "Assignment to local symbol %s is not type compatible\n", variable_name);
+		char tempbuf[256];
+		snprintf(tempbuf, sizeof tempbuf, "%d: Assignment to local symbol %s is not type compatible\n",
+			 expr->line_number, variable_name);
+		handle_error(container, tempbuf);
 	}
 }
 
@@ -404,6 +431,30 @@ static void typecheck_while_or_repeat_statement(CompilerState *container, AstNod
 	}
 }
 
+static void infer_table_type(CompilerState *compiler_state, AstNode *function, AstNode *table_expr)
+{
+	AstNode *node;
+	unsigned values_tag = 0;
+	FOR_EACH_PTR(table_expr->table_expr.expr_list, AstNode, node) {
+		if (node->type != EXPR_TABLE_ELEMENT_ASSIGN ||
+		    node->table_elem_assign_expr.key_expr != NULL) {
+			values_tag |= 4;
+			continue;
+		}
+		if (node->common_expr.type.type_code == RAVI_TNUMINT)
+			values_tag |= 1;
+		else if (node->common_expr.type.type_code == RAVI_TNUMFLT)
+			values_tag |= 2;
+		else
+			values_tag |= 4;
+	}
+	END_FOR_EACH_PTR(node)
+	if (values_tag == 1)
+		table_expr->table_expr.inferred_type_code = RAVI_TARRAYINT;
+	else if (values_tag == 2)
+		table_expr->table_expr.inferred_type_code = RAVI_TARRAYFLT;
+}
+
 /* Type checker - WIP  */
 static void typecheck_ast_node(CompilerState *container, AstNode *function, AstNode *node)
 {
@@ -510,6 +561,7 @@ static void typecheck_ast_node(CompilerState *container, AstNode *function, AstN
 	}
 	case EXPR_TABLE_LITERAL: {
 		typecheck_ast_list(container, function, node->table_expr.expr_list);
+		infer_table_type(container, function, node);
 		break;
 	}
 	default:

@@ -620,6 +620,9 @@ static AstNode *parse_table_constructor(ParserState *parser)
 	checknext(ls, '{');
 	AstNode *table_expr = allocate_expr_ast_node(parser, EXPR_TABLE_LITERAL);
 	set_type(&table_expr->table_expr.type, RAVI_TTABLE);
+	// Inferred type will be updated by typechecker and eventually
+	// used to decide if the type of the literal should be changed
+	table_expr->table_expr.inferred_type_code = RAVI_TTABLE;
 	table_expr->table_expr.expr_list = NULL;
 	do {
 		if (ls->t.token == '}')

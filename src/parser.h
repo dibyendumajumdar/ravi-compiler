@@ -348,6 +348,7 @@ struct TableElementAssignmentExpression {
 struct TableLiteralExpression {
 	BASE_EXPRESSION_FIELDS;
 	AstNodeList *expr_list;
+	ravitype_t inferred_type_code; /* If literal has values then try to infer if integer[], number[] or table */
 };
 /* suffixedexp -> primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 /* suffix_list may have EXPR_FIELD_SELECTOR, EXPR_Y_INDEX, EXPR_FUNCTION_CALL */
