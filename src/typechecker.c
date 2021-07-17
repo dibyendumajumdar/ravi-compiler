@@ -252,6 +252,12 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 	const char *variable_name = var_name ? var_name->str : "unknown-TODO";
 	VariableType *expr_type = &expr->common_expr.type;
 
+	// If expr is ANY type then allow it as a runtime check will be
+	// done
+	if (expr_type->type_code == RAVI_TANY) {
+		return;
+	}
+
 	if (var_type->type_code == RAVI_TNUMINT) {
 		/* if the expr is of type number or # operator then insert @integer operator */
 		if (expr_type->type_code == RAVI_TNUMFLT ||
