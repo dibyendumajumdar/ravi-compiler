@@ -1844,7 +1844,8 @@ static bool is_already_closed(Proc *proc, BasicBlock *block)
 		return true;
 	if (last_insn->opcode == op_close) {
 		// hmmm
-		assert(false);
+		//assert(false);
+		return false;
 	}
 	return false;
 }
