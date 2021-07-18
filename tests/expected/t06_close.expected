@@ -69,7 +69,7 @@ function()
   do
     --[expression statement start]
      --[expression list start]
-       --[suffixed expr start] closure
+       --[suffixed expr start] any
         --[primary start] closure
          function()
          --upvalues  a
@@ -817,7 +817,7 @@ function()
   do
     for
     --[local symbols] i
-      i --local symbol any 
+      i --local symbol integer 
     =
       1
      ,
@@ -828,14 +828,14 @@ function()
        --[symbols]
          j --local symbol any 
        --[expressions]
-         --[suffixed expr start] any
-          --[primary start] any
-            i --local symbol any 
+         --[suffixed expr start] integer
+          --[primary start] integer
+            i --local symbol integer 
           --[primary end]
          --[suffixed expr end]
        --[expression statement start]
         --[expression list start]
-          --[suffixed expr start] closure
+          --[suffixed expr start] any
            --[primary start] closure
             function()
             --upvalues  x, j
@@ -875,10 +875,10 @@ function()
         --[expression list end]
        --[expression statement end]
        if
-        --[binary expr start] any
-         --[suffixed expr start] any
-          --[primary start] any
-            i --local symbol any 
+        --[binary expr start] boolean
+         --[suffixed expr start] integer
+          --[primary start] integer
+            i --local symbol integer 
           --[primary end]
          --[suffixed expr end]
         ==
@@ -913,38 +913,37 @@ end
 define Proc%1
 L0 (entry)
 	MOV {1 Kint(0)} {local(x, 0)}
-	MOV {1 Kint(0)} {Tint(0)}
-	MOV {10 Kint(1)} {Tint(1)}
-	MOV {1 Kint(0)} {Tint(2)}
-	SUBii {Tint(0), Tint(2)} {Tint(0)}
+	MOV {1 Kint(0)} {Tint(1)}
+	MOV {10 Kint(1)} {Tint(2)}
+	MOV {1 Kint(0)} {Tint(3)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
-	ADDii {Tint(0), Tint(2)} {Tint(0)}
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L3}
 L3
-	LIii {Tint(1), Tint(0)} {Tbool(3)}
-	CBR {Tbool(3)} {L5, L4}
+	LIii {Tint(2), Tint(1)} {Tbool(4)}
+	CBR {Tbool(4)} {L5, L4}
 L4
-	MOV {Tint(0)} {local(i, 1)}
-	MOV {local(i, 1)} {T(0)}
-	MOV {T(0)} {local(j, 2)}
+	MOV {Tint(1)} {Tint(0)}
+	MOV {Tint(0)} {local(j, 1)}
 	CLOSURE {Proc%2} {T(0)}
 	CALL {T(0)} {T(0..), 1 Kint(0)}
 	BR {L6}
 L5
-	CLOSE {local(j, 2)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(2)}
-	CALL {T(2), local(x, 0)} {T(2..), 1 Kint(0)}
+	CLOSE {local(j, 1)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}
+	CALL {T(1), local(x, 0)} {T(1..), 1 Kint(0)}
 	CLOSE {local(x, 0)}
 	RET {L1}
 L6
-	EQ {local(i, 1), 5 Kint(2)} {T(1)}
-	CBR {T(1)} {L7, L8}
+	EQii {Tint(0), 5 Kint(2)} {Tbool(5)}
+	CBR {Tbool(5)} {L7, L8}
 L7
 	BR {L5}
 L8
-	CLOSE {local(j, 2)}
+	CLOSE {local(j, 1)}
 	BR {L2}
 L9
 	BR {L8}
@@ -958,10 +957,10 @@ digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {1 Kint(0)} {local(x, 0)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(0)}</TD></TR>
-<TR><TD>MOV {10 Kint(1)} {Tint(1)}</TD></TR>
-<TR><TD>MOV {1 Kint(0)} {Tint(2)}</TD></TR>
-<TR><TD>SUBii {Tint(0), Tint(2)} {Tint(0)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(1)}</TD></TR>
+<TR><TD>MOV {10 Kint(1)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(0)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
@@ -985,7 +984,7 @@ L0 -> L1
 }
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(0), Tint(2)} {Tint(0)}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
@@ -1000,8 +999,8 @@ L0 -> L1
 }
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(1), Tint(0)} {Tbool(3)}</TD></TR>
-<TR><TD>CBR {Tbool(3)} {L5, L4}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
 </TABLE>>];
 L3 -> L5
 L3 -> L4
@@ -1016,9 +1015,8 @@ L0 -> L1
 }
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>MOV {Tint(0)} {local(i, 1)}</TD></TR>
-<TR><TD>MOV {local(i, 1)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(j, 2)}</TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>MOV {Tint(0)} {local(j, 1)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -1035,9 +1033,9 @@ L0 -> L1
 }
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
-<TR><TD>CLOSE {local(j, 2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(x, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CLOSE {local(j, 1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local(x, 0)} {T(1..), 1 Kint(0)}</TD></TR>
 <TR><TD>CLOSE {local(x, 0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
@@ -1053,8 +1051,8 @@ L0 -> L1
 }
 L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L6</B></TD></TR>
-<TR><TD>EQ {local(i, 1), 5 Kint(2)} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L7, L8}</TD></TR>
+<TR><TD>EQii {Tint(0), 5 Kint(2)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L7, L8}</TD></TR>
 </TABLE>>];
 L6 -> L7
 L6 -> L8
@@ -1083,7 +1081,7 @@ L0 -> L1
 }
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
-<TR><TD>CLOSE {local(j, 2)}</TD></TR>
+<TR><TD>CLOSE {local(j, 1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L8 -> L2
