@@ -139,7 +139,8 @@ static void typecheck_unary_operator(CompilerState *container, AstNode *function
 		set_type(&node->unary_expr.type, RAVI_TTABLE);
 		break;
 	case UNOPR_TO_TYPE:
-		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY) {
+		if (node->unary_expr.expr->common_expr.type.type_code != RAVI_TANY &&
+		    node->unary_expr.expr->common_expr.type.type_code != RAVI_TUSERDATA) {
 			handle_error(container, "Cannot convert type to usertype");
 		}
 		assert(node->unary_expr.type.type_name != NULL); // Should already be set by the parser
@@ -332,6 +333,10 @@ static void typecheck_var_assignment(CompilerState *container, VariableType *var
 			// Note following updates the AST node too
 			expr_type->type_code = RAVI_TARRAYINT;
 		}
+	}
+	if (expr_type->type_code == RAVI_TNIL && (var_type->type_code & RAVI_TM_NIL) != 0) {
+		// NILable type so allow nil
+		return;
 	}
 	// all other types must strictly match
 	if (!is_type_same(var_type, expr_type)) { // We should probably check type convert-ability here
