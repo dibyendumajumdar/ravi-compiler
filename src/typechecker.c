@@ -523,6 +523,7 @@ static void typecheck_ast_node(CompilerState *container, AstNode *function, AstN
 		break;
 	}
 	case STMT_DO: {
+		typecheck_ast_list(container, function, node->do_stmt.do_statement_list);
 		break;
 	}
 	case STMT_EXPR: {
