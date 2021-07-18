@@ -1845,7 +1845,8 @@ static bool is_already_closed(Proc *proc, BasicBlock *block)
 	if (last_insn->opcode == op_close) {
 		// hmmm
 		//assert(false);
-		return false;
+		// FIXME we can have a block ending in op_close if its the last block
+		// and there is an implicit return; amybe an OPT pass can remove these?
 	}
 	return false;
 }
