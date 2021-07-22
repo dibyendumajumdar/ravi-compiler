@@ -1,5 +1,5 @@
 local function test()
     return 1.0
 end
-print(test())
+--print(test())
 return test()
