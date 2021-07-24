@@ -88,3 +88,9 @@ local function test()
 end
 --print(test())
 return test()
+# codegen bug assign empty string to local
+function z()
+    local t = ''
+    print(t)
+    return t
+end
