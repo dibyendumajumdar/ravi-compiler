@@ -2009,7 +2009,7 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	MOV {0.000000000000 Kflt(0)} {local(sum, 0)}
+	MOV {0E0 Kflt(0)} {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(6)}
 	MOV {10000 Kint(2)} {Tint(7)}
 	MOV {1 Kint(0)} {Tint(8)}
@@ -2026,7 +2026,7 @@ L7
 L8
 	MOV {Tint(6)} {Tint(5)}
 	MULii {Tint(5), Tint(5)} {Tint(10)}
-	DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}
+	DIVfi {1E0 Kflt(1), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
 	BR {L6}
@@ -2066,7 +2066,7 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>MOV {0.000000000000 Kflt(0)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {0E0 Kflt(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
 <TR><TD>MOV {10000 Kint(2)} {Tint(7)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
@@ -2096,7 +2096,7 @@ L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
 <TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
-<TR><TD>DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>DIVfi {1E0 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
 <TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>
@@ -2135,7 +2135,7 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
-<TR><TD>MOV {0.000000000000 Kflt(0)} {local(sum, 0)}</TD></TR>
+<TR><TD>MOV {0E0 Kflt(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
 <TR><TD>MOV {10000 Kint(2)} {Tint(7)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(8)}</TD></TR>
@@ -2165,7 +2165,7 @@ L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(6)} {Tint(5)}</TD></TR>
 <TR><TD>MULii {Tint(5), Tint(5)} {Tint(10)}</TD></TR>
-<TR><TD>DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
+<TR><TD>DIVfi {1E0 Kflt(1), Tint(10)} {Tflt(0)}</TD></TR>
 <TR><TD>ADD {local(sum, 0), Tflt(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(sum, 0)}</TD></TR>
 <TR><TD>BR {L6}</TD></TR>

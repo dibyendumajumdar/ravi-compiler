@@ -51,7 +51,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	RET {42 Kint(0), 4.200000000000 Kflt(0), true, 'hello' Ks(0)} {L1}
+	RET {42 Kint(0), 4.2E0 Kflt(0), true, 'hello' Ks(0)} {L1}
 L1 (exit)
 return a
 function()
@@ -263,7 +263,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	IDIV {4.200000000000 Kflt(0), 5 Kint(0)} {T(0)}
+	IDIV {4.2E0 Kflt(0), 5 Kint(0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0.0
@@ -279,7 +279,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	RET {0.000000000000 Kflt(0)} {L1}
+	RET {0E0 Kflt(0)} {L1}
 L1 (exit)
 return 0
 function()
@@ -526,7 +526,7 @@ L0 (entry)
 	POW {3 Kint(0), 0 Kint(1)} {Tflt(0)}
 	UNMf {Tflt(0)} {Tflt(1)}
 	ADDfi {Tflt(1), 5 Kint(2)} {Tflt(2)}
-	IDIV {Tflt(2), 3.000000000000 Kflt(0)} {T(0)}
+	IDIV {Tflt(2), 3E0 Kflt(0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 return 0xF0.0 | 0xCC.0 ~ 0xAA & 0xFD
@@ -567,8 +567,8 @@ end
 define Proc%1
 L0 (entry)
 	BANDii {170 Kint(0), 253 Kint(1)} {Tint(0)}
-	BXOR {204.000000000000 Kflt(1), Tint(0)} {Tint(1)}
-	BOR {240.000000000000 Kflt(0), Tint(1)} {Tint(0)}
+	BXOR {2.04E2 Kflt(1), Tint(0)} {Tint(1)}
+	BOR {2.4E2 Kflt(0), Tint(1)} {Tint(0)}
 	RET {Tint(0)} {L1}
 L1 (exit)
 return ~(~0xFF0 | 0xFF0)
@@ -648,7 +648,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	UNMf {100024.000000000000 Kflt(0)} {Tflt(0)}
+	UNMf {1.00024E5 Kflt(0)} {Tflt(0)}
 	BNOT {Tflt(0)} {T(0)}
 	BNOT {T(0)} {T(1)}
 	RET {T(1)} {L1}
@@ -958,7 +958,7 @@ end
 define Proc%1
 L0 (entry)
 	UNMi {2 Kint(0)} {Tint(0)}
-	POW {2.000000000000 Kflt(0), Tint(0)} {Tflt(0)}
+	POW {2E0 Kflt(0), Tint(0)} {Tflt(0)}
 	DIVii {1 Kint(1), 4 Kint(2)} {Tflt(1)}
 	EQff {Tflt(0), Tflt(1)} {Tbool(0)}
 	MOV {Tbool(0)} {T(0)}
@@ -2243,7 +2243,7 @@ L6
 	MOV {2 Kint(1)} {T(3)}
 	BR {L7}
 L7
-	UNMf {1.250000000000 Kflt(0)} {Tflt(0)}
+	UNMf {1.25E0 Kflt(0)} {Tflt(0)}
 	MOV {Tflt(0)} {T(2)}
 	CBR {T(2)} {L9, L8}
 L8
@@ -2252,7 +2252,7 @@ L8
 	BR {L9}
 L9
 	ADD {T(3), T(2)} {T(4)}
-	EQ {T(4), 0.750000000000 Kflt(1)} {T(2)}
+	EQ {T(4), 7.5E-1 Kflt(1)} {T(2)}
 	MOV {T(2)} {T(0)}
 	BR {L3}
 return (b or a)+1 == 2 and (10 or a)+1 == 11
@@ -2959,7 +2959,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	RET {54.400000000000 Kflt(0)} {L1}
+	RET {5.44E1 Kflt(0)} {L1}
 L1 (exit)
 return @User.Type a
 function()
@@ -3241,8 +3241,8 @@ end
 define Proc%1
 L0 (entry)
 	NEWFARRAY {T(0)}
-	FAPUTfv {4.000000000000 Kflt(0)} {T(0), 1 Kint(0)}
-	FAPUTfv {5.400000000000 Kflt(1)} {T(0), 2 Kint(1)}
+	FAPUTfv {4E0 Kflt(0)} {T(0), 1 Kint(0)}
+	FAPUTfv {5.4E0 Kflt(1)} {T(0), 2 Kint(1)}
 	RET {T(0)} {L1}
 L1 (exit)
 if 1 == 1 then return true else return false end
@@ -7123,7 +7123,7 @@ L3
 	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
-	MOV {0.000000000000 Kflt(0)} {local(sum, 0)}
+	MOV {0E0 Kflt(0)} {local(sum, 0)}
 	MOV {1 Kint(0)} {Tint(6)}
 	MOV {10000 Kint(2)} {Tint(7)}
 	MOV {1 Kint(0)} {Tint(8)}
@@ -7140,7 +7140,7 @@ L7
 L8
 	MOV {Tint(6)} {Tint(5)}
 	MULii {Tint(5), Tint(5)} {Tint(10)}
-	DIVfi {1.000000000000 Kflt(1), Tint(10)} {Tflt(0)}
+	DIVfi {1E0 Kflt(1), Tint(10)} {Tflt(0)}
 	ADD {local(sum, 0), Tflt(0)} {T(0)}
 	MOV {T(0)} {local(sum, 0)}
 	BR {L6}
@@ -7983,7 +7983,7 @@ L4
 	LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(5)}
 	GETsk {T(5), 'numarray' Ks(4)} {T(10)}
 	MOV {T(10)} {T(11)}
-	CALL {T(11), Tint(2), 0.000000000000 Kflt(0)} {T(11..), 1 Kint(0)}
+	CALL {T(11), Tint(2), 0E0 Kflt(0)} {T(11..), 1 Kint(0)}
 	TOFARRAY {T(11[11..])}
 	MOV {T(11[11..])} {local(xi, 4)}
 	MOV {local(xi, 4)} {T(13)}
@@ -8007,7 +8007,7 @@ L8
 	TOFARRAY {T(13)}
 	TGETik {local(c, 3), Tint(8)} {T(12)}
 	TOFARRAY {T(12)}
-	MOVf {0.000000000000 Kflt(0)} {Tflt(0)}
+	MOVf {0E0 Kflt(0)} {Tflt(0)}
 	MOV {T(13)} {local(ai, 5)}
 	MOV {T(12)} {local(cj, 6)}
 	MOV {1 Kint(0)} {Tint(14)}
@@ -8482,7 +8482,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	POW {2.000000000000 Kflt(0), 8 Kint(0)} {Tflt(0)}
+	POW {2E0 Kflt(0), 8 Kint(0)} {Tflt(0)}
 	UNMi {1 Kint(1)} {Tint(0)}
 	UNMi {Tint(0)} {Tint(1)}
 	ADDfi {Tflt(0), Tint(1)} {Tflt(1)}

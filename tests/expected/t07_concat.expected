@@ -166,7 +166,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	CONCAT {'cd' Ks(1), 1.500000000000 Kflt(0)} {T(0)}
+	CONCAT {'cd' Ks(1), 1.5E0 Kflt(0)} {T(0)}
 	CONCAT {1 Kint(0), T(0)} {T(1)}
 	CONCAT {'ab' Ks(0), T(1)} {T(0)}
 	MOV {T(0)} {local(y, 0)}
@@ -175,7 +175,7 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>CONCAT {'cd' Ks(1), 1.500000000000 Kflt(0)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {'cd' Ks(1), 1.5E0 Kflt(0)} {T(0)}</TD></TR>
 <TR><TD>CONCAT {1 Kint(0), T(0)} {T(1)}</TD></TR>
 <TR><TD>CONCAT {'ab' Ks(0), T(1)} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(y, 0)}</TD></TR>
@@ -248,7 +248,7 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {1.000000000000 Kflt(0)} {local(x, 0)}
+	MOV {1E0 Kflt(0)} {local(x, 0)}
 	CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}
 	CONCAT {local(x, 0), T(0)} {T(1)}
 	MOV {T(1)} {local(y, 1)}
@@ -257,7 +257,7 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1.000000000000 Kflt(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {1E0 Kflt(0)} {local(x, 0)}</TD></TR>
 <TR><TD>CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}</TD></TR>
 <TR><TD>CONCAT {local(x, 0), T(0)} {T(1)}</TD></TR>
 <TR><TD>MOV {T(1)} {local(y, 1)}</TD></TR>
@@ -423,11 +423,11 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {1.000000000000 Kflt(0)} {local(x, 0)}
+	MOV {1E0 Kflt(0)} {local(x, 0)}
 	CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}
 	CONCAT {local(x, 0), T(0)} {T(1)}
 	MOV {T(1)} {local(y, 1)}
-	MOV {2.000000000000 Kflt(1)} {local(z, 2)}
+	MOV {2E0 Kflt(1)} {local(z, 2)}
 	ADD {local(x, 0), 1 Kint(0)} {T(1)}
 	ADD {local(z, 2), 2 Kint(1)} {T(0)}
 	CONCAT {' ' Ks(1), T(0)} {T(2)}
@@ -440,11 +440,11 @@ L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1.000000000000 Kflt(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {1E0 Kflt(0)} {local(x, 0)}</TD></TR>
 <TR><TD>CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}</TD></TR>
 <TR><TD>CONCAT {local(x, 0), T(0)} {T(1)}</TD></TR>
 <TR><TD>MOV {T(1)} {local(y, 1)}</TD></TR>
-<TR><TD>MOV {2.000000000000 Kflt(1)} {local(z, 2)}</TD></TR>
+<TR><TD>MOV {2E0 Kflt(1)} {local(z, 2)}</TD></TR>
 <TR><TD>ADD {local(x, 0), 1 Kint(0)} {T(1)}</TD></TR>
 <TR><TD>ADD {local(z, 2), 2 Kint(1)} {T(0)}</TD></TR>
 <TR><TD>CONCAT {' ' Ks(1), T(0)} {T(2)}</TD></TR>
