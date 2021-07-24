@@ -1,0 +1,3108 @@
+local assert = assert
+return function(m: integer, n: integer)
+  assert(m == n)
+  print('testing')
+end
+
+function()
+--upvalues  _ENV*
+--[local symbols] assert
+  local
+  --[symbols]
+    assert --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       assert --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+  return
+    function(
+      m --local symbol integer 
+     ,
+      n --local symbol integer 
+    )
+    --upvalues  assert, _ENV*
+    --[local symbols] m, n
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            assert --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               --[binary expr start] any
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   m --local symbol integer 
+                 --[primary end]
+                --[suffixed expr end]
+               ==
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   n --local symbol integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            print --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'testing'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+    end
+end
+function()
+--upvalues  _ENV*
+--[local symbols] assert
+  local
+  --[symbols]
+    assert --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       assert --global symbol any 
+     --[primary end]
+    --[suffixed expr end]
+  return
+    function(
+      m --local symbol integer 
+     ,
+      n --local symbol integer 
+    )
+    --upvalues  assert, _ENV*
+    --[local symbols] m, n
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            assert --upvalue any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               --[binary expr start] boolean
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   m --local symbol integer 
+                 --[primary end]
+                --[suffixed expr end]
+               ==
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   n --local symbol integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            print --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               'testing'
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+    end
+end
+define Proc%1
+L0 (entry)
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	MOV {T(0)} {local(assert, 0)}
+	CLOSURE {Proc%2} {T(0)}
+	RET {T(0)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	TOINT {local(m, 0)}
+	TOINT {local(n, 1)}
+	MOV {Upval(0, Proc%1, assert)} {T(0)}
+	EQii {local(m, 0), local(n, 1)} {Tbool(0)}
+	CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}
+	MOV {T(1)} {T(2)}
+	CALL {T(2), 'testing' Ks(1)} {T(2..), 1 Kint(0)}
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(assert, 0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOINT {local(m, 0)}</TD></TR>
+<TR><TD>TOINT {local(n, 1)}</TD></TR>
+<TR><TD>MOV {Upval(0, Proc%1, assert)} {T(0)}</TD></TR>
+<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), 'testing' Ks(1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOINT {local(m, 0)}</TD></TR>
+<TR><TD>TOINT {local(n, 1)}</TD></TR>
+<TR><TD>MOV {Upval(0, Proc%1, assert)} {T(0)}</TD></TR>
+<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), 'testing' Ks(1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+local abs = math.abs
+local function compute_pi()
+  if abs(c) > TOL then
+  end
+end
+-- #64
+local t = { name_ = "ravi" }
+function t:name(optional)
+return self.name_, optional
+end
+-- issue #66
+local function test_upvaluejoin()
+    local debug = require'debug'
+    local foo1, foo2, foo3, foo4
+    do
+      local a:integer, b:integer = 3, 5
+      local c:number = 7.1
+      foo1 = function() return a+b end
+      foo2 = function() return b+a end
+      foo4 = function() return c end
+      do
+        local a: integer = 10
+        foo3 = function() return a+b end
+      end
+    end
+end
+-- issue #65
+do
+  local x = function ()
+    local function createarray(values: number[])
+        local arr: number[] = table.numarray(#values, 0)
+        for i=1,#values do
+            arr[i] = values[i]
+        end
+        return arr
+    end
+  end
+end
+
+function()
+--upvalues  _ENV*
+--[local symbols] abs, compute_pi, t, test_upvaluejoin
+  local
+  --[symbols]
+    abs --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       math --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[field selector start] any
+        .
+         'abs'
+       --[field selector end]
+     --[suffix list end]
+    --[suffixed expr end]
+  local
+  --[symbols]
+    compute_pi --local symbol closure 
+  --[expressions]
+    function()
+    --upvalues  abs, _ENV*
+      if
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           abs --upvalue any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 c --global symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+       >
+        --[suffixed expr start] any
+         --[primary start] any
+           TOL --global symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+      end
+    end
+  local
+  --[symbols]
+    t --local symbol any 
+  --[expressions]
+    { --[table constructor start] table
+      --[indexed assign start] string
+      --[index start]
+       --[field selector start] any
+        .
+         'name_'
+       --[field selector end]
+      --[index end]
+      --[value start]
+       'ravi'
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+   t --local symbol any 
+   --[method name]
+    --[field selector start] any
+     .
+      'name'
+    --[field selector end]
+   =
+    function(
+      self --local symbol any 
+     ,
+      optional --local symbol any 
+    )
+    --[local symbols] self, optional
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           self --local symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[field selector start] any
+            .
+             'name_'
+           --[field selector end]
+         --[suffix list end]
+        --[suffixed expr end]
+       ,
+        --[suffixed expr start] any
+         --[primary start] any
+           optional --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+  local
+  --[symbols]
+    test_upvaluejoin --local symbol closure 
+  --[expressions]
+    function()
+    --upvalues  _ENV*
+    --[local symbols] debug, foo1, foo2, foo3, foo4
+      local
+      --[symbols]
+        debug --local symbol any 
+      --[expressions]
+        --[suffixed expr start] any
+         --[primary start] any
+           require --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              'debug'
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      local
+      --[symbols]
+        foo1 --local symbol any 
+       ,
+        foo2 --local symbol any 
+       ,
+        foo3 --local symbol any 
+       ,
+        foo4 --local symbol any 
+      do
+      --[local symbols] a, b, c
+        local
+        --[symbols]
+          a --local symbol integer 
+         ,
+          b --local symbol integer 
+        --[expressions]
+          3
+         ,
+          5
+        local
+        --[symbols]
+          c --local symbol number 
+        --[expressions]
+          7.0999999999999996
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo1 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  a, b
+             return
+               --[binary expr start] any
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   a --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   b --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo2 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  b, a
+             return
+               --[binary expr start] any
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   b --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   a --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo4 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  c
+             return
+               --[suffixed expr start] number
+                --[primary start] number
+                  c --upvalue number 
+                --[primary end]
+               --[suffixed expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        do
+        --[local symbols] a
+          local
+          --[symbols]
+            a --local symbol integer 
+          --[expressions]
+            10
+          --[expression statement start]
+           --[var list start]
+             --[suffixed expr start] any
+              --[primary start] any
+                foo3 --local symbol any 
+              --[primary end]
+             --[suffixed expr end]
+           = --[var list end]
+           --[expression list start]
+             function()
+             --upvalues  a, b
+               return
+                 --[binary expr start] any
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     a --upvalue integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 +
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     b --upvalue integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 --[binary expr end]
+             end
+           --[expression list end]
+          --[expression statement end]
+        end
+      end
+    end
+  do
+  --[local symbols] x
+    local
+    --[symbols]
+      x --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] createarray
+        local
+        --[symbols]
+          createarray --local symbol closure 
+        --[expressions]
+          function(
+            values --local symbol number[] 
+          )
+          --upvalues  _ENV*
+          --[local symbols] values, arr
+            local
+            --[symbols]
+              arr --local symbol number[] 
+            --[expressions]
+              --[suffixed expr start] any
+               --[primary start] any
+                 table --global symbol any 
+               --[primary end]
+               --[suffix list start]
+                 --[field selector start] any
+                  .
+                   'numarray'
+                 --[field selector end]
+                 --[function call start] any
+                  (
+                    --[unary expr start] any
+                    #
+                     --[suffixed expr start] number[]
+                      --[primary start] number[]
+                        values --local symbol number[] 
+                      --[primary end]
+                     --[suffixed expr end]
+                    --[unary expr end]
+                   ,
+                    0
+                  )
+                 --[function call end]
+               --[suffix list end]
+              --[suffixed expr end]
+            for
+            --[local symbols] i
+              i --local symbol any 
+            =
+              1
+             ,
+              --[unary expr start] any
+              #
+               --[suffixed expr start] number[]
+                --[primary start] number[]
+                  values --local symbol number[] 
+                --[primary end]
+               --[suffixed expr end]
+              --[unary expr end]
+            do
+               --[expression statement start]
+                --[var list start]
+                  --[suffixed expr start] any
+                   --[primary start] number[]
+                     arr --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] any
+                      [
+                       --[suffixed expr start] any
+                        --[primary start] any
+                          i --local symbol any 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                = --[var list end]
+                --[expression list start]
+                  --[suffixed expr start] any
+                   --[primary start] number[]
+                     values --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] any
+                      [
+                       --[suffixed expr start] any
+                        --[primary start] any
+                          i --local symbol any 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                --[expression list end]
+               --[expression statement end]
+            end
+            return
+              --[suffixed expr start] number[]
+               --[primary start] number[]
+                 arr --local symbol number[] 
+               --[primary end]
+              --[suffixed expr end]
+          end
+      end
+  end
+end
+function()
+--upvalues  _ENV*
+--[local symbols] abs, compute_pi, t, test_upvaluejoin
+  local
+  --[symbols]
+    abs --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       math --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[field selector start] any
+        .
+         'abs'
+       --[field selector end]
+     --[suffix list end]
+    --[suffixed expr end]
+  local
+  --[symbols]
+    compute_pi --local symbol closure 
+  --[expressions]
+    function()
+    --upvalues  abs, _ENV*
+      if
+       --[binary expr start] any
+        --[suffixed expr start] any
+         --[primary start] any
+           abs --upvalue any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              --[suffixed expr start] any
+               --[primary start] any
+                 c --global symbol any 
+               --[primary end]
+              --[suffixed expr end]
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+       >
+        --[suffixed expr start] any
+         --[primary start] any
+           TOL --global symbol any 
+         --[primary end]
+        --[suffixed expr end]
+       --[binary expr end]
+      then
+      end
+    end
+  local
+  --[symbols]
+    t --local symbol any 
+  --[expressions]
+    { --[table constructor start] table
+      --[indexed assign start] string
+      --[index start]
+       --[field selector start] any
+        .
+         'name_'
+       --[field selector end]
+      --[index end]
+      --[value start]
+       'ravi'
+      --[value end]
+      --[indexed assign end]
+    } --[table constructor end]
+   t --local symbol any 
+   --[method name]
+    --[field selector start] any
+     .
+      'name'
+    --[field selector end]
+   =
+    function(
+      self --local symbol any 
+     ,
+      optional --local symbol any 
+    )
+    --[local symbols] self, optional
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           self --local symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[field selector start] any
+            .
+             'name_'
+           --[field selector end]
+         --[suffix list end]
+        --[suffixed expr end]
+       ,
+        --[suffixed expr start] any
+         --[primary start] any
+           optional --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+  local
+  --[symbols]
+    test_upvaluejoin --local symbol closure 
+  --[expressions]
+    function()
+    --upvalues  _ENV*
+    --[local symbols] debug, foo1, foo2, foo3, foo4
+      local
+      --[symbols]
+        debug --local symbol any 
+      --[expressions]
+        --[suffixed expr start] any
+         --[primary start] any
+           require --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+              'debug'
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      local
+      --[symbols]
+        foo1 --local symbol any 
+       ,
+        foo2 --local symbol any 
+       ,
+        foo3 --local symbol any 
+       ,
+        foo4 --local symbol any 
+      do
+      --[local symbols] a, b, c
+        local
+        --[symbols]
+          a --local symbol integer 
+         ,
+          b --local symbol integer 
+        --[expressions]
+          3
+         ,
+          5
+        local
+        --[symbols]
+          c --local symbol number 
+        --[expressions]
+          7.0999999999999996
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo1 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  a, b
+             return
+               --[binary expr start] integer
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   a --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   b --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo2 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  b, a
+             return
+               --[binary expr start] integer
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   b --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               +
+                --[suffixed expr start] integer
+                 --[primary start] integer
+                   a --upvalue integer 
+                 --[primary end]
+                --[suffixed expr end]
+               --[binary expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              foo4 --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           function()
+           --upvalues  c
+             return
+               --[suffixed expr start] number
+                --[primary start] number
+                  c --upvalue number 
+                --[primary end]
+               --[suffixed expr end]
+           end
+         --[expression list end]
+        --[expression statement end]
+        do
+        --[local symbols] a
+          local
+          --[symbols]
+            a --local symbol integer 
+          --[expressions]
+            10
+          --[expression statement start]
+           --[var list start]
+             --[suffixed expr start] any
+              --[primary start] any
+                foo3 --local symbol any 
+              --[primary end]
+             --[suffixed expr end]
+           = --[var list end]
+           --[expression list start]
+             function()
+             --upvalues  a, b
+               return
+                 --[binary expr start] integer
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     a --upvalue integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 +
+                  --[suffixed expr start] integer
+                   --[primary start] integer
+                     b --upvalue integer 
+                   --[primary end]
+                  --[suffixed expr end]
+                 --[binary expr end]
+             end
+           --[expression list end]
+          --[expression statement end]
+        end
+      end
+    end
+  do
+  --[local symbols] x
+    local
+    --[symbols]
+      x --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] createarray
+        local
+        --[symbols]
+          createarray --local symbol closure 
+        --[expressions]
+          function(
+            values --local symbol number[] 
+          )
+          --upvalues  _ENV*
+          --[local symbols] values, arr
+            local
+            --[symbols]
+              arr --local symbol number[] 
+            --[expressions]
+              --[suffixed expr start] any
+               --[primary start] any
+                 table --global symbol any 
+               --[primary end]
+               --[suffix list start]
+                 --[field selector start] any
+                  .
+                   'numarray'
+                 --[field selector end]
+                 --[function call start] any
+                  (
+                    --[unary expr start] integer
+                    #
+                     --[suffixed expr start] number[]
+                      --[primary start] number[]
+                        values --local symbol number[] 
+                      --[primary end]
+                     --[suffixed expr end]
+                    --[unary expr end]
+                   ,
+                    0
+                  )
+                 --[function call end]
+               --[suffix list end]
+              --[suffixed expr end]
+            for
+            --[local symbols] i
+              i --local symbol integer 
+            =
+              1
+             ,
+              --[unary expr start] integer
+              #
+               --[suffixed expr start] number[]
+                --[primary start] number[]
+                  values --local symbol number[] 
+                --[primary end]
+               --[suffixed expr end]
+              --[unary expr end]
+            do
+               --[expression statement start]
+                --[var list start]
+                  --[suffixed expr start] number
+                   --[primary start] number[]
+                     arr --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] number
+                      [
+                       --[suffixed expr start] integer
+                        --[primary start] integer
+                          i --local symbol integer 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                = --[var list end]
+                --[expression list start]
+                  --[suffixed expr start] number
+                   --[primary start] number[]
+                     values --local symbol number[] 
+                   --[primary end]
+                   --[suffix list start]
+                     --[Y index start] number
+                      [
+                       --[suffixed expr start] integer
+                        --[primary start] integer
+                          i --local symbol integer 
+                        --[primary end]
+                       --[suffixed expr end]
+                      ]
+                     --[Y index end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                --[expression list end]
+               --[expression statement end]
+            end
+            return
+              --[suffixed expr start] number[]
+               --[primary start] number[]
+                 arr --local symbol number[] 
+               --[primary end]
+              --[suffixed expr end]
+          end
+      end
+  end
+end
+define Proc%1
+L0 (entry)
+	LOADGLOBAL {Upval(_ENV), 'math' Ks(0)} {T(0)}
+	GETsk {T(0), 'abs' Ks(1)} {T(1)}
+	MOV {T(1)} {local(abs, 0)}
+	CLOSURE {Proc%2} {T(1)}
+	MOV {T(1)} {local(compute_pi, 1)}
+	NEWTABLE {T(1)}
+	TPUTsk {'ravi' Ks(3)} {T(1), 'name_' Ks(2)}
+	MOV {T(1)} {local(t, 2)}
+	CLOSURE {Proc%3} {T(2)}
+	PUTsk {T(2)} {local(t, 2), 'name' Ks(4)}
+	CLOSURE {Proc%4} {T(1)}
+	MOV {T(1)} {local(test_upvaluejoin, 3)}
+	CLOSURE {Proc%9} {T(1)}
+	MOV {T(1)} {local(x, 4)}
+	CLOSE {local(abs, 0)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	BR {L2}
+L1 (exit)
+L2
+	MOV {Upval(0, Proc%1, abs)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}
+	LT {T(1), T(0..)} {T(2)}
+	CBR {T(2)} {L3, L4}
+L3
+	BR {L4}
+L4
+	RET {L1}
+define Proc%3
+L0 (entry)
+	GETsk {local(self, 0), 'name_' Ks(0)} {T(0)}
+	RET {T(0), local(optional, 1)} {L1}
+L1 (exit)
+define Proc%4
+L0 (entry)
+	LOADGLOBAL {Upval(_ENV), 'require' Ks(0)} {T(0)}
+	MOV {T(0)} {T(1)}
+	CALL {T(1), 'debug' Ks(1)} {T(1..), 1 Kint(0)}
+	MOV {T(1[1..])} {local(debug, 0)}
+	INIT {local(foo1, 1)}
+	INIT {local(foo2, 2)}
+	INIT {local(foo3, 3)}
+	INIT {local(foo4, 4)}
+	MOVi {3 Kint(1)} {local(a, 5)}
+	MOVi {5 Kint(2)} {local(b, 6)}
+	MOVf {7.1E0 Kflt(0)} {local(c, 7)}
+	CLOSURE {Proc%5} {T(2)}
+	MOV {T(2)} {local(foo1, 1)}
+	CLOSURE {Proc%6} {T(2)}
+	MOV {T(2)} {local(foo2, 2)}
+	CLOSURE {Proc%7} {T(2)}
+	MOV {T(2)} {local(foo4, 4)}
+	MOVi {10 Kint(3)} {local(a, 8)}
+	CLOSURE {Proc%8} {T(2)}
+	MOV {T(2)} {local(foo3, 3)}
+	CLOSE {local(a, 8)}
+	CLOSE {local(a, 5)}
+	RET {L1}
+L1 (exit)
+define Proc%5
+L0 (entry)
+	ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%6
+L0 (entry)
+	ADDii {Upval(0, Proc%4, b), Upval(1, Proc%4, a)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%7
+L0 (entry)
+	RET {Upval(0, Proc%4, c)} {L1}
+L1 (exit)
+define Proc%8
+L0 (entry)
+	ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%9
+L0 (entry)
+	CLOSURE {Proc%10} {T(0)}
+	MOV {T(0)} {local(createarray, 0)}
+	RET {L1}
+L1 (exit)
+define Proc%10
+L0 (entry)
+	TOFARRAY {local(values, 0)}
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}
+	GETsk {T(0), 'numarray' Ks(1)} {T(1)}
+	MOV {T(1)} {T(2)}
+	LENi {local(values, 0)} {Tint(0)}
+	CALL {T(2), Tint(0), 0 Kint(0)} {T(2..), 1 Kint(1)}
+	TOFARRAY {T(2[2..])}
+	MOV {T(2[2..])} {local(arr, 1)}
+	MOV {1 Kint(1)} {Tint(1)}
+	LENi {local(values, 0)} {Tint(2)}
+	MOV {Tint(2)} {Tint(3)}
+	MOV {1 Kint(1)} {Tint(4)}
+	SUBii {Tint(1), Tint(4)} {Tint(1)}
+	BR {L2}
+L1 (exit)
+L2
+	ADDii {Tint(1), Tint(4)} {Tint(1)}
+	BR {L3}
+L3
+	LIii {Tint(3), Tint(1)} {Tbool(5)}
+	CBR {Tbool(5)} {L5, L4}
+L4
+	MOV {Tint(1)} {Tint(0)}
+	FAGETik {local(values, 0), Tint(0)} {Tflt(1)}
+	FAPUTfv {Tflt(1)} {local(arr, 1), Tint(0)}
+	BR {L2}
+L5
+	RET {local(arr, 1)} {L1}
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'math' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'abs' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(abs, 0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(compute_pi, 1)}</TD></TR>
+<TR><TD>NEWTABLE {T(1)}</TD></TR>
+<TR><TD>TPUTsk {'ravi' Ks(3)} {T(1), 'name_' Ks(2)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(t, 2)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(2)}</TD></TR>
+<TR><TD>PUTsk {T(2)} {local(t, 2), 'name' Ks(4)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(test_upvaluejoin, 3)}</TD></TR>
+<TR><TD>CLOSURE {Proc%9} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {local(x, 4)}</TD></TR>
+<TR><TD>CLOSE {local(abs, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>MOV {Upval(0, Proc%1, abs)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>LT {T(1), T(0..)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>GETsk {local(self, 0), 'name_' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>RET {T(0), local(optional, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'require' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), 'debug' Ks(1)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(1[1..])} {local(debug, 0)}</TD></TR>
+<TR><TD>INIT {local(foo1, 1)}</TD></TR>
+<TR><TD>INIT {local(foo2, 2)}</TD></TR>
+<TR><TD>INIT {local(foo3, 3)}</TD></TR>
+<TR><TD>INIT {local(foo4, 4)}</TD></TR>
+<TR><TD>MOVi {3 Kint(1)} {local(a, 5)}</TD></TR>
+<TR><TD>MOVi {5 Kint(2)} {local(b, 6)}</TD></TR>
+<TR><TD>MOVf {7.1E0 Kflt(0)} {local(c, 7)}</TD></TR>
+<TR><TD>CLOSURE {Proc%5} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo1, 1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%6} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo2, 2)}</TD></TR>
+<TR><TD>CLOSURE {Proc%7} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo4, 4)}</TD></TR>
+<TR><TD>MOVi {10 Kint(3)} {local(a, 8)}</TD></TR>
+<TR><TD>CLOSURE {Proc%8} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo3, 3)}</TD></TR>
+<TR><TD>CLOSE {local(a, 8)}</TD></TR>
+<TR><TD>CLOSE {local(a, 5)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, b), Upval(1, Proc%4, a)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {Upval(0, Proc%4, c)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc8 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, b), Upval(1, Proc%4, a)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {Upval(0, Proc%4, c)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc8 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc9 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%10} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(createarray, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc10 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
+<TR><TD>CALL {T(2), Tint(0), 0 Kint(0)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(arr, 1)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>FAGETik {local(values, 0), Tint(0)} {Tflt(1)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(arr, 1), Tint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L4 -> L2
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(arr, 1)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+}
+digraph Proc10 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
+<TR><TD>CALL {T(2), Tint(0), 0 Kint(0)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(arr, 1)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>FAGETik {local(values, 0), Tint(0)} {Tflt(1)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(arr, 1), Tint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L4 -> L2
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(arr, 1)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+}
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>MOV {Upval(0, Proc%1, abs)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>LT {T(1), T(0..)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>BR {L4}</TD></TR>
+</TABLE>>];
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>GETsk {local(self, 0), 'name_' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>RET {T(0), local(optional, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'require' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), 'debug' Ks(1)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(1[1..])} {local(debug, 0)}</TD></TR>
+<TR><TD>INIT {local(foo1, 1)}</TD></TR>
+<TR><TD>INIT {local(foo2, 2)}</TD></TR>
+<TR><TD>INIT {local(foo3, 3)}</TD></TR>
+<TR><TD>INIT {local(foo4, 4)}</TD></TR>
+<TR><TD>MOVi {3 Kint(1)} {local(a, 5)}</TD></TR>
+<TR><TD>MOVi {5 Kint(2)} {local(b, 6)}</TD></TR>
+<TR><TD>MOVf {7.1E0 Kflt(0)} {local(c, 7)}</TD></TR>
+<TR><TD>CLOSURE {Proc%5} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo1, 1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%6} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo2, 2)}</TD></TR>
+<TR><TD>CLOSURE {Proc%7} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo4, 4)}</TD></TR>
+<TR><TD>MOVi {10 Kint(3)} {local(a, 8)}</TD></TR>
+<TR><TD>CLOSURE {Proc%8} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {local(foo3, 3)}</TD></TR>
+<TR><TD>CLOSE {local(a, 8)}</TD></TR>
+<TR><TD>CLOSE {local(a, 5)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, b), Upval(1, Proc%4, a)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {Upval(0, Proc%4, c)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc8 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, b), Upval(1, Proc%4, a)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {Upval(0, Proc%4, c)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc8 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>ADDii {Upval(0, Proc%4, a), Upval(1, Proc%4, b)} {Tint(0)}</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc9 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%10} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(createarray, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc10 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
+<TR><TD>CALL {T(2), Tint(0), 0 Kint(0)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(arr, 1)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>FAGETik {local(values, 0), Tint(0)} {Tflt(1)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(arr, 1), Tint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L4 -> L2
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(arr, 1)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+}
+digraph Proc10 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
+<TR><TD>CALL {T(2), Tint(0), 0 Kint(0)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(arr, 1)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>BR {L3}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+</TABLE>>];
+L3 -> L5
+L3 -> L4
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
+<TR><TD>FAGETik {local(values, 0), Tint(0)} {Tflt(1)}</TD></TR>
+<TR><TD>FAPUTfv {Tflt(1)} {local(arr, 1), Tint(0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L4 -> L2
+L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L5</B></TD></TR>
+<TR><TD>RET {local(arr, 1)} {L1}</TD></TR>
+</TABLE>>];
+L5 -> L1
+}
+}
+}
+do
+  local x = function()
+    local function tryme()
+      local i,j = 5,6
+      return i,j
+    end
+    local i:integer, j:integer = tryme()
+    assert(i+j == 11)
+  end
+  x()
+end
+
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] x
+    local
+    --[symbols]
+      x --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] tryme, i, j
+        local
+        --[symbols]
+          tryme --local symbol closure 
+        --[expressions]
+          function()
+          --[local symbols] i, j
+            local
+            --[symbols]
+              i --local symbol any 
+             ,
+              j --local symbol any 
+            --[expressions]
+              5
+             ,
+              6
+            return
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+             ,
+              --[suffixed expr start] any
+               --[primary start] any
+                 j --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+          end
+        local
+        --[symbols]
+          i --local symbol integer 
+         ,
+          j --local symbol integer 
+        --[expressions]
+          --[suffixed expr start] closure
+           --[primary start] closure
+             tryme --local symbol closure 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[binary expr start] any
+                   --[suffixed expr start] integer
+                    --[primary start] integer
+                      i --local symbol integer 
+                    --[primary end]
+                   --[suffixed expr end]
+                  +
+                   --[suffixed expr start] integer
+                    --[primary start] integer
+                      j --local symbol integer 
+                    --[primary end]
+                   --[suffixed expr end]
+                  --[binary expr end]
+                 ==
+                  11
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] x
+    local
+    --[symbols]
+      x --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] tryme, i, j
+        local
+        --[symbols]
+          tryme --local symbol closure 
+        --[expressions]
+          function()
+          --[local symbols] i, j
+            local
+            --[symbols]
+              i --local symbol any 
+             ,
+              j --local symbol any 
+            --[expressions]
+              5
+             ,
+              6
+            return
+              --[suffixed expr start] any
+               --[primary start] any
+                 i --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+             ,
+              --[suffixed expr start] any
+               --[primary start] any
+                 j --local symbol any 
+               --[primary end]
+              --[suffixed expr end]
+          end
+        local
+        --[symbols]
+          i --local symbol integer 
+         ,
+          j --local symbol integer 
+        --[expressions]
+          --[suffixed expr start] any
+           --[primary start] closure
+             tryme --local symbol closure 
+           --[primary end]
+           --[suffix list start]
+             --[function call start] any
+              (
+              )
+             --[function call end]
+           --[suffix list end]
+          --[suffixed expr end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] boolean
+                  --[binary expr start] integer
+                   --[suffixed expr start] integer
+                    --[primary start] integer
+                      i --local symbol integer 
+                    --[primary end]
+                   --[suffixed expr end]
+                  +
+                   --[suffixed expr start] integer
+                    --[primary start] integer
+                      j --local symbol integer 
+                    --[primary end]
+                   --[suffixed expr end]
+                  --[binary expr end]
+                 ==
+                  11
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          x --local symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	MOV {T(0)} {local(x, 0)}
+	MOV {local(x, 0)} {T(0)}
+	CALL {T(0)} {T(0..), 1 Kint(0)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	CLOSURE {Proc%3} {T(0)}
+	MOV {T(0)} {local(tryme, 0)}
+	MOV {local(tryme, 0)} {T(0)}
+	CALL {T(0)} {T(0..), 2 Kint(0)}
+	TOINT {T(0[0..])}
+	MOVi {T(0[0..])} {Tint(0)}
+	TOINT {T(1[0..])}
+	MOVi {T(1[0..])} {Tint(1)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}
+	MOV {T(1)} {T(2)}
+	ADDii {Tint(0), Tint(1)} {Tint(2)}
+	EQii {Tint(2), 11 Kint(1)} {Tbool(3)}
+	CALL {T(2), Tbool(3)} {T(2..), 1 Kint(2)}
+	RET {L1}
+L1 (exit)
+define Proc%3
+L0 (entry)
+	MOV {5 Kint(0)} {local(i, 0)}
+	MOV {6 Kint(1)} {local(j, 1)}
+	RET {local(i, 0), local(j, 1)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {local(x, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(tryme, 0)}</TD></TR>
+<TR><TD>MOV {local(tryme, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 2 Kint(0)}</TD></TR>
+<TR><TD>TOINT {T(0[0..])}</TD></TR>
+<TR><TD>MOVi {T(0[0..])} {Tint(0)}</TD></TR>
+<TR><TD>TOINT {T(1[0..])}</TD></TR>
+<TR><TD>MOVi {T(1[0..])} {Tint(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(2)}</TD></TR>
+<TR><TD>EQii {Tint(2), 11 Kint(1)} {Tbool(3)}</TD></TR>
+<TR><TD>CALL {T(2), Tbool(3)} {T(2..), 1 Kint(2)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {5 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOV {6 Kint(1)} {local(j, 1)}</TD></TR>
+<TR><TD>RET {local(i, 0), local(j, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {5 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOV {6 Kint(1)} {local(j, 1)}</TD></TR>
+<TR><TD>RET {local(i, 0), local(j, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(tryme, 0)}</TD></TR>
+<TR><TD>MOV {local(tryme, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 2 Kint(0)}</TD></TR>
+<TR><TD>TOINT {T(0[0..])}</TD></TR>
+<TR><TD>MOVi {T(0[0..])} {Tint(0)}</TD></TR>
+<TR><TD>TOINT {T(1[0..])}</TD></TR>
+<TR><TD>MOVi {T(1[0..])} {Tint(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(2)}</TD></TR>
+<TR><TD>EQii {Tint(2), 11 Kint(1)} {Tbool(3)}</TD></TR>
+<TR><TD>CALL {T(2), Tbool(3)} {T(2..), 1 Kint(2)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {5 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOV {6 Kint(1)} {local(j, 1)}</TD></TR>
+<TR><TD>RET {local(i, 0), local(j, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOV {5 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOV {6 Kint(1)} {local(j, 1)}</TD></TR>
+<TR><TD>RET {local(i, 0), local(j, 1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+}
+do
+  local y
+  local z = function()
+    local x=function()
+      local j:number[] = {}
+      return j
+    end
+    y=x()
+    y[1] = 99.67
+    assert(y[1], 99.67)
+    assert(@integer (#y) == 1)
+  end
+  z()
+end
+
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] y, z
+    local
+    --[symbols]
+      y --local symbol any 
+    local
+    --[symbols]
+      z --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  y, _ENV*
+      --[local symbols] x
+        local
+        --[symbols]
+          x --local symbol any 
+        --[expressions]
+          function()
+          --[local symbols] j
+            local
+            --[symbols]
+              j --local symbol number[] 
+            --[expressions]
+              { --[table constructor start] table
+              } --[table constructor end]
+            return
+              --[suffixed expr start] number[]
+               --[primary start] number[]
+                 j --local symbol number[] 
+               --[primary end]
+              --[suffixed expr end]
+          end
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              y --upvalue any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              x --local symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              y --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[Y index start] any
+               [
+                1
+               ]
+              --[Y index end]
+            --[suffix list end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           99.6700000000000017
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    y --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[Y index start] any
+                     [
+                      1
+                     ]
+                    --[Y index end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+                ,
+                 99.6700000000000017
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[unary expr start] any
+                  @integer
+                   --[suffixed expr start] any
+                    --[primary start] any
+                     --[unary expr start] any
+                     #
+                      --[suffixed expr start] any
+                       --[primary start] any
+                         y --upvalue any 
+                       --[primary end]
+                      --[suffixed expr end]
+                     --[unary expr end]
+                    --[primary end]
+                   --[suffixed expr end]
+                  --[unary expr end]
+                 ==
+                  1
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --local symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] y, z
+    local
+    --[symbols]
+      y --local symbol any 
+    local
+    --[symbols]
+      z --local symbol any 
+    --[expressions]
+      function()
+      --upvalues  y, _ENV*
+      --[local symbols] x
+        local
+        --[symbols]
+          x --local symbol any 
+        --[expressions]
+          function()
+          --[local symbols] j
+            local
+            --[symbols]
+              j --local symbol number[] 
+            --[expressions]
+              { --[table constructor start] number[]
+              } --[table constructor end]
+            return
+              --[suffixed expr start] number[]
+               --[primary start] number[]
+                 j --local symbol number[] 
+               --[primary end]
+              --[suffixed expr end]
+          end
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              y --upvalue any 
+            --[primary end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              x --local symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[var list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              y --upvalue any 
+            --[primary end]
+            --[suffix list start]
+              --[Y index start] any
+               [
+                1
+               ]
+              --[Y index end]
+            --[suffix list end]
+           --[suffixed expr end]
+         = --[var list end]
+         --[expression list start]
+           99.6700000000000017
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] any
+                  --[primary start] any
+                    y --upvalue any 
+                  --[primary end]
+                  --[suffix list start]
+                    --[Y index start] any
+                     [
+                      1
+                     ]
+                    --[Y index end]
+                  --[suffix list end]
+                 --[suffixed expr end]
+                ,
+                 99.6700000000000017
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] boolean
+                  --[unary expr start] integer
+                  @integer
+                   --[suffixed expr start] any
+                    --[primary start] any
+                     --[unary expr start] any
+                     #
+                      --[suffixed expr start] any
+                       --[primary start] any
+                         y --upvalue any 
+                       --[primary end]
+                      --[suffixed expr end]
+                     --[unary expr end]
+                    --[primary end]
+                   --[suffixed expr end]
+                  --[unary expr end]
+                 ==
+                  1
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          z --local symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	INIT {local(y, 0)}
+	CLOSURE {Proc%2} {T(0)}
+	MOV {T(0)} {local(z, 1)}
+	MOV {local(z, 1)} {T(0)}
+	CALL {T(0)} {T(0..), 1 Kint(0)}
+	CLOSE {local(y, 0)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	CLOSURE {Proc%3} {T(0)}
+	MOV {T(0)} {local(x, 0)}
+	MOV {local(x, 0)} {T(0)}
+	CALL {T(0)} {T(0..), 1 Kint(0)}
+	MOV {T(0[0..])} {Upval(0, Proc%1, y)}
+	PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}
+	MOV {T(1)} {T(2)}
+	GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(3)}
+	CALL {T(2), T(3), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(3)}
+	MOV {T(3)} {T(4)}
+	LEN {Upval(0, Proc%1, y)} {T(5)}
+	TOINT {T(5)}
+	MOV {T(5)} {Tint(0)}
+	EQii {Tint(0), 1 Kint(0)} {Tbool(1)}
+	CALL {T(4), Tbool(1)} {T(4..), 1 Kint(0)}
+	RET {L1}
+L1 (exit)
+define Proc%3
+L0 (entry)
+	NEWFARRAY {T(0)}
+	MOV {T(0)} {local(j, 0)}
+	RET {local(j, 0)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {local(y, 0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(z, 1)}</TD></TR>
+<TR><TD>MOV {local(z, 1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>CLOSE {local(y, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {local(x, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {Upval(0, Proc%1, y)}</TD></TR>
+<TR><TD>PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(2), T(3), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>MOV {T(3)} {T(4)}</TD></TR>
+<TR><TD>LEN {Upval(0, Proc%1, y)} {T(5)}</TD></TR>
+<TR><TD>TOINT {T(5)}</TD></TR>
+<TR><TD>MOV {T(5)} {Tint(0)}</TD></TR>
+<TR><TD>EQii {Tint(0), 1 Kint(0)} {Tbool(1)}</TD></TR>
+<TR><TD>CALL {T(4), Tbool(1)} {T(4..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(j, 0)}</TD></TR>
+<TR><TD>RET {local(j, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(j, 0)}</TD></TR>
+<TR><TD>RET {local(j, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {local(x, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {Upval(0, Proc%1, y)}</TD></TR>
+<TR><TD>PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(2), T(3), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>MOV {T(3)} {T(4)}</TD></TR>
+<TR><TD>LEN {Upval(0, Proc%1, y)} {T(5)}</TD></TR>
+<TR><TD>TOINT {T(5)}</TD></TR>
+<TR><TD>MOV {T(5)} {Tint(0)}</TD></TR>
+<TR><TD>EQii {Tint(0), 1 Kint(0)} {Tbool(1)}</TD></TR>
+<TR><TD>CALL {T(4), Tbool(1)} {T(4..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(j, 0)}</TD></TR>
+<TR><TD>RET {local(j, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(j, 0)}</TD></TR>
+<TR><TD>RET {local(j, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+}
+do
+  local function test_numarray_meta()
+    local farray : number[] = {1.1, 2.2, 3.3}
+    setmetatable(farray, {
+      __name = 'matrix',
+      __tostring = function() return '{' .. table.concat(farray, ",") .. '}' end
+      })
+    assert(ravitype(farray) == 'matrix')
+    assert(tostring(farray) == '{1.1,2.2,3.3}')
+  end
+  assert(pcall(test_numarray_meta));
+end
+
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] test_numarray_meta
+    local
+    --[symbols]
+      test_numarray_meta --local symbol closure 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] farray
+        local
+        --[symbols]
+          farray --local symbol number[] 
+        --[expressions]
+          { --[table constructor start] table
+            --[indexed assign start] number
+            --[value start]
+             1.1000000000000001
+            --[value end]
+            --[indexed assign end]
+           ,
+            --[indexed assign start] number
+            --[value start]
+             2.2000000000000002
+            --[value end]
+            --[indexed assign end]
+           ,
+            --[indexed assign start] number
+            --[value start]
+             3.2999999999999998
+            --[value end]
+            --[indexed assign end]
+          } --[table constructor end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              setmetatable --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] number[]
+                  --[primary start] number[]
+                    farray --local symbol number[] 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 { --[table constructor start] table
+                   --[indexed assign start] string
+                   --[index start]
+                    --[field selector start] any
+                     .
+                      '__name'
+                    --[field selector end]
+                   --[index end]
+                   --[value start]
+                    'matrix'
+                   --[value end]
+                   --[indexed assign end]
+                  ,
+                   --[indexed assign start] closure
+                   --[index start]
+                    --[field selector start] any
+                     .
+                      '__tostring'
+                    --[field selector end]
+                   --[index end]
+                   --[value start]
+                    function()
+                    --upvalues  _ENV*, farray
+                      return
+                        --[binary expr start] any
+                         '{'
+                        ..
+                         --[binary expr start] any
+                          --[suffixed expr start] any
+                           --[primary start] any
+                             table --global symbol any 
+                           --[primary end]
+                           --[suffix list start]
+                             --[field selector start] any
+                              .
+                               'concat'
+                             --[field selector end]
+                             --[function call start] any
+                              (
+                                --[suffixed expr start] number[]
+                                 --[primary start] number[]
+                                   farray --upvalue number[] 
+                                 --[primary end]
+                                --[suffixed expr end]
+                               ,
+                                ','
+                              )
+                             --[function call end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ..
+                          '}'
+                         --[binary expr end]
+                        --[binary expr end]
+                    end
+                   --[value end]
+                   --[indexed assign end]
+                 } --[table constructor end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     ravitype --global symbol any 
+                   --[primary end]
+                   --[suffix list start]
+                     --[function call start] any
+                      (
+                        --[suffixed expr start] number[]
+                         --[primary start] number[]
+                           farray --local symbol number[] 
+                         --[primary end]
+                        --[suffixed expr end]
+                      )
+                     --[function call end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ==
+                  'matrix'
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     tostring --global symbol any 
+                   --[primary end]
+                   --[suffix list start]
+                     --[function call start] any
+                      (
+                        --[suffixed expr start] number[]
+                         --[primary start] number[]
+                           farray --local symbol number[] 
+                         --[primary end]
+                        --[suffixed expr end]
+                      )
+                     --[function call end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ==
+                  '{1.1,2.2,3.3}'
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          assert --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             --[suffixed expr start] any
+              --[primary start] any
+                pcall --global symbol any 
+              --[primary end]
+              --[suffix list start]
+                --[function call start] any
+                 (
+                   --[suffixed expr start] closure
+                    --[primary start] closure
+                      test_numarray_meta --local symbol closure 
+                    --[primary end]
+                   --[suffixed expr end]
+                 )
+                --[function call end]
+              --[suffix list end]
+             --[suffixed expr end]
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+function()
+--upvalues  _ENV*
+  do
+  --[local symbols] test_numarray_meta
+    local
+    --[symbols]
+      test_numarray_meta --local symbol closure 
+    --[expressions]
+      function()
+      --upvalues  _ENV*
+      --[local symbols] farray
+        local
+        --[symbols]
+          farray --local symbol number[] 
+        --[expressions]
+          { --[table constructor start] number[]
+            --[indexed assign start] number
+            --[value start]
+             1.1000000000000001
+            --[value end]
+            --[indexed assign end]
+           ,
+            --[indexed assign start] number
+            --[value start]
+             2.2000000000000002
+            --[value end]
+            --[indexed assign end]
+           ,
+            --[indexed assign start] number
+            --[value start]
+             3.2999999999999998
+            --[value end]
+            --[indexed assign end]
+          } --[table constructor end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              setmetatable --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[suffixed expr start] number[]
+                  --[primary start] number[]
+                    farray --local symbol number[] 
+                  --[primary end]
+                 --[suffixed expr end]
+                ,
+                 { --[table constructor start] table
+                   --[indexed assign start] string
+                   --[index start]
+                    --[field selector start] any
+                     .
+                      '__name'
+                    --[field selector end]
+                   --[index end]
+                   --[value start]
+                    'matrix'
+                   --[value end]
+                   --[indexed assign end]
+                  ,
+                   --[indexed assign start] closure
+                   --[index start]
+                    --[field selector start] any
+                     .
+                      '__tostring'
+                    --[field selector end]
+                   --[index end]
+                   --[value start]
+                    function()
+                    --upvalues  _ENV*, farray
+                      return
+                        --[binary expr start] any
+                         '{'
+                        ..
+                         --[binary expr start] any
+                          --[suffixed expr start] any
+                           --[primary start] any
+                             table --global symbol any 
+                           --[primary end]
+                           --[suffix list start]
+                             --[field selector start] any
+                              .
+                               'concat'
+                             --[field selector end]
+                             --[function call start] any
+                              (
+                                --[suffixed expr start] number[]
+                                 --[primary start] number[]
+                                   farray --upvalue number[] 
+                                 --[primary end]
+                                --[suffixed expr end]
+                               ,
+                                ','
+                              )
+                             --[function call end]
+                           --[suffix list end]
+                          --[suffixed expr end]
+                         ..
+                          '}'
+                         --[binary expr end]
+                        --[binary expr end]
+                    end
+                   --[value end]
+                   --[indexed assign end]
+                 } --[table constructor end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     ravitype --global symbol any 
+                   --[primary end]
+                   --[suffix list start]
+                     --[function call start] any
+                      (
+                        --[suffixed expr start] number[]
+                         --[primary start] number[]
+                           farray --local symbol number[] 
+                         --[primary end]
+                        --[suffixed expr end]
+                      )
+                     --[function call end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ==
+                  'matrix'
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+        --[expression statement start]
+         --[expression list start]
+           --[suffixed expr start] any
+            --[primary start] any
+              assert --global symbol any 
+            --[primary end]
+            --[suffix list start]
+              --[function call start] any
+               (
+                 --[binary expr start] any
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     tostring --global symbol any 
+                   --[primary end]
+                   --[suffix list start]
+                     --[function call start] any
+                      (
+                        --[suffixed expr start] number[]
+                         --[primary start] number[]
+                           farray --local symbol number[] 
+                         --[primary end]
+                        --[suffixed expr end]
+                      )
+                     --[function call end]
+                   --[suffix list end]
+                  --[suffixed expr end]
+                 ==
+                  '{1.1,2.2,3.3}'
+                 --[binary expr end]
+               )
+              --[function call end]
+            --[suffix list end]
+           --[suffixed expr end]
+         --[expression list end]
+        --[expression statement end]
+      end
+    --[expression statement start]
+     --[expression list start]
+       --[suffixed expr start] any
+        --[primary start] any
+          assert --global symbol any 
+        --[primary end]
+        --[suffix list start]
+          --[function call start] any
+           (
+             --[suffixed expr start] any
+              --[primary start] any
+                pcall --global symbol any 
+              --[primary end]
+              --[suffix list start]
+                --[function call start] any
+                 (
+                   --[suffixed expr start] closure
+                    --[primary start] closure
+                      test_numarray_meta --local symbol closure 
+                    --[primary end]
+                   --[suffixed expr end]
+                 )
+                --[function call end]
+              --[suffix list end]
+             --[suffixed expr end]
+           )
+          --[function call end]
+        --[suffix list end]
+       --[suffixed expr end]
+     --[expression list end]
+    --[expression statement end]
+  end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	MOV {T(0)} {local(test_numarray_meta, 0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	MOV {T(0)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'pcall' Ks(1)} {T(2)}
+	MOV {T(2)} {T(3)}
+	CALL {T(3), local(test_numarray_meta, 0)} {T(3..), -1 Kint(0)}
+	CALL {T(1), T(3..)} {T(1..), 1 Kint(1)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	NEWFARRAY {T(0)}
+	FAPUTfv {1.1E0 Kflt(0)} {T(0), 1 Kint(0)}
+	FAPUTfv {2.2E0 Kflt(1)} {T(0), 2 Kint(1)}
+	FAPUTfv {3.3E0 Kflt(2)} {T(0), 3 Kint(2)}
+	MOV {T(0)} {local(farray, 0)}
+	LOADGLOBAL {Upval(_ENV), 'setmetatable' Ks(0)} {T(0)}
+	MOV {T(0)} {T(1)}
+	NEWTABLE {T(2)}
+	TPUTsk {'matrix' Ks(2)} {T(2), '__name' Ks(1)}
+	CLOSURE {Proc%3} {T(3)}
+	TPUTsk {T(3)} {T(2), '__tostring' Ks(3)}
+	CALL {T(1), local(farray, 0), T(2)} {T(1..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}
+	MOV {T(2)} {T(3)}
+	LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(4)}
+	MOV {T(4)} {T(5)}
+	CALL {T(5), local(farray, 0)} {T(5..), 1 Kint(0)}
+	EQ {T(5..), 'matrix' Ks(2)} {T(6)}
+	CALL {T(3), T(6)} {T(3..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(6)}
+	MOV {T(6)} {T(5)}
+	LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(7)}
+	MOV {T(7)} {T(8)}
+	CALL {T(8), local(farray, 0)} {T(8..), 1 Kint(0)}
+	EQ {T(8..), '{1.1,2.2,3.3}' Ks(7)} {T(9)}
+	CALL {T(5), T(9)} {T(5..), 1 Kint(0)}
+	CLOSE {local(farray, 0)}
+	RET {L1}
+L1 (exit)
+define Proc%3
+L0 (entry)
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}
+	GETsk {T(0), 'concat' Ks(2)} {T(1)}
+	MOV {T(1)} {T(2)}
+	CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}
+	CONCAT {T(2..), '}' Ks(4)} {T(3)}
+	CONCAT {'{' Ks(0), T(3)} {T(2)}
+	RET {T(2)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(test_numarray_meta, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'pcall' Ks(1)} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(3), local(test_numarray_meta, 0)} {T(3..), -1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(1), T(3..)} {T(1..), 1 Kint(1)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>FAPUTfv {1.1E0 Kflt(0)} {T(0), 1 Kint(0)}</TD></TR>
+<TR><TD>FAPUTfv {2.2E0 Kflt(1)} {T(0), 2 Kint(1)}</TD></TR>
+<TR><TD>FAPUTfv {3.3E0 Kflt(2)} {T(0), 3 Kint(2)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(farray, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'setmetatable' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
+<TR><TD>NEWTABLE {T(2)}</TD></TR>
+<TR><TD>TPUTsk {'matrix' Ks(2)} {T(2), '__name' Ks(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(3)}</TD></TR>
+<TR><TD>TPUTsk {T(3)} {T(2), '__tostring' Ks(3)}</TD></TR>
+<TR><TD>CALL {T(1), local(farray, 0), T(2)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {T(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(4)}</TD></TR>
+<TR><TD>MOV {T(4)} {T(5)}</TD></TR>
+<TR><TD>CALL {T(5), local(farray, 0)} {T(5..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(5..), 'matrix' Ks(2)} {T(6)}</TD></TR>
+<TR><TD>CALL {T(3), T(6)} {T(3..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(6)}</TD></TR>
+<TR><TD>MOV {T(6)} {T(5)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(7)}</TD></TR>
+<TR><TD>MOV {T(7)} {T(8)}</TD></TR>
+<TR><TD>CALL {T(8), local(farray, 0)} {T(8..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(8..), '{1.1,2.2,3.3}' Ks(7)} {T(9)}</TD></TR>
+<TR><TD>CALL {T(5), T(9)} {T(5..), 1 Kint(0)}</TD></TR>
+<TR><TD>CLOSE {local(farray, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(3)} {T(2)}</TD></TR>
+<TR><TD>RET {T(2)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(3)} {T(2)}</TD></TR>
+<TR><TD>RET {T(2)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWFARRAY {T(0)}</TD></TR>
+<TR><TD>FAPUTfv {1.1E0 Kflt(0)} {T(0), 1 Kint(0)}</TD></TR>
+<TR><TD>FAPUTfv {2.2E0 Kflt(1)} {T(0), 2 Kint(1)}</TD></TR>
+<TR><TD>FAPUTfv {3.3E0 Kflt(2)} {T(0), 3 Kint(2)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(farray, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'setmetatable' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
+<TR><TD>NEWTABLE {T(2)}</TD></TR>
+<TR><TD>TPUTsk {'matrix' Ks(2)} {T(2), '__name' Ks(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(3)}</TD></TR>
+<TR><TD>TPUTsk {T(3)} {T(2), '__tostring' Ks(3)}</TD></TR>
+<TR><TD>CALL {T(1), local(farray, 0), T(2)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}</TD></TR>
+<TR><TD>MOV {T(2)} {T(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(4)}</TD></TR>
+<TR><TD>MOV {T(4)} {T(5)}</TD></TR>
+<TR><TD>CALL {T(5), local(farray, 0)} {T(5..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(5..), 'matrix' Ks(2)} {T(6)}</TD></TR>
+<TR><TD>CALL {T(3), T(6)} {T(3..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(6)}</TD></TR>
+<TR><TD>MOV {T(6)} {T(5)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(7)}</TD></TR>
+<TR><TD>MOV {T(7)} {T(8)}</TD></TR>
+<TR><TD>CALL {T(8), local(farray, 0)} {T(8..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(8..), '{1.1,2.2,3.3}' Ks(7)} {T(9)}</TD></TR>
+<TR><TD>CALL {T(5), T(9)} {T(5..), 1 Kint(0)}</TD></TR>
+<TR><TD>CLOSE {local(farray, 0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(3)} {T(2)}</TD></TR>
+<TR><TD>RET {T(2)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(3)} {T(2)}</TD></TR>
+<TR><TD>RET {T(2)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+}
+local function test()
+    return 1.0
+end
+--print(test())
+return test()
+function()
+--upvalues  _ENV*
+--[local symbols] test
+  local
+  --[symbols]
+    test --local symbol closure 
+  --[expressions]
+    function()
+      return
+        1.0000000000000000
+    end
+  return
+    --[suffixed expr start] closure
+     --[primary start] closure
+       test --local symbol closure 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+function()
+--upvalues  _ENV*
+--[local symbols] test
+  local
+  --[symbols]
+    test --local symbol closure 
+  --[expressions]
+    function()
+      return
+        1.0000000000000000
+    end
+  return
+    --[suffixed expr start] any
+     --[primary start] closure
+       test --local symbol closure 
+     --[primary end]
+     --[suffix list start]
+       --[function call start] any
+        (
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	MOV {T(0)} {local(test, 0)}
+	MOV {local(test, 0)} {T(0)}
+	CALL {T(0)} {T(0..), -1 Kint(0)}
+	RET {T(0..)} {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	RET {1E0 Kflt(0)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(test, 0)}</TD></TR>
+<TR><TD>MOV {local(test, 0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), -1 Kint(0)}</TD></TR>
+<TR><TD>RET {T(0..)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1E0 Kflt(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1E0 Kflt(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}

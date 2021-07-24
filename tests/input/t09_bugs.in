@@ -1,0 +1,90 @@
+local assert = assert
+return function(m: integer, n: integer)
+  assert(m == n)
+  print('testing')
+end
+#
+local abs = math.abs
+local function compute_pi()
+  if abs(c) > TOL then
+  end
+end
+-- #64
+local t = { name_ = "ravi" }
+function t:name(optional)
+return self.name_, optional
+end
+-- issue #66
+local function test_upvaluejoin()
+    local debug = require'debug'
+    local foo1, foo2, foo3, foo4
+    do
+      local a:integer, b:integer = 3, 5
+      local c:number = 7.1
+      foo1 = function() return a+b end
+      foo2 = function() return b+a end
+      foo4 = function() return c end
+      do
+        local a: integer = 10
+        foo3 = function() return a+b end
+      end
+    end
+end
+-- issue #65
+do
+  local x = function ()
+    local function createarray(values: number[])
+        local arr: number[] = table.numarray(#values, 0)
+        for i=1,#values do
+            arr[i] = values[i]
+        end
+        return arr
+    end
+  end
+end
+#
+do
+  local x = function()
+    local function tryme()
+      local i,j = 5,6
+      return i,j
+    end
+    local i:integer, j:integer = tryme()
+    assert(i+j == 11)
+  end
+  x()
+end
+#
+do
+  local y
+  local z = function()
+    local x=function()
+      local j:number[] = {}
+      return j
+    end
+    y=x()
+    y[1] = 99.67
+    assert(y[1], 99.67)
+    assert(@integer (#y) == 1)
+  end
+  z()
+end
+#
+do
+  local function test_numarray_meta()
+    local farray : number[] = {1.1, 2.2, 3.3}
+    setmetatable(farray, {
+      __name = 'matrix',
+      __tostring = function() return '{' .. table.concat(farray, ",") .. '}' end
+      })
+    assert(ravitype(farray) == 'matrix')
+    assert(tostring(farray) == '{1.1,2.2,3.3}')
+  end
+  assert(pcall(test_numarray_meta));
+end
+#
+local function test()
+    return 1.0
+end
+--print(test())
+return test()

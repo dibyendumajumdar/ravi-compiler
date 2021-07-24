@@ -1,7 +1,6 @@
 ## Sources
 
 * `trun.c` - a new driver for executing tests - handles multiple cases in a single input file. Runs lexer, parser, typechecker, linearizer, CFG generation, etc. and then dumps it all out on `stdout`.
-* `tparse.c` - a simple driver that takes some source text as input and runs lexer, parser, typechecker, and linearizer on the input. This is an older version that is now superceded by `trun`.
 * `tgraph.c` - basic smoke test for graph data structure.
 * `tastwalk.c` - demonstrates how to write AST walking; it does not do anything but just walks the AST silently.
 * `tmisc.c` - miscellaneous internal tests.

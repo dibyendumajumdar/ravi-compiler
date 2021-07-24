@@ -54,3 +54,9 @@ $command -f input/t08_genericfor.in > results.out
 #cp results.out expected/t08_genericfor.expected
 diff expected/t08_genericfor.expected results.out
 rm results.out
+
+echo "testing t09_bugs"
+$command -f input/t09_bugs.in > results.out
+#cp results.out expected/t09_bugs.expected
+diff expected/t09_bugs.expected results.out
+rm results.out

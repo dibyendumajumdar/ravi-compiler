@@ -44,6 +44,5 @@ jobs:
       run: |
          cd tests
          sh truntests.sh ${{runner.workspace}}/build/trun
-         sh runtests.sh ${{runner.workspace}}/build/tparse
          sh runtparse.sh ${{runner.workspace}}/build/taskwalk
 
