@@ -18,9 +18,9 @@ uniformly represented in an instruction. Following are the possible types:
 
 <dl>
     <dt>PSEUDO_SYMBOL</dt><dd>An object of type lua_symbol representing local variable or upvalue, always refers to Lua stack relative to 'base'</dd>
-	<dt>PSEUDO_TEMP_FLT</dt><dd>A floating point temporary - may also be used for locals that do not escape - refers to C stack</dd>
+	<dt>PSEUDO_TEMP_FLT</dt><dd>A floating point temporary - may also be used for locals that do not escape - references C stack</dd>
 	<dt>PSEUDO_TEMP_INT</dt><dd>An integer temporary - may also be used for locals that do not escape - references C stack</dd>
-	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temporary restricted to <code>1</code> and <code>0</code> - references C stack, shares the virtual C stack with <code>PSEUDO_TEMP_INT</code></dd>
+	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temporary restricted to <code>1</code> and <code>0</code> - references C stack, and shares the virtual C stack with <code>PSEUDO_TEMP_INT</code></dd>
 	<dt>PSEUDO_TEMP_ANY</dt><dd>A temporray of any type - will always be on Lua stack relative to 'base'</dd>
 	<dt>PSEUDO_CONSTANT</dt><dd>A literal constant</dd>
 	<dt>PSEUDO_PROC</dt><dd>A Lua function</dd>
@@ -29,40 +29,46 @@ uniformly represented in an instruction. Following are the possible types:
 	<dt>PSEUDO_FALSE</dt><dd><code>false</code> value</dd>
 	<dt>PSEUDO_BLOCK</dt><dd>A basic block, used for targets of branching instructions</dd>
 	<dt>PSEUDO_RANGE</dt><dd>Represents a range of registers from a certain starting register on Lua stack relative to 'base'</dd>
-	<dt>PSEUDO_RANGE_SELECT</dt><dd>Picks a certain register from a range, resolves to register on Lua stack, relative to 'base'</dd>
+	<dt>PSEUDO_RANGE_SELECT</dt><dd>Picks a specified register from a range, resolves to register on Lua stack, relative to 'base'</dd>
 	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to <code>ci->func</code> rather than <code>base</code>, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between <code>ci->func</code> and <code>base</code>.</dd>
 </dl>
 
+A compiled function is laid out as follows:
+
+* The integer/floating point temp values get variables on the C stack.
+* The locals appear before the temporaries on the Lua stack. When a temporary has stack position `0`, it means `0` relative to the starting register for temporaries.
+* Only string constants appear in the constants table in Lua. Other constants get inlined.
 
 ## Instructions
 
-The instruction set in the intermediate representation is covered here. As each opcode is implemented end to end, it will be added to the list below.
+The instruction set in the intermediate representation is covered here.
 
 When printed as text, the instructions are always output in following format.
 
 ```
- 	OP_Code '{' operands '}' '{' targets '}'
+ 	OpCode '{' operands '}' '{' targets '}'
 ```
 
 Example:
 
 ```
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
-	MOV {T(0)} {local(assert, 0)}
+	^          ^                             ^
+	Opcode     Operands                      Targets
 ```
 
 ### Operands and targets
 
-In the textual output, each operand or target refers to a `Psuedo`. The following conventions are used:
+In the textual output, each operand or target represents an underlying `Psuedo`. The following conventions are used:
 
-* `Upval` - a `PSEUDO_SYMBOL` referencing an up-value
-* `local` - a `PSEUDO_SYMBOL` referencing a local variable on Lua stack
+* `Upval` - a `PSEUDO_SYMBOL` for an up-value
+* `local` - a `PSEUDO_SYMBOL` for a local variable on Lua stack
 * `Tint` - a `PSEUDO_TEMP_INT` referencing a C stack variable
 * `Tflt` - a `PSEUDO_TEMP_FLT` referencing a C stack variable
 * `Tbool` - a `PSEUDO_TEMP_BOOL` referencing a C stack variable
-* `T` - a `PSEUDO_TEMP_ANY` referencing a Lua stack variable relative to 'base`
-* `T(n..)` - a `PSEUDO_RANGE` referencing a Lua stack position starting at register `n` from 'base'
-* `T(s[n..])` a `PSEUDO_RANGE_SELECT` referencing a particular register `s` from a range starting at register `n` from 'base'
+* `T` - a `PSEUDO_TEMP_ANY` referencing a Lua stack variable relative to 'base' plus locals
+* `T(n..)` - a `PSEUDO_RANGE` referencing a Lua stack position starting at register `n` from 'base' plus locals
+* `T(s[n..])` a `PSEUDO_RANGE_SELECT` referencing a particular register `s` from a range starting at register `n` from 'base' plus locals
 * `Kint` - a `PSEUDO_CONSTANT` of integer type
 * `Kflt` - a `PSEUDO_CONSTANT` of floating point type
 * `Ks` - a `PSEUDO_CONSTANT` of string type
@@ -71,18 +77,20 @@ Example:
 
 ```
 	LOADGLOBAL {Upval(_ENV), 'io' Ks(5)} {T(5)}
+	            ^            ^            ^
+				Pseudo 1     Pseudo 2     Pseudo 3
 ```
-Above we see three pseudos, `Upval(_ENV)`, `'io' Ks(5)` and `T(5)`, an upvalue, a string constant and a temporary, respectively.
+Above we see three pseudos, `Upval(_ENV)`, `'io' Ks(5)` and `T(5)` - these represent an upvalue, a string constant and a temporary, respectively.
 
 ```
 	CALL {T(0), Tint(0), 0E0 Kflt(0)} {T(0..), 1 Kint(0)}
 ```
 In this example, we have 3 operand pseuods, and 2 target pseudos. 
 
-* `T(0)` refers to a temporary at register `0`
+* `T(0)` refers to a temporary at register `0` from 'base' plus locals
 * `Tint(0)` refers to an integer temporary at C stack variable `0`
 * `0E0 Kflt(0)` refers to a floating point constant
-* `T(0..)` refers to a range of registers starting at register `0`.
+* `T(0..)` refers to a range of registers starting at register `0` from 'base' plus locals
 * `1 Kint(0)` refers to an integer constant
 
 
@@ -378,7 +386,7 @@ OPCode | Operand 1 | Operand 2 | Result
 
 ### Unary operators
 
-A number of unary arithmetic/bitwise operators are used in the linear IR. 
+A number of unary operators are used in the linear IR. 
 
 The general form is as follows:
 
@@ -391,15 +399,15 @@ The general form is as follows:
 
 The available op codes are listed below:
 
-OPCode | Operand | Result 
---- | --- | ---
-`UNM` | Any | Temp register
-`UNMi` | Integer | Temp integer
-`UNMf` | Floating point | Temp floating point
-`NOT` | Any | Temp register
-`BNOT` | Any | Temp integer
-`LEN` | table like object | Temp register
-`LENi` | table like object | Temp integer
+OPCode | Description | Operand | Result 
+--- | --- | --- | ---
+`UNM` | Unary minus | Any | Temp register
+`UNMi` | Unary minus | Integer | Temp integer
+`UNMf` | Unary minus | Floating point | Temp floating point
+`NOT` | Logical not | Any | Temp register
+`BNOT` | Bitwise not | Any | Temp integer
+`LEN` | Get number of elements | table like object | Temp register
+`LENi` | Get number of elements | table like object | Temp integer
 
 
 ### Type assertion opcodes
@@ -419,7 +427,7 @@ The available op codes are listed below:
 
 OPCode | Operand | Description
 --- | --- | ---
-`TOTYPE` | Type name (string literal) | Asserts that the given type name matches the one registered in Lua's registry
+`TOTYPE` | Type name (string literal) | Asserts that the given type name matches the one registered in Lua's registry for metatable associated with the target value
 `TOINT` | N/a | Asserts target register is integer
 `TOFLT` | N/a | Asserts target register is floating point
 `TOSTRING` | N/a | Asserts target register is string
@@ -436,6 +444,14 @@ This means setting the associated register to a default value such as `nil` or `
 ### `CONCAT`
 
 Performs a string concatenation like operation - i.e. handle the `..` Lua operator.
+
+<dl>
+    <dt>operands[]</dt>
+    <dd>0 or more pseudos representing values to be concatenated</dd>
+    <dt>target</dt>
+    <dd>The destination seudo where the result should be stored</dd>
+</dl> 
+
 
 ## Code Generation Patterns
 
