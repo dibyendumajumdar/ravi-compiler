@@ -211,6 +211,87 @@ The `TGET` opcode is used to retrieve a value from a table.
     <dd>Always a register pseudo - may be local or temporary register</dd>
 </dl>
 
+### `TGETik`
+
+The `TGETik` opcode is used to retrieve a value from a table, when key is known to be an integer value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of integer type</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `TGETsk`
+
+The `TGETsk` opcode is used to retrieve a value from a table, when key is known to be a string value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of string type</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `IAGET`
+
+The `IAGET` opcode is used to retrieve a value from an `integer[]`, result will always be an integer value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing an `integer[]`</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of any type</dd>
+    <dt>target</dt>
+    <dd>Always an integer value</dd>
+</dl>
+
+### `IAGETik`
+
+The `IAGETik` opcode is used to retrieve a value from an `integer[]`, where key is known to be an integer value.
+The result will always be an integer value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing an `integer[]`</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of integer type</dd>
+    <dt>target</dt>
+    <dd>Always an integer value</dd>
+</dl>
+
+### `FAGET`
+
+The `FAGET` opcode is used to retrieve a value from an `number[]`, result will always be a floating point value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing an `number[]`</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of any type</dd>
+    <dt>target</dt>
+    <dd>Always a floating point value</dd>
+</dl>
+
+### `FAGETik`
+
+The `FAGETik` opcode is used to retrieve a value from an `number[]`, where key is known to be an integer value.
+The result will always be a floating point value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing an `number[]`</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of integer type</dd>
+    <dt>target</dt>
+    <dd>Always a floating point value</dd>
+</dl>
+
+
 
 ### `op_storeglobal`
 
