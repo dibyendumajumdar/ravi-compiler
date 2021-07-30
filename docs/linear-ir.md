@@ -600,3 +600,33 @@ Lbody:
 Lend:
 ```
 
+### Generic For Loops
+
+Lower generic for a do block with a while loop as described in Lua 5.3 manual.
+
+A for statement like
+
+```
+     for var_1, ···, var_n in explist do block end
+```
+
+is equivalent to the code:
+
+```
+     do
+       local f, s, var = explist
+       while true do
+         local var_1, ···, var_n = f(s, var)
+         if var_1 == nil then break end
+         var = var_1
+         block
+       end
+     end
+```
+
+Note the following:
+
+* `explist` is evaluated only once. Its results are an iterator function, a state, and an initial value for the first iterator variable.
+* `f`, `s`, and `var` are invisible variables. The names are here for explanatory purposes only.
+* You can use break to exit a for loop.
+* The loop variables `var_i` are local to the loop; you cannot use their values after the for ends. If you need these values, then assign them to other variables before breaking or exiting the loop.
