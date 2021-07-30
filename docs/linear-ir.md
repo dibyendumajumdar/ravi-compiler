@@ -263,9 +263,22 @@ OpCode  | Operand[0] = source pseudo | Target[0] = table like object | Target[1]
 
 ### Comparison operators
 
-A number of comparison operators are used in the linear IR. These are listed below:
+A number of comparison operators are used in the linear IR. 
 
-OP Code | Description | Result 
+The general form is as follows:
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>First input operand</dd>
+    <dt>operand[1]</dt>
+    <dd>Second input operand</dd>
+    <dt>target[0]</dt>
+    <dd>Destination pseudo</dd>
+</dl>
+
+The available op codes are listed below:
+
+OPCode | Description | Result 
 --- | --- | ---
 `EQ` | compares two Lua stack values for `==` | Temp register
 `EQii` | compares two C stack integers | Temp boolean
