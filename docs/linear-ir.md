@@ -17,19 +17,19 @@ Instruction operands and targets are represented via a `pseudo` type. This is a 
 uniformly represented in an instruction. Following are the possible types:
 
 <dl>
-    <dt>PSEUDO_SYMBOL</dt><dd>a symbol which can be a variable or up-value</dd>
-	<dt>PSEUDO_TEMP_FLT</dt><dd>a temporary of floating type</dd>
-	<dt>PSEUDO_TEMP_INT</dt><dd>a temporary of integer type</dd>
-	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temp but restricted to 1 and 0  - refers to C var, shares the virtual C stack with PSEUDO_TEMP_INT</dd>
-	<dt>PSEUDO_TEMP_ANY</dt><dd>a temporary of any type, must be on Lua stack</dd>
-	<dt>PSEUDO_CONSTANT</dt><dd>a literal constant</dd>
+    <dt>PSEUDO_SYMBOL</dt><dd>An object of type lua_symbol representing local variable or upvalue, always refers to Lua stack relative to 'base'</dd>
+	<dt>PSEUDO_TEMP_FLT</dt><dd>A floating point temporary - may also be used for locals that do not escape - refers to C stack</dd>
+	<dt>PSEUDO_TEMP_INT</dt><dd>An integer temporary - may also be used for locals that do not escape - references C stack</dd>
+	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temporary restricted to <code>1</code> and <code>0</code> - references C stack, shares the virtual C stack with <code>PSEUDO_TEMP_INT</code></dd>
+	<dt>PSEUDO_TEMP_ANY</dt><dd>A temporray of any type - will always be on Lua stack relative to 'base'</dd>
+	<dt>PSEUDO_CONSTANT</dt><dd>A literal constant</dd>
 	<dt>PSEUDO_PROC</dt><dd>A Lua function</dd>
-	<dt>PSEUDO_NIL</dt><dd>nil value</dd>
-	<dt>PSEUDO_TRUE</dt><dd>true value</dd>
-	<dt>PSEUDO_FALSE</dt><dd>false value</dd>
-	<dt>PSEUDO_BLOCK</dt><dd>a basic block, used for targets of branching instructions</dd>
-	<dt>PSEUDO_RANGE</dt><dd>a range of registers with a starting register, unbounded</dd>
-	<dt>PSEUDO_RANGE_SELECT</dt><dd>specific register from a range</dd>
+	<dt>PSEUDO_NIL</dt><dd><code>nil</code> value</dd>
+	<dt>PSEUDO_TRUE</dt><dd><code>true</code> value</dd>
+	<dt>PSEUDO_FALSE</dt><dd><code>false</code> value</dd>
+	<dt>PSEUDO_BLOCK</dt><dd>A basic block, used for targets of branching instructions</dd>
+	<dt>PSEUDO_RANGE</dt><dd>Represents a range of registers from a certain starting register on Lua stack relative to 'base'</dd>
+	<dt>PSEUDO_RANGE_SELECT</dt><dd>Picks a certain register from a range, resolves to register on Lua stack, relative to 'base'</dd>
 	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to <code>ci->func</code> rather than <code>base</code>, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between <code>ci->func</code> and <code>base</code>.</dd>
 </dl>
 
@@ -38,7 +38,55 @@ uniformly represented in an instruction. Following are the possible types:
 
 The instruction set in the intermediate representation is covered here. As each opcode is implemented end to end, it will be added to the list below.
 
-#### `op_ret` 
+When printed as text, the instructions are always output in following format.
+
+```
+ 	OP_Code '{' operands '}' '{' targets '}'
+```
+
+Example:
+
+```
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	MOV {T(0)} {local(assert, 0)}
+```
+
+### Operands and targets
+
+In the textual output, each operand or target refers to a `Psuedo`. The following conventions are used:
+
+* `Upval` - a `PSEUDO_SYMBOL` referencing an up-value
+* `local` - a `PSEUDO_SYMBOL` referencing a local variable on Lua stack
+* `Tint` - a `PSEUDO_TEMP_INT` referencing a C stack variable
+* `Tflt` - a `PSEUDO_TEMP_FLT` referencing a C stack variable
+* `Tbool` - a `PSEUDO_TEMP_BOOL` referencing a C stack variable
+* `T` - a `PSEUDO_TEMP_ANY` referencing a Lua stack variable relative to 'base`
+* `T(n..)` - a `PSEUDO_RANGE` referencing a Lua stack position starting at register `n` from 'base'
+* `T(s[n..])` a `PSEUDO_RANGE_SELECT` referencing a particular register `s` from a range starting at register `n` from 'base'
+* `Kint` - a `PSEUDO_CONSTANT` of integer type
+* `Kflt` - a `PSEUDO_CONSTANT` of floating point type
+* `Ks` - a `PSEUDO_CONSTANT` of string type
+
+Example:
+
+```
+	LOADGLOBAL {Upval(_ENV), 'io' Ks(5)} {T(5)}
+```
+Above we see three pseudos, `Upval(_ENV)`, `'io' Ks(5)` and `T(5)`, an upvalue, a string constant and a temporary, respectively.
+
+```
+	CALL {T(0), Tint(0), 0E0 Kflt(0)} {T(0..), 1 Kint(0)}
+```
+In this example, we have 3 operand pseuods, and 2 target pseudos. 
+
+* `T(0)` refers to a temporary at register `0`
+* `Tint(0)` refers to an integer temporary at C stack variable `0`
+* `0E0 Kflt(0)` refers to a floating point constant
+* `T(0..)` refers to a range of registers starting at register `0`.
+* `1 Kint(0)` refers to an integer constant
+
+
+#### `OP_RET` 
 
 Returns values to calling function, and sets `L->ci` to parent.
 
