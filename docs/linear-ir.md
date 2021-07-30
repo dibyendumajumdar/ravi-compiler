@@ -525,4 +525,78 @@ Belse:
 Bend:
 ```
 
+### Numeric For Loops
+
+Lua manual states:
+
+```
+	 for v = e1, e2, e3 do block end
+```
+
+is equivalent to the code:
+
+```
+	 do
+	   local var, limit, step = tonumber(e1), tonumber(e2), tonumber(e3)
+	   if not (var and limit and step) then error() end
+	   var = var - step
+	   while true do
+		 var = var + step
+		 if (step >= 0 and var > limit) or (step < 0 and var < limit) then
+		   break
+		 end
+		 local v = var
+		 block
+	   end
+	 end
+```
+
+We do not need local vars to hold var, limit, step as these can be
+temporaries.
+
+```
+	step_positive = 0 < step
+	var = var - step
+	goto L1
+L1:
+	var = var + step;
+	if step_positive goto L2;
+		else goto L3;
+L2:
+	stop = var > limit
+	if stop goto Lend
+		else goto Lbody
+L3:
+	stop = var < limit
+	if stop goto Lend
+		else goto Lbody
+Lbody:
+	set local symbol in for loop to var
+	do body
+	goto L1;
+
+Lend:
+```
+
+Above is the general case
+
+When we know the increment to be negative or positive we can simplify.
+Example for positive case
+
+```
+	var = var - step
+	goto L1
+L1:
+	var = var + step;
+ 	goto L2
+L2:
+	stop = var > limit
+	if stop goto Lend
+		else goto Lbody
+Lbody:
+	set local symbol in for loop to var
+	do body
+	goto L1;
+Lend:
+```
 
