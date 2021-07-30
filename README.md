@@ -40,6 +40,7 @@ The project is available under MIT license.
 Documentation is coming soon.
 
 For now you can look at following:
+* [Linear IR](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/docs/linear-ir.md)
 * [WIP public api](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/include/ravi_compiler.h) - only the lexer and parser API are public for now
 * [Test inputs and outputs](https://github.com/dibyendumajumdar/ravi-compiler/blob/master/tests)
 * [Example Ravi Tests](https://github.com/dibyendumajumdar/ravi/tree/master/tests/comptests)
