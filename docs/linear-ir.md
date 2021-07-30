@@ -290,4 +290,54 @@ OPCode | Description | Result
 `LEii` | compares two C stack integers | Temp boolean 
 `LEff` | compares two C stack floats | Temp boolean 
 
+### Binary operators
+
+A number of binary arithmetic/bitwise operators are used in the linear IR. 
+
+The general form is as follows:
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>First input operand</dd>
+    <dt>operand[1]</dt>
+    <dd>Second input operand</dd>
+    <dt>target[0]</dt>
+    <dd>Destination pseudo</dd>
+</dl>
+
+The available op codes are listed below:
+
+OPCode | Operand 1 | Operand 2 | Result 
+--- | --- | --- | ---
+`ADD` | Any | Any | Temp register
+`ADDii` | Integer | Integer | Temp integer
+`ADDff` | Floating point | Floating point | Temp floating point
+`ADDfi` | Floating point | Integer | Temp floating point
+`SUB` | Any | Any | Temp register 
+`SUBii` | Integer | Integer | Temp integer 
+`SUBff` | Floating point | Floating point | Temp floating point
+`SUBfi` | Floating point | Integer | Temp floating point 
+`SUBif` | Integer | Floating point | Temp floating point
+`MUL` | Any | Any | Temp register
+`MULii` | Integer | Integer | Temp integer
+`MULff` | Floating point | Floating point | Temp floating point
+`MULfi` | Floating point | Integer | Temp floating point
+`DIV` | Any | Any | Temp register 
+`DIVii` | Integer | Integer | Temp integer 
+`DIVff` | Floating point | Floating point | Temp floating point
+`DIVfi` | Floating point | Integer | Temp floating point 
+`DIVif` | Integer | Floating point | Temp floating point
+`IDIV` | Any | Any | Temp register 
+`BAND` | Any | Any | Temp register 
+`BANDii` | Any | Any | Temp register 
+`BOR` | Any | Any | Temp register 
+`BORii` | Any | Any | Temp register 
+`BXOR` | Any | Any | Temp register 
+`BXORii` | Any | Any | Temp register 
+`SHR` | Any | Any | Temp register 
+`SHRii` | Any | Any | Temp register 
+`SHL` | Any | Any | Temp register 
+`SHLii` | Any | Any | Temp register 
+
+
 
