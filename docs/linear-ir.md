@@ -188,13 +188,13 @@ OpCode  | Operand[0] = table | Operand[1] = key | Target[0] = destination
 `FAGETik` | Symbol representing an `number[]` | A key of integer type | Floating point temporary
 
 
-### `op_storeglobal`
+### `STOREGLOBAL`
 
-The `op_storeglobal` opcode is used to save a value to the `_ENV` table. By default Lua
+The `STOREGLOBAL` opcode is used to save a value to the `_ENV` table. By default Lua
 provides an up-value in the main chunk that references the `_ENV` table. But users can define
 a local `_ENV` variable that overrides the default.
 
-The `op_storeglobal` is akin to saving a value to a table, where the key is always a 
+The `STOREGLOBAL` is akin to saving a value to a table, where the key is always a 
 string constant and the table is usually an up-value.
 
 <dl>
@@ -205,6 +205,35 @@ string constant and the table is usually an up-value.
     <dt>target[1]</dt>
     <dd>A string constant representing the name of the global variable</dd>
 </dl>
+
+### Various `PUT` opcodes
+
+The IR has several flavours of the `PUT` opcode. The general structure is as follows:
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The source pseudo</dd>
+    <dt>target[0]</dt>
+    <dd>Destination table like object</dd>
+    <dt>target[1]</dt>
+    <dd>The key to sue to index into the table like object</dd>
+</dl>
+
+The various flavours of `PUT` opcodes are listed below.
+
+OpCode  | Operand[0] = source pseudo | Target[0] = table like object | Target[1] = key
+--- | --- | --- | ---
+`PUT` | Register pseudo | a table like interface | Any key type 
+`PUTsk` | Register pseudo | a table like interface | A string key
+`PUTik` | Register pseudo | a table like interface | An integer key
+`TPU` | Register pseudo | Symbol representing table | A key of any type
+`TPUTik` | Register pseudo | Symbol representing table | A key of integer type
+`TPUTsk` | Register pseudo | Symbol representing table | A key of string type
+`IAPUT` | Register pseudo | Symbol representing an `integer[]` | An integer key
+`IAPUTiv` | Integer value | Symbol representing an `integer[]` | An integer key
+`FAPUT` | Register pseudo | Symbol representing an `number[]` | An integer key
+`FAPUTfv` | Floating point value | Symbol representing an `number[]` | An integer key
+
 
 ### `op_call`
 
