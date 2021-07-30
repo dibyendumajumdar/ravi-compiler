@@ -329,15 +329,15 @@ OPCode | Operand 1 | Operand 2 | Result
 `DIVif` | Integer | Floating point | Temp floating point
 `IDIV` | Any | Any | Temp register 
 `BAND` | Any | Any | Temp register 
-`BANDii` | Any | Any | Temp register 
+`BANDii` | Integer | Integer | Temp integer 
 `BOR` | Any | Any | Temp register 
-`BORii` | Any | Any | Temp register 
+`BORii` | Integer | Integer | Temp integer 
 `BXOR` | Any | Any | Temp register 
-`BXORii` | Any | Any | Temp register 
+`BXORii` | Integer | Integer | Temp integer 
 `SHR` | Any | Any | Temp register 
-`SHRii` | Any | Any | Temp register 
+`SHRii` | Integer | Integer | Temp integer 
 `SHL` | Any | Any | Temp register 
-`SHLii` | Any | Any | Temp register 
+`SHLii` | Integer | Integer | Temp integer 
 
 
 
