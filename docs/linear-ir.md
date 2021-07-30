@@ -167,6 +167,41 @@ the last argument as `luaD_precall()` uses this to determine the number of argum
 * `CALL` copies the function and arguments to the right place and then 
 invokes `luaD_precall()` to handle the actual function call.
 
+### `CLOSURE`
+
+The `CLOSURE` op code creates a new closure.
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The function object.</dd>
+    <dt>target[0]</dt>
+    <dd>The register where closure will be created.</dd>
+</dl>
+
+
+### `CLOSE`
+
+The `CLOSE` opcode invokes `luaF_close()` to close upvalues.
+
+
+### Object Creation Operators
+
+The Op codes for creating tables, arrays and closures have similar form. 
+
+<dl>
+    <dt>target[0]</dt>
+    <dd>Destination pseudo</dd>
+</dl>
+
+The available op codes are listed below:
+
+OPCode | Description | Result 
+--- | --- | ---
+`NEWTABLE` | Create a Lua table | Temp register
+`NEWIARRAY` | Create a Ravi integer array | Temp integer
+`NEWFARRAY` | Create a Ravi floating point array | Temp floating point
+
+
 ### `LOADGLOBAL`
 
 The `LOADGLOBAL` opcode is used to retrieve a value from the `_ENV` table. By default Lua
@@ -361,8 +396,36 @@ OPCode | Operand | Result
 `UNM` | Any | Temp register
 `UNMi` | Integer | Temp integer
 `UNMf` | Floating point | Temp floating point
+`NOT` | Any | Temp register
+`BNOT` | Any | Temp integer
 `LEN` | table like object | Temp register
 `LENi` | table like object | Temp integer
 
+
+### Type assertion opcodes
+
+A number of type assertion op codes are used in the linear IR. 
+
+The general form is as follows:
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>Optional operand - only used by `TOTYPE`</dd>
+    <dt>target[0]</dt>
+    <dd>Destination pseudo</dd>
+</dl>
+
+The available op codes are listed below:
+
+OPCode | Operand | Description
+--- | --- | ---
+`TOTYPE` | Type name (string literal) | Asserts that the given type name matches the one registered in Lua's registry
+`TOINT` | N/a | Asserts target register is integer
+`TOFLT` | N/a | Asserts target register is floating point
+`TOSTRING` | N/a | Asserts target register is string
+`TOCLOSURE` | N/a | Asserts target register is a function
+`TOTABLE` | N/a | Asserts target register is a table
+`TOIARRAY` | N/a | Asserts target register is an integer array
+`TOFARRAY` | N/a | Asserts target register is a floting point array
 
 
