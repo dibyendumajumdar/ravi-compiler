@@ -53,8 +53,8 @@ Example:
 
 ```
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
-	^          ^                             ^
-	Opcode     Operands                      Targets
+        ^          ^                             ^
+        Opcode     Operands                      Targets
 ```
 
 ### Operands and targets
@@ -78,7 +78,7 @@ Example:
 ```
 	LOADGLOBAL {Upval(_ENV), 'io' Ks(5)} {T(5)}
 	            ^            ^            ^
-				Pseudo 1     Pseudo 2     Pseudo 3
+                    Pseudo 1     Pseudo 2     Pseudo 3
 ```
 Above we see three pseudos, `Upval(_ENV)`, `'io' Ks(5)` and `T(5)` - these represent an upvalue, a string constant and a temporary, respectively.
 
