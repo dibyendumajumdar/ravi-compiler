@@ -328,6 +328,8 @@ OPCode | Operand 1 | Operand 2 | Result
 `DIVfi` | Floating point | Integer | Temp floating point 
 `DIVif` | Integer | Floating point | Temp floating point
 `IDIV` | Any | Any | Temp register 
+`MOD` | Any | Any | Temp register 
+`POW` | Any | Any | Temp register 
 `BAND` | Any | Any | Temp register 
 `BANDii` | Integer | Integer | Temp integer 
 `BOR` | Any | Any | Temp register 
@@ -338,6 +340,29 @@ OPCode | Operand 1 | Operand 2 | Result
 `SHRii` | Integer | Integer | Temp integer 
 `SHL` | Any | Any | Temp register 
 `SHLii` | Integer | Integer | Temp integer 
+
+### Unary operators
+
+A number of unary arithmetic/bitwise operators are used in the linear IR. 
+
+The general form is as follows:
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>Input operand</dd>
+    <dt>target[0]</dt>
+    <dd>Destination pseudo</dd>
+</dl>
+
+The available op codes are listed below:
+
+OPCode | Operand | Result 
+--- | --- | ---
+`UNM` | Any | Temp register
+`UNMi` | Integer | Temp integer
+`UNMf` | Floating point | Temp floating point
+`LEN` | table like object | Temp register
+`LENi` | table like object | Temp integer
 
 
 
