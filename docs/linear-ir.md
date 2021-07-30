@@ -428,4 +428,101 @@ OPCode | Operand | Description
 `TOIARRAY` | N/a | Asserts target register is an integer array
 `TOFARRAY` | N/a | Asserts target register is a floting point array
 
+### `INIT`
+
+The `INIT` opcode is used to initialize a local variable on Lua stack.
+This means setting the associated register to a default value such as `nil` or `0`.
+
+### `CONCAT`
+
+Performs a string concatenation like operation - i.e. handle the `..` Lua operator.
+
+## Code Generation Patterns
+
+### Boolean conditions
+
+Lua and/or operators are processed so that with 'and' the result is the final 
+true value, and with 'or' it is the first true value.
+
+`and` IR
+```
+	result = eval(expr_left);
+	if (result)
+		goto Lnext:
+	else
+		goto Ldone;
+Lnext:
+	result = eval(expr_right);
+	goto Ldone;
+Ldone:
+```
+
+`or` IR
+```
+	result = eval(expr_left);
+	if (result)
+		goto Ldone:
+	else
+		goto Lnext;
+Lnext:
+	result = eval(expr_right);
+	goto Ldone;
+Ldone:
+```
+
+### If Statements
+
+The Lua if statement has a complex structure as it is somewhat like
+a combination of case and if statement. The if block is followed by
+1 or more elseif blocks. Finally we have an optinal else block.
+The elseif blocks are like case statements.
+
+Given
+
+```
+if cond1 then
+	block for cond1
+elseif cond2 then
+	block for cond2
+else
+	block for else
+end
+```
+
+We linearize the statement as follows.
+
+```
+B0:
+	if cond1 goto Bcond1 else B2;   // Initial if condition
+
+B2:
+	if cond2 goto Bcond2 else B3:   // This is an elseif condition
+
+B3:
+	<if AST has else>
+	goto Belse;
+	<else>
+	goto Bend;
+
+Bcond1:
+	start scope
+	block for cond1
+	end scope
+	goto Bend;
+
+Bcond2:
+	start scope
+	block for cond2
+	end scope
+	goto Bend;
+
+Belse:
+	start scope
+	block for else
+	end scope
+	goto Bend;
+
+Bend:
+```
+
 
