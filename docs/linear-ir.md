@@ -52,7 +52,7 @@ When printed as text, the instructions are always output in following format.
 Example:
 
 ```
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+        LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
         ^          ^                             ^
         Opcode     Operands                      Targets
 ```
@@ -76,8 +76,8 @@ In the textual output, each operand or target represents an underlying `Psuedo`.
 Example:
 
 ```
-	LOADGLOBAL {Upval(_ENV), 'io' Ks(5)} {T(5)}
-	            ^            ^            ^
+        LOADGLOBAL {Upval(_ENV), 'io' Ks(5)} {T(5)}
+                    ^            ^            ^
                     Pseudo 1     Pseudo 2     Pseudo 3
 ```
 Above we see three pseudos, `Upval(_ENV)`, `'io' Ks(5)` and `T(5)` - these represent an upvalue, a string constant and a temporary, respectively.
