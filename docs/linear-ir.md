@@ -86,7 +86,7 @@ In this example, we have 3 operand pseuods, and 2 target pseudos.
 * `1 Kint(0)` refers to an integer constant
 
 
-#### `OP_RET` 
+#### `RET` 
 
 Returns values to calling function, and sets `L->ci` to parent.
 
@@ -97,16 +97,16 @@ Returns values to calling function, and sets `L->ci` to parent.
     <dd>The block to which we should jump to. Note that all returns jump to the exit block</dd>
 </dl> 
 
-The `op_ret` instruction must perform some housekeeping. 
+The `RET` instruction must perform some housekeeping. 
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
 any deferred closures executed. This call may be omitted if no variables in the proc including child procs escaped.
 * Next it must copy the return values to the stack, results must be placed at `ci->func` and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
-* The last operand might be a `PSEUDO_RANGE`, in which case `op_ret` must inspect `L->top` to determine the number of values to copy. 
+* The last operand might be a `PSEUDO_RANGE`, in which case `RET` must inspect `L->top` to determine the number of values to copy. 
 * The `L->ci` must be set to the parent of the current function.
-* `op_ret` sets `L-top` to just past the return values on the stack.
+* `RET` sets `L-top` to just past the return values on the stack.
 
-### `op_mov`
+### `MOV`
 
 Copies a value from one location to another
 
@@ -119,7 +119,7 @@ Copies a value from one location to another
 
 * The move operation deals with scalar quantities, table/array store/loads are handled by different operators.
 
-### `op_br`
+### `BR`
 
 Branches unconditionally to the target block
 
@@ -130,7 +130,7 @@ Branches unconditionally to the target block
     <dd>1 target block</dd>
 </dl>
 
-### `op_cbr`
+### `CBR`
 
 Branches conditionally to one of two blocks.
 
@@ -141,13 +141,13 @@ Branches conditionally to one of two blocks.
     <dd>Two block pseudos, the first is the target for true condition and second for false condition</dd>
 </dl>
 
-### `op_loadglobal`
+### `LOADGLOBAL`
 
-The `op_loadglobal` opcode is used to retrieve a value from the `_ENV` table. By default Lua
+The `LOADGLOBAL` opcode is used to retrieve a value from the `_ENV` table. By default Lua
 provides an up-value in the main chunk that references the `_ENV` table. But users can define
 a local `_ENV` variable that overrides the default.
 
-The `op_loadglobal` is akin to loading a value from a table, where the key is always a 
+The `LOADGLOBAL` is akin to loading a value from a table, where the key is always a 
 string constant and the table is usually an up-value.
 
 <dl>
@@ -158,6 +158,59 @@ string constant and the table is usually an up-value.
     <dt>target</dt>
     <dd>Always a register pseudo - may be local or temporary register</dd>
 </dl>
+
+### `GET`
+
+The `GET` opcode is used to retrieve a value from a table like interface. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table like interface</dd>
+    <dt>operand[1]</dt>
+    <dd>A key</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `GETsk`
+
+The `GETsk` opcode is used to retrieve a value from a table like interface, where key is known to be string value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table like interface</dd>
+    <dt>operand[1]</dt>
+    <dd>A string key</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `GETik`
+
+The `GETik` opcode is used to retrieve a value from a table like interface, where key is known to be integer value. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table like interface</dd>
+    <dt>operand[1]</dt>
+    <dd>An integer key</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
+### `TGET`
+
+The `TGET` opcode is used to retrieve a value from a table. 
+
+<dl>
+    <dt>operand[0]</dt>
+    <dd>The symbol representing table</dd>
+    <dt>operand[1]</dt>
+    <dd>A key of any type</dd>
+    <dt>target</dt>
+    <dd>Always a register pseudo - may be local or temporary register</dd>
+</dl>
+
 
 ### `op_storeglobal`
 
