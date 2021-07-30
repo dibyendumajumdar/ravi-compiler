@@ -159,138 +159,33 @@ string constant and the table is usually an up-value.
     <dd>Always a register pseudo - may be local or temporary register</dd>
 </dl>
 
-### `GET`
+### Various `GET` opcodes
 
-The `GET` opcode is used to retrieve a value from a table like interface. 
+The IR has several flavours of the `GET` opcode. The general structure is as follows:
 
 <dl>
     <dt>operand[0]</dt>
-    <dd>The symbol representing table like interface</dd>
+    <dd>The symbol representing table, or table like interface, or array</dd>
     <dt>operand[1]</dt>
     <dd>A key</dd>
     <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
+    <dd>The destination pseudo where the value extracted will be loaded</dd>
 </dl>
 
-### `GETsk`
+The various flavours of `GET` opcodes are listed below.
 
-The `GETsk` opcode is used to retrieve a value from a table like interface, where key is known to be string value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing table like interface</dd>
-    <dt>operand[1]</dt>
-    <dd>A string key</dd>
-    <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
-</dl>
-
-### `GETik`
-
-The `GETik` opcode is used to retrieve a value from a table like interface, where key is known to be integer value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing table like interface</dd>
-    <dt>operand[1]</dt>
-    <dd>An integer key</dd>
-    <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
-</dl>
-
-### `TGET`
-
-The `TGET` opcode is used to retrieve a value from a table. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing table</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of any type</dd>
-    <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
-</dl>
-
-### `TGETik`
-
-The `TGETik` opcode is used to retrieve a value from a table, when key is known to be an integer value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing table</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of integer type</dd>
-    <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
-</dl>
-
-### `TGETsk`
-
-The `TGETsk` opcode is used to retrieve a value from a table, when key is known to be a string value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing table</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of string type</dd>
-    <dt>target</dt>
-    <dd>Always a register pseudo - may be local or temporary register</dd>
-</dl>
-
-### `IAGET`
-
-The `IAGET` opcode is used to retrieve a value from an `integer[]`, result will always be an integer value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing an `integer[]`</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of any type</dd>
-    <dt>target</dt>
-    <dd>Always an integer value</dd>
-</dl>
-
-### `IAGETik`
-
-The `IAGETik` opcode is used to retrieve a value from an `integer[]`, where key is known to be an integer value.
-The result will always be an integer value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing an `integer[]`</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of integer type</dd>
-    <dt>target</dt>
-    <dd>Always an integer value</dd>
-</dl>
-
-### `FAGET`
-
-The `FAGET` opcode is used to retrieve a value from an `number[]`, result will always be a floating point value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing an `number[]`</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of any type</dd>
-    <dt>target</dt>
-    <dd>Always a floating point value</dd>
-</dl>
-
-### `FAGETik`
-
-The `FAGETik` opcode is used to retrieve a value from an `number[]`, where key is known to be an integer value.
-The result will always be a floating point value. 
-
-<dl>
-    <dt>operand[0]</dt>
-    <dd>The symbol representing an `number[]`</dd>
-    <dt>operand[1]</dt>
-    <dd>A key of integer type</dd>
-    <dt>target</dt>
-    <dd>Always a floating point value</dd>
-</dl>
-
+OpCode  | Operand[0] = table | Operand[1] = key | Target[0] = destination
+--- | --- | --- | ---
+`GET` | a table like interface | Any key type | A register pseudo 
+`GETsk` | a table like interface | A string key | A register pseudo
+`GETik` | a table like interface | An integer key | A register pseudo
+`TGET` | Symbol representing table | A key of any type | A register pseudo
+`TGETik` | Symbol representing table | A key of integer type | A register pseudo
+`TGETsk` | Symbol representing table | A key of string type | A register pseudo
+`IAGET` | Symbol representing an `integer[]` | A key of any type | Integer temporary
+`IAGETik` | Symbol representing an `integer[]` | A key of integer type | Integer temporary
+`FAGET` | Symbol representing an `number[]` | A key of any type | Floating point temporary
+`FAGETik` | Symbol representing an `number[]` | A key of integer type | Floating point temporary
 
 
 ### `op_storeglobal`
