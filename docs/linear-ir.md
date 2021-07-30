@@ -141,6 +141,32 @@ Branches conditionally to one of two blocks.
     <dd>Two block pseudos, the first is the target for true condition and second for false condition</dd>
 </dl>
 
+### `CALL`
+
+The `CALL` opcode is used to invoke a function.
+
+<dl>
+    <dt>operands[]</dt>
+    <dd>The first operand is the function to be called.
+    This is followed by function arguments. The last argument may be a <code>PSEUDO_RANGE</code>.
+    </dd>
+    <dt>target[0]</dt>
+    <dd>The register where results will be placed. This
+    ia also where the function value / arguments will be placed prior to
+    invoking the function.</dd>
+    <dt>target[1]</dt>
+    <dd>The second value is the number of results the caller is expecting.
+    If this is <code>-1</code> then caller wants all results.</dd>
+</dl>
+
+* If the caller supplied `-1` as number of results then `CALL` needs to determine
+the number of values to return by inspecting `L->top` - the number of values to return will
+be the difference between `L->top` and register at `target[0]`.
+* Before calling a function, `CALL` needs to ensure that `L->top` is set to just past
+the last argument as `luaD_precall()` uses this to determine the number of arguments.
+* `CALL` copies the function and arguments to the right place and then 
+invokes `luaD_precall()` to handle the actual function call.
+
 ### `LOADGLOBAL`
 
 The `LOADGLOBAL` opcode is used to retrieve a value from the `_ENV` table. By default Lua
@@ -235,44 +261,20 @@ OpCode  | Operand[0] = source pseudo | Target[0] = table like object | Target[1]
 `FAPUTfv` | Floating point value | Symbol representing an `number[]` | An integer key
 
 
-### `op_call`
-
-The `op_call` opcode is used to invoke a function.
-
-<dl>
-    <dt>operands[]</dt>
-    <dd>The first operand is the function to be called.
-    This is followed by function arguments. The last argument may be a <code>PSEUDO_RANGE</code>.
-    </dd>
-    <dt>target[0]</dt>
-    <dd>The register where results will be placed. This
-    ia also where the function value / arguments will be placed prior to
-    invoking the function.</dd>
-    <dt>target[1]</dt>
-    <dd>The second value is the number of results the caller is expecting.
-    If this is <code>-1</code> then caller wants all results.</dd>
-</dl>
-
-* If the caller supplied `-1` as number of results then `op_call` needs to determine
-the number of values to return by inspecting `L->top` - the number of values to return will
-be the difference between `L->top` and register at `target[0]`.
-* Before calling a function, `op_call` needs to ensure that `L->top` is set to just past
-the last argument as `luaD_precall()` uses this to determine the number of arguments.
-* `op_call` copies the function and arguments to the right place and then 
-invokes `luaD_precall()` to handle the actual function call.
-
-### Comparion operators
+### Comparison operators
 
 A number of comparison operators are used in the linear IR. These are listed below:
 
-* `op_eq` - compares two Lua stack values for `==`
-* `op_eqii` - compares two C stack integers
-* `op_eqff` - compares two C stack floats
-* `op_lt` - compares two Lua stack values for `<`
-* `op_ltii` - compares two C stack integers 
-* `op_ltff` - compares two C stack floats 
-* `op_le` - compares two Lua stack values for `<=`
-* `op_leii` - compares two C stack integers 
-* `op_leff` - compares two C stack floats 
+OP Code | Description | Result 
+--- | --- | ---
+`EQ` | compares two Lua stack values for `==` | Temp register
+`EQii` | compares two C stack integers | Temp boolean
+`EQff` | compares two C stack floats | Temp boolean
+`LT` | compares two Lua stack values for `<` | Temp register
+`LTii` | compares two C stack integers | Temp boolean 
+`LTff` | compares two C stack floats | Temp boolean 
+`LE` | compares two Lua stack values for `<=` | Temp register
+`LEii` | compares two C stack integers | Temp boolean 
+`LEff` | compares two C stack floats | Temp boolean 
 
 
