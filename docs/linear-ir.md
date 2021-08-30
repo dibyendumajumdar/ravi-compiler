@@ -59,7 +59,7 @@ Example:
 
 ### Operands and targets
 
-In the textual output, each operand or target represents an underlying `Psuedo`. The following conventions are used:
+In the textual output, each operand or target represents an underlying `Pseudo`. The following conventions are used:
 
 * `Upval` - a `PSEUDO_SYMBOL` for an up-value
 * `local` - a `PSEUDO_SYMBOL` for a local variable on Lua stack
