@@ -206,8 +206,8 @@ The available op codes are listed below:
 OPCode | Description | Result 
 --- | --- | ---
 `NEWTABLE` | Create a Lua table | Temp register
-`NEWIARRAY` | Create a Ravi integer array | Temp integer
-`NEWFARRAY` | Create a Ravi floating point array | Temp floating point
+`NEWIARRAY` | Create a Ravi integer array | Temp register
+`NEWFARRAY` | Create a Ravi floating point array | Temp register
 
 
 ### `LOADGLOBAL`
