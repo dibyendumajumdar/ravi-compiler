@@ -14,14 +14,14 @@ Instructions are uniformly represented as follows. Each instruction has an op co
 Conceptually the targets represent the output of the instruction, whereas operands are the input, although sometimes the interpretation may be different.
 
 Instruction operands and targets are represented via a `pseudo` type. This is a union type that allows various different types of objects to be
-uniformly represented in an instruction. Following are the possible types:
+uniformly represented in an instruction. Following are the possible `pseudo` types:
 
 <dl>
-    <dt>PSEUDO_SYMBOL</dt><dd>An object of type lua_symbol representing local variable or upvalue, always refers to Lua stack relative to 'base'</dd>
-	<dt>PSEUDO_TEMP_FLT</dt><dd>A floating point temporary - may also be used for locals that do not escape - references C stack</dd>
-	<dt>PSEUDO_TEMP_INT</dt><dd>An integer temporary - may also be used for locals that do not escape - references C stack</dd>
+	<dt>PSEUDO_SYMBOL</dt><dd>An object of type <code>lua_symbol</code> representing local variable or upvalue, always refers to Lua stack relative to 'base'</dd>
+	<dt>PSEUDO_TEMP_FLT</dt><dd>A floating point temporary - may also be used for locals that do not escape as upvalues - references C stack</dd>
+	<dt>PSEUDO_TEMP_INT</dt><dd>An integer temporary - may also be used for locals that do not escape as upvalues - references C stack</dd>
 	<dt>PSEUDO_TEMP_BOOL</dt><dd>An integer temporary restricted to <code>1</code> and <code>0</code> - references C stack, and shares the virtual C stack with <code>PSEUDO_TEMP_INT</code></dd>
-	<dt>PSEUDO_TEMP_ANY</dt><dd>A temporray of any type - will always be on Lua stack relative to 'base'</dd>
+	<dt>PSEUDO_TEMP_ANY</dt><dd>A temporary of any type - will always be on Lua stack relative to 'base'</dd>
 	<dt>PSEUDO_CONSTANT</dt><dd>A literal constant</dd>
 	<dt>PSEUDO_PROC</dt><dd>A Lua function</dd>
 	<dt>PSEUDO_NIL</dt><dd><code>nil</code> value</dd>
