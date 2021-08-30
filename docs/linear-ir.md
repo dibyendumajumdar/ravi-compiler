@@ -108,7 +108,7 @@ Returns values to calling function, and sets `L->ci` to parent.
 The `RET` instruction must perform some housekeeping. 
 
 * Firstly it must invoke `luaF_close()` if the proc has child procs so that up-values are closed and 
-any deferred closures executed. This call may be omitted if no variables in the proc including child procs escaped.
+any deferred closures executed. This call may be omitted if no local variables in the proc including child procs escaped as upvalues.
 * Next it must copy the return values to the stack, results must be placed at `ci->func` and above. The number of results to copy needs to take into account  `ci->nresults` field which says how many values the caller is expecting. If the caller is expecting more values that are available then the extra values should be set to `nil`. If `ci->nresults == -1` caller wants all available values.
 * The last operand might be a `PSEUDO_RANGE`, in which case `RET` must inspect `L->top` to determine the number of values to copy. 
 * The `L->ci` must be set to the parent of the current function.
