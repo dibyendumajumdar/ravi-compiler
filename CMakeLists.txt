@@ -24,7 +24,8 @@ set(HEADERS
         src/dataflow_framework.h
         src/optimizer.h
         src/parser.h
-        src/codegen.h)
+        src/codegen.h
+        src/chibicc.h)
 
 set(SRCS
         src/allocate.c
@@ -50,6 +51,8 @@ set(SRCS
         src/df_liveness.c
         src/codegen.c
         src/ravi_binding.c
+        src/chibicc_tokenize.c
+        src/chibicc_parse.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
