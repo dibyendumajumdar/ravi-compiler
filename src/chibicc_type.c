@@ -17,7 +17,7 @@ Type *ty_float = &(Type){TY_FLOAT, 4, 4};
 Type *ty_double = &(Type){TY_DOUBLE, 8, 8};
 Type *ty_ldouble = &(Type){TY_LDOUBLE, 16, 16};
 
-static Type *new_type(TypeKind kind, int size, int align) {
+static Type *new_type(C_parser *parser, TypeKind kind, int size, int align) {
   Type *ty = calloc(1, sizeof(Type));
   ty->kind = kind;
   ty->size = size;
@@ -87,58 +87,58 @@ bool is_compatible(Type *t1, Type *t2) {
   return false;
 }
 
-Type *copy_type(Type *ty) {
+Type *copy_type(C_parser *parser, Type *ty) {
   Type *ret = calloc(1, sizeof(Type));
   *ret = *ty;
   ret->origin = ty;
   return ret;
 }
 
-Type *pointer_to(Type *base) {
-  Type *ty = new_type(TY_PTR, 8, 8);
+Type *pointer_to(C_parser *parser, Type *base) {
+  Type *ty = new_type(parser, TY_PTR, 8, 8);
   ty->base = base;
   ty->is_unsigned = true;
   return ty;
 }
 
-Type *func_type(Type *return_ty) {
+Type *func_type(C_parser *parser, Type *return_ty) {
   // The C spec disallows sizeof(<function type>), but
   // GCC allows that and the expression is evaluated to 1.
-  Type *ty = new_type(TY_FUNC, 1, 1);
+  Type *ty = new_type(parser, TY_FUNC, 1, 1);
   ty->return_ty = return_ty;
   return ty;
 }
 
-Type *array_of(Type *base, int len) {
-  Type *ty = new_type(TY_ARRAY, base->size * len, base->align);
+Type *array_of(C_parser *parser, Type *base, int len) {
+  Type *ty = new_type(parser, TY_ARRAY, base->size * len, base->align);
   ty->base = base;
   ty->array_len = len;
   return ty;
 }
 
-Type *vla_of(Type *base, Node *len) {
-  Type *ty = new_type(TY_VLA, 8, 8);
+Type *vla_of(C_parser *parser, Type *base, Node *len) {
+  Type *ty = new_type(parser, TY_VLA, 8, 8);
   ty->base = base;
   ty->vla_len = len;
   return ty;
 }
 
-Type *enum_type(void) {
-  return new_type(TY_ENUM, 4, 4);
+Type *enum_type(C_parser *parser) {
+  return new_type(parser, TY_ENUM, 4, 4);
 }
 
-Type *struct_type(void) {
-  return new_type(TY_STRUCT, 0, 1);
+Type *struct_type(C_parser *parser) {
+  return new_type(parser, TY_STRUCT, 0, 1);
 }
 
-static Type *get_common_type(Type *ty1, Type *ty2) {
+static Type *get_common_type(C_parser *parser, Type *ty1, Type *ty2) {
   if (ty1->base)
-    return pointer_to(ty1->base);
+    return pointer_to(parser, ty1->base);
 
   if (ty1->kind == TY_FUNC)
-    return pointer_to(ty1);
+    return pointer_to(parser, ty1);
   if (ty2->kind == TY_FUNC)
-    return pointer_to(ty2);
+    return pointer_to(parser, ty2);
 
   if (ty1->kind == TY_LDOUBLE || ty2->kind == TY_LDOUBLE)
     return ty_ldouble;
@@ -167,28 +167,28 @@ static Type *get_common_type(Type *ty1, Type *ty2) {
 // be promoted to match with the other.
 //
 // This operation is called the "usual arithmetic conversion".
-static void usual_arith_conv(Node **lhs, Node **rhs) {
-  Type *ty = get_common_type((*lhs)->ty, (*rhs)->ty);
-  *lhs = new_cast(*lhs, ty);
-  *rhs = new_cast(*rhs, ty);
+static void usual_arith_conv(C_parser *parser, Node **lhs, Node **rhs) {
+  Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
+  *lhs = new_cast(parser, *lhs, ty);
+  *rhs = new_cast(parser, *rhs, ty);
 }
 
-void add_type(Node *node) {
+void add_type(C_parser *parser, Node *node) {
   if (!node || node->ty)
     return;
 
-  add_type(node->lhs);
-  add_type(node->rhs);
-  add_type(node->cond);
-  add_type(node->then);
-  add_type(node->els);
-  add_type(node->init);
-  add_type(node->inc);
+  add_type(parser, node->lhs);
+  add_type(parser, node->rhs);
+  add_type(parser, node->cond);
+  add_type(parser, node->then);
+  add_type(parser, node->els);
+  add_type(parser, node->init);
+  add_type(parser, node->inc);
 
   for (Node *n = node->body; n; n = n->next)
-    add_type(n);
+    add_type(parser, n);
   for (Node *n = node->args; n; n = n->next)
-    add_type(n);
+    add_type(parser, n);
 
   switch (node->kind) {
   case ND_NUM:
@@ -202,27 +202,27 @@ void add_type(Node *node) {
   case ND_BITAND:
   case ND_BITOR:
   case ND_BITXOR:
-    usual_arith_conv(&node->lhs, &node->rhs);
+    usual_arith_conv(parser, &node->lhs, &node->rhs);
     node->ty = node->lhs->ty;
     return;
   case ND_NEG: {
-    Type *ty = get_common_type(ty_int, node->lhs->ty);
-    node->lhs = new_cast(node->lhs, ty);
+    Type *ty = get_common_type(parser, ty_int, node->lhs->ty);
+    node->lhs = new_cast(parser, node->lhs, ty);
     node->ty = ty;
     return;
   }
   case ND_ASSIGN:
     if (node->lhs->ty->kind == TY_ARRAY)
-      error_tok(node->lhs->tok, "not an lvalue");
+      error_tok(parser, node->lhs->tok, "not an lvalue");
     if (node->lhs->ty->kind != TY_STRUCT)
-      node->rhs = new_cast(node->rhs, node->lhs->ty);
+      node->rhs = new_cast(parser, node->rhs, node->lhs->ty);
     node->ty = node->lhs->ty;
     return;
   case ND_EQ:
   case ND_NE:
   case ND_LT:
   case ND_LE:
-    usual_arith_conv(&node->lhs, &node->rhs);
+    usual_arith_conv(parser, &node->lhs, &node->rhs);
     node->ty = ty_int;
     return;
   case ND_FUNCALL:
@@ -246,7 +246,7 @@ void add_type(Node *node) {
     if (node->then->ty->kind == TY_VOID || node->els->ty->kind == TY_VOID) {
       node->ty = ty_void;
     } else {
-      usual_arith_conv(&node->then, &node->els);
+      usual_arith_conv(parser, &node->then, &node->els);
       node->ty = node->then->ty;
     }
     return;
@@ -259,16 +259,16 @@ void add_type(Node *node) {
   case ND_ADDR: {
     Type *ty = node->lhs->ty;
     if (ty->kind == TY_ARRAY)
-      node->ty = pointer_to(ty->base);
+      node->ty = pointer_to(parser, ty->base);
     else
-      node->ty = pointer_to(ty);
+      node->ty = pointer_to(parser, ty);
     return;
   }
   case ND_DEREF:
     if (!node->lhs->ty->base)
-      error_tok(node->tok, "invalid pointer dereference");
+      error_tok(parser, node->tok, "invalid pointer dereference");
     if (node->lhs->ty->base->kind == TY_VOID)
-      error_tok(node->tok, "dereferencing a void pointer");
+      error_tok(parser, node->tok, "dereferencing a void pointer");
 
     node->ty = node->lhs->ty->base;
     return;
@@ -282,25 +282,25 @@ void add_type(Node *node) {
         return;
       }
     }
-    error_tok(node->tok, "statement expression returning void is not supported");
+    error_tok(parser, node->tok, "statement expression returning void is not supported");
     return;
   case ND_LABEL_VAL:
-    node->ty = pointer_to(ty_void);
+    node->ty = pointer_to(parser, ty_void);
     return;
   case ND_CAS:
-    add_type(node->cas_addr);
-    add_type(node->cas_old);
-    add_type(node->cas_new);
+    add_type(parser, node->cas_addr);
+    add_type(parser, node->cas_old);
+    add_type(parser, node->cas_new);
     node->ty = ty_bool;
 
     if (node->cas_addr->ty->kind != TY_PTR)
-      error_tok(node->cas_addr->tok, "pointer expected");
+      error_tok(parser, node->cas_addr->tok, "pointer expected");
     if (node->cas_old->ty->kind != TY_PTR)
-      error_tok(node->cas_old->tok, "pointer expected");
+      error_tok(parser, node->cas_old->tok, "pointer expected");
     return;
   case ND_EXCH:
     if (node->lhs->ty->kind != TY_PTR)
-      error_tok(node->cas_addr->tok, "pointer expected");
+      error_tok(parser, node->cas_addr->tok, "pointer expected");
     node->ty = node->lhs->ty->base;
     return;
   }

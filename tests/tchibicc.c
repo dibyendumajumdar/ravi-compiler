@@ -10,8 +10,10 @@ int main(int argc, const char *argv[])
 	" return 0;\n" \
 	"}\n";
 	strncpy(buffer, code, sizeof buffer);
-	Token *tok = tokenize_buffer(buffer);
-	convert_pp_tokens(tok);
-	Obj *obj = parse(tok);
+	C_parser parser = {0};
+	Token *tok = tokenize_buffer(&parser, buffer);
+	convert_pp_tokens(&parser, tok);
+	Scope scope = {0};
+	Obj *obj = parse(&scope, &parser, tok);
 	return 0;
 }

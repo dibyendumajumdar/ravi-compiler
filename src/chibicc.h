@@ -37,6 +37,7 @@ typedef struct Node Node;
 typedef struct Member Member;
 typedef struct Relocation Relocation;
 typedef struct Hideset Hideset;
+typedef struct C_parser C_parser;
 
 //
 // strings.c
@@ -99,19 +100,19 @@ struct Token {
 };
 
 noreturn void error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
-noreturn void error_at(char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-noreturn void error_tok(Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-void warn_tok(Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+noreturn void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+noreturn void error_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+void warn_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 bool equal(Token *tok, char *op);
 Token *skip(Token *tok, char *op);
 bool consume(Token **rest, Token *tok, char *str);
-void convert_pp_tokens(Token *tok);
-File **get_input_files(void);
+void convert_pp_tokens(C_parser *tokenizer, Token *tok);
+File **get_input_files(C_parser *tokenizer);
 File *new_file(char *name, int file_no, char *contents);
-Token *tokenize_string_literal(Token *tok, Type *basety);
-Token *tokenize(File *file);
-Token *tokenize_file(char *filename);
-Token *tokenize_buffer(char *p);
+Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, Type *basety);
+Token *tokenize(C_parser *tokenizer, File *file);
+Token *tokenize_file(C_parser *tokenizer, char *filename);
+Token *tokenize_buffer(C_parser *tokenizer, char *p);
 
 #define unreachable() \
   error("internal error at %s:%d", __FILE__, __LINE__)
@@ -298,9 +299,73 @@ struct Node {
   long double fval;
 };
 
-Node *new_cast(Node *expr, Type *ty);
-int64_t const_expr(Token **rest, Token *tok);
-Obj *parse(Token *tok);
+typedef struct {
+  char *key;
+  int keylen;
+  void *val;
+} HashEntry;
+
+typedef struct {
+  HashEntry *buckets;
+  int capacity;
+  int used;
+} HashMap;
+
+// Represents a block scope.
+typedef struct Scope Scope;
+struct Scope {
+  Scope *next;
+
+  // C has two block scopes; one is for variables/typedefs and
+  // the other is for struct/union/enum tags.
+  HashMap vars;
+  HashMap tags;
+};
+
+struct C_parser {
+  int file_no;
+  // Input file
+  File *current_file;
+
+  // A list of all input files.
+  File **input_files;
+
+  // True if the current position is at the beginning of a line
+  bool at_bol;
+
+  // True if the current position follows a space character
+  bool has_space;
+
+  // All local variable instances created during parsing are
+  // accumulated to this list.
+  Obj *locals;
+
+  // Likewise, global variables are accumulated to this list.
+  Obj *globals;
+
+  Scope *scope; // = &(Scope){0};
+
+  // Points to the function object the parser is currently parsing.
+  Obj *current_fn;
+
+  // Lists of all goto statements and labels in the curent function.
+  Node *gotos;
+  Node *labels;
+
+  // Current "goto" and "continue" jump targets.
+  char *brk_label;
+  char *cont_label;
+
+  // Points to a node representing a switch if we are parsing
+  // a switch statement. Otherwise, NULL.
+  Node *current_switch;
+
+  Obj *builtin_alloca;
+};
+
+Node *new_cast(C_parser *parser, Node *expr, Type *ty);
+int64_t const_expr(C_parser *parser, Token **rest, Token *tok);
+Obj *parse(Scope* globalScope, C_parser *parser, Token *tok);
 
 //
 // type.c
@@ -403,14 +468,14 @@ bool is_integer(Type *ty);
 bool is_flonum(Type *ty);
 bool is_numeric(Type *ty);
 bool is_compatible(Type *t1, Type *t2);
-Type *copy_type(Type *ty);
-Type *pointer_to(Type *base);
-Type *func_type(Type *return_ty);
-Type *array_of(Type *base, int size);
-Type *vla_of(Type *base, Node *expr);
-Type *enum_type(void);
-Type *struct_type(void);
-void add_type(Node *node);
+Type *copy_type(C_parser *parser, Type *ty);
+Type *pointer_to(C_parser *parser, Type *base);
+Type *func_type(C_parser *parser, Type *return_ty);
+Type *array_of(C_parser *parser, Type *base, int size);
+Type *vla_of(C_parser *parser, Type *base, Node *expr);
+Type *enum_type(C_parser *parser);
+Type *struct_type(C_parser *parser);
+void add_type(C_parser *parser, Node *node);
 
 //
 // codegen.c
@@ -429,26 +494,14 @@ static inline int align_to(int n, int align) {
 //
 
 int encode_utf8(char *buf, uint32_t c);
-uint32_t decode_utf8(char **new_pos, char *p);
+uint32_t decode_utf8(C_parser *tokenizer, char **new_pos, char *p);
 bool is_ident1(uint32_t c);
 bool is_ident2(uint32_t c);
-int display_width(char *p, int len);
+int display_width(C_parser *tokenizer, char *p, int len);
 
 //
 // hashmap.c
 //
-
-typedef struct {
-  char *key;
-  int keylen;
-  void *val;
-} HashEntry;
-
-typedef struct {
-  HashEntry *buckets;
-  int capacity;
-  int used;
-} HashMap;
 
 void *hashmap_get(HashMap *map, char *key);
 void *hashmap_get2(HashMap *map, char *key, int keylen);
