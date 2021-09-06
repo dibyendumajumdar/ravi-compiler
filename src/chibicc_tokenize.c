@@ -491,7 +491,7 @@ Token *tokenize(File *file) {
   current_file = file;
 
   char *p = file->contents;
-  Token head = {};
+  Token head = {0};
   Token *cur = &head;
 
   at_bol = true;
@@ -636,6 +636,7 @@ Token *tokenize(File *file) {
   return head.next;
 }
 
+#if 0
 // Returns the contents of a given file.
 static char *read_file(char *path) {
   FILE *fp;
@@ -686,6 +687,7 @@ File *new_file(char *name, int file_no, char *contents) {
   file->contents = contents;
   return file;
 }
+#endif
 
 // Replaces \r or \r\n with \n.
 static void canonicalize_newline(char *p) {
@@ -779,6 +781,12 @@ Token *tokenize_file(char *path) {
   char *p = read_file(path);
   if (!p)
     return NULL;
+  return tokenize_buffer(p);
+}
+
+Token *tokenize_buffer(char *p) {
+  if (!p)
+    return NULL;
 
   // UTF-8 texts may start with a 3-byte "BOM" marker sequence.
   // If exists, just skip them because they are useless bytes.
@@ -793,7 +801,7 @@ Token *tokenize_file(char *path) {
 
   // Save the filename for assembler .file directive.
   static int file_no;
-  File *file = new_file(path, file_no + 1, p);
+  File *file = new_file("", file_no + 1, p);
 
   // Save the filename for assembler .file directive.
   input_files = realloc(input_files, sizeof(char *) * (file_no + 2));

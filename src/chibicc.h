@@ -2,27 +2,33 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <glob.h>
-#include <libgen.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdnoreturn.h>
 #include <string.h>
-#include <strings.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef _WIN32
+#include <glob.h>
+#include <libgen.h>
+#include <strings.h>
+#include <stdnoreturn.h>
 #include <sys/wait.h>
-#include <time.h>
 #include <unistd.h>
+#endif
 
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #ifndef __GNUC__
 # define __attribute__(x)
+#endif
+#ifdef _WIN32
+# define noreturn
+# define strncasecmp strnicmp
 #endif
 
 typedef struct Type Type;
@@ -104,6 +110,7 @@ File *new_file(char *name, int file_no, char *contents);
 Token *tokenize_string_literal(Token *tok, Type *basety);
 Token *tokenize(File *file);
 Token *tokenize_file(char *filename);
+Token *tokenize_buffer(char *p);
 
 #define unreachable() \
   error("internal error at %s:%d", __FILE__, __LINE__)
