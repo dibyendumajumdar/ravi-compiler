@@ -674,6 +674,7 @@ static char *read_file(char *path) {
   fclose(out);
   return buf;
 }
+#endif
 
 File **get_input_files(void) {
   return input_files;
@@ -687,7 +688,7 @@ File *new_file(char *name, int file_no, char *contents) {
   file->contents = contents;
   return file;
 }
-#endif
+
 
 // Replaces \r or \r\n with \n.
 static void canonicalize_newline(char *p) {
@@ -777,12 +778,14 @@ static void convert_universal_chars(char *p) {
   *q = '\0';
 }
 
+#if 0
 Token *tokenize_file(char *path) {
   char *p = read_file(path);
   if (!p)
     return NULL;
   return tokenize_buffer(p);
 }
+#endif
 
 Token *tokenize_buffer(char *p) {
   if (!p)

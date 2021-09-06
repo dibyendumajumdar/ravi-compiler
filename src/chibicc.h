@@ -29,6 +29,7 @@
 #ifdef _WIN32
 # define noreturn
 # define strncasecmp strnicmp
+# define strndup _strndup
 #endif
 
 typedef struct Type Type;
@@ -416,7 +417,12 @@ void add_type(Node *node);
 //
 
 void codegen(Obj *prog, FILE *out);
-int align_to(int n, int align);
+// Round up `n` to the nearest multiple of `align`. For instance,
+// align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
+static inline int align_to(int n, int align) {
+	return (n + align - 1) / align * align;
+}
+
 
 //
 // unicode.c

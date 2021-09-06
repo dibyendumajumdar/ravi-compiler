@@ -160,6 +160,12 @@ static int align_down(int n, int align) {
   return align_to(n - align + 1, align);
 }
 
+static char *str_dup(const char *temp, size_t len) {
+  char *p = (char *) calloc(1, len+1);
+  strncpy(p, temp, len+1);
+  return p;
+}
+
 static void enter_scope(void) {
   Scope *sc = calloc(1, sizeof(Scope));
   sc->next = scope;
@@ -326,7 +332,10 @@ static Obj *new_gvar(char *name, Type *ty) {
 
 static char *new_unique_name(void) {
   static int id = 0;
-  return format(".L..%d", id++);
+  char temp[64];
+
+  snprintf(temp, sizeof temp, ".L..%d", id++);
+  return str_dup(temp, strlen(temp));
 }
 
 static Obj *new_anon_gvar(Type *ty) {
@@ -342,7 +351,7 @@ static Obj *new_string_literal(char *p, Type *ty) {
 static char *get_ident(Token *tok) {
   if (tok->kind != TK_IDENT)
     error_tok(tok, "expected an identifier");
-  return strndup(tok->loc, tok->len);
+  return str_dup(tok->loc, tok->len);
 }
 
 static Type *find_typedef(Token *tok) {
@@ -1745,7 +1754,7 @@ static Node *stmt(Token **rest, Token *tok) {
 
   if (tok->kind == TK_IDENT && equal(tok->next, ":")) {
     Node *node = new_node(ND_LABEL, tok);
-    node->label = strndup(tok->loc, tok->len);
+    node->label = str_dup(tok->loc, tok->len);
     node->unique_label = new_unique_name();
     node->lhs = stmt(rest, tok->next->next);
     node->goto_next = labels;

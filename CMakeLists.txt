@@ -53,6 +53,10 @@ set(SRCS
         src/ravi_binding.c
         src/chibicc_tokenize.c
         src/chibicc_parse.c
+        src/chibicc_type.c
+        src/chibicc_strings.c
+        src/chibicc_unicode.c
+        src/chibicc_hashmap.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
@@ -126,6 +130,13 @@ target_include_directories(trun
 add_executable(tgraph tests/tgraph.c)
 target_link_libraries(tgraph ravicomp)
 target_include_directories(tgraph
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
+
+add_executable(tchibicc tests/tchibicc.c)
+target_link_libraries(tchibicc ravicomp)
+target_include_directories(tchibicc
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
