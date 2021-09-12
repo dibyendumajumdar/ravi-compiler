@@ -102,7 +102,7 @@ C_Token *C_skip(C_parser *parser, C_Token *tok, char *op) {
   return tok->next;
 }
 
-bool consume(C_Token **rest, C_Token *tok, char *str) {
+bool C_consume(C_Token **rest, C_Token *tok, char *str) {
   if (C_equal(tok, str)) {
     *rest = tok->next;
     return true;

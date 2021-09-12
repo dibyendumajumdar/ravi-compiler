@@ -431,10 +431,9 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     }
 
     // These keywords are recognized but ignored.
-    if (consume(&tok, tok, "const") || consume(&tok, tok, "volatile") ||
-        consume(&tok, tok, "auto") || consume(&tok, tok, "register") ||
-        consume(&tok, tok, "restrict") || consume(&tok, tok, "__restrict") ||
-        consume(&tok, tok, "__restrict__") || consume(&tok, tok, "_Noreturn"))
+    if (C_consume(&tok, tok, "const") || C_consume(&tok, tok, "volatile") || C_consume(&tok, tok, "auto") ||
+	C_consume(&tok, tok, "register") || C_consume(&tok, tok, "restrict") || C_consume(&tok, tok, "__restrict") ||
+	C_consume(&tok, tok, "__restrict__") || C_consume(&tok, tok, "_Noreturn"))
       continue;
 
     if (C_equal(tok, "_Atomic")) {
@@ -669,7 +668,7 @@ static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
 // pointers = ("*" ("const" | "volatile" | "restrict")*)*
 static C_Type *pointers(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
-  while (consume(&tok, tok, "*")) {
+  while (C_consume(&tok, tok, "*")) {
     ty = pointer_to(parser, ty);
     while (C_equal(tok, "const") || C_equal(tok, "volatile") || C_equal(tok, "restrict") || C_equal(tok, "__restrict") ||
 	   C_equal(tok, "__restrict__"))
@@ -1219,7 +1218,7 @@ static void union_initializer(C_parser *parser, C_Token **rest, C_Token *tok, In
 
   if (C_equal(tok, "{")) {
     initializer2(parser, &tok, tok->next, init->children[0]);
-    consume(&tok, tok, ",");
+    C_consume(&tok, tok, ",");
     *rest = C_skip(parser, tok, "}");
   } else {
     initializer2(parser, rest, tok, init->children[0]);
@@ -1549,7 +1548,7 @@ static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, "return")) {
 	  C_Node *node = new_node(parser, ND_RETURN, tok);
-    if (consume(rest, tok->next, ";"))
+    if (C_consume(rest, tok->next, ";"))
       return node;
 
     C_Node *exp = expr(parser, &tok, tok->next);
@@ -2554,8 +2553,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
     bool first = true;
 
     // Anonymous struct member
-    if ((basety->kind == TY_STRUCT || basety->kind == TY_UNION) &&
-        consume(&tok, tok, ";")) {
+    if ((basety->kind == TY_STRUCT || basety->kind == TY_UNION) && C_consume(&tok, tok, ";")) {
 	    C_Member *mem = calloc(1, sizeof(C_Member));
       mem->ty = basety;
       mem->idx = idx++;
@@ -2565,7 +2563,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
     }
 
     // Regular struct members
-    while (!consume(&tok, tok, ";")) {
+    while (!C_consume(&tok, tok, ";")) {
       if (!first)
         tok = C_skip(parser, tok, ",");
       first = false;
@@ -2576,7 +2574,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
       mem->idx = idx++;
       mem->align = attr.align ? attr.align : mem->ty->align;
 
-      if (consume(&tok, tok, ":")) {
+      if (C_consume(&tok, tok, ":")) {
         mem->is_bitfield = true;
         mem->bit_width = const_expr(parser, &tok, tok);
       }
@@ -2599,23 +2597,23 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
 // attribute = ("__attribute__" "(" "(" "packed" ")" ")")*
 static C_Token *attribute_list(C_parser *parser, C_Token *tok, C_Type *ty) {
-  while (consume(&tok, tok, "__attribute__")) {
+  while (C_consume(&tok, tok, "__attribute__")) {
     tok = C_skip(parser, tok, "(");
     tok = C_skip(parser, tok, "(");
 
     bool first = true;
 
-    while (!consume(&tok, tok, ")")) {
+    while (!C_consume(&tok, tok, ")")) {
       if (!first)
         tok = C_skip(parser, tok, ",");
       first = false;
 
-      if (consume(&tok, tok, "packed")) {
+      if (C_consume(&tok, tok, "packed")) {
         ty->is_packed = true;
         continue;
       }
 
-      if (consume(&tok, tok, "aligned")) {
+      if (C_consume(&tok, tok, "aligned")) {
         tok = C_skip(parser, tok, "(");
         ty->align = const_expr(parser, &tok, tok);
         tok = C_skip(parser, tok, ")");
@@ -2946,7 +2944,7 @@ static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok)
 
   C_Node *ret = NULL;
 
-  while (!consume(rest, tok, ")")) {
+  while (!C_consume(rest, tok, ")")) {
     tok = C_skip(parser, tok, ",");
 
     if (C_equal(tok, "default")) {
@@ -3133,7 +3131,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
 static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety) {
   bool first = true;
 
-  while (!consume(&tok, tok, ";")) {
+  while (!C_consume(&tok, tok, ";")) {
     if (!first)
       tok = C_skip(parser, tok, ",");
     first = false;
@@ -3225,7 +3223,7 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
 
   fn->is_root = !(fn->is_static && fn->is_inline);
 
-  if (consume(&tok, tok, ";"))
+  if (C_consume(&tok, tok, ";"))
     return tok;
 
   parser->current_fn = fn;
@@ -3267,7 +3265,7 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
 static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
   bool first = true;
 
-  while (!consume(&tok, tok, ";")) {
+  while (!C_consume(&tok, tok, ";")) {
     if (!first)
       tok = C_skip(parser, tok, ",");
     first = false;
