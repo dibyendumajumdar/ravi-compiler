@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
 	"} Str;\n";
 	strncpy(buffer, code, sizeof buffer);
 	C_parser parser = {0};
-	Token *tok = tokenize_buffer(&parser, buffer);
+	C_Token *tok = tokenize_buffer(&parser, buffer);
 	convert_pp_tokens(&parser, tok);
 	Scope scope = {0};
 	Obj *obj = parse(&scope, &parser, tok);

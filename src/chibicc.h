@@ -58,7 +58,7 @@ char *format(char *fmt, ...) __attribute__((format(printf, 1, 2)));
 // tokenize.c
 //
 
-// Token
+// C_Token
 typedef enum {
   TK_IDENT,   // Identifiers
   TK_PUNCT,   // Punctuators
@@ -79,15 +79,15 @@ typedef struct {
   int line_delta;
 } C_File;
 
-// Token type
-typedef struct Token Token;
-struct Token {
-	C_TokenKind kind;   // Token kind
-  Token *next;      // Next token
+// C_Token type
+typedef struct C_Token C_Token;
+struct C_Token {
+	C_TokenKind kind;   // C_Token kind
+	C_Token *next;      // Next token
   int64_t val;      // If kind is TK_NUM, its value
   long double fval; // If kind is TK_NUM, its value
-  char *loc;        // Token location
-  int len;          // Token length
+  char *loc;        // C_Token location
+  int len;          // C_Token length
   C_Type *ty;         // Used if TK_NUM or TK_STR
   char *str;        // String literal contents including terminating '\0'
 
@@ -98,23 +98,23 @@ struct Token {
   bool at_bol;      // True if this token is at beginning of line
   bool has_space;   // True if this token follows a space character
   C_Hideset *hideset; // For macro expansion
-  Token *origin;    // If this is expanded from a macro, the original token
+  C_Token *origin;    // If this is expanded from a macro, the original token
 };
 
 noreturn void error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
 noreturn void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-noreturn void error_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-void warn_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-bool equal(Token *tok, char *op);
-Token *skip(C_parser *parser, Token *tok, char *op);
-bool consume(Token **rest, Token *tok, char *str);
-void convert_pp_tokens(C_parser *tokenizer, Token *tok);
+noreturn void error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+void warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+bool equal(C_Token *tok, char *op);
+C_Token *skip(C_parser *parser, C_Token *tok, char *op);
+bool consume(C_Token **rest, C_Token *tok, char *str);
+void convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
 C_File **get_input_files(C_parser *tokenizer);
 C_File *new_file(char *name, int file_no, char *contents);
-Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, C_Type *basety);
-Token *tokenize(C_parser *tokenizer, C_File *file);
-Token *tokenize_file(C_parser *tokenizer, char *filename);
-Token *tokenize_buffer(C_parser *tokenizer, char *p);
+C_Token *tokenize_string_literal(C_parser *tokenizer, C_Token *tok, C_Type *basety);
+C_Token *tokenize(C_parser *tokenizer, C_File *file);
+C_Token *tokenize_file(C_parser *tokenizer, char *filename);
+C_Token *tokenize_buffer(C_parser *tokenizer, char *p);
 
 #define unreachable() \
   error("internal error at %s:%d", __FILE__, __LINE__)
@@ -127,7 +127,7 @@ char *search_include_paths(char *filename);
 void init_macros(void);
 void define_macro(char *name, char *buf);
 void undef_macro(char *name);
-Token *preprocess(Token *tok);
+C_Token *preprocess(C_Token *tok);
 
 //
 // parse.c
@@ -139,7 +139,7 @@ struct Obj {
   Obj *next;
   char *name;    // Variable name
   C_Type *ty;      // Type
-  Token *tok;    // representative token
+  C_Token *tok;    // representative token
   bool is_local; // local or global/function
   int align;     // alignment
 
@@ -240,7 +240,7 @@ struct C_Node {
   NodeKind kind; // C_Node kind
   C_Node *next;    // Next node
   C_Type *ty;      // Type, e.g. int or pointer to int
-  Token *tok;    // Representative token
+  C_Token *tok;    // Representative token
 
   C_Node *lhs;     // Left-hand side
   C_Node *rhs;     // Right-hand side
@@ -370,11 +370,11 @@ struct C_parser {
 };
 
 C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
-int64_t const_expr(C_parser *parser, Token **rest, Token *tok);
-Obj *parse(Scope* globalScope, C_parser *parser, Token *tok);
+int64_t const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
+Obj *parse(Scope* globalScope, C_parser *parser, C_Token *tok);
 
 #ifdef RAVI_EXTENSIONS
-C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, Token *tok);
+C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, C_Token *tok);
 Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
 #endif
 
@@ -420,8 +420,8 @@ struct C_Type {
   C_Type *base;
 
   // Declaration
-  Token *name;
-  Token *name_pos;
+  C_Token *name;
+  C_Token *name_pos;
 
   // Array
   int array_len;
@@ -446,8 +446,8 @@ struct C_Type {
 struct C_Member {
 	C_Member *next;
   C_Type *ty;
-  Token *tok; // for error message
-  Token *name;
+  C_Token *tok; // for error message
+  C_Token *name;
   int idx;
   int align;
   int offset;
