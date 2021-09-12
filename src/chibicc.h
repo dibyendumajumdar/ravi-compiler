@@ -38,7 +38,7 @@ typedef struct C_Type C_Type;
 typedef struct C_Node C_Node;
 typedef struct C_Member C_Member;
 typedef struct C_Relocation C_Relocation;
-typedef struct Hideset Hideset;
+typedef struct C_Hideset C_Hideset;
 typedef struct C_parser C_parser;
 
 //
@@ -97,7 +97,7 @@ struct Token {
   int line_delta;   // Line number
   bool at_bol;      // True if this token is at beginning of line
   bool has_space;   // True if this token follows a space character
-  Hideset *hideset; // For macro expansion
+  C_Hideset *hideset; // For macro expansion
   Token *origin;    // If this is expanded from a macro, the original token
 };
 
