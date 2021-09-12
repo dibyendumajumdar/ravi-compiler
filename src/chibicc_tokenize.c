@@ -440,7 +440,7 @@ static bool convert_pp_int(C_Token *tok) {
 //
 // This function converts a pp-number token to a regular number token.
 static void convert_pp_number(C_parser *tokenizer, C_Token *tok) {
-  // Try to parse as an integer constant.
+  // Try to C_parse as an integer constant.
   if (convert_pp_int(tok))
     return;
 
@@ -803,7 +803,7 @@ C_Token *tokenize_file(C_parser *tokenizer, char *path) {
 }
 #endif
 
-C_Token *tokenize_buffer(C_parser *tokenizer, char *p) {
+C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p) {
   if (!p)
     return NULL;
 

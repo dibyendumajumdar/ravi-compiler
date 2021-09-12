@@ -240,7 +240,7 @@ static C_Node *new_vla_ptr(C_parser *parser, C_Obj *var, C_Token *tok) {
   return node;
 }
 
-C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty) {
+C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty) {
   add_type(parser, expr);
 
   C_Node *node = calloc(1, sizeof(C_Node));
@@ -454,7 +454,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
       if (is_typename(parser, tok))
         attr->align = typename(parser, &tok, tok)->align;
       else
-        attr->align = const_expr(parser, &tok, tok);
+        attr->align = C_const_expr(parser, &tok, tok);
       tok = C_skip(parser, tok, ")");
       continue;
     }
@@ -782,7 +782,7 @@ static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
     tok = tok->next;
 
     if (C_equal(tok, "="))
-      val = const_expr(parser, &tok, tok->next);
+      val = C_const_expr(parser, &tok, tok->next);
 
     VarScope *sc = push_scope(parser, name);
     sc->enum_ty = ty;
@@ -978,12 +978,12 @@ static void string_initializer(C_parser *parser, C_Token **rest, C_Token *tok, I
 //
 // The above initializer sets x.c to 5.
 static void array_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, int *begin, int *end) {
-  *begin = const_expr(parser, &tok, tok->next);
+  *begin = C_const_expr(parser, &tok, tok->next);
   if (*begin >= ty->array_len)
 	  C_error_tok(parser, tok, "array designator index exceeds array bounds");
 
   if (C_equal(tok, "...")) {
-    *end = const_expr(parser, &tok, tok->next);
+    *end = C_const_expr(parser, &tok, tok->next);
     if (*end >= ty->array_len)
 	    C_error_tok(parser, tok, "array designator index exceeds array bounds");
     if (*end < *begin)
@@ -1076,9 +1076,9 @@ static int count_array_init_elements(C_parser *parser, C_Token *tok, C_Type *ty)
     first = false;
 
     if (C_equal(tok, "[")) {
-      i = const_expr(parser, &tok, tok->next);
+      i = C_const_expr(parser, &tok, tok->next);
       if (C_equal(tok, "..."))
-        i = const_expr(parser, &tok, tok->next);
+        i = C_const_expr(parser, &tok, tok->next);
       tok = C_skip(parser, tok, "]");
       designation(parser, &tok, tok, dummy);
     } else {
@@ -1557,7 +1557,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     add_type(parser, exp);
     C_Type *ty = parser->current_fn->ty->return_ty;
     if (ty->kind != TY_STRUCT && ty->kind != TY_UNION)
-      exp = new_cast(parser, exp, parser->current_fn->ty->return_ty);
+      exp = C_new_cast(parser, exp, parser->current_fn->ty->return_ty);
 
     node->lhs = exp;
     return node;
@@ -1599,12 +1599,12 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 	    C_error_tok(parser, tok, "stray case");
 
     C_Node *node = new_node(parser, ND_CASE, tok);
-    int begin = const_expr(parser, &tok, tok->next);
+    int begin = C_const_expr(parser, &tok, tok->next);
     int end;
 
     if (C_equal(tok, "...")) {
       // [GNU] Case ranges, e.g. "case 1 ... 5:"
-      end = const_expr(parser, &tok, tok->next);
+      end = C_const_expr(parser, &tok, tok->next);
       if (end < begin)
 	      C_error_tok(parser, tok, "empty case range specified");
     } else {
@@ -1985,7 +1985,7 @@ static bool is_const_expr(C_parser *parser, C_Node *node) {
   return false;
 }
 
-int64_t const_expr(C_parser *parser, C_Token **rest, C_Token *tok) {
+int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = conditional(parser, rest, tok);
   return eval(parser, node);
 }
@@ -2475,7 +2475,7 @@ static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok) {
       return unary(parser, rest, start);
 
     // type cast
-    C_Node *node = new_cast(parser, cast(parser, rest, tok), ty);
+    C_Node *node = C_new_cast(parser, cast(parser, rest, tok), ty);
     node->tok = start;
     return node;
   }
@@ -2576,7 +2576,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
       if (C_consume(&tok, tok, ":")) {
         mem->is_bitfield = true;
-        mem->bit_width = const_expr(parser, &tok, tok);
+        mem->bit_width = C_const_expr(parser, &tok, tok);
       }
 
       cur = cur->next = mem;
@@ -2615,7 +2615,7 @@ static C_Token *attribute_list(C_parser *parser, C_Token *tok, C_Type *ty) {
 
       if (C_consume(&tok, tok, "aligned")) {
         tok = C_skip(parser, tok, "(");
-        ty->align = const_expr(parser, &tok, tok);
+        ty->align = C_const_expr(parser, &tok, tok);
         tok = C_skip(parser, tok, ")");
         continue;
       }
@@ -2789,9 +2789,10 @@ static C_Node *struct_ref(C_parser *parser, C_Node *node, C_Token *tok) {
 // Convert A++ to `(typeof A)((A += 1) - 1)`
 static C_Node *new_inc_dec(C_parser *parser, C_Node *node, C_Token *tok, int addend) {
   add_type(parser, node);
-  return new_cast(parser, new_add(parser, to_assign(parser, new_add(parser, node, new_num(parser, addend, tok), tok)),
-                          new_num(parser, -addend, tok), tok),
-                  node->ty);
+  return C_new_cast(parser,
+		    new_add(parser, to_assign(parser, new_add(parser, node, new_num(parser, addend, tok), tok)),
+			    new_num(parser, -addend, tok), tok),
+		    node->ty);
 }
 
 // postfix = "(" type-name ")" "{" initializer-list "}"
@@ -2897,12 +2898,12 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
 
     if (param_ty) {
       if (param_ty->kind != TY_STRUCT && param_ty->kind != TY_UNION)
-        arg = new_cast(parser, arg, param_ty);
+        arg = C_new_cast(parser, arg, param_ty);
       param_ty = param_ty->next;
     } else if (arg->ty->kind == TY_FLOAT) {
       // If parameter type is omitted (e.g. in "..."), float
       // arguments are promoted to double.
-      arg = new_cast(parser, arg, ty_double);
+      arg = C_new_cast(parser, arg, ty_double);
     }
 
     cur = cur->next = arg;
@@ -3155,9 +3156,9 @@ static void create_param_lvars(C_parser *parser, C_Type *param) {
 
 // This function matches gotos or labels-as-values with labels.
 //
-// We cannot resolve gotos as we parse a function because gotos
+// We cannot resolve gotos as we C_parse a function because gotos
 // can refer a label that appears later in the function.
-// So, we need to do this after we parse the entire function.
+// So, we need to do this after we C_parse the entire function.
 static void resolve_goto_labels(C_parser *parser) {
   for (C_Node *x = parser->gotos; x; x = x->goto_next) {
     for (C_Node *y = parser->labels; y; y = y->goto_next) {
@@ -3358,7 +3359,7 @@ C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token
 #endif
 
 // program = (typedef | function-definition | global-variable)*
-C_Obj *parse(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Obj *C_parse(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
   parser->scope = globalScope;
 
   declare_builtin_functions(parser);

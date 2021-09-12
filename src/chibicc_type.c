@@ -195,8 +195,8 @@ static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
 // This operation is called the "usual arithmetic conversion".
 static void usual_arith_conv(C_parser *parser, C_Node **lhs, C_Node **rhs) {
 	C_Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
-  *lhs = new_cast(parser, *lhs, ty);
-  *rhs = new_cast(parser, *rhs, ty);
+  *lhs = C_new_cast(parser, *lhs, ty);
+  *rhs = C_new_cast(parser, *rhs, ty);
 }
 
 void add_type(C_parser *parser, C_Node *node) {
@@ -233,7 +233,7 @@ void add_type(C_parser *parser, C_Node *node) {
     return;
   case ND_NEG: {
 	  C_Type *ty = get_common_type(parser, ty_int, node->lhs->ty);
-    node->lhs = new_cast(parser, node->lhs, ty);
+    node->lhs = C_new_cast(parser, node->lhs, ty);
     node->ty = ty;
     return;
   }
@@ -241,7 +241,7 @@ void add_type(C_parser *parser, C_Node *node) {
     if (node->lhs->ty->kind == TY_ARRAY)
 	    C_error_tok(parser, node->lhs->tok, "not an lvalue");
     if (node->lhs->ty->kind != TY_STRUCT)
-      node->rhs = new_cast(parser, node->rhs, node->lhs->ty);
+      node->rhs = C_new_cast(parser, node->rhs, node->lhs->ty);
     node->ty = node->lhs->ty;
     return;
   case ND_EQ:

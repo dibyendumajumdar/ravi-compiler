@@ -128,13 +128,13 @@ bool C_consume(C_Token **rest, C_Token *tok, char *str);
 void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
 C_File *C_new_file(char *name, int file_no, char *contents);
 C_Token *C_tokenize(C_parser *tokenizer, C_File *file);
-C_Token *tokenize_buffer(C_parser *tokenizer, char *p);
+C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p);
 
 #define unreachable() \
   C_error("internal error at %s:%d", __FILE__, __LINE__)
 
 //
-// parse.c
+// C_parse.c
 //
 
 // Variable or function
@@ -373,9 +373,9 @@ struct C_parser {
 #endif
 };
 
-C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
-int64_t const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
-C_Obj *parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
+C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
+int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
+C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
 
 #ifdef RAVI_EXTENSIONS
 C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
