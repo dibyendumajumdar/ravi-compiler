@@ -19,7 +19,7 @@ int main(int argc, const char *argv[])
 	strncpy(buffer, code, sizeof buffer);
 	C_parser parser = {0};
 	C_Token *tok = tokenize_buffer(&parser, buffer);
-	convert_pp_tokens(&parser, tok);
+	C_convert_pp_tokens(&parser, tok);
 	C_Scope scope = {0};
 	C_Obj *obj = parse(&scope, &parser, tok);
 	hashmap_foreach(&scope.vars, printout);
@@ -28,7 +28,7 @@ int main(int argc, const char *argv[])
 	const char *snippet = "{ Str s; s.data = \"hello world\"; s.len = sizeof \"hello world\"; }\n";
 	strncpy(buffer2, snippet, sizeof buffer2);
 	tok = tokenize_buffer(&parser, buffer2);
-	convert_pp_tokens(&parser, tok);
+	C_convert_pp_tokens(&parser, tok);
 	parser.allow_partial_parsing = true;
 	C_Node *node = parse_compound_statement(&scope, &parser, tok);
 	return 0;

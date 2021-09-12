@@ -467,7 +467,7 @@ static void convert_pp_number(C_parser *tokenizer, C_Token *tok) {
   tok->ty = ty;
 }
 
-void convert_pp_tokens(C_parser *tokenizer, C_Token *tok) {
+void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok) {
   for (C_Token *t = tok; t->kind != TK_EOF; t = t->next) {
     if (is_keyword(t))
       t->kind = TK_KEYWORD;
@@ -689,11 +689,12 @@ static char *read_file(char *path) {
   fclose(out);
   return buf;
 }
-#endif
 
 C_File **get_input_files(C_parser *tokenizer) {
   return tokenizer->input_files;
 }
+#endif
+
 
 C_File *new_file(char *name, int file_no, char *contents) {
 	C_File *file = calloc(1, sizeof(C_File));
