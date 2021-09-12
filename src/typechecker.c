@@ -552,6 +552,9 @@ static void typecheck_ast_node(CompilerState *container, AstNode *function, AstN
 		typecheck_for_num_statment(container, function, node);
 		break;
 	}
+	case STMT_EMBEDDED_C: {
+		break;
+	}
 	case EXPR_SUFFIXED: {
 		typecheck_suffixedexpr(container, function, node);
 		break;

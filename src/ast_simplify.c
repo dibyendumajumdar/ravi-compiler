@@ -566,6 +566,8 @@ static void process_statement(CompilerState *container, AstNode *node)
 		process_expression_list(container, node->for_stmt.expr_list);
 		process_statement_list(container, node->for_stmt.for_statement_list);
 		break;
+	case STMT_EMBEDDED_C:
+		break;
 	default:
 		fprintf(stderr, "AST = %d\n", node->type);
 		assert(0);

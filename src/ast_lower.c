@@ -369,6 +369,8 @@ static void process_statement(CompilerState *container, AstNode *node)
 	case STMT_FOR_IN:
 		lower_for_in_statement(container, node);
 		break;
+	case STMT_EMBEDDED_C:
+		break;
 	default:
 		fprintf(stderr, "AST = %d\n", node->type);
 		assert(0);
