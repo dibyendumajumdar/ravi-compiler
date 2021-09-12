@@ -34,7 +34,7 @@
 # define strndup _strndup
 #endif
 
-typedef struct Type Type;
+typedef struct C_Type C_Type;
 typedef struct Node Node;
 typedef struct Member Member;
 typedef struct Relocation Relocation;
@@ -88,7 +88,7 @@ struct Token {
   long double fval; // If kind is TK_NUM, its value
   char *loc;        // Token location
   int len;          // Token length
-  Type *ty;         // Used if TK_NUM or TK_STR
+  C_Type *ty;         // Used if TK_NUM or TK_STR
   char *str;        // String literal contents including terminating '\0'
 
   File *file;       // Source location
@@ -111,7 +111,7 @@ bool consume(Token **rest, Token *tok, char *str);
 void convert_pp_tokens(C_parser *tokenizer, Token *tok);
 File **get_input_files(C_parser *tokenizer);
 File *new_file(char *name, int file_no, char *contents);
-Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, Type *basety);
+Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, C_Type *basety);
 Token *tokenize(C_parser *tokenizer, File *file);
 Token *tokenize_file(C_parser *tokenizer, char *filename);
 Token *tokenize_buffer(C_parser *tokenizer, char *p);
@@ -138,7 +138,7 @@ typedef struct Obj Obj;
 struct Obj {
   Obj *next;
   char *name;    // Variable name
-  Type *ty;      // Type
+  C_Type *ty;      // Type
   Token *tok;    // representative token
   bool is_local; // local or global/function
   int align;     // alignment
@@ -239,7 +239,7 @@ typedef enum {
 struct Node {
   NodeKind kind; // Node kind
   Node *next;    // Next node
-  Type *ty;      // Type, e.g. int or pointer to int
+  C_Type *ty;      // Type, e.g. int or pointer to int
   Token *tok;    // Representative token
 
   Node *lhs;     // Left-hand side
@@ -263,7 +263,7 @@ struct Node {
   Member *member;
 
   // Function call
-  Type *func_ty;
+  C_Type *func_ty;
   Node *args;
   bool pass_by_stack;
   Obj *ret_buffer;
@@ -369,7 +369,7 @@ struct C_parser {
 #endif
 };
 
-Node *new_cast(C_parser *parser, Node *expr, Type *ty);
+Node *new_cast(C_parser *parser, Node *expr, C_Type *ty);
 int64_t const_expr(C_parser *parser, Token **rest, Token *tok);
 Obj *parse(Scope* globalScope, C_parser *parser, Token *tok);
 
@@ -401,13 +401,13 @@ typedef enum {
   TY_UNION,
 } TypeKind;
 
-struct Type {
+struct C_Type {
   TypeKind kind;
   int size;           // sizeof() value
   int align;          // alignment
   bool is_unsigned;   // unsigned or signed
   bool is_atomic;     // true if _Atomic
-  Type *origin;       // for type compatibility check
+  C_Type *origin;       // for type compatibility check
 
   // Pointer-to or array-of type. We intentionally use the same member
   // to represent pointer/array duality in C.
@@ -417,7 +417,7 @@ struct Type {
   // pointer or not. That means in many contexts "array of T" is
   // naturally handled as if it were "pointer to T", as required by
   // the C spec.
-  Type *base;
+  C_Type *base;
 
   // Declaration
   Token *name;
@@ -436,16 +436,16 @@ struct Type {
   bool is_packed;
 
   // Function type
-  Type *return_ty;
-  Type *params;
+  C_Type *return_ty;
+  C_Type *params;
   bool is_variadic;
-  Type *next;
+  C_Type *next;
 };
 
 // Struct member
 struct Member {
   Member *next;
-  Type *ty;
+  C_Type *ty;
   Token *tok; // for error message
   Token *name;
   int idx;
@@ -458,34 +458,34 @@ struct Member {
   int bit_width;
 };
 
-extern Type *ty_void;
-extern Type *ty_bool;
+extern C_Type *ty_void;
+extern C_Type *ty_bool;
 
-extern Type *ty_char;
-extern Type *ty_short;
-extern Type *ty_int;
-extern Type *ty_long;
+extern C_Type *ty_char;
+extern C_Type *ty_short;
+extern C_Type *ty_int;
+extern C_Type *ty_long;
 
-extern Type *ty_uchar;
-extern Type *ty_ushort;
-extern Type *ty_uint;
-extern Type *ty_ulong;
+extern C_Type *ty_uchar;
+extern C_Type *ty_ushort;
+extern C_Type *ty_uint;
+extern C_Type *ty_ulong;
 
-extern Type *ty_float;
-extern Type *ty_double;
-extern Type *ty_ldouble;
+extern C_Type *ty_float;
+extern C_Type *ty_double;
+extern C_Type *ty_ldouble;
 
-bool is_integer(Type *ty);
-bool is_flonum(Type *ty);
-bool is_numeric(Type *ty);
-bool is_compatible(Type *t1, Type *t2);
-Type *copy_type(C_parser *parser, Type *ty);
-Type *pointer_to(C_parser *parser, Type *base);
-Type *func_type(C_parser *parser, Type *return_ty);
-Type *array_of(C_parser *parser, Type *base, int size);
-Type *vla_of(C_parser *parser, Type *base, Node *expr);
-Type *enum_type(C_parser *parser);
-Type *struct_type(C_parser *parser);
+bool is_integer(C_Type *ty);
+bool is_flonum(C_Type *ty);
+bool is_numeric(C_Type *ty);
+bool is_compatible(C_Type *t1, C_Type *t2);
+C_Type *copy_type(C_parser *parser, C_Type *ty);
+C_Type *pointer_to(C_parser *parser, C_Type *base);
+C_Type *func_type(C_parser *parser, C_Type *return_ty);
+C_Type *array_of(C_parser *parser, C_Type *base, int size);
+C_Type *vla_of(C_parser *parser, C_Type *base, Node *expr);
+C_Type *enum_type(C_parser *parser);
+C_Type *struct_type(C_parser *parser);
 void add_type(C_parser *parser, Node *node);
 
 //

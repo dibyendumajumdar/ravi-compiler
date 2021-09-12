@@ -1,46 +1,46 @@
 #include "chibicc.h"
 
-Type *ty_void = &(Type){TY_VOID, 1, 1};
-Type *ty_bool = &(Type){TY_BOOL, 1, 1};
+C_Type *ty_void = &(C_Type){TY_VOID, 1, 1};
+C_Type *ty_bool = &(C_Type){TY_BOOL, 1, 1};
 
-Type *ty_char = &(Type){TY_CHAR, 1, 1};
-Type *ty_short = &(Type){TY_SHORT, 2, 2};
-Type *ty_int = &(Type){TY_INT, 4, 4};
-Type *ty_long = &(Type){TY_LONG, 8, 8};
+C_Type *ty_char = &(C_Type){TY_CHAR, 1, 1};
+C_Type *ty_short = &(C_Type){TY_SHORT, 2, 2};
+C_Type *ty_int = &(C_Type){TY_INT, 4, 4};
+C_Type *ty_long = &(C_Type){TY_LONG, 8, 8};
 
-Type *ty_uchar = &(Type){TY_CHAR, 1, 1, true};
-Type *ty_ushort = &(Type){TY_SHORT, 2, 2, true};
-Type *ty_uint = &(Type){TY_INT, 4, 4, true};
-Type *ty_ulong = &(Type){TY_LONG, 8, 8, true};
+C_Type *ty_uchar = &(C_Type){TY_CHAR, 1, 1, true};
+C_Type *ty_ushort = &(C_Type){TY_SHORT, 2, 2, true};
+C_Type *ty_uint = &(C_Type){TY_INT, 4, 4, true};
+C_Type *ty_ulong = &(C_Type){TY_LONG, 8, 8, true};
 
-Type *ty_float = &(Type){TY_FLOAT, 4, 4};
-Type *ty_double = &(Type){TY_DOUBLE, 8, 8};
-Type *ty_ldouble = &(Type){TY_LDOUBLE, 16, 16};
+C_Type *ty_float = &(C_Type){TY_FLOAT, 4, 4};
+C_Type *ty_double = &(C_Type){TY_DOUBLE, 8, 8};
+C_Type *ty_ldouble = &(C_Type){TY_LDOUBLE, 16, 16};
 
-static Type *new_type(C_parser *parser, TypeKind kind, int size, int align) {
-  Type *ty = calloc(1, sizeof(Type));
+static C_Type *new_type(C_parser *parser, TypeKind kind, int size, int align) {
+	C_Type *ty = calloc(1, sizeof(C_Type));
   ty->kind = kind;
   ty->size = size;
   ty->align = align;
   return ty;
 }
 
-bool is_integer(Type *ty) {
+bool is_integer(C_Type *ty) {
   TypeKind k = ty->kind;
   return k == TY_BOOL || k == TY_CHAR || k == TY_SHORT ||
          k == TY_INT  || k == TY_LONG || k == TY_ENUM;
 }
 
-bool is_flonum(Type *ty) {
+bool is_flonum(C_Type *ty) {
   return ty->kind == TY_FLOAT || ty->kind == TY_DOUBLE ||
          ty->kind == TY_LDOUBLE;
 }
 
-bool is_numeric(Type *ty) {
+bool is_numeric(C_Type *ty) {
   return is_integer(ty) || is_flonum(ty);
 }
 
-bool is_compatible(Type *t1, Type *t2) {
+bool is_compatible(C_Type *t1, C_Type *t2) {
   if (t1 == t2)
     return true;
 
@@ -71,8 +71,8 @@ bool is_compatible(Type *t1, Type *t2) {
     if (t1->is_variadic != t2->is_variadic)
       return false;
 
-    Type *p1 = t1->params;
-    Type *p2 = t2->params;
+    C_Type *p1 = t1->params;
+    C_Type *p2 = t2->params;
     for (; p1 && p2; p1 = p1->next, p2 = p2->next)
       if (!is_compatible(p1, p2))
         return false;
@@ -87,51 +87,51 @@ bool is_compatible(Type *t1, Type *t2) {
   return false;
 }
 
-Type *copy_type(C_parser *parser, Type *ty) {
-  Type *ret = calloc(1, sizeof(Type));
+C_Type *copy_type(C_parser *parser, C_Type *ty) {
+	C_Type *ret = calloc(1, sizeof(C_Type));
   *ret = *ty;
   ret->origin = ty;
   return ret;
 }
 
-Type *pointer_to(C_parser *parser, Type *base) {
-  Type *ty = new_type(parser, TY_PTR, 8, 8);
+C_Type *pointer_to(C_parser *parser, C_Type *base) {
+	C_Type *ty = new_type(parser, TY_PTR, 8, 8);
   ty->base = base;
   ty->is_unsigned = true;
   return ty;
 }
 
-Type *func_type(C_parser *parser, Type *return_ty) {
+C_Type *func_type(C_parser *parser, C_Type *return_ty) {
   // The C spec disallows sizeof(<function type>), but
   // GCC allows that and the expression is evaluated to 1.
-  Type *ty = new_type(parser, TY_FUNC, 1, 1);
+  C_Type *ty = new_type(parser, TY_FUNC, 1, 1);
   ty->return_ty = return_ty;
   return ty;
 }
 
-Type *array_of(C_parser *parser, Type *base, int len) {
-  Type *ty = new_type(parser, TY_ARRAY, base->size * len, base->align);
+C_Type *array_of(C_parser *parser, C_Type *base, int len) {
+	C_Type *ty = new_type(parser, TY_ARRAY, base->size * len, base->align);
   ty->base = base;
   ty->array_len = len;
   return ty;
 }
 
-Type *vla_of(C_parser *parser, Type *base, Node *len) {
-  Type *ty = new_type(parser, TY_VLA, 8, 8);
+C_Type *vla_of(C_parser *parser, C_Type *base, Node *len) {
+	C_Type *ty = new_type(parser, TY_VLA, 8, 8);
   ty->base = base;
   ty->vla_len = len;
   return ty;
 }
 
-Type *enum_type(C_parser *parser) {
+C_Type *enum_type(C_parser *parser) {
   return new_type(parser, TY_ENUM, 4, 4);
 }
 
-Type *struct_type(C_parser *parser) {
+C_Type *struct_type(C_parser *parser) {
   return new_type(parser, TY_STRUCT, 0, 1);
 }
 
-static Type *get_common_type(C_parser *parser, Type *ty1, Type *ty2) {
+static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
   if (ty1->base)
     return pointer_to(parser, ty1->base);
 
@@ -168,7 +168,7 @@ static Type *get_common_type(C_parser *parser, Type *ty1, Type *ty2) {
 //
 // This operation is called the "usual arithmetic conversion".
 static void usual_arith_conv(C_parser *parser, Node **lhs, Node **rhs) {
-  Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
+	C_Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
   *lhs = new_cast(parser, *lhs, ty);
   *rhs = new_cast(parser, *rhs, ty);
 }
@@ -206,7 +206,7 @@ void add_type(C_parser *parser, Node *node) {
     node->ty = node->lhs->ty;
     return;
   case ND_NEG: {
-    Type *ty = get_common_type(parser, ty_int, node->lhs->ty);
+	  C_Type *ty = get_common_type(parser, ty_int, node->lhs->ty);
     node->lhs = new_cast(parser, node->lhs, ty);
     node->ty = ty;
     return;
@@ -257,7 +257,7 @@ void add_type(C_parser *parser, Node *node) {
     node->ty = node->member->ty;
     return;
   case ND_ADDR: {
-    Type *ty = node->lhs->ty;
+	  C_Type *ty = node->lhs->ty;
     if (ty->kind == TY_ARRAY)
       node->ty = pointer_to(parser, ty->base);
     else

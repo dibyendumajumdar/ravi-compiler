@@ -22,8 +22,8 @@
 // or enum constants
 typedef struct {
   Obj *var;
-  Type *type_def;
-  Type *enum_ty;
+  C_Type *type_def;
+  C_Type *enum_ty;
   int enum_val;
 } VarScope;
 
@@ -44,7 +44,7 @@ typedef struct {
 typedef struct Initializer Initializer;
 struct Initializer {
   Initializer *next;
-  Type *ty;
+  C_Type *ty;
   Token *tok;
   bool is_flexible;
 
@@ -72,17 +72,17 @@ struct InitDesg {
 
 
 static bool is_typename(C_parser *parser, Token *tok);
-static Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr);
-static Type *typename(C_parser *parser, Token **rest, Token *tok);
-static Type *enum_specifier(C_parser *parser, Token **rest, Token *tok);
-static Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok);
-static Type *type_suffix(C_parser *parser, Token **rest, Token *tok, Type *ty);
-static Type *declarator(C_parser *parser, Token **rest, Token *tok, Type *ty);
-static Node *declaration(C_parser *parser, Token **rest, Token *tok, Type *basety, VarAttr *attr);
+static C_Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr);
+static C_Type *typename(C_parser *parser, Token **rest, Token *tok);
+static C_Type *enum_specifier(C_parser *parser, Token **rest, Token *tok);
+static C_Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok);
+static C_Type *type_suffix(C_parser *parser, Token **rest, Token *tok, C_Type *ty);
+static C_Type *declarator(C_parser *parser, Token **rest, Token *tok, C_Type *ty);
+static Node *declaration(C_parser *parser, Token **rest, Token *tok, C_Type *basety, VarAttr *attr);
 static void array_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, int i);
 static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, Member *mem);
 static void initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init);
-static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, Type *ty, Type **new_ty);
+static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, C_Type *ty, C_Type **new_ty);
 static Node *lvar_initializer(C_parser *parser, Token **rest, Token *tok, Obj *var);
 static void gvar_initializer(C_parser *parser, Token **rest, Token *tok, Obj *var);
 static Node *compound_stmt(C_parser *parser, Token **rest, Token *tok);
@@ -109,17 +109,17 @@ static Node *new_add(C_parser *parser, Node *lhs, Node *rhs, Token *tok);
 static Node *new_sub(C_parser *parser, Node *lhs, Node *rhs, Token *tok);
 static Node *mul(C_parser *parser, Token **rest, Token *tok);
 static Node *cast(C_parser *parser, Token **rest, Token *tok);
-static Member *get_struct_member(C_parser *parser, Type *ty, Token *tok);
-static Type *struct_decl(C_parser *parser, Token **rest, Token *tok);
-static Type *union_decl(C_parser *parser, Token **rest, Token *tok);
+static Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok);
+static C_Type *struct_decl(C_parser *parser, Token **rest, Token *tok);
+static C_Type *union_decl(C_parser *parser, Token **rest, Token *tok);
 static Node *postfix(C_parser *parser, Token **rest, Token *tok);
 static Node *funcall(C_parser *parser, Token **rest, Token *tok, Node *node);
 static Node *unary(C_parser *parser, Token **rest, Token *tok);
 static Node *primary(C_parser *parser, Token **rest, Token *tok);
-static Token *parse_typedef(C_parser *parser, Token *tok, Type *basety);
+static Token *parse_typedef(C_parser *parser, Token *tok, C_Type *basety);
 static bool is_function(C_parser *parser, Token *tok);
-static Token *function(C_parser *parser, Token *tok, Type *basety, VarAttr *attr);
-static Token *global_variable(C_parser *parser, Token *tok, Type *basety, VarAttr *attr);
+static Token *function(C_parser *parser, Token *tok, C_Type *basety, VarAttr *attr);
+static Token *global_variable(C_parser *parser, Token *tok, C_Type *basety, VarAttr *attr);
 
 static int align_down(int n, int align) {
   return align_to(n - align + 1, align);
@@ -152,9 +152,9 @@ static VarScope *find_var(C_parser *parser, Token *tok) {
   return NULL;
 }
 
-static Type *find_tag(C_parser *parser, Token *tok) {
+static C_Type *find_tag(C_parser *parser, Token *tok) {
   for (Scope *sc = parser->scope; sc; sc = sc->next) {
-    Type *ty = hashmap_get2(&sc->tags, tok->loc, tok->len);
+	  C_Type *ty = hashmap_get2(&sc->tags, tok->loc, tok->len);
     if (ty)
       return ty;
   }
@@ -213,7 +213,7 @@ static Node *new_vla_ptr(C_parser *parser, Obj *var, Token *tok) {
   return node;
 }
 
-Node *new_cast(C_parser *parser, Node *expr, Type *ty) {
+Node *new_cast(C_parser *parser, Node *expr, C_Type *ty) {
   add_type(parser, expr);
 
   Node *node = calloc(1, sizeof(Node));
@@ -230,7 +230,7 @@ static VarScope *push_scope(C_parser *parser, char *name) {
   return sc;
 }
 
-static Initializer *new_initializer(Type *ty, bool is_flexible) {
+static Initializer *new_initializer(C_Type *ty, bool is_flexible) {
   Initializer *init = calloc(1, sizeof(Initializer));
   init->ty = ty;
 
@@ -270,7 +270,7 @@ static Initializer *new_initializer(Type *ty, bool is_flexible) {
   return init;
 }
 
-static Obj *new_var(C_parser *parser, char *name, Type *ty) {
+static Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
   Obj *var = calloc(1, sizeof(Obj));
   var->name = name;
   var->ty = ty;
@@ -279,7 +279,7 @@ static Obj *new_var(C_parser *parser, char *name, Type *ty) {
   return var;
 }
 
-static Obj *new_lvar(C_parser *parser, char *name, Type *ty) {
+static Obj *new_lvar(C_parser *parser, char *name, C_Type *ty) {
   Obj *var = new_var(parser, name, ty);
   var->is_local = true;
   var->next = parser->locals;
@@ -287,7 +287,7 @@ static Obj *new_lvar(C_parser *parser, char *name, Type *ty) {
   return var;
 }
 
-static Obj *new_gvar(C_parser *parser, char *name, Type *ty) {
+static Obj *new_gvar(C_parser *parser, char *name, C_Type *ty) {
   Obj *var = new_var(parser, name, ty);
   var->next = parser->globals;
   var->is_static = true;
@@ -304,11 +304,11 @@ static char *new_unique_name(void) {
   return str_dup(temp, strlen(temp));
 }
 
-static Obj *new_anon_gvar(C_parser *parser, Type *ty) {
+static Obj *new_anon_gvar(C_parser *parser, C_Type *ty) {
   return new_gvar(parser, new_unique_name(), ty);
 }
 
-static Obj *new_string_literal(C_parser *parser, char *p, Type *ty) {
+static Obj *new_string_literal(C_parser *parser, char *p, C_Type *ty) {
   Obj *var = new_anon_gvar(parser, ty);
   var->init_data = p;
   return var;
@@ -320,7 +320,7 @@ static char *get_ident(C_parser *parser, Token *tok) {
   return str_dup(tok->loc, tok->len);
 }
 
-static Type *find_typedef(C_parser *parser, Token *tok) {
+static C_Type *find_typedef(C_parser *parser, Token *tok) {
   if (tok->kind == TK_IDENT) {
     VarScope *sc = find_var(parser, tok);
     if (sc)
@@ -329,7 +329,7 @@ static Type *find_typedef(C_parser *parser, Token *tok) {
   return NULL;
 }
 
-static void push_tag_scope(C_parser *parser, Token *tok, Type *ty) {
+static void push_tag_scope(C_parser *parser, Token *tok, C_Type *ty) {
   hashmap_put2(&parser->scope->tags, tok->loc, tok->len, ty);
 }
 
@@ -353,7 +353,7 @@ static void push_tag_scope(C_parser *parser, Token *tok, Type *ty) {
 // while keeping the "current" type object that the typenames up
 // until that point represent. When we reach a non-typename token,
 // we returns the current type object.
-static Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr) {
+static C_Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr) {
   // We use a single integer as counters for all typenames.
   // For example, bits 0 and 1 represents how many times we saw the
   // keyword "void" so far. With this, we can use a switch statement
@@ -372,7 +372,7 @@ static Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr)
     UNSIGNED = 1 << 18,
   };
 
-  Type *ty = ty_int;
+  C_Type *ty = ty_int;
   int counter = 0;
   bool is_atomic = false;
 
@@ -433,7 +433,7 @@ static Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr)
     }
 
     // Handle user-defined types.
-    Type *ty2 = find_typedef(parser, tok);
+    C_Type *ty2 = find_typedef(parser, tok);
     if (equal(tok, "struct") || equal(tok, "union") || equal(tok, "enum") ||
         equal(tok, "typeof") || ty2) {
       if (counter)
@@ -556,14 +556,14 @@ static Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *attr)
 
 // func-params = ("void" | param ("," param)* ("," "...")?)? ")"
 // param       = declspec declarator
-static Type *func_params(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *func_params(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   if (equal(tok, "void") && equal(tok->next, ")")) {
     *rest = tok->next->next;
     return func_type(parser, ty);
   }
 
-  Type head = {0};
-  Type *cur = &head;
+  C_Type head = {0};
+  C_Type *cur = &head;
   bool is_variadic = false;
 
   while (!equal(tok, ")")) {
@@ -577,7 +577,7 @@ static Type *func_params(C_parser *parser, Token **rest, Token *tok, Type *ty) {
       break;
     }
 
-    Type *ty2 = declspec(parser, &tok, tok, NULL);
+    C_Type *ty2 = declspec(parser, &tok, tok, NULL);
     ty2 = declarator(parser, &tok, tok, ty2);
 
     Token *name = ty2->name;
@@ -608,7 +608,7 @@ static Type *func_params(C_parser *parser, Token **rest, Token *tok, Type *ty) {
 }
 
 // array-dimensions = ("static" | "restrict")* const-expr? "]" type-suffix
-static Type *array_dimensions(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *array_dimensions(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   while (equal(tok, "static") || equal(tok, "restrict"))
     tok = tok->next;
 
@@ -629,7 +629,7 @@ static Type *array_dimensions(C_parser *parser, Token **rest, Token *tok, Type *
 // type-suffix = "(" func-params
 //             | "[" array-dimensions
 //             | ε
-static Type *type_suffix(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *type_suffix(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   if (equal(tok, "("))
     return func_params(parser, rest, tok->next, ty);
 
@@ -641,7 +641,7 @@ static Type *type_suffix(C_parser *parser, Token **rest, Token *tok, Type *ty) {
 }
 
 // pointers = ("*" ("const" | "volatile" | "restrict")*)*
-static Type *pointers(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *pointers(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   while (consume(&tok, tok, "*")) {
     ty = pointer_to(parser, ty);
     while (equal(tok, "const") || equal(tok, "volatile") || equal(tok, "restrict") ||
@@ -653,12 +653,12 @@ static Type *pointers(C_parser *parser, Token **rest, Token *tok, Type *ty) {
 }
 
 // declarator = pointers ("(" ident ")" | "(" declarator ")" | ident) type-suffix
-static Type *declarator(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *declarator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
   if (equal(tok, "(")) {
     Token *start = tok;
-    Type dummy = {0};
+    C_Type dummy = {0};
     declarator(parser, &tok, start->next, &dummy);
     tok = skip(tok, ")");
     ty = type_suffix(parser, rest, tok, ty);
@@ -680,12 +680,12 @@ static Type *declarator(C_parser *parser, Token **rest, Token *tok, Type *ty) {
 }
 
 // abstract-declarator = pointers ("(" abstract-declarator ")")? type-suffix
-static Type *abstract_declarator(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static C_Type *abstract_declarator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
   if (equal(tok, "(")) {
     Token *start = tok;
-    Type dummy = {0};
+    C_Type dummy = {0};
     abstract_declarator(parser, &tok, start->next, &dummy);
     tok = skip(tok, ")");
     ty = type_suffix(parser, rest, tok, ty);
@@ -696,8 +696,8 @@ static Type *abstract_declarator(C_parser *parser, Token **rest, Token *tok, Typ
 }
 
 // type-name = declspec abstract-declarator
-static Type *typename(C_parser *parser, Token **rest, Token *tok) {
-  Type *ty = declspec(parser, &tok, tok, NULL);
+static C_Type *typename(C_parser *parser, Token **rest, Token *tok) {
+	C_Type *ty = declspec(parser, &tok, tok, NULL);
   return abstract_declarator(parser, rest, tok, ty);
 }
 
@@ -723,8 +723,8 @@ static bool consume_end(Token **rest, Token *tok) {
 //                | ident ("{" enum-list? "}")?
 //
 // enum-list      = ident ("=" num)? ("," ident ("=" num)?)* ","?
-static Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
-  Type *ty = enum_type(parser);
+static C_Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
+	C_Type *ty = enum_type(parser);
 
   // Read a struct tag.
   Token *tag = NULL;
@@ -734,7 +734,7 @@ static Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
   }
 
   if (tag && !equal(tok, "{")) {
-    Type *ty = find_tag(parser, tag);
+	  C_Type *ty = find_tag(parser, tag);
     if (!ty)
       error_tok(parser, tag, "unknown enum type");
     if (ty->kind != TY_ENUM)
@@ -769,10 +769,10 @@ static Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // typeof-specifier = "(" (expr | typename) ")"
-static Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok) {
+static C_Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok) {
   tok = skip(tok, "(");
 
-  Type *ty;
+  C_Type *ty;
   if (is_typename(parser, tok)) {
     ty = typename(parser, &tok, tok);
   } else {
@@ -785,7 +785,7 @@ static Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // Generate code for computing a VLA size.
-static Node *compute_vla_size(C_parser *parser, Type *ty, Token *tok) {
+static Node *compute_vla_size(C_parser *parser, C_Type *ty, Token *tok) {
   Node *node = new_node(parser, ND_NULL_EXPR, tok);
   if (ty->base)
     node = new_binary(parser, ND_COMMA, node, compute_vla_size(parser, ty->base, tok), tok);
@@ -816,7 +816,7 @@ static Node *new_alloca(C_parser *parser, Node *sz) {
 }
 
 // declaration = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
-static Node *declaration(C_parser *parser, Token **rest, Token *tok, Type *basety, VarAttr *attr) {
+static Node *declaration(C_parser *parser, Token **rest, Token *tok, C_Type *basety, VarAttr *attr) {
   Node head = {0};
   Node *cur = &head;
   int i = 0;
@@ -825,7 +825,7 @@ static Node *declaration(C_parser *parser, Token **rest, Token *tok, Type *baset
     if (i++ > 0)
       tok = skip(tok, ",");
 
-    Type *ty = declarator(parser, &tok, tok, basety);
+    C_Type *ty = declarator(parser, &tok, tok, basety);
     if (ty->kind == TY_VOID)
       error_tok(parser, tok, "variable declared void");
     if (!ty->name)
@@ -951,7 +951,7 @@ static void string_initializer(C_parser *parser, Token **rest, Token *tok, Initi
 //   struct { int a, b, c; } x = { .c=5 };
 //
 // The above initializer sets x.c to 5.
-static void array_designator(C_parser *parser, Token **rest, Token *tok, Type *ty, int *begin, int *end) {
+static void array_designator(C_parser *parser, Token **rest, Token *tok, C_Type *ty, int *begin, int *end) {
   *begin = const_expr(parser, &tok, tok->next);
   if (*begin >= ty->array_len)
     error_tok(parser, tok, "array designator index exceeds array bounds");
@@ -970,7 +970,7 @@ static void array_designator(C_parser *parser, Token **rest, Token *tok, Type *t
 }
 
 // struct-designator = "." ident
-static Member *struct_designator(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static Member *struct_designator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   Token *start = tok;
   tok = skip(tok, ".");
   if (tok->kind != TK_IDENT)
@@ -1038,7 +1038,7 @@ static void designation(C_parser *parser, Token **rest, Token *tok, Initializer 
 // An array length can be omitted if an array has an initializer
 // (e.g. `int x[] = {1,2,3}`). If it's omitted, count the number
 // of initializer elements.
-static int count_array_init_elements(C_parser *parser, Token *tok, Type *ty) {
+static int count_array_init_elements(C_parser *parser, Token *tok, C_Type *ty) {
   bool first = true;
   Initializer *dummy = new_initializer(ty->base, true);
 
@@ -1252,7 +1252,7 @@ static void initializer2(C_parser *parser, Token **rest, Token *tok, Initializer
   init->expr = assign(parser, rest, tok);
 }
 
-static Type *copy_struct_type(C_parser *parser, Type *ty) {
+static C_Type *copy_struct_type(C_parser *parser, C_Type *ty) {
   ty = copy_type(parser, ty);
 
   Member head = {0};
@@ -1267,7 +1267,7 @@ static Type *copy_struct_type(C_parser *parser, Type *ty) {
   return ty;
 }
 
-static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, Type *ty, Type **new_ty) {
+static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, C_Type *ty, C_Type **new_ty) {
   Initializer *init = new_initializer(ty, true);
   initializer2(parser, rest, tok, init);
 
@@ -1303,7 +1303,7 @@ static Node *init_desg_expr(C_parser *parser, InitDesg *desg, Token *tok) {
   return new_unary(parser, ND_DEREF, new_add(parser, lhs, rhs, tok), tok);
 }
 
-static Node *create_lvar_init(C_parser *parser, Initializer *init, Type *ty, InitDesg *desg, Token *tok) {
+static Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty, InitDesg *desg, Token *tok) {
   if (ty->kind == TY_ARRAY) {
     Node *node = new_node(parser, ND_NULL_EXPR, tok);
     for (int i = 0; i < ty->array_len; i++) {
@@ -1389,7 +1389,7 @@ static void write_buf(char *buf, uint64_t val, int sz) {
 }
 
 static Relocation *
-write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, Type *ty, char *buf, int offset) {
+write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, C_Type *ty, char *buf, int offset) {
   if (ty->kind == TY_ARRAY) {
     int sz = ty->base->size;
     for (int i = 0; i < ty->array_len; i++)
@@ -1529,7 +1529,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
     *rest = skip(tok, ";");
 
     add_type(parser, exp);
-    Type *ty = parser->current_fn->ty->return_ty;
+    C_Type *ty = parser->current_fn->ty->return_ty;
     if (ty->kind != TY_STRUCT && ty->kind != TY_UNION)
       exp = new_cast(parser, exp, parser->current_fn->ty->return_ty);
 
@@ -1619,7 +1619,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
     parser->cont_label = node->cont_label = new_unique_name();
 
     if (is_typename(parser, tok)) {
-      Type *basety = declspec(parser, &tok, tok, NULL);
+	    C_Type *basety = declspec(parser, &tok, tok, NULL);
       node->init = declaration(parser, &tok, tok, basety, NULL);
     } else {
       node->init = expr_stmt(parser, &tok, tok);
@@ -1745,7 +1745,7 @@ static Node *compound_stmt(C_parser *parser, Token **rest, Token *tok) {
   while ((!parser->allow_partial_parsing || parser->allow_partial_parsing && tok->kind != TK_EOF) && !equal(tok, "}")) {
     if (is_typename(parser, tok) && !equal(tok->next, ":")) {
       VarAttr attr = {0};
-      Type *basety = declspec(parser, &tok, tok, &attr);
+      C_Type *basety = declspec(parser, &tok, tok, &attr);
 
       if (attr.is_typedef) {
         tok = parse_typedef(parser, tok, basety);
@@ -2441,7 +2441,7 @@ static Node *mul(C_parser *parser, Token **rest, Token *tok) {
 static Node *cast(C_parser *parser, Token **rest, Token *tok) {
   if (equal(tok, "(") && is_typename(parser, tok->next)) {
     Token *start = tok;
-    Type *ty = typename(parser, &tok, tok->next);
+    C_Type *ty = typename(parser, &tok, tok->next);
     tok = skip(tok, ")");
 
     // compound literal
@@ -2516,14 +2516,14 @@ static Node *unary(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // struct-members = (declspec declarator (","  declarator)* ";")*
-static void struct_members(C_parser *parser, Token **rest, Token *tok, Type *ty) {
+static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   Member head = {0};
   Member *cur = &head;
   int idx = 0;
 
   while (!equal(tok, "}")) {
     VarAttr attr = {0};
-    Type *basety = declspec(parser, &tok, tok, &attr);
+    C_Type *basety = declspec(parser, &tok, tok, &attr);
     bool first = true;
 
     // Anonymous struct member
@@ -2571,7 +2571,7 @@ static void struct_members(C_parser *parser, Token **rest, Token *tok, Type *ty)
 }
 
 // attribute = ("__attribute__" "(" "(" "packed" ")" ")")*
-static Token *attribute_list(C_parser *parser, Token *tok, Type *ty) {
+static Token *attribute_list(C_parser *parser, Token *tok, C_Type *ty) {
   while (consume(&tok, tok, "__attribute__")) {
     tok = skip(tok, "(");
     tok = skip(tok, "(");
@@ -2605,8 +2605,8 @@ static Token *attribute_list(C_parser *parser, Token *tok, Type *ty) {
 }
 
 // struct-union-decl = attribute? ident? ("{" struct-members)?
-static Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
-  Type *ty = struct_type(parser);
+static C_Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
+	C_Type *ty = struct_type(parser);
   tok = attribute_list(parser, tok, ty);
 
   // Read a tag.
@@ -2619,7 +2619,7 @@ static Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
   if (tag && !equal(tok, "{")) {
     *rest = tok;
 
-    Type *ty2 = find_tag(parser, tag);
+    C_Type *ty2 = find_tag(parser, tag);
     if (ty2)
       return ty2;
 
@@ -2637,7 +2637,7 @@ static Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
   if (tag) {
     // If this is a redefinition, overwrite a previous type.
     // Otherwise, register the struct type.
-    Type *ty2 = hashmap_get2(&parser->scope->tags, tag->loc, tag->len);
+    C_Type *ty2 = hashmap_get2(&parser->scope->tags, tag->loc, tag->len);
     if (ty2) {
       *ty2 = *ty;
       return ty2;
@@ -2650,8 +2650,8 @@ static Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // struct-decl = struct-union-decl
-static Type *struct_decl(C_parser *parser, Token **rest, Token *tok) {
-  Type *ty = struct_union_decl(parser, rest, tok);
+static C_Type *struct_decl(C_parser *parser, Token **rest, Token *tok) {
+	C_Type *ty = struct_union_decl(parser, rest, tok);
   ty->kind = TY_STRUCT;
 
   if (ty->size < 0)
@@ -2689,8 +2689,8 @@ static Type *struct_decl(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // union-decl = struct-union-decl
-static Type *union_decl(C_parser *parser, Token **rest, Token *tok) {
-  Type *ty = struct_union_decl(parser, rest, tok);
+static C_Type *union_decl(C_parser *parser, Token **rest, Token *tok) {
+	C_Type *ty = struct_union_decl(parser, rest, tok);
   ty->kind = TY_UNION;
 
   if (ty->size < 0)
@@ -2710,7 +2710,7 @@ static Type *union_decl(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // Find a struct member by name.
-static Member *get_struct_member(C_parser *parser, Type *ty, Token *tok) {
+static Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok) {
   for (Member *mem = ty->members; mem; mem = mem->next) {
     // Anonymous struct member
     if ((mem->ty->kind == TY_STRUCT || mem->ty->kind == TY_UNION) &&
@@ -2746,7 +2746,7 @@ static Node *struct_ref(C_parser *parser, Node *node, Token *tok) {
   if (node->ty->kind != TY_STRUCT && node->ty->kind != TY_UNION)
     error_tok(parser, node->tok, "not a struct nor a union");
 
-  Type *ty = node->ty;
+  C_Type *ty = node->ty;
 
   for (;;) {
     Member *mem = get_struct_member(parser, ty, tok);
@@ -2783,7 +2783,7 @@ static Node *postfix(C_parser *parser, Token **rest, Token *tok) {
   if (equal(tok, "(") && is_typename(parser, tok->next)) {
     // Compound literal
     Token *start = tok;
-    Type *ty = typename(parser, &tok, tok->next);
+    C_Type *ty = typename(parser, &tok, tok->next);
     tok = skip(tok, ")");
 
     if (parser->scope->next == NULL) {
@@ -2854,8 +2854,8 @@ static Node *funcall(C_parser *parser, Token **rest, Token *tok, Node *fn) {
       (fn->ty->kind != TY_PTR || fn->ty->base->kind != TY_FUNC))
     error_tok(parser, fn->tok, "not a function");
 
-  Type *ty = (fn->ty->kind == TY_FUNC) ? fn->ty : fn->ty->base;
-  Type *param_ty = ty->params;
+  C_Type *ty = (fn->ty->kind == TY_FUNC) ? fn->ty : fn->ty->base;
+  C_Type *param_ty = ty->params;
 
   Node head = {0};
   Node *cur = &head;
@@ -2911,7 +2911,7 @@ static Node *generic_selection(C_parser *parser, Token **rest, Token *tok) {
   Node *ctrl = assign(parser, &tok, tok);
   add_type(parser, ctrl);
 
-  Type *t1 = ctrl->ty;
+  C_Type *t1 = ctrl->ty;
   if (t1->kind == TY_FUNC)
     t1 = pointer_to(parser, t1);
   else if (t1->kind == TY_ARRAY)
@@ -2930,7 +2930,7 @@ static Node *generic_selection(C_parser *parser, Token **rest, Token *tok) {
       continue;
     }
 
-    Type *t2 = typename(parser, &tok, tok);
+    C_Type *t2 = typename(parser, &tok, tok);
     tok = skip(tok, ":");
     Node *node = assign(parser, &tok, tok);
     if (is_compatible(t1, t2))
@@ -2973,7 +2973,7 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
   }
 
   if (equal(tok, "sizeof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
-    Type *ty = typename(parser, &tok, tok->next->next);
+	  C_Type *ty = typename(parser, &tok, tok->next->next);
     *rest = skip(tok, ")");
 
     if (ty->kind == TY_VLA) {
@@ -2997,7 +2997,7 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
   }
 
   if (equal(tok, "_Alignof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
-    Type *ty = typename(parser, &tok, tok->next->next);
+	  C_Type *ty = typename(parser, &tok, tok->next->next);
     *rest = skip(tok, ")");
     return new_ulong(parser, ty->align, tok);
   }
@@ -3013,16 +3013,16 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "__builtin_types_compatible_p")) {
     tok = skip(tok->next, "(");
-    Type *t1 = typename(parser, &tok, tok);
+    C_Type *t1 = typename(parser, &tok, tok);
     tok = skip(tok, ",");
-    Type *t2 = typename(parser, &tok, tok);
+    C_Type *t2 = typename(parser, &tok, tok);
     *rest = skip(tok, ")");
     return new_num(parser, is_compatible(t1, t2), start);
   }
 
   if (equal(tok, "__builtin_reg_class")) {
     tok = skip(tok->next, "(");
-    Type *ty = typename(parser, &tok, tok);
+    C_Type *ty = typename(parser, &tok, tok);
     *rest = skip(tok, ")");
 
     if (is_integer(ty) || ty->kind == TY_PTR)
@@ -3102,7 +3102,7 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
   error_tok(parser, tok, "expected an expression");
 }
 
-static Token *parse_typedef(C_parser *parser, Token *tok, Type *basety) {
+static Token *parse_typedef(C_parser *parser, Token *tok, C_Type *basety) {
   bool first = true;
 
   while (!consume(&tok, tok, ";")) {
@@ -3110,7 +3110,7 @@ static Token *parse_typedef(C_parser *parser, Token *tok, Type *basety) {
       tok = skip(tok, ",");
     first = false;
 
-    Type *ty = declarator(parser, &tok, tok, basety);
+    C_Type *ty = declarator(parser, &tok, tok, basety);
     if (!ty->name)
       error_tok(parser, ty->name_pos, "typedef name omitted");
     push_scope(parser, get_ident(parser, ty->name))->type_def = ty;
@@ -3118,7 +3118,7 @@ static Token *parse_typedef(C_parser *parser, Token *tok, Type *basety) {
   return tok;
 }
 
-static void create_param_lvars(C_parser *parser, Type *param) {
+static void create_param_lvars(C_parser *parser, C_Type *param) {
   if (param) {
     create_param_lvars(parser, param->next);
     if (!param->name)
@@ -3171,8 +3171,8 @@ static void mark_live(C_parser *parser, Obj *var) {
   }
 }
 
-static Token *function(C_parser *parser, Token *tok, Type *basety, VarAttr *attr) {
-  Type *ty = declarator(parser, &tok, tok, basety);
+static Token *function(C_parser *parser, Token *tok, C_Type *basety, VarAttr *attr) {
+	C_Type *ty = declarator(parser, &tok, tok, basety);
   if (!ty->name)
     error_tok(parser, ty->name_pos, "function name omitted");
   char *name_str = get_ident(parser, ty->name);
@@ -3207,7 +3207,7 @@ static Token *function(C_parser *parser, Token *tok, Type *basety, VarAttr *attr
 
   // A buffer for a struct/union return value is passed
   // as the hidden first parameter.
-  Type *rty = ty->return_ty;
+  C_Type *rty = ty->return_ty;
   if ((rty->kind == TY_STRUCT || rty->kind == TY_UNION) && rty->size > 16)
     new_lvar(parser, "", pointer_to(parser, rty));
 
@@ -3236,7 +3236,7 @@ static Token *function(C_parser *parser, Token *tok, Type *basety, VarAttr *attr
   return tok;
 }
 
-static Token *global_variable(C_parser *parser, Token *tok, Type *basety, VarAttr *attr) {
+static Token *global_variable(C_parser *parser, Token *tok, C_Type *basety, VarAttr *attr) {
   bool first = true;
 
   while (!consume(&tok, tok, ";")) {
@@ -3244,7 +3244,7 @@ static Token *global_variable(C_parser *parser, Token *tok, Type *basety, VarAtt
       tok = skip(tok, ",");
     first = false;
 
-    Type *ty = declarator(parser, &tok, tok, basety);
+    C_Type *ty = declarator(parser, &tok, tok, basety);
     if (!ty->name)
       error_tok(parser, ty->name_pos, "variable name omitted");
 
@@ -3269,8 +3269,8 @@ static bool is_function(C_parser *parser, Token *tok) {
   if (equal(tok, ";"))
     return false;
 
-  Type dummy = {0};
-  Type *ty = declarator(parser, &tok, tok, &dummy);
+  C_Type dummy = {0};
+  C_Type *ty = declarator(parser, &tok, tok, &dummy);
   return ty->kind == TY_FUNC;
 }
 
@@ -3302,7 +3302,7 @@ static void scan_globals(C_parser *parser) {
 }
 
 static void declare_builtin_functions(C_parser *parser) {
-  Type *ty = func_type(parser, pointer_to(parser, ty_void));
+	C_Type *ty = func_type(parser, pointer_to(parser, ty_void));
   ty->params = copy_type(parser, ty_int);
   parser->builtin_alloca = new_gvar(parser, "alloca", ty);
   parser->builtin_alloca->is_definition = false;
@@ -3340,7 +3340,7 @@ Obj *parse(Scope *globalScope, C_parser *parser, Token *tok) {
 
   while (tok->kind != TK_EOF) {
     VarAttr attr = {0};
-    Type *basety = declspec(parser, &tok, tok, &attr);
+    C_Type *basety = declspec(parser, &tok, tok, &attr);
 
     // Typedef
     if (attr.is_typedef) {

@@ -288,7 +288,7 @@ static Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char *
 //
 // UTF-32 is a fixed-width encoding for Unicode. Each code point is
 // encoded in 4 bytes.
-static Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char *quote, Type *ty) {
+static Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char *quote, C_Type *ty) {
   char *end = string_literal_end(tokenizer, quote + 1);
   uint32_t *buf = calloc(4, end - quote);
   int len = 0;
@@ -306,7 +306,7 @@ static Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char *
   return tok;
 }
 
-static Token *read_char_literal(C_parser *tokenizer, char *start, char *quote, Type *ty) {
+static Token *read_char_literal(C_parser *tokenizer, char *start, char *quote, C_Type *ty) {
   char *p = quote + 1;
   if (*p == '\0')
     error_at(tokenizer, start, "unclosed char literal");
@@ -372,7 +372,7 @@ static bool convert_pp_int(Token *tok) {
     return false;
 
   // Infer a type.
-  Type *ty;
+  C_Type *ty;
   if (base == 10) {
     if (l && u)
       ty = ty_ulong;
@@ -421,7 +421,7 @@ static void convert_pp_number(C_parser *tokenizer, Token *tok) {
   char *end;
   long double val = strtold(tok->loc, &end);
 
-  Type *ty;
+  C_Type *ty;
   if (*end == 'f' || *end == 'F') {
     ty = ty_float;
     end++;
@@ -464,7 +464,7 @@ static void add_line_numbers(C_parser *tokenizer, Token *tok) {
   } while (*p++);
 }
 
-Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, Type *basety) {
+Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, C_Type *basety) {
   Token *t;
   if (basety->size == 2)
     t = read_utf16_string_literal(tokenizer, tok->loc, tok->loc);
