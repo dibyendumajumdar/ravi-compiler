@@ -284,6 +284,13 @@ static void walk_statement(void *data, const Statement *statement)
 		raviX_return_statement_foreach_expression(return_statement, data, walk_expression);
 		break;
 	}
+	case STMT_EMBEDDED_C: {
+		const EmbeddedCStatement *embedded_C_statement = raviX_embedded_C_statment(statement);
+		raviX_embedded_C_statement_foreach_symbol(embedded_C_statement, data, walk_variable_symbol);
+		const StringObject *C_source = raviX_embedded_C_statement_C_source(embedded_C_statement);
+		(void) C_source;
+		break;
+	}
 	default: {
 		// Cannot happen
 		assert(false);
