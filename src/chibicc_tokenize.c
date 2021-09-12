@@ -491,7 +491,7 @@ static void add_line_numbers(C_parser *tokenizer, C_Token *tok) {
   } while (*p++);
 }
 
-C_Token *tokenize_string_literal(C_parser *tokenizer, C_Token *tok, C_Type *basety) {
+static C_Token *tokenize_string_literal(C_parser *tokenizer, C_Token *tok, C_Type *basety) {
 	C_Token *t;
   if (basety->size == 2)
     t = read_utf16_string_literal(tokenizer, tok->loc, tok->loc);
@@ -502,7 +502,7 @@ C_Token *tokenize_string_literal(C_parser *tokenizer, C_Token *tok, C_Type *base
 }
 
 // Tokenize a given string and returns new tokens.
-C_Token *tokenize(C_parser *tokenizer, C_File *file) {
+C_Token *C_tokenize(C_parser *tokenizer, C_File *file) {
   tokenizer->current_file = file;
 
   char *p = file->contents;
@@ -828,5 +828,5 @@ C_Token *tokenize_buffer(C_parser *tokenizer, char *p) {
   tokenizer->input_files[file_no + 1] = NULL;
   file_no++;
 
-  return tokenize(tokenizer, file);
+  return C_tokenize(tokenizer, file);
 }

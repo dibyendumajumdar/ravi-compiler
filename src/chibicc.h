@@ -72,7 +72,7 @@ void strarray_push(StringArray *arr, char *s);
 char *format(char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
 //
-// tokenize.c
+// C_tokenize.c
 //
 
 // C_Token
@@ -127,8 +127,7 @@ C_Token *C_skip(C_parser *parser, C_Token *tok, char *op);
 bool C_consume(C_Token **rest, C_Token *tok, char *str);
 void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
 C_File *C_new_file(char *name, int file_no, char *contents);
-C_Token *tokenize_string_literal(C_parser *tokenizer, C_Token *tok, C_Type *basety);
-C_Token *tokenize(C_parser *tokenizer, C_File *file);
+C_Token *C_tokenize(C_parser *tokenizer, C_File *file);
 C_Token *tokenize_buffer(C_parser *tokenizer, char *p);
 
 #define unreachable() \
