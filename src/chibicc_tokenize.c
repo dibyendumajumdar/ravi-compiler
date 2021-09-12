@@ -83,7 +83,7 @@ void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
   exit(1);
 }
 
-void warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
+void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(tokenizer, tok->file->name, tok->file->contents, tok->line_no, tok->loc, fmt, ap);
