@@ -475,7 +475,7 @@ Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, C_Type *basety) 
 }
 
 // Tokenize a given string and returns new tokens.
-Token *tokenize(C_parser *tokenizer, File *file) {
+Token *tokenize(C_parser *tokenizer, C_File *file) {
   tokenizer->current_file = file;
 
   char *p = file->contents;
@@ -664,12 +664,12 @@ static char *read_file(char *path) {
 }
 #endif
 
-File **get_input_files(C_parser *tokenizer) {
+C_File **get_input_files(C_parser *tokenizer) {
   return tokenizer->input_files;
 }
 
-File *new_file(char *name, int file_no, char *contents) {
-  File *file = calloc(1, sizeof(File));
+C_File *new_file(char *name, int file_no, char *contents) {
+	C_File *file = calloc(1, sizeof(C_File));
   file->name = name;
   file->display_name = name;
   file->file_no = file_no;
@@ -792,7 +792,7 @@ Token *tokenize_buffer(C_parser *tokenizer, char *p) {
 
   // Save the filename for assembler .file directive.
   static int file_no;
-  File *file = new_file("", file_no + 1, p);
+  C_File *file = new_file("", file_no + 1, p);
 
   // Save the filename for assembler .file directive.
   tokenizer->input_files = realloc(tokenizer->input_files, sizeof(char *) * (file_no + 2));

@@ -77,7 +77,7 @@ typedef struct {
   // For #line directive
   char *display_name;
   int line_delta;
-} File;
+} C_File;
 
 // Token type
 typedef struct Token Token;
@@ -91,7 +91,7 @@ struct Token {
   C_Type *ty;         // Used if TK_NUM or TK_STR
   char *str;        // String literal contents including terminating '\0'
 
-  File *file;       // Source location
+  C_File *file;       // Source location
   char *filename;   // Filename
   int line_no;      // Line number
   int line_delta;   // Line number
@@ -109,10 +109,10 @@ bool equal(Token *tok, char *op);
 Token *skip(C_parser *parser, Token *tok, char *op);
 bool consume(Token **rest, Token *tok, char *str);
 void convert_pp_tokens(C_parser *tokenizer, Token *tok);
-File **get_input_files(C_parser *tokenizer);
-File *new_file(char *name, int file_no, char *contents);
+C_File **get_input_files(C_parser *tokenizer);
+C_File *new_file(char *name, int file_no, char *contents);
 Token *tokenize_string_literal(C_parser *tokenizer, Token *tok, C_Type *basety);
-Token *tokenize(C_parser *tokenizer, File *file);
+Token *tokenize(C_parser *tokenizer, C_File *file);
 Token *tokenize_file(C_parser *tokenizer, char *filename);
 Token *tokenize_buffer(C_parser *tokenizer, char *p);
 
@@ -327,10 +327,10 @@ struct Scope {
 struct C_parser {
   int file_no;
   // Input file
-  File *current_file;
+  C_File *current_file;
 
   // A list of all input files.
-  File **input_files;
+  C_File **input_files;
 
   // True if the current position is at the beginning of a line
   bool at_bol;
