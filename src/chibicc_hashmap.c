@@ -133,6 +133,14 @@ void hashmap_delete2(HashMap *map, char *key, int keylen) {
     ent->key = TOMBSTONE;
 }
 
+void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val)) {
+  for (int i = 0; i < map->capacity; i++) {
+    HashEntry *ent = &map->buckets[i];
+    if (ent->key && ent->key != TOMBSTONE)
+      f(ent->key, ent->keylen, ent->val);
+  }
+}
+
 #if 0
 void hashmap_test(void) {
   HashMap *map = calloc(1, sizeof(HashMap));
