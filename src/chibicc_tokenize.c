@@ -696,7 +696,7 @@ C_File **get_input_files(C_parser *tokenizer) {
 #endif
 
 
-C_File *new_file(char *name, int file_no, char *contents) {
+C_File *C_new_file(char *name, int file_no, char *contents) {
 	C_File *file = calloc(1, sizeof(C_File));
   file->name = name;
   file->display_name = name;
@@ -820,7 +820,7 @@ C_Token *tokenize_buffer(C_parser *tokenizer, char *p) {
 
   // Save the filename for assembler .file directive.
   static int file_no;
-  C_File *file = new_file("", file_no + 1, p);
+  C_File *file = C_new_file("", file_no + 1, p);
 
   // Save the filename for assembler .file directive.
   tokenizer->input_files = realloc(tokenizer->input_files, sizeof(char *) * (file_no + 2));
