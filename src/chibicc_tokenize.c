@@ -76,7 +76,7 @@ void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) {
   exit(1);
 }
 
-void error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
+void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(tokenizer, tok->file->name, tok->file->contents, tok->line_no, tok->loc, fmt, ap);
@@ -98,7 +98,7 @@ bool equal(C_Token *tok, char *op) {
 // Ensure that the current token is `op`.
 C_Token *skip(C_parser *parser, C_Token *tok, char *op) {
   if (!equal(tok, op))
-    error_tok(parser, tok, "expected '%s'", op);
+	  C_error_tok(parser, tok, "expected '%s'", op);
   return tok->next;
 }
 
@@ -460,7 +460,7 @@ static void convert_pp_number(C_parser *tokenizer, C_Token *tok) {
   }
 
   if (tok->loc + tok->len != end)
-    error_tok(tokenizer, tok, "invalid numeric constant");
+	  C_error_tok(tokenizer, tok, "invalid numeric constant");
 
   tok->kind = TK_NUM;
   tok->fval = val;

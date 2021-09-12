@@ -343,7 +343,7 @@ static C_Obj *new_string_literal(C_parser *parser, char *p, C_Type *ty) {
 
 static char *get_ident(C_parser *parser, C_Token *tok) {
   if (tok->kind != TK_IDENT)
-    error_tok(parser, tok, "expected an identifier");
+	  C_error_tok(parser, tok, "expected an identifier");
   return str_dup(tok->loc, tok->len);
 }
 
@@ -408,7 +408,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     if (equal(tok, "typedef") || equal(tok, "static") || equal(tok, "extern") ||
         equal(tok, "inline") || equal(tok, "_Thread_local") || equal(tok, "__thread")) {
       if (!attr)
-        error_tok(parser, tok, "storage class specifier is not allowed in this context");
+	      C_error_tok(parser, tok, "storage class specifier is not allowed in this context");
 
       if (equal(tok, "typedef"))
         attr->is_typedef = true;
@@ -423,8 +423,9 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
       if (attr->is_typedef &&
           attr->is_static + attr->is_extern + attr->is_inline + attr->is_tls > 1)
-        error_tok(parser, tok, "typedef may not be used together with static,"
-                  " extern, inline, __thread or _Thread_local");
+	      C_error_tok(parser, tok,
+			  "typedef may not be used together with static,"
+			  " extern, inline, __thread or _Thread_local");
       tok = tok->next;
       continue;
     }
@@ -448,7 +449,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
     if (equal(tok, "_Alignas")) {
       if (!attr)
-        error_tok(parser, tok, "_Alignas is not allowed in this context");
+	      C_error_tok(parser, tok, "_Alignas is not allowed in this context");
       tok = skip(parser, tok->next, "(");
 
       if (is_typename(parser, tok))
@@ -566,7 +567,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
       ty = ty_ldouble;
       break;
     default:
-      error_tok(parser, tok, "invalid type");
+	    C_error_tok(parser, tok, "invalid type");
     }
 
     tok = tok->next;
@@ -763,9 +764,9 @@ static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
   if (tag && !equal(tok, "{")) {
 	  C_Type *ty = find_tag(parser, tag);
     if (!ty)
-      error_tok(parser, tag, "unknown enum type");
+	    C_error_tok(parser, tag, "unknown enum type");
     if (ty->kind != TY_ENUM)
-      error_tok(parser, tag, "not an enum tag");
+	    C_error_tok(parser, tag, "not an enum tag");
     *rest = tok;
     return ty;
   }
@@ -854,9 +855,9 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
     C_Type *ty = declarator(parser, &tok, tok, basety);
     if (ty->kind == TY_VOID)
-      error_tok(parser, tok, "variable declared void");
+	    C_error_tok(parser, tok, "variable declared void");
     if (!ty->name)
-      error_tok(parser, ty->name_pos, "variable name omitted");
+	    C_error_tok(parser, ty->name_pos, "variable name omitted");
 
     if (attr && attr->is_static) {
       // static local variable
@@ -874,7 +875,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
     if (ty->kind == TY_VLA) {
       if (equal(tok, "="))
-        error_tok(parser, tok, "variable-sized object may not be initialized");
+	      C_error_tok(parser, tok, "variable-sized object may not be initialized");
 
       // Variable length arrays (VLAs) are translated to alloca() calls.
       // For example, `int x[n+2]` is translated to `tmp = n + 2,
@@ -899,9 +900,9 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
     }
 
     if (var->ty->size < 0)
-      error_tok(parser, ty->name, "variable has incomplete type");
+	    C_error_tok(parser, ty->name, "variable has incomplete type");
     if (var->ty->kind == TY_VOID)
-      error_tok(parser, ty->name, "variable declared void");
+	    C_error_tok(parser, ty->name, "variable declared void");
   }
 
   C_Node *node = new_node(parser, ND_BLOCK, tok);
@@ -981,14 +982,14 @@ static void string_initializer(C_parser *parser, C_Token **rest, C_Token *tok, I
 static void array_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, int *begin, int *end) {
   *begin = const_expr(parser, &tok, tok->next);
   if (*begin >= ty->array_len)
-    error_tok(parser, tok, "array designator index exceeds array bounds");
+	  C_error_tok(parser, tok, "array designator index exceeds array bounds");
 
   if (equal(tok, "...")) {
     *end = const_expr(parser, &tok, tok->next);
     if (*end >= ty->array_len)
-      error_tok(parser, tok, "array designator index exceeds array bounds");
+	    C_error_tok(parser, tok, "array designator index exceeds array bounds");
     if (*end < *begin)
-      error_tok(parser, tok, "array designator range [%d, %d] is empty", *begin, *end);
+	    C_error_tok(parser, tok, "array designator range [%d, %d] is empty", *begin, *end);
   } else {
     *end = *begin;
   }
@@ -1001,7 +1002,7 @@ static C_Member *struct_designator(C_parser *parser, C_Token **rest, C_Token *to
 	C_Token *start = tok;
   tok = skip(parser, tok, ".");
   if (tok->kind != TK_IDENT)
-    error_tok(parser, tok, "expected a field designator");
+	  C_error_tok(parser, tok, "expected a field designator");
 
   for (C_Member *mem = ty->members; mem; mem = mem->next) {
     // Anonymous struct member
@@ -1020,14 +1021,14 @@ static C_Member *struct_designator(C_parser *parser, C_Token **rest, C_Token *to
     }
   }
 
-  error_tok(parser, tok, "struct has no such member");
+  C_error_tok(parser, tok, "struct has no such member");
 }
 
 // designation = ("[" const-expr "]" | "." ident)* "="? initializer
 static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   if (equal(tok, "[")) {
     if (init->ty->kind != TY_ARRAY)
-      error_tok(parser, tok, "array index in non-array initializer");
+	    C_error_tok(parser, tok, "array index in non-array initializer");
 
     int begin, end;
     array_designator(parser, &tok, tok, init->ty, &begin, &end);
@@ -1055,7 +1056,7 @@ static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initiali
   }
 
   if (equal(tok, "."))
-    error_tok(parser, tok, "field name not in struct or union initializer");
+	  C_error_tok(parser, tok, "field name not in struct or union initializer");
 
   if (equal(tok, "="))
     tok = tok->next;
@@ -1525,7 +1526,7 @@ static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   tok = skip(parser, tok, "(");
   if (tok->kind != TK_STR || tok->ty->base->kind != TY_CHAR)
-    error_tok(parser, tok, "expected string literal");
+	  C_error_tok(parser, tok, "expected string literal");
   node->asm_str = tok->str;
   *rest = skip(parser, tok->next, ")");
   return node;
@@ -1597,7 +1598,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   if (equal(tok, "case")) {
     if (!parser->current_switch)
-      error_tok(parser, tok, "stray case");
+	    C_error_tok(parser, tok, "stray case");
 
     C_Node *node = new_node(parser, ND_CASE, tok);
     int begin = const_expr(parser, &tok, tok->next);
@@ -1607,7 +1608,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
       // [GNU] Case ranges, e.g. "case 1 ... 5:"
       end = const_expr(parser, &tok, tok->next);
       if (end < begin)
-        error_tok(parser, tok, "empty case range specified");
+	      C_error_tok(parser, tok, "empty case range specified");
     } else {
       end = begin;
     }
@@ -1624,7 +1625,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   if (equal(tok, "default")) {
     if (!parser->current_switch)
-      error_tok(parser, tok, "stray default");
+	    C_error_tok(parser, tok, "stray default");
 
     C_Node *node = new_node(parser, ND_CASE, tok);
     tok = skip(parser, tok->next, ":");
@@ -1729,7 +1730,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   if (equal(tok, "break")) {
     if (!parser->brk_label)
-      error_tok(parser, tok, "stray break");
+	    C_error_tok(parser, tok, "stray break");
     C_Node *node = new_node(parser, ND_GOTO, tok);
     node->unique_label = parser->brk_label;
     *rest = skip(parser, tok->next, ";");
@@ -1738,7 +1739,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   if (equal(tok, "continue")) {
     if (!parser->cont_label)
-      error_tok(parser, tok, "stray continue");
+	    C_error_tok(parser, tok, "stray continue");
     C_Node *node = new_node(parser, ND_GOTO, tok);
     node->unique_label = parser->cont_label;
     *rest = skip(parser, tok->next, ";");
@@ -1914,29 +1915,29 @@ static int64_t eval2(C_parser *parser, C_Node *node, char ***label) {
     return 0;
   case ND_MEMBER:
     if (!label)
-      error_tok(parser, node->tok, "not a compile-time constant");
+	    C_error_tok(parser, node->tok, "not a compile-time constant");
     if (node->ty->kind != TY_ARRAY)
-      error_tok(parser, node->tok, "invalid initializer");
+	    C_error_tok(parser, node->tok, "invalid initializer");
     return eval_rval(parser, node->lhs, label) + node->member->offset;
   case ND_VAR:
     if (!label)
-      error_tok(parser, node->tok, "not a compile-time constant");
+	    C_error_tok(parser, node->tok, "not a compile-time constant");
     if (node->var->ty->kind != TY_ARRAY && node->var->ty->kind != TY_FUNC)
-      error_tok(parser, node->tok, "invalid initializer");
+	    C_error_tok(parser, node->tok, "invalid initializer");
     *label = &node->var->name;
     return 0;
   case ND_NUM:
     return node->val;
   }
 
-  error_tok(parser, node->tok, "not a compile-time constant");
+  C_error_tok(parser, node->tok, "not a compile-time constant");
 }
 
 static int64_t eval_rval(C_parser *parser, C_Node *node, char ***label) {
   switch (node->kind) {
   case ND_VAR:
     if (node->var->is_local)
-      error_tok(parser, node->tok, "not a compile-time constant");
+	    C_error_tok(parser, node->tok, "not a compile-time constant");
     *label = &node->var->name;
     return 0;
   case ND_DEREF:
@@ -1945,7 +1946,7 @@ static int64_t eval_rval(C_parser *parser, C_Node *node, char ***label) {
     return eval_rval(parser, node->lhs, label) + node->member->offset;
   }
 
-  error_tok(parser, node->tok, "invalid initializer");
+  C_error_tok(parser, node->tok, "invalid initializer");
 }
 
 static bool is_const_expr(C_parser *parser, C_Node *node) {
@@ -2023,7 +2024,7 @@ static double eval_double(C_parser *parser, C_Node *node) {
     return node->fval;
   }
 
-  error_tok(parser, node->tok, "not a compile-time constant");
+  C_error_tok(parser, node->tok, "not a compile-time constant");
 }
 
 // Convert op= operators to expressions containing an assignment.
@@ -2358,7 +2359,7 @@ static C_Node *new_add(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
     return new_binary(parser, ND_ADD, lhs, rhs, tok);
 
   if (lhs->ty->base && rhs->ty->base)
-    error_tok(parser, tok, "invalid operands");
+	  C_error_tok(parser, tok, "invalid operands");
 
   // Canonicalize `num + ptr` to `ptr + num`.
   if (!lhs->ty->base && rhs->ty->base) {
@@ -2412,7 +2413,7 @@ static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
     return new_binary(parser, ND_DIV, node, new_num(parser, lhs->ty->base->size, tok), tok);
   }
 
-  error_tok(parser, tok, "invalid operands");
+  C_error_tok(parser, tok, "invalid operands");
 }
 
 // add = mul ("+" mul | "-" mul)*
@@ -2499,7 +2500,7 @@ static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
 	  C_Node *lhs = cast(parser, rest, tok->next);
     add_type(parser, lhs);
     if (lhs->kind == ND_MEMBER && lhs->member->is_bitfield)
-      error_tok(parser, tok, "cannot take address of bitfield");
+	    C_error_tok(parser, tok, "cannot take address of bitfield");
     return new_unary(parser, ND_ADDR, lhs, tok);
   }
 
@@ -2622,7 +2623,7 @@ static C_Token *attribute_list(C_parser *parser, C_Token *tok, C_Type *ty) {
         continue;
       }
 
-      error_tok(parser, tok, "unknown attribute");
+      C_error_tok(parser, tok, "unknown attribute");
     }
 
     tok = skip(parser, tok, ")");
@@ -2771,14 +2772,14 @@ static C_Member *get_struct_member(C_parser *parser, C_Type *ty, C_Token *tok) {
 static C_Node *struct_ref(C_parser *parser, C_Node *node, C_Token *tok) {
   add_type(parser, node);
   if (node->ty->kind != TY_STRUCT && node->ty->kind != TY_UNION)
-    error_tok(parser, node->tok, "not a struct nor a union");
+	  C_error_tok(parser, node->tok, "not a struct nor a union");
 
   C_Type *ty = node->ty;
 
   for (;;) {
 	  C_Member *mem = get_struct_member(parser, ty, tok);
     if (!mem)
-      error_tok(parser, tok, "no such member");
+	    C_error_tok(parser, tok, "no such member");
     node = new_unary(parser, ND_MEMBER, node, tok);
     node->member = mem;
     if (mem->name)
@@ -2879,7 +2880,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
 
   if (fn->ty->kind != TY_FUNC &&
       (fn->ty->kind != TY_PTR || fn->ty->base->kind != TY_FUNC))
-    error_tok(parser, fn->tok, "not a function");
+	  C_error_tok(parser, fn->tok, "not a function");
 
   C_Type *ty = (fn->ty->kind == TY_FUNC) ? fn->ty : fn->ty->base;
   C_Type *param_ty = ty->params;
@@ -2895,7 +2896,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
     add_type(parser, arg);
 
     if (!param_ty && !ty->is_variadic)
-      error_tok(parser, tok, "too many arguments");
+	    C_error_tok(parser, tok, "too many arguments");
 
     if (param_ty) {
       if (param_ty->kind != TY_STRUCT && param_ty->kind != TY_UNION)
@@ -2911,7 +2912,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
   }
 
   if (param_ty)
-    error_tok(parser, tok, "too few arguments");
+	  C_error_tok(parser, tok, "too few arguments");
 
   *rest = skip(parser, tok, ")");
 
@@ -2965,8 +2966,9 @@ static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok)
   }
 
   if (!ret)
-    error_tok(parser, start, "controlling expression type not compatible with"
-              " any generic association type");
+	  C_error_tok(parser, start,
+		      "controlling expression type not compatible with"
+		      " any generic association type");
   return ret;
 }
 
@@ -3102,8 +3104,8 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     }
 
     if (equal(tok->next, "("))
-      error_tok(parser, tok, "implicit declaration of a function");
-    error_tok(parser, tok, "undefined variable");
+	    C_error_tok(parser, tok, "implicit declaration of a function");
+    C_error_tok(parser, tok, "undefined variable");
   }
 
   if (tok->kind == TK_STR) {
@@ -3126,7 +3128,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  error_tok(parser, tok, "expected an expression");
+  C_error_tok(parser, tok, "expected an expression");
 }
 
 static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety) {
@@ -3139,7 +3141,7 @@ static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety) {
 
     C_Type *ty = declarator(parser, &tok, tok, basety);
     if (!ty->name)
-      error_tok(parser, ty->name_pos, "typedef name omitted");
+	    C_error_tok(parser, ty->name_pos, "typedef name omitted");
     push_scope(parser, get_ident(parser, ty->name))->type_def = ty;
   }
   return tok;
@@ -3149,7 +3151,7 @@ static void create_param_lvars(C_parser *parser, C_Type *param) {
   if (param) {
     create_param_lvars(parser, param->next);
     if (!param->name)
-      error_tok(parser, param->name_pos, "parameter name omitted");
+	    C_error_tok(parser, param->name_pos, "parameter name omitted");
     new_lvar(parser, get_ident(parser, param->name), param);
   }
 }
@@ -3169,7 +3171,7 @@ static void resolve_goto_labels(C_parser *parser) {
     }
 
     if (x->unique_label == NULL)
-      error_tok(parser, x->tok->next, "use of undeclared label");
+	    C_error_tok(parser, x->tok->next, "use of undeclared label");
   }
 
   parser->gotos = parser->labels = NULL;
@@ -3201,18 +3203,18 @@ static void mark_live(C_parser *parser, C_Obj *var) {
 static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
 	C_Type *ty = declarator(parser, &tok, tok, basety);
   if (!ty->name)
-    error_tok(parser, ty->name_pos, "function name omitted");
+	  C_error_tok(parser, ty->name_pos, "function name omitted");
   char *name_str = get_ident(parser, ty->name);
 
   C_Obj *fn = find_func(parser, name_str);
   if (fn) {
     // Redeclaration
     if (!fn->is_function)
-      error_tok(parser, tok, "redeclared as a different kind of symbol");
+	    C_error_tok(parser, tok, "redeclared as a different kind of symbol");
     if (fn->is_definition && equal(tok, "{"))
-      error_tok(parser, tok, "redefinition of %s", name_str);
+	    C_error_tok(parser, tok, "redefinition of %s", name_str);
     if (!fn->is_static && attr->is_static)
-      error_tok(parser, tok, "static declaration follows a non-static declaration");
+	    C_error_tok(parser, tok, "static declaration follows a non-static declaration");
     fn->is_definition = fn->is_definition || equal(tok, "{");
   } else {
     fn = new_gvar(parser, name_str, ty);
@@ -3273,7 +3275,7 @@ static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, 
 
     C_Type *ty = declarator(parser, &tok, tok, basety);
     if (!ty->name)
-      error_tok(parser, ty->name_pos, "variable name omitted");
+	    C_error_tok(parser, ty->name_pos, "variable name omitted");
 
     C_Obj *var = new_gvar(parser, get_ident(parser, ty->name), ty);
     var->is_definition = !attr->is_extern;
