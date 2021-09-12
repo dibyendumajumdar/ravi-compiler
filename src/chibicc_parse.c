@@ -58,7 +58,7 @@ struct Initializer {
 
   // Only one member can be initialized for a union.
   // `mem` is used to clarify which member is initialized.
-  Member *mem;
+  C_Member *mem;
 };
 
 // For local variable initializer.
@@ -66,7 +66,7 @@ typedef struct InitDesg InitDesg;
 struct InitDesg {
   InitDesg *next;
   int idx;
-  Member *member;
+  C_Member *member;
   Obj *var;
 };
 
@@ -80,7 +80,7 @@ static C_Type *type_suffix(C_parser *parser, Token **rest, Token *tok, C_Type *t
 static C_Type *declarator(C_parser *parser, Token **rest, Token *tok, C_Type *ty);
 static C_Node *declaration(C_parser *parser, Token **rest, Token *tok, C_Type *basety, VarAttr *attr);
 static void array_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, int i);
-static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, Member *mem);
+static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, C_Member *mem);
 static void initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init);
 static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, C_Type *ty, C_Type **new_ty);
 static C_Node *lvar_initializer(C_parser *parser, Token **rest, Token *tok, Obj *var);
@@ -109,7 +109,7 @@ static C_Node *new_add(C_parser *parser, C_Node *lhs, C_Node *rhs, Token *tok);
 static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, Token *tok);
 static C_Node *mul(C_parser *parser, Token **rest, Token *tok);
 static C_Node *cast(C_parser *parser, Token **rest, Token *tok);
-static Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok);
+static C_Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok);
 static C_Type *struct_decl(C_parser *parser, Token **rest, Token *tok);
 static C_Type *union_decl(C_parser *parser, Token **rest, Token *tok);
 static C_Node *postfix(C_parser *parser, Token **rest, Token *tok);
@@ -249,12 +249,12 @@ static Initializer *new_initializer(C_Type *ty, bool is_flexible) {
   if (ty->kind == TY_STRUCT || ty->kind == TY_UNION) {
     // Count the number of struct members.
     int len = 0;
-    for (Member *mem = ty->members; mem; mem = mem->next)
+    for (C_Member *mem = ty->members; mem; mem = mem->next)
       len++;
 
     init->children = calloc(len, sizeof(Initializer *));
 
-    for (Member *mem = ty->members; mem; mem = mem->next) {
+    for (C_Member *mem = ty->members; mem; mem = mem->next) {
       if (is_flexible && ty->is_flexible && !mem->next) {
         Initializer *child = calloc(1, sizeof(Initializer));
         child->ty = mem->ty;
@@ -970,13 +970,13 @@ static void array_designator(C_parser *parser, Token **rest, Token *tok, C_Type 
 }
 
 // struct-designator = "." ident
-static Member *struct_designator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
+static C_Member *struct_designator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   Token *start = tok;
   tok = skip(parser, tok, ".");
   if (tok->kind != TK_IDENT)
     error_tok(parser, tok, "expected a field designator");
 
-  for (Member *mem = ty->members; mem; mem = mem->next) {
+  for (C_Member *mem = ty->members; mem; mem = mem->next) {
     // Anonymous struct member
     if (mem->ty->kind == TY_STRUCT && !mem->name) {
       if (get_struct_member(parser, mem->ty, tok)) {
@@ -1013,7 +1013,7 @@ static void designation(C_parser *parser, Token **rest, Token *tok, Initializer 
   }
 
   if (equal(tok, ".") && init->ty->kind == TY_STRUCT) {
-    Member *mem = struct_designator(parser, &tok, tok, init->ty);
+	  C_Member *mem = struct_designator(parser, &tok, tok, init->ty);
     designation(parser, &tok, tok, init->children[mem->idx]);
     init->expr = NULL;
     struct_initializer2(parser, rest, tok, init, mem->next);
@@ -1021,7 +1021,7 @@ static void designation(C_parser *parser, Token **rest, Token *tok, Initializer 
   }
 
   if (equal(tok, ".") && init->ty->kind == TY_UNION) {
-    Member *mem = struct_designator(parser, &tok, tok, init->ty);
+	  C_Member *mem = struct_designator(parser, &tok, tok, init->ty);
     init->mem = mem;
     designation(parser, rest, tok, init->children[mem->idx]);
     return;
@@ -1131,7 +1131,7 @@ static void array_initializer2(C_parser *parser, Token **rest, Token *tok, Initi
 static void struct_initializer1(C_parser *parser, Token **rest, Token *tok, Initializer *init) {
   tok = skip(parser, tok, "{");
 
-  Member *mem = init->ty->members;
+  C_Member *mem = init->ty->members;
   bool first = true;
 
   while (!consume_end(rest, tok)) {
@@ -1156,7 +1156,7 @@ static void struct_initializer1(C_parser *parser, Token **rest, Token *tok, Init
 }
 
 // struct-initializer2 = initializer ("," initializer)*
-static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, Member *mem) {
+static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Initializer *init, C_Member *mem) {
   bool first = true;
 
   for (; mem && !is_end(tok); mem = mem->next) {
@@ -1181,7 +1181,7 @@ static void union_initializer(C_parser *parser, Token **rest, Token *tok, Initia
   // and that initializes the first union member by default.
   // You can initialize other member using a designated initializer.
   if (equal(tok, "{") && equal(tok->next, ".")) {
-    Member *mem = struct_designator(parser, &tok, tok->next, init->ty);
+	  C_Member *mem = struct_designator(parser, &tok, tok->next, init->ty);
     init->mem = mem;
     designation(parser, &tok, tok, init->children[mem->idx]);
     *rest = skip(parser, tok, "}");
@@ -1255,10 +1255,10 @@ static void initializer2(C_parser *parser, Token **rest, Token *tok, Initializer
 static C_Type *copy_struct_type(C_parser *parser, C_Type *ty) {
   ty = copy_type(parser, ty);
 
-  Member head = {0};
-  Member *cur = &head;
-  for (Member *mem = ty->members; mem; mem = mem->next) {
-    Member *m = calloc(1, sizeof(Member));
+  C_Member head = {0};
+  C_Member *cur = &head;
+  for (C_Member *mem = ty->members; mem; mem = mem->next) {
+	  C_Member *m = calloc(1, sizeof(C_Member));
     *m = *mem;
     cur = cur->next = m;
   }
@@ -1274,7 +1274,7 @@ static Initializer *initializer(C_parser *parser, Token **rest, Token *tok, C_Ty
   if ((ty->kind == TY_STRUCT || ty->kind == TY_UNION) && ty->is_flexible) {
     ty = copy_struct_type(parser, ty);
 
-    Member *mem = ty->members;
+    C_Member *mem = ty->members;
     while (mem->next)
       mem = mem->next;
     mem->ty = init->children[mem->idx]->ty;
@@ -1317,7 +1317,7 @@ static C_Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty,
   if (ty->kind == TY_STRUCT && !init->expr) {
 	  C_Node *node = new_node(parser, ND_NULL_EXPR, tok);
 
-    for (Member *mem = ty->members; mem; mem = mem->next) {
+    for (C_Member *mem = ty->members; mem; mem = mem->next) {
       InitDesg desg2 = {desg, 0, mem};
       C_Node *rhs = create_lvar_init(parser, init->children[mem->idx], mem->ty, &desg2, tok);
       node = new_binary(parser, ND_COMMA, node, rhs, tok);
@@ -1326,7 +1326,7 @@ static C_Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty,
   }
 
   if (ty->kind == TY_UNION) {
-    Member *mem = init->mem ? init->mem : ty->members;
+	  C_Member *mem = init->mem ? init->mem : ty->members;
     InitDesg desg2 = {desg, 0, mem};
     return create_lvar_init(parser, init->children[mem->idx], mem->ty, &desg2, tok);
   }
@@ -1398,7 +1398,7 @@ write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, C_Type *ty
   }
 
   if (ty->kind == TY_STRUCT) {
-    for (Member *mem = ty->members; mem; mem = mem->next) {
+    for (C_Member *mem = ty->members; mem; mem = mem->next) {
       if (mem->is_bitfield) {
 	      C_Node *expr = init->children[mem->idx]->expr;
         if (!expr)
@@ -2517,8 +2517,8 @@ static C_Node *unary(C_parser *parser, Token **rest, Token *tok) {
 
 // struct-members = (declspec declarator (","  declarator)* ";")*
 static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
-  Member head = {0};
-  Member *cur = &head;
+	C_Member head = {0};
+	C_Member *cur = &head;
   int idx = 0;
 
   while (!equal(tok, "}")) {
@@ -2529,7 +2529,7 @@ static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *t
     // Anonymous struct member
     if ((basety->kind == TY_STRUCT || basety->kind == TY_UNION) &&
         consume(&tok, tok, ";")) {
-      Member *mem = calloc(1, sizeof(Member));
+	    C_Member *mem = calloc(1, sizeof(C_Member));
       mem->ty = basety;
       mem->idx = idx++;
       mem->align = attr.align ? attr.align : mem->ty->align;
@@ -2543,7 +2543,7 @@ static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *t
         tok = skip(parser, tok, ",");
       first = false;
 
-      Member *mem = calloc(1, sizeof(Member));
+      C_Member *mem = calloc(1, sizeof(C_Member));
       mem->ty = declarator(parser, &tok, tok, basety);
       mem->name = mem->ty->name;
       mem->idx = idx++;
@@ -2660,7 +2660,7 @@ static C_Type *struct_decl(C_parser *parser, Token **rest, Token *tok) {
   // Assign offsets within the struct to members.
   int bits = 0;
 
-  for (Member *mem = ty->members; mem; mem = mem->next) {
+  for (C_Member *mem = ty->members; mem; mem = mem->next) {
     if (mem->is_bitfield && mem->bit_width == 0) {
       // Zero-width anonymous bitfield has a special meaning.
       // It affects only alignment.
@@ -2699,7 +2699,7 @@ static C_Type *union_decl(C_parser *parser, Token **rest, Token *tok) {
   // If union, we don't have to assign offsets because they
   // are already initialized to zero. We need to compute the
   // alignment and the size though.
-  for (Member *mem = ty->members; mem; mem = mem->next) {
+  for (C_Member *mem = ty->members; mem; mem = mem->next) {
     if (ty->align < mem->align)
       ty->align = mem->align;
     if (ty->size < mem->ty->size)
@@ -2710,8 +2710,8 @@ static C_Type *union_decl(C_parser *parser, Token **rest, Token *tok) {
 }
 
 // Find a struct member by name.
-static Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok) {
-  for (Member *mem = ty->members; mem; mem = mem->next) {
+static C_Member *get_struct_member(C_parser *parser, C_Type *ty, Token *tok) {
+  for (C_Member *mem = ty->members; mem; mem = mem->next) {
     // Anonymous struct member
     if ((mem->ty->kind == TY_STRUCT || mem->ty->kind == TY_UNION) &&
         !mem->name) {
@@ -2749,7 +2749,7 @@ static C_Node *struct_ref(C_parser *parser, C_Node *node, Token *tok) {
   C_Type *ty = node->ty;
 
   for (;;) {
-    Member *mem = get_struct_member(parser, ty, tok);
+	  C_Member *mem = get_struct_member(parser, ty, tok);
     if (!mem)
       error_tok(parser, tok, "no such member");
     node = new_unary(parser, ND_MEMBER, node, tok);

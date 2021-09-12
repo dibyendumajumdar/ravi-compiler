@@ -36,7 +36,7 @@
 
 typedef struct C_Type C_Type;
 typedef struct C_Node C_Node;
-typedef struct Member Member;
+typedef struct C_Member C_Member;
 typedef struct Relocation Relocation;
 typedef struct Hideset Hideset;
 typedef struct C_parser C_parser;
@@ -260,7 +260,7 @@ struct C_Node {
   C_Node *body;
 
   // Struct member access
-  Member *member;
+  C_Member *member;
 
   // Function call
   C_Type *func_ty;
@@ -431,7 +431,7 @@ struct C_Type {
   Obj *vla_size; // sizeof() value
 
   // Struct
-  Member *members;
+  C_Member *members;
   bool is_flexible;
   bool is_packed;
 
@@ -443,8 +443,8 @@ struct C_Type {
 };
 
 // Struct member
-struct Member {
-  Member *next;
+struct C_Member {
+	C_Member *next;
   C_Type *ty;
   Token *tok; // for error message
   Token *name;
