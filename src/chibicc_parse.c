@@ -127,7 +127,8 @@ static int align_down(int n, int align) {
 
 static char *str_dup(const char *temp, size_t len) {
   char *p = (char *) calloc(1, len+1);
-  strncpy(p, temp, len+1);
+  memcpy(p, temp, len);
+  p[len] = 0;
   return p;
 }
 
