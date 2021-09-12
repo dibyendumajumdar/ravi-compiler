@@ -21,7 +21,7 @@
 // Scope for local variables, global variables, typedefs
 // or enum constants
 typedef struct {
-  Obj *var;
+	C_Obj *var;
   C_Type *type_def;
   C_Type *enum_ty;
   int enum_val;
@@ -67,7 +67,7 @@ struct InitDesg {
   InitDesg *next;
   int idx;
   C_Member *member;
-  Obj *var;
+  C_Obj *var;
 };
 
 
@@ -83,8 +83,8 @@ static void array_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, I
 static void struct_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init, C_Member *mem);
 static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init);
 static Initializer *initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, C_Type **new_ty);
-static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Obj *var);
-static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Obj *var);
+static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
+static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
 static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok);
 static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok);
 static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok);
@@ -201,13 +201,13 @@ static C_Node *new_ulong(C_parser *parser, long val, C_Token *tok) {
   return node;
 }
 
-static C_Node *new_var_node(C_parser *parser, Obj *var, C_Token *tok) {
+static C_Node *new_var_node(C_parser *parser, C_Obj *var, C_Token *tok) {
 	C_Node *node = new_node(parser, ND_VAR, tok);
   node->var = var;
   return node;
 }
 
-static C_Node *new_vla_ptr(C_parser *parser, Obj *var, C_Token *tok) {
+static C_Node *new_vla_ptr(C_parser *parser, C_Obj *var, C_Token *tok) {
 	C_Node *node = new_node(parser, ND_VLA_PTR, tok);
   node->var = var;
   return node;
@@ -270,8 +270,8 @@ static Initializer *new_initializer(C_Type *ty, bool is_flexible) {
   return init;
 }
 
-static Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
-  Obj *var = calloc(1, sizeof(Obj));
+static C_Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
+	C_Obj *var = calloc(1, sizeof(C_Obj));
   var->name = name;
   var->ty = ty;
   var->align = ty->align;
@@ -279,16 +279,16 @@ static Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
   return var;
 }
 
-static Obj *new_lvar(C_parser *parser, char *name, C_Type *ty) {
-  Obj *var = new_var(parser, name, ty);
+static C_Obj *new_lvar(C_parser *parser, char *name, C_Type *ty) {
+	C_Obj *var = new_var(parser, name, ty);
   var->is_local = true;
   var->next = parser->locals;
   parser->locals = var;
   return var;
 }
 
-static Obj *new_gvar(C_parser *parser, char *name, C_Type *ty) {
-  Obj *var = new_var(parser, name, ty);
+static C_Obj *new_gvar(C_parser *parser, char *name, C_Type *ty) {
+	C_Obj *var = new_var(parser, name, ty);
   var->next = parser->globals;
   var->is_static = true;
   var->is_definition = true;
@@ -304,12 +304,12 @@ static char *new_unique_name(void) {
   return str_dup(temp, strlen(temp));
 }
 
-static Obj *new_anon_gvar(C_parser *parser, C_Type *ty) {
+static C_Obj *new_anon_gvar(C_parser *parser, C_Type *ty) {
   return new_gvar(parser, new_unique_name(), ty);
 }
 
-static Obj *new_string_literal(C_parser *parser, char *p, C_Type *ty) {
-  Obj *var = new_anon_gvar(parser, ty);
+static C_Obj *new_string_literal(C_parser *parser, char *p, C_Type *ty) {
+	C_Obj *var = new_anon_gvar(parser, ty);
   var->init_data = p;
   return var;
 }
@@ -833,7 +833,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
     if (attr && attr->is_static) {
       // static local variable
-      Obj *var = new_anon_gvar(parser, ty);
+      C_Obj *var = new_anon_gvar(parser, ty);
       push_scope(parser, get_ident(parser, ty->name))->var = var;
       if (equal(tok, "="))
         gvar_initializer(parser, &tok, tok->next, var);
@@ -852,7 +852,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
       // Variable length arrays (VLAs) are translated to alloca() calls.
       // For example, `int x[n+2]` is translated to `tmp = n + 2,
       // x = alloca(tmp)`.
-      Obj *var = new_lvar(parser, get_ident(parser, ty->name), ty);
+      C_Obj *var = new_lvar(parser, get_ident(parser, ty->name), ty);
       C_Token *tok = ty->name;
       C_Node *expr = new_binary(parser, ND_ASSIGN, new_vla_ptr(parser, var, tok),
                               new_alloca(parser, new_var_node(parser, ty->vla_size, tok)),
@@ -862,7 +862,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
       continue;
     }
 
-    Obj *var = new_lvar(parser, get_ident(parser, ty->name), ty);
+    C_Obj *var = new_lvar(parser, get_ident(parser, ty->name), ty);
     if (attr && attr->align)
       var->align = attr->align;
 
@@ -1348,7 +1348,7 @@ static C_Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty,
 //   x[0][1] = 7;
 //   x[1][0] = 8;
 //   x[1][1] = 9;
-static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Obj *var) {
+static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
   Initializer *init = initializer(parser, rest, tok, var->ty, &var->ty);
   InitDesg desg = {NULL, 0, NULL, var};
 
@@ -1458,7 +1458,7 @@ write_gvar_data(C_parser *parser, C_Relocation *cur, Initializer *init, C_Type *
 // embedded to .data section. This function serializes Initializer
 // objects to a flat byte array. It is a compile error if an
 // initializer list contains a non-constant expression.
-static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Obj *var) {
+static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
   Initializer *init = initializer(parser, rest, tok, var->ty, &var->ty);
 
   C_Relocation head = {0};
@@ -2012,7 +2012,7 @@ static C_Node *to_assign(C_parser *parser, C_Node *binary) {
 
   // Convert `A.x op= C` to `tmp = &A, (*tmp).x = (*tmp).x op C`.
   if (binary->lhs->kind == ND_MEMBER) {
-    Obj *var = new_lvar(parser, "", pointer_to(parser, binary->lhs->lhs->ty));
+	  C_Obj *var = new_lvar(parser, "", pointer_to(parser, binary->lhs->lhs->ty));
 
     C_Node *expr1 = new_binary(parser, ND_ASSIGN, new_var_node(parser, var, tok),
                              new_unary(parser, ND_ADDR, binary->lhs->lhs, tok), tok);
@@ -2047,10 +2047,10 @@ static C_Node *to_assign(C_parser *parser, C_Node *binary) {
 	  C_Node head = {0};
 	  C_Node *cur = &head;
 
-    Obj *addr = new_lvar(parser, "", pointer_to(parser, binary->lhs->ty));
-    Obj *val = new_lvar(parser, "", binary->rhs->ty);
-    Obj *old = new_lvar(parser, "", binary->lhs->ty);
-    Obj *new = new_lvar(parser, "", binary->lhs->ty);
+	  C_Obj *addr = new_lvar(parser, "", pointer_to(parser, binary->lhs->ty));
+	  C_Obj *val = new_lvar(parser, "", binary->rhs->ty);
+	  C_Obj *old = new_lvar(parser, "", binary->lhs->ty);
+	  C_Obj *new = new_lvar(parser, "", binary->lhs->ty);
 
     cur = cur->next =
       new_unary(parser, ND_EXPR_STMT,
@@ -2097,7 +2097,7 @@ static C_Node *to_assign(C_parser *parser, C_Node *binary) {
   }
 
   // Convert `A op= B` to ``tmp = &A, *tmp = *tmp op B`.
-  Obj *var = new_lvar(parser, "", pointer_to(parser, binary->lhs->ty));
+  C_Obj *var = new_lvar(parser, "", pointer_to(parser, binary->lhs->ty));
 
   C_Node *expr1 = new_binary(parser, ND_ASSIGN, new_var_node(parser, var, tok),
                            new_unary(parser, ND_ADDR, binary->lhs, tok), tok);
@@ -2169,7 +2169,7 @@ static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok) {
   if (equal(tok->next, ":")) {
     // [GNU] Compile `a ?: b` as `tmp = a, tmp ? tmp : b`.
     add_type(parser, cond);
-    Obj *var = new_lvar(parser, "", cond->ty);
+    C_Obj *var = new_lvar(parser, "", cond->ty);
     C_Node *lhs = new_binary(parser, ND_ASSIGN, new_var_node(parser, var, tok), cond, tok);
     C_Node *rhs = new_node(parser, ND_COND, tok);
     rhs->cond = new_var_node(parser, var, tok);
@@ -2787,12 +2787,12 @@ static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
     tok = skip(parser, tok, ")");
 
     if (parser->scope->next == NULL) {
-      Obj *var = new_anon_gvar(parser, ty);
+	    C_Obj *var = new_anon_gvar(parser, ty);
       gvar_initializer(parser, rest, tok, var);
       return new_var_node(parser,var, start);
     }
 
-    Obj *var = new_lvar(parser, "", ty);
+    C_Obj *var = new_lvar(parser, "", ty);
     C_Node *lhs = lvar_initializer(parser, rest, tok, var);
     C_Node *rhs = new_var_node(parser, var, tok);
     return new_binary(parser, ND_COMMA, lhs, rhs, start);
@@ -3080,7 +3080,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
   }
 
   if (tok->kind == TK_STR) {
-    Obj *var = new_string_literal(parser, tok->str, tok->ty);
+	  C_Obj *var = new_string_literal(parser, tok->str, tok->ty);
     *rest = tok->next;
     return new_var_node(parser, var, tok);
   }
@@ -3148,7 +3148,7 @@ static void resolve_goto_labels(C_parser *parser) {
   parser->gotos = parser->labels = NULL;
 }
 
-static Obj *find_func(C_parser *parser, char *name) {
+static C_Obj *find_func(C_parser *parser, char *name) {
   Scope *sc = parser->scope;
   while (sc->next)
     sc = sc->next;
@@ -3159,13 +3159,13 @@ static Obj *find_func(C_parser *parser, char *name) {
   return NULL;
 }
 
-static void mark_live(C_parser *parser, Obj *var) {
+static void mark_live(C_parser *parser, C_Obj *var) {
   if (!var->is_function || var->is_live)
     return;
   var->is_live = true;
 
   for (int i = 0; i < var->refs.len; i++) {
-    Obj *fn = find_func(parser, var->refs.data[i]);
+	  C_Obj *fn = find_func(parser, var->refs.data[i]);
     if (fn)
       mark_live(parser, fn);
   }
@@ -3177,7 +3177,7 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
     error_tok(parser, ty->name_pos, "function name omitted");
   char *name_str = get_ident(parser, ty->name);
 
-  Obj *fn = find_func(parser, name_str);
+  C_Obj *fn = find_func(parser, name_str);
   if (fn) {
     // Redeclaration
     if (!fn->is_function)
@@ -3248,7 +3248,7 @@ static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, 
     if (!ty->name)
       error_tok(parser, ty->name_pos, "variable name omitted");
 
-    Obj *var = new_gvar(parser, get_ident(parser, ty->name), ty);
+    C_Obj *var = new_gvar(parser, get_ident(parser, ty->name), ty);
     var->is_definition = !attr->is_extern;
     var->is_static = attr->is_static;
     var->is_tls = attr->is_tls;
@@ -3276,17 +3276,17 @@ static bool is_function(C_parser *parser, C_Token *tok) {
 
 // Remove redundant tentative definitions.
 static void scan_globals(C_parser *parser) {
-  Obj head;
-  Obj *cur = &head;
+	C_Obj head;
+	C_Obj *cur = &head;
 
-  for (Obj *var = parser->globals; var; var = var->next) {
+  for (C_Obj *var = parser->globals; var; var = var->next) {
     if (!var->is_tentative) {
       cur = cur->next = var;
       continue;
     }
 
     // Find another definition of the same identifier.
-    Obj *var2 = parser->globals;
+    C_Obj *var2 = parser->globals;
     for (; var2; var2 = var2->next)
       if (var != var2 && var2->is_definition && !strcmp(var->name, var2->name))
         break;
@@ -3309,8 +3309,8 @@ static void declare_builtin_functions(C_parser *parser) {
 }
 
 #ifdef RAVI_EXTENSIONS
-Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str) {
-	Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
+C_Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str) {
+	C_Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
 	fn->is_function = true;
 	fn->is_definition = true;
 	fn->is_static = true;
@@ -3332,7 +3332,7 @@ C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, C_Token *
 #endif
 
 // program = (typedef | function-definition | global-variable)*
-Obj *parse(Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Obj *parse(Scope *globalScope, C_parser *parser, C_Token *tok) {
   parser->scope = globalScope;
 
   declare_builtin_functions(parser);
@@ -3358,7 +3358,7 @@ Obj *parse(Scope *globalScope, C_parser *parser, C_Token *tok) {
     tok = global_variable(parser, tok, basety, &attr);
   }
 
-  for (Obj *var = parser->globals; var; var = var->next)
+  for (C_Obj *var = parser->globals; var; var = var->next)
     if (var->is_root)
       mark_live(parser, var);
 

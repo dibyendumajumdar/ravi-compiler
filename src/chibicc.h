@@ -134,9 +134,9 @@ C_Token *preprocess(C_Token *tok);
 //
 
 // Variable or function
-typedef struct Obj Obj;
-struct Obj {
-  Obj *next;
+typedef struct C_Obj C_Obj;
+struct C_Obj {
+  C_Obj *next;
   char *name;    // Variable name
   C_Type *ty;      // Type
   C_Token *tok;    // representative token
@@ -159,11 +159,11 @@ struct Obj {
 
   // Function
   bool is_inline;
-  Obj *params;
+  C_Obj *params;
   C_Node *body;
-  Obj *locals;
-  Obj *va_area;
-  Obj *alloca_bottom;
+  C_Obj *locals;
+  C_Obj *va_area;
+  C_Obj *alloca_bottom;
   int stack_size;
 
   // Static inline function
@@ -266,7 +266,7 @@ struct C_Node {
   C_Type *func_ty;
   C_Node *args;
   bool pass_by_stack;
-  Obj *ret_buffer;
+  C_Obj *ret_buffer;
 
   // Goto or labeled statement, or labels-as-values
   char *label;
@@ -290,11 +290,11 @@ struct C_Node {
   C_Node *cas_new;
 
   // Atomic op= operators
-  Obj *atomic_addr;
+  C_Obj *atomic_addr;
   C_Node *atomic_expr;
 
   // Variable
-  Obj *var;
+  C_Obj *var;
 
   // Numeric literal
   int64_t val;
@@ -340,15 +340,15 @@ struct C_parser {
 
   // All local variable instances created during parsing are
   // accumulated to this list.
-  Obj *locals;
+  C_Obj *locals;
 
   // Likewise, global variables are accumulated to this list.
-  Obj *globals;
+  C_Obj *globals;
 
   Scope *scope; // = &(Scope){0};
 
   // Points to the function object the parser is currently parsing.
-  Obj *current_fn;
+  C_Obj *current_fn;
 
   // Lists of all goto statements and labels in the curent function.
   C_Node *gotos;
@@ -362,7 +362,7 @@ struct C_parser {
   // a switch statement. Otherwise, NULL.
   C_Node *current_switch;
 
-  Obj *builtin_alloca;
+  C_Obj *builtin_alloca;
 
 #ifdef RAVI_EXTENSIONS
   bool allow_partial_parsing;
@@ -371,11 +371,11 @@ struct C_parser {
 
 C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
 int64_t const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
-Obj *parse(Scope* globalScope, C_parser *parser, C_Token *tok);
+C_Obj *parse(Scope* globalScope, C_parser *parser, C_Token *tok);
 
 #ifdef RAVI_EXTENSIONS
 C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, C_Token *tok);
-Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
+C_Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
 #endif
 
 //
@@ -428,7 +428,7 @@ struct C_Type {
 
   // Variable-length array
   C_Node *vla_len; // # of elements
-  Obj *vla_size; // sizeof() value
+  C_Obj *vla_size; // sizeof() value
 
   // Struct
   C_Member *members;
@@ -492,7 +492,7 @@ void add_type(C_parser *parser, C_Node *node);
 // codegen.c
 //
 
-void codegen(Obj *prog, FILE *out);
+void codegen(C_Obj *prog, FILE *out);
 // Round up `n` to the nearest multiple of `align`. For instance,
 // align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
 static inline int align_to(int n, int align) {
