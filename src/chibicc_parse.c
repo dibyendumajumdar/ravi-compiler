@@ -1741,7 +1741,7 @@ static Node *compound_stmt(C_parser *parser, Token **rest, Token *tok) {
 
   enter_scope(parser);
 
-  while (!equal(tok, "}")) {
+  while ((!parser->allow_partial_parsing || parser->allow_partial_parsing && tok->kind != TK_EOF) && !equal(tok, "}")) {
     if (is_typename(parser, tok) && !equal(tok->next, ":")) {
       VarAttr attr = {0};
       Type *basety = declspec(parser, &tok, tok, &attr);
@@ -3306,6 +3306,29 @@ static void declare_builtin_functions(C_parser *parser) {
   parser->builtin_alloca = new_gvar(parser, "alloca", ty);
   parser->builtin_alloca->is_definition = false;
 }
+
+#ifdef RAVI_EXTENSIONS
+Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str) {
+	Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
+	fn->is_function = true;
+	fn->is_definition = true;
+	fn->is_static = true;
+	fn->is_inline = false;
+	parser->current_fn = fn;
+	parser->locals = NULL;
+	parser->gotos = NULL;
+	parser->labels = NULL;
+	parser->brk_label = NULL;
+	parser->cont_label = NULL;
+	parser->current_switch = NULL;
+	return fn;
+}
+
+Node *parse_compound_statement(Scope *globalScope, C_parser *parser, Token *tok) {
+	parser->scope = globalScope;
+	return compound_stmt(parser, &tok, tok);
+}
+#endif
 
 // program = (typedef | function-definition | global-variable)*
 Obj *parse(Scope *globalScope, C_parser *parser, Token *tok) {

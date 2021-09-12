@@ -361,11 +361,20 @@ struct C_parser {
   Node *current_switch;
 
   Obj *builtin_alloca;
+
+#ifdef RAVI_EXTENSIONS
+  bool allow_partial_parsing;
+#endif
 };
 
 Node *new_cast(C_parser *parser, Node *expr, Type *ty);
 int64_t const_expr(C_parser *parser, Token **rest, Token *tok);
 Obj *parse(Scope* globalScope, C_parser *parser, Token *tok);
+
+#ifdef RAVI_EXTENSIONS
+Node *parse_compound_statement(Scope *globalScope, C_parser *parser, Token *tok);
+Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
+#endif
 
 //
 // type.c
