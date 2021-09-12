@@ -30,6 +30,6 @@ int main(int argc, const char *argv[])
 	tok = tokenize_buffer(&parser, buffer2);
 	convert_pp_tokens(&parser, tok);
 	parser.allow_partial_parsing = true;
-	Node *node = parse_compound_statement(&scope, &parser, tok);
+	C_Node *node = parse_compound_statement(&scope, &parser, tok);
 	return 0;
 }

@@ -116,7 +116,7 @@ C_Type *array_of(C_parser *parser, C_Type *base, int len) {
   return ty;
 }
 
-C_Type *vla_of(C_parser *parser, C_Type *base, Node *len) {
+C_Type *vla_of(C_parser *parser, C_Type *base, C_Node *len) {
 	C_Type *ty = new_type(parser, TY_VLA, 8, 8);
   ty->base = base;
   ty->vla_len = len;
@@ -167,13 +167,13 @@ static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
 // be promoted to match with the other.
 //
 // This operation is called the "usual arithmetic conversion".
-static void usual_arith_conv(C_parser *parser, Node **lhs, Node **rhs) {
+static void usual_arith_conv(C_parser *parser, C_Node **lhs, C_Node **rhs) {
 	C_Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
   *lhs = new_cast(parser, *lhs, ty);
   *rhs = new_cast(parser, *rhs, ty);
 }
 
-void add_type(C_parser *parser, Node *node) {
+void add_type(C_parser *parser, C_Node *node) {
   if (!node || node->ty)
     return;
 
@@ -185,9 +185,9 @@ void add_type(C_parser *parser, Node *node) {
   add_type(parser, node->init);
   add_type(parser, node->inc);
 
-  for (Node *n = node->body; n; n = n->next)
+  for (C_Node *n = node->body; n; n = n->next)
     add_type(parser, n);
-  for (Node *n = node->args; n; n = n->next)
+  for (C_Node *n = node->args; n; n = n->next)
     add_type(parser, n);
 
   switch (node->kind) {
@@ -274,7 +274,7 @@ void add_type(C_parser *parser, Node *node) {
     return;
   case ND_STMT_EXPR:
     if (node->body) {
-      Node *stmt = node->body;
+	    C_Node *stmt = node->body;
       while (stmt->next)
         stmt = stmt->next;
       if (stmt->kind == ND_EXPR_STMT) {

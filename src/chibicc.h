@@ -35,7 +35,7 @@
 #endif
 
 typedef struct C_Type C_Type;
-typedef struct Node Node;
+typedef struct C_Node C_Node;
 typedef struct Member Member;
 typedef struct Relocation Relocation;
 typedef struct Hideset Hideset;
@@ -160,7 +160,7 @@ struct Obj {
   // Function
   bool is_inline;
   Obj *params;
-  Node *body;
+  C_Node *body;
   Obj *locals;
   Obj *va_area;
   Obj *alloca_bottom;
@@ -236,46 +236,46 @@ typedef enum {
 } NodeKind;
 
 // AST node type
-struct Node {
-  NodeKind kind; // Node kind
-  Node *next;    // Next node
+struct C_Node {
+  NodeKind kind; // C_Node kind
+  C_Node *next;    // Next node
   C_Type *ty;      // Type, e.g. int or pointer to int
   Token *tok;    // Representative token
 
-  Node *lhs;     // Left-hand side
-  Node *rhs;     // Right-hand side
+  C_Node *lhs;     // Left-hand side
+  C_Node *rhs;     // Right-hand side
 
   // "if" or "for" statement
-  Node *cond;
-  Node *then;
-  Node *els;
-  Node *init;
-  Node *inc;
+  C_Node *cond;
+  C_Node *then;
+  C_Node *els;
+  C_Node *init;
+  C_Node *inc;
 
   // "break" and "continue" labels
   char *brk_label;
   char *cont_label;
 
   // Block or statement expression
-  Node *body;
+  C_Node *body;
 
   // Struct member access
   Member *member;
 
   // Function call
   C_Type *func_ty;
-  Node *args;
+  C_Node *args;
   bool pass_by_stack;
   Obj *ret_buffer;
 
   // Goto or labeled statement, or labels-as-values
   char *label;
   char *unique_label;
-  Node *goto_next;
+  C_Node *goto_next;
 
   // Switch
-  Node *case_next;
-  Node *default_case;
+  C_Node *case_next;
+  C_Node *default_case;
 
   // Case
   long begin;
@@ -285,13 +285,13 @@ struct Node {
   char *asm_str;
 
   // Atomic compare-and-swap
-  Node *cas_addr;
-  Node *cas_old;
-  Node *cas_new;
+  C_Node *cas_addr;
+  C_Node *cas_old;
+  C_Node *cas_new;
 
   // Atomic op= operators
   Obj *atomic_addr;
-  Node *atomic_expr;
+  C_Node *atomic_expr;
 
   // Variable
   Obj *var;
@@ -351,8 +351,8 @@ struct C_parser {
   Obj *current_fn;
 
   // Lists of all goto statements and labels in the curent function.
-  Node *gotos;
-  Node *labels;
+  C_Node *gotos;
+  C_Node *labels;
 
   // Current "goto" and "continue" jump targets.
   char *brk_label;
@@ -360,7 +360,7 @@ struct C_parser {
 
   // Points to a node representing a switch if we are parsing
   // a switch statement. Otherwise, NULL.
-  Node *current_switch;
+  C_Node *current_switch;
 
   Obj *builtin_alloca;
 
@@ -369,12 +369,12 @@ struct C_parser {
 #endif
 };
 
-Node *new_cast(C_parser *parser, Node *expr, C_Type *ty);
+C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
 int64_t const_expr(C_parser *parser, Token **rest, Token *tok);
 Obj *parse(Scope* globalScope, C_parser *parser, Token *tok);
 
 #ifdef RAVI_EXTENSIONS
-Node *parse_compound_statement(Scope *globalScope, C_parser *parser, Token *tok);
+C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, Token *tok);
 Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
 #endif
 
@@ -427,7 +427,7 @@ struct C_Type {
   int array_len;
 
   // Variable-length array
-  Node *vla_len; // # of elements
+  C_Node *vla_len; // # of elements
   Obj *vla_size; // sizeof() value
 
   // Struct
@@ -483,10 +483,10 @@ C_Type *copy_type(C_parser *parser, C_Type *ty);
 C_Type *pointer_to(C_parser *parser, C_Type *base);
 C_Type *func_type(C_parser *parser, C_Type *return_ty);
 C_Type *array_of(C_parser *parser, C_Type *base, int size);
-C_Type *vla_of(C_parser *parser, C_Type *base, Node *expr);
+C_Type *vla_of(C_parser *parser, C_Type *base, C_Node *expr);
 C_Type *enum_type(C_parser *parser);
 C_Type *struct_type(C_parser *parser);
-void add_type(C_parser *parser, Node *node);
+void add_type(C_parser *parser, C_Node *node);
 
 //
 // codegen.c
