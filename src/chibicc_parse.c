@@ -160,7 +160,7 @@ static char *str_dup(const char *temp, size_t len) {
 }
 
 static void enter_scope(C_parser *parser) {
-	C_Scope *sc = calloc(1, sizeof(C_Scope));
+  C_Scope *sc = calloc(1, sizeof(C_Scope));
   sc->next = parser->scope;
   parser->scope = sc;
 }
@@ -189,7 +189,7 @@ static C_Type *find_tag(C_parser *parser, C_Token *tok) {
 }
 
 static C_Node *new_node(C_parser *parser, C_NodeKind kind, C_Token *tok) {
-	C_Node *node = calloc(1, sizeof(C_Node));
+  C_Node *node = calloc(1, sizeof(C_Node));
   node->kind = kind;
   node->tok = tok;
   return node;
@@ -298,7 +298,7 @@ static Initializer *new_initializer(C_Type *ty, bool is_flexible) {
 }
 
 static C_Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
-	C_Obj *var = calloc(1, sizeof(C_Obj));
+  C_Obj *var = calloc(1, sizeof(C_Obj));
   var->name = name;
   var->ty = ty;
   var->align = ty->align;
@@ -1284,7 +1284,7 @@ static C_Type *copy_struct_type(C_parser *parser, C_Type *ty) {
   C_Member head = {0};
   C_Member *cur = &head;
   for (C_Member *mem = ty->members; mem; mem = mem->next) {
-	  C_Member *m = calloc(1, sizeof(C_Member));
+    C_Member *m = calloc(1, sizeof(C_Member));
     *m = *mem;
     cur = cur->next = m;
   }
@@ -2554,7 +2554,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
     // Anonymous struct member
     if ((basety->kind == TY_STRUCT || basety->kind == TY_UNION) && C_consume(&tok, tok, ";")) {
-	    C_Member *mem = calloc(1, sizeof(C_Member));
+      C_Member *mem = calloc(1, sizeof(C_Member));
       mem->ty = basety;
       mem->idx = idx++;
       mem->align = attr.align ? attr.align : mem->ty->align;

@@ -113,7 +113,7 @@ bool C_consume(C_Token **rest, C_Token *tok, char *str) {
 
 // Create a new token.
 static C_Token *new_token(C_parser *tokenizer, C_TokenKind kind, char *start, char *end) {
-	C_Token *tok = calloc(1, sizeof(C_Token));
+  C_Token *tok = calloc(1, sizeof(C_Token));
   tok->kind = kind;
   tok->loc = start;
   tok->len = end - start;
@@ -697,7 +697,7 @@ C_File **get_input_files(C_parser *tokenizer) {
 
 
 C_File *C_new_file(char *name, int file_no, char *contents) {
-	C_File *file = calloc(1, sizeof(C_File));
+  C_File *file = calloc(1, sizeof(C_File));
   file->name = name;
   file->display_name = name;
   file->file_no = file_no;
