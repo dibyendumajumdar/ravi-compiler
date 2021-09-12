@@ -123,7 +123,7 @@ noreturn void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attri
 noreturn void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 bool C_equal(C_Token *tok, char *op);
-C_Token *skip(C_parser *parser, C_Token *tok, char *op);
+C_Token *C_skip(C_parser *parser, C_Token *tok, char *op);
 bool consume(C_Token **rest, C_Token *tok, char *str);
 void convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
 C_File **get_input_files(C_parser *tokenizer);

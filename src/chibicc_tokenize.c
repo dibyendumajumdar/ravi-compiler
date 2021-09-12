@@ -96,7 +96,7 @@ bool C_equal(C_Token *tok, char *op) {
 }
 
 // Ensure that the current token is `op`.
-C_Token *skip(C_parser *parser, C_Token *tok, char *op) {
+C_Token *C_skip(C_parser *parser, C_Token *tok, char *op) {
   if (!C_equal(tok, op))
 	  C_error_tok(parser, tok, "expected '%s'", op);
   return tok->next;
@@ -807,7 +807,7 @@ C_Token *tokenize_buffer(C_parser *tokenizer, char *p) {
     return NULL;
 
   // UTF-8 texts may start with a 3-byte "BOM" marker sequence.
-  // If exists, just skip them because they are useless bytes.
+  // If exists, just C_skip them because they are useless bytes.
   // (It is actually not recommended to add BOM markers to UTF-8
   // texts, but it's not uncommon particularly on Windows.)
   if (!memcmp(p, "\xef\xbb\xbf", 3))
