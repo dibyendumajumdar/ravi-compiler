@@ -20,6 +20,8 @@
 #include <unistd.h>
 #endif
 
+#define RAVI_EXTENSIONS
+
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
