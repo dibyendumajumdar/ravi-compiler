@@ -91,19 +91,19 @@ void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) {
 }
 
 // Consumes the current token if it matches `op`.
-bool equal(C_Token *tok, char *op) {
+bool C_equal(C_Token *tok, char *op) {
   return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0';
 }
 
 // Ensure that the current token is `op`.
 C_Token *skip(C_parser *parser, C_Token *tok, char *op) {
-  if (!equal(tok, op))
+  if (!C_equal(tok, op))
 	  C_error_tok(parser, tok, "expected '%s'", op);
   return tok->next;
 }
 
 bool consume(C_Token **rest, C_Token *tok, char *str) {
-  if (equal(tok, str)) {
+  if (C_equal(tok, str)) {
     *rest = tok->next;
     return true;
   }
@@ -279,7 +279,7 @@ static C_Token *read_string_literal(C_parser *tokenizer, char *start, char *quot
 //
 // UTF-16 is yet another variable-width encoding for Unicode. Code
 // points smaller than U+10000 are encoded in 2 bytes. Code points
-// equal to or larger than that are encoded in 4 bytes. Each 2 bytes
+// C_equal to or larger than that are encoded in 4 bytes. Each 2 bytes
 // in the 4 byte sequence is called "surrogate", and a 4 byte sequence
 // is called a "surrogate pair".
 static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char *quote) {

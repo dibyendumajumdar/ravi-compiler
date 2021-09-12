@@ -405,18 +405,18 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
   while (is_typename(parser, tok)) {
     // Handle storage class specifiers.
-    if (equal(tok, "typedef") || equal(tok, "static") || equal(tok, "extern") ||
-        equal(tok, "inline") || equal(tok, "_Thread_local") || equal(tok, "__thread")) {
+    if (C_equal(tok, "typedef") || C_equal(tok, "static") || C_equal(tok, "extern") || C_equal(tok, "inline") ||
+	C_equal(tok, "_Thread_local") || C_equal(tok, "__thread")) {
       if (!attr)
 	      C_error_tok(parser, tok, "storage class specifier is not allowed in this context");
 
-      if (equal(tok, "typedef"))
+      if (C_equal(tok, "typedef"))
         attr->is_typedef = true;
-      else if (equal(tok, "static"))
+      else if (C_equal(tok, "static"))
         attr->is_static = true;
-      else if (equal(tok, "extern"))
+      else if (C_equal(tok, "extern"))
         attr->is_extern = true;
-      else if (equal(tok, "inline"))
+      else if (C_equal(tok, "inline"))
         attr->is_inline = true;
       else
         attr->is_tls = true;
@@ -437,9 +437,9 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
         consume(&tok, tok, "__restrict__") || consume(&tok, tok, "_Noreturn"))
       continue;
 
-    if (equal(tok, "_Atomic")) {
+    if (C_equal(tok, "_Atomic")) {
       tok = tok->next;
-      if (equal(tok , "(")) {
+      if (C_equal(tok, "(")) {
         ty = typename(parser, &tok, tok->next);
         tok = skip(parser, tok, ")");
       }
@@ -447,7 +447,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
       continue;
     }
 
-    if (equal(tok, "_Alignas")) {
+    if (C_equal(tok, "_Alignas")) {
       if (!attr)
 	      C_error_tok(parser, tok, "_Alignas is not allowed in this context");
       tok = skip(parser, tok->next, "(");
@@ -462,18 +462,17 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
     // Handle user-defined types.
     C_Type *ty2 = find_typedef(parser, tok);
-    if (equal(tok, "struct") || equal(tok, "union") || equal(tok, "enum") ||
-        equal(tok, "typeof") || ty2) {
+    if (C_equal(tok, "struct") || C_equal(tok, "union") || C_equal(tok, "enum") || C_equal(tok, "typeof") || ty2) {
       if (counter)
         break;
 
-      if (equal(tok, "struct")) {
+      if (C_equal(tok, "struct")) {
         ty = struct_decl(parser, &tok, tok->next);
-      } else if (equal(tok, "union")) {
+      } else if (C_equal(tok, "union")) {
         ty = union_decl(parser, &tok, tok->next);
-      } else if (equal(tok, "enum")) {
+      } else if (C_equal(tok, "enum")) {
         ty = enum_specifier(parser, &tok, tok->next);
-      } else if (equal(tok, "typeof")) {
+      } else if (C_equal(tok, "typeof")) {
         ty = typeof_specifier(parser, &tok, tok->next);
       } else {
         ty = ty2;
@@ -485,25 +484,25 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     }
 
     // Handle built-in types.
-    if (equal(tok, "void"))
+    if (C_equal(tok, "void"))
       counter += VOID;
-    else if (equal(tok, "_Bool"))
+    else if (C_equal(tok, "_Bool"))
       counter += BOOL;
-    else if (equal(tok, "char"))
+    else if (C_equal(tok, "char"))
       counter += CHAR;
-    else if (equal(tok, "short"))
+    else if (C_equal(tok, "short"))
       counter += SHORT;
-    else if (equal(tok, "int"))
+    else if (C_equal(tok, "int"))
       counter += INT;
-    else if (equal(tok, "long"))
+    else if (C_equal(tok, "long"))
       counter += LONG;
-    else if (equal(tok, "float"))
+    else if (C_equal(tok, "float"))
       counter += FLOAT;
-    else if (equal(tok, "double"))
+    else if (C_equal(tok, "double"))
       counter += DOUBLE;
-    else if (equal(tok, "signed"))
+    else if (C_equal(tok, "signed"))
       counter |= SIGNED;
-    else if (equal(tok, "unsigned"))
+    else if (C_equal(tok, "unsigned"))
       counter |= UNSIGNED;
     else
 	    unreachable();
@@ -585,7 +584,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 // func-params = ("void" | param ("," param)* ("," "...")?)? ")"
 // param       = declspec declarator
 static C_Type *func_params(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
-  if (equal(tok, "void") && equal(tok->next, ")")) {
+  if (C_equal(tok, "void") && C_equal(tok->next, ")")) {
     *rest = tok->next->next;
     return func_type(parser, ty);
   }
@@ -594,11 +593,11 @@ static C_Type *func_params(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
   C_Type *cur = &head;
   bool is_variadic = false;
 
-  while (!equal(tok, ")")) {
+  while (!C_equal(tok, ")")) {
     if (cur != &head)
       tok = skip(parser, tok, ",");
 
-    if (equal(tok, "...")) {
+    if (C_equal(tok, "...")) {
       is_variadic = true;
       tok = tok->next;
       skip(parser, tok, ")");
@@ -637,10 +636,10 @@ static C_Type *func_params(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 
 // array-dimensions = ("static" | "restrict")* const-expr? "]" type-suffix
 static C_Type *array_dimensions(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
-  while (equal(tok, "static") || equal(tok, "restrict"))
+  while (C_equal(tok, "static") || C_equal(tok, "restrict"))
     tok = tok->next;
 
-  if (equal(tok, "]")) {
+  if (C_equal(tok, "]")) {
     ty = type_suffix(parser, rest, tok->next, ty);
     return array_of(parser, ty, -1);
   }
@@ -658,10 +657,10 @@ static C_Type *array_dimensions(C_parser *parser, C_Token **rest, C_Token *tok, 
 //             | "[" array-dimensions
 //             | ε
 static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
-  if (equal(tok, "("))
+  if (C_equal(tok, "("))
     return func_params(parser, rest, tok->next, ty);
 
-  if (equal(tok, "["))
+  if (C_equal(tok, "["))
     return array_dimensions(parser, rest, tok->next, ty);
 
   *rest = tok;
@@ -672,8 +671,8 @@ static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 static C_Type *pointers(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   while (consume(&tok, tok, "*")) {
     ty = pointer_to(parser, ty);
-    while (equal(tok, "const") || equal(tok, "volatile") || equal(tok, "restrict") ||
-           equal(tok, "__restrict") || equal(tok, "__restrict__"))
+    while (C_equal(tok, "const") || C_equal(tok, "volatile") || C_equal(tok, "restrict") || C_equal(tok, "__restrict") ||
+	   C_equal(tok, "__restrict__"))
       tok = tok->next;
   }
   *rest = tok;
@@ -684,7 +683,7 @@ static C_Type *pointers(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *
 static C_Type *declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
-  if (equal(tok, "(")) {
+  if (C_equal(tok, "(")) {
 	  C_Token *start = tok;
     C_Type dummy = {0};
     declarator(parser, &tok, start->next, &dummy);
@@ -711,7 +710,7 @@ static C_Type *declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type
 static C_Type *abstract_declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
-  if (equal(tok, "(")) {
+  if (C_equal(tok, "(")) {
 	  C_Token *start = tok;
     C_Type dummy = {0};
     abstract_declarator(parser, &tok, start->next, &dummy);
@@ -730,16 +729,16 @@ static C_Type *typename(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 static bool is_end(C_Token *tok) {
-  return equal(tok, "}") || (equal(tok, ",") && equal(tok->next, "}"));
+  return C_equal(tok, "}") || (C_equal(tok, ",") && C_equal(tok->next, "}"));
 }
 
 static bool consume_end(C_Token **rest, C_Token *tok) {
-  if (equal(tok, "}")) {
+  if (C_equal(tok, "}")) {
     *rest = tok->next;
     return true;
   }
 
-  if (equal(tok, ",") && equal(tok->next, "}")) {
+  if (C_equal(tok, ",") && C_equal(tok->next, "}")) {
     *rest = tok->next->next;
     return true;
   }
@@ -761,7 +760,7 @@ static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
     tok = tok->next;
   }
 
-  if (tag && !equal(tok, "{")) {
+  if (tag && !C_equal(tok, "{")) {
 	  C_Type *ty = find_tag(parser, tag);
     if (!ty)
 	    C_error_tok(parser, tag, "unknown enum type");
@@ -783,7 +782,7 @@ static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
     char *name = get_ident(parser, tok);
     tok = tok->next;
 
-    if (equal(tok, "="))
+    if (C_equal(tok, "="))
       val = const_expr(parser, &tok, tok->next);
 
     VarScope *sc = push_scope(parser, name);
@@ -849,7 +848,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 	C_Node *cur = &head;
   int i = 0;
 
-  while (!equal(tok, ";")) {
+  while (!C_equal(tok, ";")) {
     if (i++ > 0)
       tok = skip(parser, tok, ",");
 
@@ -863,7 +862,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
       // static local variable
       C_Obj *var = new_anon_gvar(parser, ty);
       push_scope(parser, get_ident(parser, ty->name))->var = var;
-      if (equal(tok, "="))
+      if (C_equal(tok, "="))
         gvar_initializer(parser, &tok, tok->next, var);
       continue;
     }
@@ -874,7 +873,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
     cur = cur->next = new_unary(parser, ND_EXPR_STMT, compute_vla_size(parser, ty, tok), tok);
 
     if (ty->kind == TY_VLA) {
-      if (equal(tok, "="))
+      if (C_equal(tok, "="))
 	      C_error_tok(parser, tok, "variable-sized object may not be initialized");
 
       // Variable length arrays (VLAs) are translated to alloca() calls.
@@ -894,7 +893,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
     if (attr && attr->align)
       var->align = attr->align;
 
-    if (equal(tok, "=")) {
+    if (C_equal(tok, "=")) {
 	    C_Node *expr = lvar_initializer(parser, &tok, tok->next, var);
       cur = cur->next = new_unary(parser, ND_EXPR_STMT, expr, tok);
     }
@@ -912,7 +911,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 }
 
 static C_Token *skip_excess_element(C_parser *parser, C_Token *tok) {
-  if (equal(tok, "{")) {
+  if (C_equal(tok, "{")) {
     tok = skip_excess_element(parser, tok->next);
     return skip(parser, tok, "}");
   }
@@ -984,7 +983,7 @@ static void array_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_T
   if (*begin >= ty->array_len)
 	  C_error_tok(parser, tok, "array designator index exceeds array bounds");
 
-  if (equal(tok, "...")) {
+  if (C_equal(tok, "...")) {
     *end = const_expr(parser, &tok, tok->next);
     if (*end >= ty->array_len)
 	    C_error_tok(parser, tok, "array designator index exceeds array bounds");
@@ -1026,7 +1025,7 @@ static C_Member *struct_designator(C_parser *parser, C_Token **rest, C_Token *to
 
 // designation = ("[" const-expr "]" | "." ident)* "="? initializer
 static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
-  if (equal(tok, "[")) {
+  if (C_equal(tok, "[")) {
     if (init->ty->kind != TY_ARRAY)
 	    C_error_tok(parser, tok, "array index in non-array initializer");
 
@@ -1040,7 +1039,7 @@ static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initiali
     return;
   }
 
-  if (equal(tok, ".") && init->ty->kind == TY_STRUCT) {
+  if (C_equal(tok, ".") && init->ty->kind == TY_STRUCT) {
 	  C_Member *mem = struct_designator(parser, &tok, tok, init->ty);
     designation(parser, &tok, tok, init->children[mem->idx]);
     init->expr = NULL;
@@ -1048,17 +1047,17 @@ static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initiali
     return;
   }
 
-  if (equal(tok, ".") && init->ty->kind == TY_UNION) {
+  if (C_equal(tok, ".") && init->ty->kind == TY_UNION) {
 	  C_Member *mem = struct_designator(parser, &tok, tok, init->ty);
     init->mem = mem;
     designation(parser, rest, tok, init->children[mem->idx]);
     return;
   }
 
-  if (equal(tok, "."))
+  if (C_equal(tok, "."))
 	  C_error_tok(parser, tok, "field name not in struct or union initializer");
 
-  if (equal(tok, "="))
+  if (C_equal(tok, "="))
     tok = tok->next;
   initializer2(parser, rest, tok, init);
 }
@@ -1077,9 +1076,9 @@ static int count_array_init_elements(C_parser *parser, C_Token *tok, C_Type *ty)
       tok = skip(parser, tok, ",");
     first = false;
 
-    if (equal(tok, "[")) {
+    if (C_equal(tok, "[")) {
       i = const_expr(parser, &tok, tok->next);
-      if (equal(tok, "..."))
+      if (C_equal(tok, "..."))
         i = const_expr(parser, &tok, tok->next);
       tok = skip(parser, tok, "]");
       designation(parser, &tok, tok, dummy);
@@ -1114,7 +1113,7 @@ static void array_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, I
       tok = skip(parser, tok, ",");
     first = false;
 
-    if (equal(tok, "[")) {
+    if (C_equal(tok, "[")) {
       int begin, end;
       array_designator(parser, &tok, tok, init->ty, &begin, &end);
 
@@ -1145,7 +1144,7 @@ static void array_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, I
     if (i > 0)
       tok = skip(parser, tok, ",");
 
-    if (equal(tok, "[") || equal(tok, ".")) {
+    if (C_equal(tok, "[") || C_equal(tok, ".")) {
       *rest = start;
       return;
     }
@@ -1167,7 +1166,7 @@ static void struct_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, 
       tok = skip(parser, tok, ",");
     first = false;
 
-    if (equal(tok, ".")) {
+    if (C_equal(tok, ".")) {
       mem = struct_designator(parser, &tok, tok, init->ty);
       designation(parser, &tok, tok, init->children[mem->idx]);
       mem = mem->next;
@@ -1194,7 +1193,7 @@ static void struct_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, 
       tok = skip(parser, tok, ",");
     first = false;
 
-    if (equal(tok, "[") || equal(tok, ".")) {
+    if (C_equal(tok, "[") || C_equal(tok, ".")) {
       *rest = start;
       return;
     }
@@ -1208,7 +1207,7 @@ static void union_initializer(C_parser *parser, C_Token **rest, C_Token *tok, In
   // Unlike structs, union initializers take only one initializer,
   // and that initializes the first union member by default.
   // You can initialize other member using a designated initializer.
-  if (equal(tok, "{") && equal(tok->next, ".")) {
+  if (C_equal(tok, "{") && C_equal(tok->next, ".")) {
 	  C_Member *mem = struct_designator(parser, &tok, tok->next, init->ty);
     init->mem = mem;
     designation(parser, &tok, tok, init->children[mem->idx]);
@@ -1218,7 +1217,7 @@ static void union_initializer(C_parser *parser, C_Token **rest, C_Token *tok, In
 
   init->mem = init->ty->members;
 
-  if (equal(tok, "{")) {
+  if (C_equal(tok, "{")) {
     initializer2(parser, &tok, tok->next, init->children[0]);
     consume(&tok, tok, ",");
     *rest = skip(parser, tok, "}");
@@ -1237,7 +1236,7 @@ static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initial
   }
 
   if (init->ty->kind == TY_ARRAY) {
-    if (equal(tok, "{"))
+    if (C_equal(tok, "{"))
       array_initializer1(parser, rest, tok, init);
     else
       array_initializer2(parser, rest, tok, init, 0);
@@ -1245,7 +1244,7 @@ static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initial
   }
 
   if (init->ty->kind == TY_STRUCT) {
-    if (equal(tok, "{")) {
+    if (C_equal(tok, "{")) {
       struct_initializer1(parser, rest, tok, init);
       return;
     }
@@ -1269,7 +1268,7 @@ static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initial
     return;
   }
 
-  if (equal(tok, "{")) {
+  if (C_equal(tok, "{")) {
     // An initializer for a scalar variable can be surrounded by
     // braces. E.g. `int x = {3};`. Handle that case.
     initializer2(parser, &tok, tok->next, init);
@@ -1521,7 +1520,7 @@ static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = new_node(parser, ND_ASM, tok);
   tok = tok->next;
 
-  while (equal(tok, "volatile") || equal(tok, "inline"))
+  while (C_equal(tok, "volatile") || C_equal(tok, "inline"))
     tok = tok->next;
 
   tok = skip(parser, tok, "(");
@@ -1548,7 +1547,7 @@ static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 //      | "{" compound-stmt
 //      | expr-stmt
 static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
-  if (equal(tok, "return")) {
+  if (C_equal(tok, "return")) {
 	  C_Node *node = new_node(parser, ND_RETURN, tok);
     if (consume(rest, tok->next, ";"))
       return node;
@@ -1565,19 +1564,19 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "if")) {
+  if (C_equal(tok, "if")) {
 	  C_Node *node = new_node(parser, ND_IF, tok);
     tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
     tok = skip(parser, tok, ")");
     node->then = stmt(parser, &tok, tok);
-    if (equal(tok, "else"))
+    if (C_equal(tok, "else"))
       node->els = stmt(parser, &tok, tok->next);
     *rest = tok;
     return node;
   }
 
-  if (equal(tok, "switch")) {
+  if (C_equal(tok, "switch")) {
 	  C_Node *node = new_node(parser, ND_SWITCH, tok);
     tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
@@ -1596,7 +1595,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "case")) {
+  if (C_equal(tok, "case")) {
     if (!parser->current_switch)
 	    C_error_tok(parser, tok, "stray case");
 
@@ -1604,7 +1603,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     int begin = const_expr(parser, &tok, tok->next);
     int end;
 
-    if (equal(tok, "...")) {
+    if (C_equal(tok, "...")) {
       // [GNU] Case ranges, e.g. "case 1 ... 5:"
       end = const_expr(parser, &tok, tok->next);
       if (end < begin)
@@ -1623,7 +1622,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "default")) {
+  if (C_equal(tok, "default")) {
     if (!parser->current_switch)
 	    C_error_tok(parser, tok, "stray default");
 
@@ -1635,7 +1634,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "for")) {
+  if (C_equal(tok, "for")) {
 	  C_Node *node = new_node(parser, ND_FOR, tok);
     tok = skip(parser, tok->next, "(");
 
@@ -1653,11 +1652,11 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
       node->init = expr_stmt(parser, &tok, tok);
     }
 
-    if (!equal(tok, ";"))
+    if (!C_equal(tok, ";"))
       node->cond = expr(parser, &tok, tok);
     tok = skip(parser, tok, ";");
 
-    if (!equal(tok, ")"))
+    if (!C_equal(tok, ")"))
       node->inc = expr(parser, &tok, tok);
     tok = skip(parser, tok, ")");
 
@@ -1669,7 +1668,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "while")) {
+  if (C_equal(tok, "while")) {
 	  C_Node *node = new_node(parser, ND_FOR, tok);
     tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
@@ -1687,7 +1686,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "do")) {
+  if (C_equal(tok, "do")) {
 	  C_Node *node = new_node(parser, ND_DO, tok);
 
     char *brk = parser->brk_label;
@@ -1708,11 +1707,11 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "asm"))
+  if (C_equal(tok, "asm"))
     return asm_stmt(parser, rest, tok);
 
-  if (equal(tok, "goto")) {
-    if (equal(tok->next, "*")) {
+  if (C_equal(tok, "goto")) {
+    if (C_equal(tok->next, "*")) {
       // [GNU] `goto *ptr` jumps to the address specified by `ptr`.
       C_Node *node = new_node(parser, ND_GOTO_EXPR, tok);
       node->lhs = expr(parser, &tok, tok->next->next);
@@ -1728,7 +1727,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "break")) {
+  if (C_equal(tok, "break")) {
     if (!parser->brk_label)
 	    C_error_tok(parser, tok, "stray break");
     C_Node *node = new_node(parser, ND_GOTO, tok);
@@ -1737,7 +1736,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "continue")) {
+  if (C_equal(tok, "continue")) {
     if (!parser->cont_label)
 	    C_error_tok(parser, tok, "stray continue");
     C_Node *node = new_node(parser, ND_GOTO, tok);
@@ -1746,7 +1745,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (tok->kind == TK_IDENT && equal(tok->next, ":")) {
+  if (tok->kind == TK_IDENT && C_equal(tok->next, ":")) {
 	  C_Node *node = new_node(parser, ND_LABEL, tok);
     node->label = str_dup(tok->loc, tok->len);
     node->unique_label = new_unique_name();
@@ -1756,7 +1755,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "{"))
+  if (C_equal(tok, "{"))
     return compound_stmt(parser, rest, tok->next);
 
   return expr_stmt(parser, rest, tok);
@@ -1770,8 +1769,8 @@ static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   enter_scope(parser);
 
-  while ((!parser->allow_partial_parsing || parser->allow_partial_parsing && tok->kind != TK_EOF) && !equal(tok, "}")) {
-    if (is_typename(parser, tok) && !equal(tok->next, ":")) {
+  while ((!parser->allow_partial_parsing || parser->allow_partial_parsing && tok->kind != TK_EOF) && !C_equal(tok, "}")) {
+    if (is_typename(parser, tok) && !C_equal(tok->next, ":")) {
       VarAttr attr = {0};
       C_Type *basety = declspec(parser, &tok, tok, &attr);
 
@@ -1806,7 +1805,7 @@ static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
 // expr-stmt = expr? ";"
 static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
-  if (equal(tok, ";")) {
+  if (C_equal(tok, ";")) {
     *rest = tok->next;
     return new_node(parser, ND_BLOCK, tok);
   }
@@ -1821,7 +1820,7 @@ static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 static C_Node *expr(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = assign(parser, &tok, tok);
 
-  if (equal(tok, ","))
+  if (C_equal(tok, ","))
     return new_binary(parser, ND_COMMA, node, expr(parser, rest, tok->next), tok);
 
   *rest = tok;
@@ -2148,37 +2147,37 @@ static C_Node *to_assign(C_parser *parser, C_Node *binary) {
 static C_Node *assign(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = conditional(parser, &tok, tok);
 
-  if (equal(tok, "="))
+  if (C_equal(tok, "="))
     return new_binary(parser, ND_ASSIGN, node, assign(parser, rest, tok->next), tok);
 
-  if (equal(tok, "+="))
+  if (C_equal(tok, "+="))
     return to_assign(parser, new_add(parser, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "-="))
+  if (C_equal(tok, "-="))
     return to_assign(parser, new_sub(parser, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "*="))
+  if (C_equal(tok, "*="))
     return to_assign(parser, new_binary(parser, ND_MUL, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "/="))
+  if (C_equal(tok, "/="))
     return to_assign(parser, new_binary(parser, ND_DIV, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "%="))
+  if (C_equal(tok, "%="))
     return to_assign(parser, new_binary(parser, ND_MOD, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "&="))
+  if (C_equal(tok, "&="))
     return to_assign(parser, new_binary(parser, ND_BITAND, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "|="))
+  if (C_equal(tok, "|="))
     return to_assign(parser, new_binary(parser, ND_BITOR, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "^="))
+  if (C_equal(tok, "^="))
     return to_assign(parser, new_binary(parser, ND_BITXOR, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, "<<="))
+  if (C_equal(tok, "<<="))
     return to_assign(parser, new_binary(parser, ND_SHL, node, assign(parser, rest, tok->next), tok));
 
-  if (equal(tok, ">>="))
+  if (C_equal(tok, ">>="))
     return to_assign(parser, new_binary(parser, ND_SHR, node, assign(parser, rest, tok->next), tok));
 
   *rest = tok;
@@ -2189,12 +2188,12 @@ static C_Node *assign(C_parser *parser, C_Token **rest, C_Token *tok) {
 static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *cond = logor(parser, &tok, tok);
 
-  if (!equal(tok, "?")) {
+  if (!C_equal(tok, "?")) {
     *rest = tok;
     return cond;
   }
 
-  if (equal(tok->next, ":")) {
+  if (C_equal(tok->next, ":")) {
     // [GNU] Compile `a ?: b` as `tmp = a, tmp ? tmp : b`.
     add_type(parser, cond);
     C_Obj *var = new_lvar(parser, "", cond->ty);
@@ -2217,7 +2216,7 @@ static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok) {
 // logor = logand ("||" logand)*
 static C_Node *logor(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = logand(parser, &tok, tok);
-  while (equal(tok, "||")) {
+  while (C_equal(tok, "||")) {
 	  C_Token *start = tok;
     node = new_binary(parser, ND_LOGOR, node, logand(parser, &tok, tok->next), start);
   }
@@ -2228,7 +2227,7 @@ static C_Node *logor(C_parser *parser, C_Token **rest, C_Token *tok) {
 // logand = bitor ("&&" bitor)*
 static C_Node *logand(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = bitor(parser, &tok, tok);
-  while (equal(tok, "&&")) {
+  while (C_equal(tok, "&&")) {
 	  C_Token *start = tok;
     node = new_binary(parser, ND_LOGAND, node, bitor(parser, &tok, tok->next), start);
   }
@@ -2239,7 +2238,7 @@ static C_Node *logand(C_parser *parser, C_Token **rest, C_Token *tok) {
 // bitor = bitxor ("|" bitxor)*
 static C_Node *bitor(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = bitxor(parser, &tok, tok);
-  while (equal(tok, "|")) {
+  while (C_equal(tok, "|")) {
 	  C_Token *start = tok;
     node = new_binary(parser, ND_BITOR, node, bitxor(parser, &tok, tok->next), start);
   }
@@ -2250,7 +2249,7 @@ static C_Node *bitor(C_parser *parser, C_Token **rest, C_Token *tok) {
 // bitxor = bitand ("^" bitand)*
 static C_Node *bitxor(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = bitand(parser, &tok, tok);
-  while (equal(tok, "^")) {
+  while (C_equal(tok, "^")) {
 	  C_Token *start = tok;
     node = new_binary(parser, ND_BITXOR, node, bitand(parser, &tok, tok->next), start);
   }
@@ -2261,7 +2260,7 @@ static C_Node *bitxor(C_parser *parser, C_Token **rest, C_Token *tok) {
 // bitand = equality ("&" equality)*
 static C_Node *bitand(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Node *node = equality(parser, &tok, tok);
-  while (equal(tok, "&")) {
+  while (C_equal(tok, "&")) {
 	  C_Token *start = tok;
     node = new_binary(parser, ND_BITAND, node, equality(parser, &tok, tok->next), start);
   }
@@ -2276,12 +2275,12 @@ static C_Node *equality(C_parser *parser, C_Token **rest, C_Token *tok) {
   for (;;) {
 	  C_Token *start = tok;
 
-    if (equal(tok, "==")) {
+    if (C_equal(tok, "==")) {
       node = new_binary(parser, ND_EQ, node, relational(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, "!=")) {
+    if (C_equal(tok, "!=")) {
       node = new_binary(parser, ND_NE, node, relational(parser, &tok, tok->next), start);
       continue;
     }
@@ -2298,22 +2297,22 @@ static C_Node *relational(C_parser *parser, C_Token **rest, C_Token *tok) {
   for (;;) {
 	  C_Token *start = tok;
 
-    if (equal(tok, "<")) {
+    if (C_equal(tok, "<")) {
       node = new_binary(parser, ND_LT, node, shift(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, "<=")) {
+    if (C_equal(tok, "<=")) {
       node = new_binary(parser, ND_LE, node, shift(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, ">")) {
+    if (C_equal(tok, ">")) {
       node = new_binary(parser, ND_LT, shift(parser, &tok, tok->next), node, start);
       continue;
     }
 
-    if (equal(tok, ">=")) {
+    if (C_equal(tok, ">=")) {
       node = new_binary(parser, ND_LE, shift(parser, &tok, tok->next), node, start);
       continue;
     }
@@ -2330,12 +2329,12 @@ static C_Node *shift(C_parser *parser, C_Token **rest, C_Token *tok) {
   for (;;) {
 	  C_Token *start = tok;
 
-    if (equal(tok, "<<")) {
+    if (C_equal(tok, "<<")) {
       node = new_binary(parser, ND_SHL, node, add(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, ">>")) {
+    if (C_equal(tok, ">>")) {
       node = new_binary(parser, ND_SHR, node, add(parser, &tok, tok->next), start);
       continue;
     }
@@ -2423,12 +2422,12 @@ static C_Node *add(C_parser *parser, C_Token **rest, C_Token *tok) {
   for (;;) {
 	  C_Token *start = tok;
 
-    if (equal(tok, "+")) {
+    if (C_equal(tok, "+")) {
       node = new_add(parser, node, mul(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, "-")) {
+    if (C_equal(tok, "-")) {
       node = new_sub(parser, node, mul(parser, &tok, tok->next), start);
       continue;
     }
@@ -2445,17 +2444,17 @@ static C_Node *mul(C_parser *parser, C_Token **rest, C_Token *tok) {
   for (;;) {
 	  C_Token *start = tok;
 
-    if (equal(tok, "*")) {
+    if (C_equal(tok, "*")) {
       node = new_binary(parser, ND_MUL, node, cast(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, "/")) {
+    if (C_equal(tok, "/")) {
       node = new_binary(parser, ND_DIV, node, cast(parser, &tok, tok->next), start);
       continue;
     }
 
-    if (equal(tok, "%")) {
+    if (C_equal(tok, "%")) {
       node = new_binary(parser, ND_MOD, node, cast(parser, &tok, tok->next), start);
       continue;
     }
@@ -2467,13 +2466,13 @@ static C_Node *mul(C_parser *parser, C_Token **rest, C_Token *tok) {
 
 // cast = "(" type-name ")" cast | unary
 static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok) {
-  if (equal(tok, "(") && is_typename(parser, tok->next)) {
+  if (C_equal(tok, "(") && is_typename(parser, tok->next)) {
 	  C_Token *start = tok;
     C_Type *ty = typename(parser, &tok, tok->next);
     tok = skip(parser, tok, ")");
 
     // compound literal
-    if (equal(tok, "{"))
+    if (C_equal(tok, "{"))
       return unary(parser, rest, start);
 
     // type cast
@@ -2490,13 +2489,13 @@ static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok) {
 //       | "&&" ident
 //       | postfix
 static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
-  if (equal(tok, "+"))
+  if (C_equal(tok, "+"))
     return cast(parser, rest, tok->next);
 
-  if (equal(tok, "-"))
+  if (C_equal(tok, "-"))
     return new_unary(parser, ND_NEG, cast(parser, rest, tok->next), tok);
 
-  if (equal(tok, "&")) {
+  if (C_equal(tok, "&")) {
 	  C_Node *lhs = cast(parser, rest, tok->next);
     add_type(parser, lhs);
     if (lhs->kind == ND_MEMBER && lhs->member->is_bitfield)
@@ -2504,7 +2503,7 @@ static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_unary(parser, ND_ADDR, lhs, tok);
   }
 
-  if (equal(tok, "*")) {
+  if (C_equal(tok, "*")) {
     // [https://www.sigbus.info/n1570#6.5.3.2p4] This is an oddity
     // in the C spec, but dereferencing a function shouldn't do
     // anything. If foo is a function, `*foo`, `**foo` or `*****foo`
@@ -2516,22 +2515,22 @@ static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_unary(parser, ND_DEREF, node, tok);
   }
 
-  if (equal(tok, "!"))
+  if (C_equal(tok, "!"))
     return new_unary(parser, ND_NOT, cast(parser, rest, tok->next), tok);
 
-  if (equal(tok, "~"))
+  if (C_equal(tok, "~"))
     return new_unary(parser, ND_BITNOT, cast(parser, rest, tok->next), tok);
 
   // Read ++i as i+=1
-  if (equal(tok, "++"))
+  if (C_equal(tok, "++"))
     return to_assign(parser, new_add(parser, unary(parser, rest, tok->next), new_num(parser, 1, tok), tok));
 
   // Read --i as i-=1
-  if (equal(tok, "--"))
+  if (C_equal(tok, "--"))
     return to_assign(parser, new_sub(parser, unary(parser, rest, tok->next), new_num(parser, 1, tok), tok));
 
   // [GNU] labels-as-values
-  if (equal(tok, "&&")) {
+  if (C_equal(tok, "&&")) {
 	  C_Node *node = new_node(parser, ND_LABEL_VAL, tok);
     node->label = get_ident(parser, tok->next);
     node->goto_next = parser->gotos;
@@ -2549,7 +2548,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 	C_Member *cur = &head;
   int idx = 0;
 
-  while (!equal(tok, "}")) {
+  while (!C_equal(tok, "}")) {
     VarAttr attr = {0};
     C_Type *basety = declspec(parser, &tok, tok, &attr);
     bool first = true;
@@ -2644,7 +2643,7 @@ static C_Type *struct_union_decl(C_parser *parser, C_Token **rest, C_Token *tok)
     tok = tok->next;
   }
 
-  if (tag && !equal(tok, "{")) {
+  if (tag && !C_equal(tok, "{")) {
     *rest = tok;
 
     C_Type *ty2 = find_tag(parser, tag);
@@ -2808,7 +2807,7 @@ static C_Node *new_inc_dec(C_parser *parser, C_Node *node, C_Token *tok, int add
 //              | "++"
 //              | "--"
 static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
-  if (equal(tok, "(") && is_typename(parser, tok->next)) {
+  if (C_equal(tok, "(") && is_typename(parser, tok->next)) {
     // Compound literal
     C_Token *start = tok;
     C_Type *ty = typename(parser, &tok, tok->next);
@@ -2829,12 +2828,12 @@ static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = primary(parser, &tok, tok);
 
   for (;;) {
-    if (equal(tok, "(")) {
+    if (C_equal(tok, "(")) {
       node = funcall(parser, &tok, tok->next, node);
       continue;
     }
 
-    if (equal(tok, "[")) {
+    if (C_equal(tok, "[")) {
       // x[y] is short for *(x+y)
       C_Token *start = tok;
       C_Node *idx = expr(parser, &tok, tok->next);
@@ -2843,13 +2842,13 @@ static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
       continue;
     }
 
-    if (equal(tok, ".")) {
+    if (C_equal(tok, ".")) {
       node = struct_ref(parser, node, tok->next);
       tok = tok->next->next;
       continue;
     }
 
-    if (equal(tok, "->")) {
+    if (C_equal(tok, "->")) {
       // x->y is short for (*x).y
       node = new_unary(parser, ND_DEREF, node, tok);
       node = struct_ref(parser, node, tok->next);
@@ -2857,13 +2856,13 @@ static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
       continue;
     }
 
-    if (equal(tok, "++")) {
+    if (C_equal(tok, "++")) {
       node = new_inc_dec(parser, node, tok, 1);
       tok = tok->next;
       continue;
     }
 
-    if (equal(tok, "--")) {
+    if (C_equal(tok, "--")) {
       node = new_inc_dec(parser, node, tok, -1);
       tok = tok->next;
       continue;
@@ -2888,7 +2887,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
   C_Node head = {0};
   C_Node *cur = &head;
 
-  while (!equal(tok, ")")) {
+  while (!C_equal(tok, ")")) {
     if (cur != &head)
       tok = skip(parser, tok, ",");
 
@@ -2950,7 +2949,7 @@ static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok)
   while (!consume(rest, tok, ")")) {
     tok = skip(parser, tok, ",");
 
-    if (equal(tok, "default")) {
+    if (C_equal(tok, "default")) {
       tok = skip(parser, tok->next, ":");
       C_Node *node = assign(parser, &tok, tok);
       if (!ret)
@@ -2987,7 +2986,7 @@ static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok)
 static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
 	C_Token *start = tok;
 
-  if (equal(tok, "(") && equal(tok->next, "{")) {
+  if (C_equal(tok, "(") && C_equal(tok->next, "{")) {
     // This is a GNU statement expresssion.
     C_Node *node = new_node(parser, ND_STMT_EXPR, tok);
     node->body = compound_stmt(parser, &tok, tok->next->next)->body;
@@ -2995,13 +2994,13 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "(")) {
+  if (C_equal(tok, "(")) {
 	  C_Node *node = expr(parser, &tok, tok->next);
     *rest = skip(parser, tok, ")");
     return node;
   }
 
-  if (equal(tok, "sizeof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
+  if (C_equal(tok, "sizeof") && C_equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
 	  C_Type *ty = typename(parser, &tok, tok->next->next);
     *rest = skip(parser, tok, ")");
 
@@ -3017,7 +3016,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_ulong(parser, ty->size, start);
   }
 
-  if (equal(tok, "sizeof")) {
+  if (C_equal(tok, "sizeof")) {
 	  C_Node *node = unary(parser, rest, tok->next);
     add_type(parser, node);
     if (node->ty->kind == TY_VLA)
@@ -3025,22 +3024,22 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_ulong(parser, node->ty->size, tok);
   }
 
-  if (equal(tok, "_Alignof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
+  if (C_equal(tok, "_Alignof") && C_equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
 	  C_Type *ty = typename(parser, &tok, tok->next->next);
     *rest = skip(parser, tok, ")");
     return new_ulong(parser, ty->align, tok);
   }
 
-  if (equal(tok, "_Alignof")) {
+  if (C_equal(tok, "_Alignof")) {
 	  C_Node *node = unary(parser, rest, tok->next);
     add_type(parser, node);
     return new_ulong(parser, node->ty->align, tok);
   }
 
-  if (equal(tok, "_Generic"))
+  if (C_equal(tok, "_Generic"))
     return generic_selection(parser, rest, tok->next);
 
-  if (equal(tok, "__builtin_types_compatible_p")) {
+  if (C_equal(tok, "__builtin_types_compatible_p")) {
     tok = skip(parser, tok->next, "(");
     C_Type *t1 = typename(parser, &tok, tok);
     tok = skip(parser, tok, ",");
@@ -3049,7 +3048,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_num(parser, is_compatible(t1, t2), start);
   }
 
-  if (equal(tok, "__builtin_reg_class")) {
+  if (C_equal(tok, "__builtin_reg_class")) {
     tok = skip(parser, tok->next, "(");
     C_Type *ty = typename(parser, &tok, tok);
     *rest = skip(parser, tok, ")");
@@ -3061,7 +3060,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return new_num(parser, 2, start);
   }
 
-  if (equal(tok, "__builtin_compare_and_swap")) {
+  if (C_equal(tok, "__builtin_compare_and_swap")) {
 	  C_Node *node = new_node(parser, ND_CAS, tok);
     tok = skip(parser, tok->next, "(");
     node->cas_addr = assign(parser, &tok, tok);
@@ -3073,7 +3072,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
     return node;
   }
 
-  if (equal(tok, "__builtin_atomic_exchange")) {
+  if (C_equal(tok, "__builtin_atomic_exchange")) {
 	  C_Node *node = new_node(parser, ND_EXCH, tok);
     tok = skip(parser, tok->next, "(");
     node->lhs = assign(parser, &tok, tok);
@@ -3103,7 +3102,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
         return new_num(parser, sc->enum_val, tok);
     }
 
-    if (equal(tok->next, "("))
+    if (C_equal(tok->next, "("))
 	    C_error_tok(parser, tok, "implicit declaration of a function");
     C_error_tok(parser, tok, "undefined variable");
   }
@@ -3211,15 +3210,15 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
     // Redeclaration
     if (!fn->is_function)
 	    C_error_tok(parser, tok, "redeclared as a different kind of symbol");
-    if (fn->is_definition && equal(tok, "{"))
+    if (fn->is_definition && C_equal(tok, "{"))
 	    C_error_tok(parser, tok, "redefinition of %s", name_str);
     if (!fn->is_static && attr->is_static)
 	    C_error_tok(parser, tok, "static declaration follows a non-static declaration");
-    fn->is_definition = fn->is_definition || equal(tok, "{");
+    fn->is_definition = fn->is_definition || C_equal(tok, "{");
   } else {
     fn = new_gvar(parser, name_str, ty);
     fn->is_function = true;
-    fn->is_definition = equal(tok, "{");
+    fn->is_definition = C_equal(tok, "{");
     fn->is_static = attr->is_static || (attr->is_inline && !attr->is_extern);
     fn->is_inline = attr->is_inline;
   }
@@ -3284,7 +3283,7 @@ static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, 
     if (attr->align)
       var->align = attr->align;
 
-    if (equal(tok, "="))
+    if (C_equal(tok, "="))
       gvar_initializer(parser, &tok, tok->next, var);
     else if (!attr->is_extern && !attr->is_tls)
       var->is_tentative = true;
@@ -3295,7 +3294,7 @@ static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, 
 // Lookahead tokens and returns true if a given token is a start
 // of a function definition or declaration.
 static bool is_function(C_parser *parser, C_Token *tok) {
-  if (equal(tok, ";"))
+  if (C_equal(tok, ";"))
     return false;
 
   C_Type dummy = {0};
