@@ -161,21 +161,21 @@ static C_Type *find_tag(C_parser *parser, C_Token *tok) {
   return NULL;
 }
 
-static C_Node *new_node(C_parser *parser, NodeKind kind, C_Token *tok) {
+static C_Node *new_node(C_parser *parser, C_NodeKind kind, C_Token *tok) {
 	C_Node *node = calloc(1, sizeof(C_Node));
   node->kind = kind;
   node->tok = tok;
   return node;
 }
 
-static C_Node *new_binary(C_parser *parser, NodeKind kind, C_Node *lhs, C_Node *rhs, C_Token *tok) {
+static C_Node *new_binary(C_parser *parser, C_NodeKind kind, C_Node *lhs, C_Node *rhs, C_Token *tok) {
 	C_Node *node = new_node(parser, kind, tok);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
-static C_Node *new_unary(C_parser *parser, NodeKind kind, C_Node *expr, C_Token *tok) {
+static C_Node *new_unary(C_parser *parser, C_NodeKind kind, C_Node *expr, C_Token *tok) {
 	C_Node *node = new_node(parser, kind, tok);
   node->lhs = expr;
   return node;

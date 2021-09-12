@@ -233,11 +233,11 @@ typedef enum {
   ND_ASM,       // "asm"
   ND_CAS,       // Atomic compare-and-swap
   ND_EXCH,      // Atomic exchange
-} NodeKind;
+} C_NodeKind;
 
 // AST node type
 struct C_Node {
-  NodeKind kind; // C_Node kind
+  C_NodeKind kind; // C_Node kind
   C_Node *next;    // Next node
   C_Type *ty;      // Type, e.g. int or pointer to int
   C_Token *tok;    // Representative token
