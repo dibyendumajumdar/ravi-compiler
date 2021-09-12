@@ -106,7 +106,7 @@ noreturn void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribu
 noreturn void error_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 void warn_tok(C_parser *tokenizer, Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 bool equal(Token *tok, char *op);
-Token *skip(Token *tok, char *op);
+Token *skip(C_parser *parser, Token *tok, char *op);
 bool consume(Token **rest, Token *tok, char *str);
 void convert_pp_tokens(C_parser *tokenizer, Token *tok);
 File **get_input_files(C_parser *tokenizer);

@@ -413,7 +413,7 @@ static C_Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *att
       tok = tok->next;
       if (equal(tok , "(")) {
         ty = typename(parser, &tok, tok->next);
-        tok = skip(tok, ")");
+        tok = skip(parser, tok, ")");
       }
       is_atomic = true;
       continue;
@@ -422,13 +422,13 @@ static C_Type *declspec(C_parser *parser, Token **rest, Token *tok, VarAttr *att
     if (equal(tok, "_Alignas")) {
       if (!attr)
         error_tok(parser, tok, "_Alignas is not allowed in this context");
-      tok = skip(tok->next, "(");
+      tok = skip(parser, tok->next, "(");
 
       if (is_typename(parser, tok))
         attr->align = typename(parser, &tok, tok)->align;
       else
         attr->align = const_expr(parser, &tok, tok);
-      tok = skip(tok, ")");
+      tok = skip(parser, tok, ")");
       continue;
     }
 
@@ -568,12 +568,12 @@ static C_Type *func_params(C_parser *parser, Token **rest, Token *tok, C_Type *t
 
   while (!equal(tok, ")")) {
     if (cur != &head)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
 
     if (equal(tok, "...")) {
       is_variadic = true;
       tok = tok->next;
-      skip(tok, ")");
+      skip(parser, tok, ")");
       break;
     }
 
@@ -618,7 +618,7 @@ static C_Type *array_dimensions(C_parser *parser, Token **rest, Token *tok, C_Ty
   }
 
   Node *expr = conditional(parser, &tok, tok);
-  tok = skip(tok, "]");
+  tok = skip(parser, tok, "]");
   ty = type_suffix(parser, rest, tok, ty);
 
   if (ty->kind == TY_VLA || !is_const_expr(parser, expr))
@@ -660,7 +660,7 @@ static C_Type *declarator(C_parser *parser, Token **rest, Token *tok, C_Type *ty
     Token *start = tok;
     C_Type dummy = {0};
     declarator(parser, &tok, start->next, &dummy);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
     ty = type_suffix(parser, rest, tok, ty);
     return declarator(parser, &tok, start->next, ty);
   }
@@ -687,7 +687,7 @@ static C_Type *abstract_declarator(C_parser *parser, Token **rest, Token *tok, C
     Token *start = tok;
     C_Type dummy = {0};
     abstract_declarator(parser, &tok, start->next, &dummy);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
     ty = type_suffix(parser, rest, tok, ty);
     return abstract_declarator(parser, &tok, start->next, ty);
   }
@@ -743,14 +743,14 @@ static C_Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
     return ty;
   }
 
-  tok = skip(tok, "{");
+  tok = skip(parser, tok, "{");
 
   // Read an enum-list.
   int i = 0;
   int val = 0;
   while (!consume_end(rest, tok)) {
     if (i++ > 0)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
 
     char *name = get_ident(parser, tok);
     tok = tok->next;
@@ -770,7 +770,7 @@ static C_Type *enum_specifier(C_parser *parser, Token **rest, Token *tok) {
 
 // typeof-specifier = "(" (expr | typename) ")"
 static C_Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok) {
-  tok = skip(tok, "(");
+  tok = skip(parser, tok, "(");
 
   C_Type *ty;
   if (is_typename(parser, tok)) {
@@ -780,7 +780,7 @@ static C_Type *typeof_specifier(C_parser *parser, Token **rest, Token *tok) {
     add_type(parser, node);
     ty = node->ty;
   }
-  *rest = skip(tok, ")");
+  *rest = skip(parser, tok, ")");
   return ty;
 }
 
@@ -823,7 +823,7 @@ static Node *declaration(C_parser *parser, Token **rest, Token *tok, C_Type *bas
 
   while (!equal(tok, ";")) {
     if (i++ > 0)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
 
     C_Type *ty = declarator(parser, &tok, tok, basety);
     if (ty->kind == TY_VOID)
@@ -886,7 +886,7 @@ static Node *declaration(C_parser *parser, Token **rest, Token *tok, C_Type *bas
 static Token *skip_excess_element(C_parser *parser, Token *tok) {
   if (equal(tok, "{")) {
     tok = skip_excess_element(parser, tok->next);
-    return skip(tok, "}");
+    return skip(parser, tok, "}");
   }
 
   assign(parser, &tok, tok);
@@ -966,13 +966,13 @@ static void array_designator(C_parser *parser, Token **rest, Token *tok, C_Type 
     *end = *begin;
   }
 
-  *rest = skip(tok, "]");
+  *rest = skip(parser, tok, "]");
 }
 
 // struct-designator = "." ident
 static Member *struct_designator(C_parser *parser, Token **rest, Token *tok, C_Type *ty) {
   Token *start = tok;
-  tok = skip(tok, ".");
+  tok = skip(parser, tok, ".");
   if (tok->kind != TK_IDENT)
     error_tok(parser, tok, "expected a field designator");
 
@@ -1046,14 +1046,14 @@ static int count_array_init_elements(C_parser *parser, Token *tok, C_Type *ty) {
 
   while (!consume_end(&tok, tok)) {
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     if (equal(tok, "[")) {
       i = const_expr(parser, &tok, tok->next);
       if (equal(tok, "..."))
         i = const_expr(parser, &tok, tok->next);
-      tok = skip(tok, "]");
+      tok = skip(parser, tok, "]");
       designation(parser, &tok, tok, dummy);
     } else {
       initializer2(parser, &tok, tok, dummy);
@@ -1067,7 +1067,7 @@ static int count_array_init_elements(C_parser *parser, Token *tok, C_Type *ty) {
 
 // array-initializer1 = "{" initializer ("," initializer)* ","? "}"
 static void array_initializer1(C_parser *parser, Token **rest, Token *tok, Initializer *init) {
-  tok = skip(tok, "{");
+  tok = skip(parser, tok, "{");
 
   if (init->is_flexible) {
     int len = count_array_init_elements(parser, tok, init->ty);
@@ -1083,7 +1083,7 @@ static void array_initializer1(C_parser *parser, Token **rest, Token *tok, Initi
 
   for (int i = 0; !consume_end(rest, tok); i++) {
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     if (equal(tok, "[")) {
@@ -1115,7 +1115,7 @@ static void array_initializer2(C_parser *parser, Token **rest, Token *tok, Initi
   for (; i < init->ty->array_len && !is_end(tok); i++) {
     Token *start = tok;
     if (i > 0)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
 
     if (equal(tok, "[") || equal(tok, ".")) {
       *rest = start;
@@ -1129,14 +1129,14 @@ static void array_initializer2(C_parser *parser, Token **rest, Token *tok, Initi
 
 // struct-initializer1 = "{" initializer ("," initializer)* ","? "}"
 static void struct_initializer1(C_parser *parser, Token **rest, Token *tok, Initializer *init) {
-  tok = skip(tok, "{");
+  tok = skip(parser, tok, "{");
 
   Member *mem = init->ty->members;
   bool first = true;
 
   while (!consume_end(rest, tok)) {
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     if (equal(tok, ".")) {
@@ -1163,7 +1163,7 @@ static void struct_initializer2(C_parser *parser, Token **rest, Token *tok, Init
     Token *start = tok;
 
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     if (equal(tok, "[") || equal(tok, ".")) {
@@ -1184,7 +1184,7 @@ static void union_initializer(C_parser *parser, Token **rest, Token *tok, Initia
     Member *mem = struct_designator(parser, &tok, tok->next, init->ty);
     init->mem = mem;
     designation(parser, &tok, tok, init->children[mem->idx]);
-    *rest = skip(tok, "}");
+    *rest = skip(parser, tok, "}");
     return;
   }
 
@@ -1193,7 +1193,7 @@ static void union_initializer(C_parser *parser, Token **rest, Token *tok, Initia
   if (equal(tok, "{")) {
     initializer2(parser, &tok, tok->next, init->children[0]);
     consume(&tok, tok, ",");
-    *rest = skip(tok, "}");
+    *rest = skip(parser, tok, "}");
   } else {
     initializer2(parser, rest, tok, init->children[0]);
   }
@@ -1245,7 +1245,7 @@ static void initializer2(C_parser *parser, Token **rest, Token *tok, Initializer
     // An initializer for a scalar variable can be surrounded by
     // braces. E.g. `int x = {3};`. Handle that case.
     initializer2(parser, &tok, tok->next, init);
-    *rest = skip(tok, "}");
+    *rest = skip(parser, tok, "}");
     return;
   }
 
@@ -1496,11 +1496,11 @@ static Node *asm_stmt(C_parser *parser, Token **rest, Token *tok) {
   while (equal(tok, "volatile") || equal(tok, "inline"))
     tok = tok->next;
 
-  tok = skip(tok, "(");
+  tok = skip(parser, tok, "(");
   if (tok->kind != TK_STR || tok->ty->base->kind != TY_CHAR)
     error_tok(parser, tok, "expected string literal");
   node->asm_str = tok->str;
-  *rest = skip(tok->next, ")");
+  *rest = skip(parser, tok->next, ")");
   return node;
 }
 
@@ -1526,7 +1526,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       return node;
 
     Node *exp = expr(parser, &tok, tok->next);
-    *rest = skip(tok, ";");
+    *rest = skip(parser, tok, ";");
 
     add_type(parser, exp);
     C_Type *ty = parser->current_fn->ty->return_ty;
@@ -1539,9 +1539,9 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "if")) {
     Node *node = new_node(parser, ND_IF, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
     node->then = stmt(parser, &tok, tok);
     if (equal(tok, "else"))
       node->els = stmt(parser, &tok, tok->next);
@@ -1551,9 +1551,9 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "switch")) {
     Node *node = new_node(parser, ND_SWITCH, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
 
     Node *sw = parser->current_switch;
     parser->current_switch = node;
@@ -1585,7 +1585,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       end = begin;
     }
 
-    tok = skip(tok, ":");
+    tok = skip(parser, tok, ":");
     node->label = new_unique_name();
     node->lhs = stmt(parser, rest, tok);
     node->begin = begin;
@@ -1600,7 +1600,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       error_tok(parser, tok, "stray default");
 
     Node *node = new_node(parser, ND_CASE, tok);
-    tok = skip(tok->next, ":");
+    tok = skip(parser, tok->next, ":");
     node->label = new_unique_name();
     node->lhs = stmt(parser, rest, tok);
     parser->current_switch->default_case = node;
@@ -1609,7 +1609,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "for")) {
     Node *node = new_node(parser, ND_FOR, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
 
     enter_scope(parser);
 
@@ -1627,11 +1627,11 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
 
     if (!equal(tok, ";"))
       node->cond = expr(parser, &tok, tok);
-    tok = skip(tok, ";");
+    tok = skip(parser, tok, ";");
 
     if (!equal(tok, ")"))
       node->inc = expr(parser, &tok, tok);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
 
     node->then = stmt(parser, rest, tok);
 
@@ -1643,9 +1643,9 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "while")) {
     Node *node = new_node(parser, ND_FOR, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     node->cond = expr(parser, &tok, tok);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
 
     char *brk = parser->brk_label;
     char *cont = parser->cont_label;
@@ -1672,11 +1672,11 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
     parser->brk_label = brk;
     parser->cont_label = cont;
 
-    tok = skip(tok, "while");
-    tok = skip(tok, "(");
+    tok = skip(parser, tok, "while");
+    tok = skip(parser, tok, "(");
     node->cond = expr(parser, &tok, tok);
-    tok = skip(tok, ")");
-    *rest = skip(tok, ";");
+    tok = skip(parser, tok, ")");
+    *rest = skip(parser, tok, ";");
     return node;
   }
 
@@ -1688,7 +1688,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       // [GNU] `goto *ptr` jumps to the address specified by `ptr`.
       Node *node = new_node(parser, ND_GOTO_EXPR, tok);
       node->lhs = expr(parser, &tok, tok->next->next);
-      *rest = skip(tok, ";");
+      *rest = skip(parser, tok, ";");
       return node;
     }
 
@@ -1696,7 +1696,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
     node->label = get_ident(parser, tok->next);
     node->goto_next = parser->gotos;
     parser->gotos = node;
-    *rest = skip(tok->next->next, ";");
+    *rest = skip(parser, tok->next->next, ";");
     return node;
   }
 
@@ -1705,7 +1705,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       error_tok(parser, tok, "stray break");
     Node *node = new_node(parser, ND_GOTO, tok);
     node->unique_label = parser->brk_label;
-    *rest = skip(tok->next, ";");
+    *rest = skip(parser, tok->next, ";");
     return node;
   }
 
@@ -1714,7 +1714,7 @@ static Node *stmt(C_parser *parser, Token **rest, Token *tok) {
       error_tok(parser, tok, "stray continue");
     Node *node = new_node(parser, ND_GOTO, tok);
     node->unique_label = parser->cont_label;
-    *rest = skip(tok->next, ";");
+    *rest = skip(parser, tok->next, ";");
     return node;
   }
 
@@ -1785,7 +1785,7 @@ static Node *expr_stmt(C_parser *parser, Token **rest, Token *tok) {
 
   Node *node = new_node(parser, ND_EXPR_STMT, tok);
   node->lhs = expr(parser, &tok, tok);
-  *rest = skip(tok, ";");
+  *rest = skip(parser, tok, ";");
   return node;
 }
 
@@ -2181,7 +2181,7 @@ static Node *conditional(C_parser *parser, Token **rest, Token *tok) {
   Node *node = new_node(parser, ND_COND, tok);
   node->cond = cond;
   node->then = expr(parser, &tok, tok->next);
-  tok = skip(tok, ":");
+  tok = skip(parser, tok, ":");
   node->els = conditional(parser, rest, tok);
   return node;
 }
@@ -2442,7 +2442,7 @@ static Node *cast(C_parser *parser, Token **rest, Token *tok) {
   if (equal(tok, "(") && is_typename(parser, tok->next)) {
     Token *start = tok;
     C_Type *ty = typename(parser, &tok, tok->next);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
 
     // compound literal
     if (equal(tok, "{"))
@@ -2540,7 +2540,7 @@ static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *t
     // Regular struct members
     while (!consume(&tok, tok, ";")) {
       if (!first)
-        tok = skip(tok, ",");
+        tok = skip(parser, tok, ",");
       first = false;
 
       Member *mem = calloc(1, sizeof(Member));
@@ -2573,14 +2573,14 @@ static void struct_members(C_parser *parser, Token **rest, Token *tok, C_Type *t
 // attribute = ("__attribute__" "(" "(" "packed" ")" ")")*
 static Token *attribute_list(C_parser *parser, Token *tok, C_Type *ty) {
   while (consume(&tok, tok, "__attribute__")) {
-    tok = skip(tok, "(");
-    tok = skip(tok, "(");
+    tok = skip(parser, tok, "(");
+    tok = skip(parser, tok, "(");
 
     bool first = true;
 
     while (!consume(&tok, tok, ")")) {
       if (!first)
-        tok = skip(tok, ",");
+        tok = skip(parser, tok, ",");
       first = false;
 
       if (consume(&tok, tok, "packed")) {
@@ -2589,16 +2589,16 @@ static Token *attribute_list(C_parser *parser, Token *tok, C_Type *ty) {
       }
 
       if (consume(&tok, tok, "aligned")) {
-        tok = skip(tok, "(");
+        tok = skip(parser, tok, "(");
         ty->align = const_expr(parser, &tok, tok);
-        tok = skip(tok, ")");
+        tok = skip(parser, tok, ")");
         continue;
       }
 
       error_tok(parser, tok, "unknown attribute");
     }
 
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
   }
 
   return tok;
@@ -2628,7 +2628,7 @@ static C_Type *struct_union_decl(C_parser *parser, Token **rest, Token *tok) {
     return ty;
   }
 
-  tok = skip(tok, "{");
+  tok = skip(parser, tok, "{");
 
   // Construct a struct object.
   struct_members(parser, &tok, tok, ty);
@@ -2784,7 +2784,7 @@ static Node *postfix(C_parser *parser, Token **rest, Token *tok) {
     // Compound literal
     Token *start = tok;
     C_Type *ty = typename(parser, &tok, tok->next);
-    tok = skip(tok, ")");
+    tok = skip(parser, tok, ")");
 
     if (parser->scope->next == NULL) {
       Obj *var = new_anon_gvar(parser, ty);
@@ -2810,7 +2810,7 @@ static Node *postfix(C_parser *parser, Token **rest, Token *tok) {
       // x[y] is short for *(x+y)
       Token *start = tok;
       Node *idx = expr(parser, &tok, tok->next);
-      tok = skip(tok, "]");
+      tok = skip(parser, tok, "]");
       node = new_unary(parser, ND_DEREF, new_add(parser, node, idx, start), start);
       continue;
     }
@@ -2862,7 +2862,7 @@ static Node *funcall(C_parser *parser, Token **rest, Token *tok, Node *fn) {
 
   while (!equal(tok, ")")) {
     if (cur != &head)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
 
     Node *arg = assign(parser, &tok, tok);
     add_type(parser, arg);
@@ -2886,7 +2886,7 @@ static Node *funcall(C_parser *parser, Token **rest, Token *tok, Node *fn) {
   if (param_ty)
     error_tok(parser, tok, "too few arguments");
 
-  *rest = skip(tok, ")");
+  *rest = skip(parser, tok, ")");
 
   Node *node = new_unary(parser, ND_FUNCALL, fn, tok);
   node->func_ty = ty;
@@ -2906,7 +2906,7 @@ static Node *funcall(C_parser *parser, Token **rest, Token *tok, Node *fn) {
 //               | "default" ":" assign
 static Node *generic_selection(C_parser *parser, Token **rest, Token *tok) {
   Token *start = tok;
-  tok = skip(tok, "(");
+  tok = skip(parser, tok, "(");
 
   Node *ctrl = assign(parser, &tok, tok);
   add_type(parser, ctrl);
@@ -2920,10 +2920,10 @@ static Node *generic_selection(C_parser *parser, Token **rest, Token *tok) {
   Node *ret = NULL;
 
   while (!consume(rest, tok, ")")) {
-    tok = skip(tok, ",");
+    tok = skip(parser, tok, ",");
 
     if (equal(tok, "default")) {
-      tok = skip(tok->next, ":");
+      tok = skip(parser, tok->next, ":");
       Node *node = assign(parser, &tok, tok);
       if (!ret)
         ret = node;
@@ -2931,7 +2931,7 @@ static Node *generic_selection(C_parser *parser, Token **rest, Token *tok) {
     }
 
     C_Type *t2 = typename(parser, &tok, tok);
-    tok = skip(tok, ":");
+    tok = skip(parser, tok, ":");
     Node *node = assign(parser, &tok, tok);
     if (is_compatible(t1, t2))
       ret = node;
@@ -2962,19 +2962,19 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
     // This is a GNU statement expresssion.
     Node *node = new_node(parser, ND_STMT_EXPR, tok);
     node->body = compound_stmt(parser, &tok, tok->next->next)->body;
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return node;
   }
 
   if (equal(tok, "(")) {
     Node *node = expr(parser, &tok, tok->next);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return node;
   }
 
   if (equal(tok, "sizeof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
 	  C_Type *ty = typename(parser, &tok, tok->next->next);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
 
     if (ty->kind == TY_VLA) {
       if (ty->vla_size)
@@ -2998,7 +2998,7 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "_Alignof") && equal(tok->next, "(") && is_typename(parser, tok->next->next)) {
 	  C_Type *ty = typename(parser, &tok, tok->next->next);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return new_ulong(parser, ty->align, tok);
   }
 
@@ -3012,18 +3012,18 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
     return generic_selection(parser, rest, tok->next);
 
   if (equal(tok, "__builtin_types_compatible_p")) {
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     C_Type *t1 = typename(parser, &tok, tok);
-    tok = skip(tok, ",");
+    tok = skip(parser, tok, ",");
     C_Type *t2 = typename(parser, &tok, tok);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return new_num(parser, is_compatible(t1, t2), start);
   }
 
   if (equal(tok, "__builtin_reg_class")) {
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     C_Type *ty = typename(parser, &tok, tok);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
 
     if (is_integer(ty) || ty->kind == TY_PTR)
       return new_num(parser, 0, start);
@@ -3034,23 +3034,23 @@ static Node *primary(C_parser *parser, Token **rest, Token *tok) {
 
   if (equal(tok, "__builtin_compare_and_swap")) {
     Node *node = new_node(parser, ND_CAS, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     node->cas_addr = assign(parser, &tok, tok);
-    tok = skip(tok, ",");
+    tok = skip(parser, tok, ",");
     node->cas_old = assign(parser, &tok, tok);
-    tok = skip(tok, ",");
+    tok = skip(parser, tok, ",");
     node->cas_new = assign(parser, &tok, tok);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return node;
   }
 
   if (equal(tok, "__builtin_atomic_exchange")) {
     Node *node = new_node(parser, ND_EXCH, tok);
-    tok = skip(tok->next, "(");
+    tok = skip(parser, tok->next, "(");
     node->lhs = assign(parser, &tok, tok);
-    tok = skip(tok, ",");
+    tok = skip(parser, tok, ",");
     node->rhs = assign(parser, &tok, tok);
-    *rest = skip(tok, ")");
+    *rest = skip(parser, tok, ")");
     return node;
   }
 
@@ -3107,7 +3107,7 @@ static Token *parse_typedef(C_parser *parser, Token *tok, C_Type *basety) {
 
   while (!consume(&tok, tok, ";")) {
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     C_Type *ty = declarator(parser, &tok, tok, basety);
@@ -3217,7 +3217,7 @@ static Token *function(C_parser *parser, Token *tok, C_Type *basety, VarAttr *at
     fn->va_area = new_lvar(parser, "__va_area__", array_of(parser, ty_char, 136));
   fn->alloca_bottom = new_lvar(parser, "__alloca_size__", pointer_to(parser, ty_char));
 
-  tok = skip(tok, "{");
+  tok = skip(parser, tok, "{");
 
   // [https://www.sigbus.info/n1570#6.4.2.2p1] "__func__" is
   // automatically defined as a local variable containing the
@@ -3241,7 +3241,7 @@ static Token *global_variable(C_parser *parser, Token *tok, C_Type *basety, VarA
 
   while (!consume(&tok, tok, ";")) {
     if (!first)
-      tok = skip(tok, ",");
+      tok = skip(parser, tok, ",");
     first = false;
 
     C_Type *ty = declarator(parser, &tok, tok, basety);

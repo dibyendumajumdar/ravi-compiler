@@ -69,9 +69,9 @@ bool equal(Token *tok, char *op) {
 }
 
 // Ensure that the current token is `op`.
-Token *skip(Token *tok, char *op) {
+Token *skip(C_parser *parser, Token *tok, char *op) {
   if (!equal(tok, op))
-    error_tok(tok, "expected '%s'", op);
+    error_tok(parser, tok, "expected '%s'", op);
   return tok->next;
 }
 
