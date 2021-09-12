@@ -118,7 +118,7 @@ struct C_Token {
   C_Token *origin;    // If this is expanded from a macro, the original token
 };
 
-noreturn void error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
+noreturn void C_error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
 noreturn void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 noreturn void error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 void warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));

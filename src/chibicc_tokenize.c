@@ -28,7 +28,7 @@ SOFTWARE.
 #include "chibicc.h"
 
 // Reports an error and exit.
-void error(char *fmt, ...) {
+void C_error(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);

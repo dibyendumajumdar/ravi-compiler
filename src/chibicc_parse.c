@@ -505,7 +505,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     else if (equal(tok, "unsigned"))
       counter |= UNSIGNED;
     else
-      unreachable();
+	    unreachable();
 
     switch (counter) {
     case VOID:
@@ -947,7 +947,7 @@ static void string_initializer(C_parser *parser, C_Token **rest, C_Token *tok, I
     break;
   }
   default:
-    unreachable();
+	  unreachable();
   }
 
   *rest = tok->next;
@@ -1412,7 +1412,7 @@ static void write_buf(char *buf, uint64_t val, int sz) {
   else if (sz == 8)
     *(uint64_t *)buf = val;
   else
-    unreachable();
+	  unreachable();
 }
 
 static C_Relocation *
