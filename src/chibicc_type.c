@@ -26,22 +26,22 @@ SOFTWARE.
 
 #include "chibicc.h"
 
-C_Type *ty_void = &(C_Type){TY_VOID, 1, 1};
-C_Type *ty_bool = &(C_Type){TY_BOOL, 1, 1};
+C_Type *C_ty_void = &(C_Type){TY_VOID, 1, 1};
+C_Type *C_ty_bool = &(C_Type){TY_BOOL, 1, 1};
 
-C_Type *ty_char = &(C_Type){TY_CHAR, 1, 1};
-C_Type *ty_short = &(C_Type){TY_SHORT, 2, 2};
-C_Type *ty_int = &(C_Type){TY_INT, 4, 4};
-C_Type *ty_long = &(C_Type){TY_LONG, 8, 8};
+C_Type *C_ty_char = &(C_Type){TY_CHAR, 1, 1};
+C_Type *C_ty_short = &(C_Type){TY_SHORT, 2, 2};
+C_Type *C_ty_int = &(C_Type){TY_INT, 4, 4};
+C_Type *C_ty_long = &(C_Type){TY_LONG, 8, 8};
 
-C_Type *ty_uchar = &(C_Type){TY_CHAR, 1, 1, true};
-C_Type *ty_ushort = &(C_Type){TY_SHORT, 2, 2, true};
-C_Type *ty_uint = &(C_Type){TY_INT, 4, 4, true};
-C_Type *ty_ulong = &(C_Type){TY_LONG, 8, 8, true};
+C_Type *C_ty_uchar = &(C_Type){TY_CHAR, 1, 1, true};
+C_Type *C_ty_ushort = &(C_Type){TY_SHORT, 2, 2, true};
+C_Type *C_ty_uint = &(C_Type){TY_INT, 4, 4, true};
+C_Type *C_ty_ulong = &(C_Type){TY_LONG, 8, 8, true};
 
-C_Type *ty_float = &(C_Type){TY_FLOAT, 4, 4};
-C_Type *ty_double = &(C_Type){TY_DOUBLE, 8, 8};
-C_Type *ty_ldouble = &(C_Type){TY_LDOUBLE, 16, 16};
+C_Type *C_ty_float = &(C_Type){TY_FLOAT, 4, 4};
+C_Type *C_ty_double = &(C_Type){TY_DOUBLE, 8, 8};
+C_Type *C_ty_ldouble = &(C_Type){TY_LDOUBLE, 16, 16};
 
 static C_Type *new_type(C_parser *parser, TypeKind kind, int size, int align) {
 	C_Type *ty = calloc(1, sizeof(C_Type));
@@ -167,16 +167,16 @@ static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
     return pointer_to(parser, ty2);
 
   if (ty1->kind == TY_LDOUBLE || ty2->kind == TY_LDOUBLE)
-    return ty_ldouble;
+    return C_ty_ldouble;
   if (ty1->kind == TY_DOUBLE || ty2->kind == TY_DOUBLE)
-    return ty_double;
+    return C_ty_double;
   if (ty1->kind == TY_FLOAT || ty2->kind == TY_FLOAT)
-    return ty_float;
+    return C_ty_float;
 
   if (ty1->size < 4)
-    ty1 = ty_int;
+    ty1 = C_ty_int;
   if (ty2->size < 4)
-    ty2 = ty_int;
+    ty2 = C_ty_int;
 
   if (ty1->size != ty2->size)
     return (ty1->size < ty2->size) ? ty2 : ty1;
@@ -218,7 +218,7 @@ void add_type(C_parser *parser, C_Node *node) {
 
   switch (node->kind) {
   case ND_NUM:
-    node->ty = ty_int;
+    node->ty = C_ty_int;
     return;
   case ND_ADD:
   case ND_SUB:
@@ -232,7 +232,7 @@ void add_type(C_parser *parser, C_Node *node) {
     node->ty = node->lhs->ty;
     return;
   case ND_NEG: {
-	  C_Type *ty = get_common_type(parser, ty_int, node->lhs->ty);
+	  C_Type *ty = get_common_type(parser, C_ty_int, node->lhs->ty);
     node->lhs = C_new_cast(parser, node->lhs, ty);
     node->ty = ty;
     return;
@@ -249,7 +249,7 @@ void add_type(C_parser *parser, C_Node *node) {
   case ND_LT:
   case ND_LE:
     usual_arith_conv(parser, &node->lhs, &node->rhs);
-    node->ty = ty_int;
+    node->ty = C_ty_int;
     return;
   case ND_FUNCALL:
     node->ty = node->func_ty->return_ty;
@@ -257,7 +257,7 @@ void add_type(C_parser *parser, C_Node *node) {
   case ND_NOT:
   case ND_LOGOR:
   case ND_LOGAND:
-    node->ty = ty_int;
+    node->ty = C_ty_int;
     return;
   case ND_BITNOT:
   case ND_SHL:
@@ -270,7 +270,7 @@ void add_type(C_parser *parser, C_Node *node) {
     return;
   case ND_COND:
     if (node->then->ty->kind == TY_VOID || node->els->ty->kind == TY_VOID) {
-      node->ty = ty_void;
+      node->ty = C_ty_void;
     } else {
       usual_arith_conv(parser, &node->then, &node->els);
       node->ty = node->then->ty;
@@ -311,13 +311,13 @@ void add_type(C_parser *parser, C_Node *node) {
     C_error_tok(parser, node->tok, "statement expression returning void is not supported");
     return;
   case ND_LABEL_VAL:
-    node->ty = pointer_to(parser, ty_void);
+    node->ty = pointer_to(parser, C_ty_void);
     return;
   case ND_CAS:
     add_type(parser, node->cas_addr);
     add_type(parser, node->cas_old);
     add_type(parser, node->cas_new);
-    node->ty = ty_bool;
+    node->ty = C_ty_bool;
 
     if (node->cas_addr->ty->kind != TY_PTR)
 	    C_error_tok(parser, node->cas_addr->tok, "pointer expected");

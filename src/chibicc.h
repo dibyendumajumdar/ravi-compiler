@@ -462,22 +462,22 @@ struct C_Member {
   int bit_width;
 };
 
-extern C_Type *ty_void;
-extern C_Type *ty_bool;
+extern C_Type *C_ty_void;
+extern C_Type *C_ty_bool;
 
-extern C_Type *ty_char;
-extern C_Type *ty_short;
-extern C_Type *ty_int;
-extern C_Type *ty_long;
+extern C_Type *C_ty_char;
+extern C_Type *C_ty_short;
+extern C_Type *C_ty_int;
+extern C_Type *C_ty_long;
 
-extern C_Type *ty_uchar;
-extern C_Type *ty_ushort;
-extern C_Type *ty_uint;
-extern C_Type *ty_ulong;
+extern C_Type *C_ty_uchar;
+extern C_Type *C_ty_ushort;
+extern C_Type *C_ty_uint;
+extern C_Type *C_ty_ulong;
 
-extern C_Type *ty_float;
-extern C_Type *ty_double;
-extern C_Type *ty_ldouble;
+extern C_Type *C_ty_float;
+extern C_Type *C_ty_double;
+extern C_Type *C_ty_ldouble;
 
 bool is_integer(C_Type *ty);
 bool is_flonum(C_Type *ty);

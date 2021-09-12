@@ -270,7 +270,7 @@ static C_Token *read_string_literal(C_parser *tokenizer, char *start, char *quot
   }
 
   C_Token *tok = new_token(tokenizer, TK_STR, start, end + 1);
-  tok->ty = array_of(tokenizer, ty_char, len + 1);
+  tok->ty = array_of(tokenizer, C_ty_char, len + 1);
   tok->str = buf;
   return tok;
 }
@@ -306,7 +306,7 @@ static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char
   }
 
   C_Token *tok = new_token(tokenizer, TK_STR, start, end + 1);
-  tok->ty = array_of(tokenizer, ty_ushort, len + 1);
+  tok->ty = array_of(tokenizer, C_ty_ushort, len + 1);
   tok->str = (char *)buf;
   return tok;
 }
@@ -402,28 +402,28 @@ static bool convert_pp_int(C_Token *tok) {
   C_Type *ty;
   if (base == 10) {
     if (l && u)
-      ty = ty_ulong;
+      ty = C_ty_ulong;
     else if (l)
-      ty = ty_long;
+      ty = C_ty_long;
     else if (u)
-      ty = (val >> 32) ? ty_ulong : ty_uint;
+      ty = (val >> 32) ? C_ty_ulong : C_ty_uint;
     else
-      ty = (val >> 31) ? ty_long : ty_int;
+      ty = (val >> 31) ? C_ty_long : C_ty_int;
   } else {
     if (l && u)
-      ty = ty_ulong;
+      ty = C_ty_ulong;
     else if (l)
-      ty = (val >> 63) ? ty_ulong : ty_long;
+      ty = (val >> 63) ? C_ty_ulong : C_ty_long;
     else if (u)
-      ty = (val >> 32) ? ty_ulong : ty_uint;
+      ty = (val >> 32) ? C_ty_ulong : C_ty_uint;
     else if (val >> 63)
-      ty = ty_ulong;
+      ty = C_ty_ulong;
     else if (val >> 32)
-      ty = ty_long;
+      ty = C_ty_long;
     else if (val >> 31)
-      ty = ty_uint;
+      ty = C_ty_uint;
     else
-      ty = ty_int;
+      ty = C_ty_int;
   }
 
   tok->kind = TK_NUM;
@@ -450,13 +450,13 @@ static void convert_pp_number(C_parser *tokenizer, C_Token *tok) {
 
   C_Type *ty;
   if (*end == 'f' || *end == 'F') {
-    ty = ty_float;
+    ty = C_ty_float;
     end++;
   } else if (*end == 'l' || *end == 'L') {
-    ty = ty_ldouble;
+    ty = C_ty_ldouble;
     end++;
   } else {
-    ty = ty_double;
+    ty = C_ty_double;
   }
 
   if (tok->loc + tok->len != end)
@@ -585,21 +585,21 @@ C_Token *C_tokenize(C_parser *tokenizer, C_File *file) {
 
     // Wide string literal
     if (startswith(p, "L\"")) {
-      cur = cur->next = read_utf32_string_literal(tokenizer, p, p + 1, ty_int);
+      cur = cur->next = read_utf32_string_literal(tokenizer, p, p + 1, C_ty_int);
       p += cur->len;
       continue;
     }
 
     // UTF-32 string literal
     if (startswith(p, "U\"")) {
-      cur = cur->next = read_utf32_string_literal(tokenizer, p, p + 1, ty_uint);
+      cur = cur->next = read_utf32_string_literal(tokenizer, p, p + 1, C_ty_uint);
       p += cur->len;
       continue;
     }
 
     // Character literal
     if (*p == '\'') {
-      cur = cur->next = read_char_literal(tokenizer, p, p, ty_int);
+      cur = cur->next = read_char_literal(tokenizer, p, p, C_ty_int);
       cur->val = (char)cur->val;
       p += cur->len;
       continue;
@@ -607,7 +607,7 @@ C_Token *C_tokenize(C_parser *tokenizer, C_File *file) {
 
     // UTF-16 character literal
     if (startswith(p, "u'")) {
-      cur = cur->next = read_char_literal(tokenizer, p, p + 1, ty_ushort);
+      cur = cur->next = read_char_literal(tokenizer, p, p + 1, C_ty_ushort);
       cur->val &= 0xffff;
       p += cur->len;
       continue;
@@ -615,14 +615,14 @@ C_Token *C_tokenize(C_parser *tokenizer, C_File *file) {
 
     // Wide character literal
     if (startswith(p, "L'")) {
-      cur = cur->next = read_char_literal(tokenizer, p, p + 1, ty_int);
+      cur = cur->next = read_char_literal(tokenizer, p, p + 1, C_ty_int);
       p += cur->len;
       continue;
     }
 
     // UTF-32 character literal
     if (startswith(p, "U'")) {
-      cur = cur->next = read_char_literal(tokenizer, p, p + 1, ty_uint);
+      cur = cur->next = read_char_literal(tokenizer, p, p + 1, C_ty_uint);
       p += cur->len;
       continue;
     }

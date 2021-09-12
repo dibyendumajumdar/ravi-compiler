@@ -217,14 +217,14 @@ static C_Node *new_num(C_parser *parser, int64_t val, C_Token *tok) {
 static C_Node *new_long(C_parser *parser, int64_t val, C_Token *tok) {
 	C_Node *node = new_node(parser, ND_NUM, tok);
   node->val = val;
-  node->ty = ty_long;
+  node->ty = C_ty_long;
   return node;
 }
 
 static C_Node *new_ulong(C_parser *parser, long val, C_Token *tok) {
 	C_Node *node = new_node(parser, ND_NUM, tok);
   node->val = val;
-  node->ty = ty_ulong;
+  node->ty = C_ty_ulong;
   return node;
 }
 
@@ -399,7 +399,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     UNSIGNED = 1 << 18,
   };
 
-  C_Type *ty = ty_int;
+  C_Type *ty = C_ty_int;
   int counter = 0;
   bool is_atomic = false;
 
@@ -508,36 +508,36 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
     switch (counter) {
     case VOID:
-      ty = ty_void;
+      ty = C_ty_void;
       break;
     case BOOL:
-      ty = ty_bool;
+      ty = C_ty_bool;
       break;
     case CHAR:
     case SIGNED + CHAR:
-      ty = ty_char;
+      ty = C_ty_char;
       break;
     case UNSIGNED + CHAR:
-      ty = ty_uchar;
+      ty = C_ty_uchar;
       break;
     case SHORT:
     case SHORT + INT:
     case SIGNED + SHORT:
     case SIGNED + SHORT + INT:
-      ty = ty_short;
+      ty = C_ty_short;
       break;
     case UNSIGNED + SHORT:
     case UNSIGNED + SHORT + INT:
-      ty = ty_ushort;
+      ty = C_ty_ushort;
       break;
     case INT:
     case SIGNED:
     case SIGNED + INT:
-      ty = ty_int;
+      ty = C_ty_int;
       break;
     case UNSIGNED:
     case UNSIGNED + INT:
-      ty = ty_uint;
+      ty = C_ty_uint;
       break;
     case LONG:
     case LONG + INT:
@@ -547,22 +547,22 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     case SIGNED + LONG + INT:
     case SIGNED + LONG + LONG:
     case SIGNED + LONG + LONG + INT:
-      ty = ty_long;
+      ty = C_ty_long;
       break;
     case UNSIGNED + LONG:
     case UNSIGNED + LONG + INT:
     case UNSIGNED + LONG + LONG:
     case UNSIGNED + LONG + LONG + INT:
-      ty = ty_ulong;
+      ty = C_ty_ulong;
       break;
     case FLOAT:
-      ty = ty_float;
+      ty = C_ty_float;
       break;
     case DOUBLE:
-      ty = ty_double;
+      ty = C_ty_double;
       break;
     case LONG + DOUBLE:
-      ty = ty_ldouble;
+      ty = C_ty_ldouble;
       break;
     default:
 	    C_error_tok(parser, tok, "invalid type");
@@ -825,7 +825,7 @@ static C_Node *compute_vla_size(C_parser *parser, C_Type *ty, C_Token *tok) {
   else
     base_sz = new_num(parser, ty->base->size, tok);
 
-  ty->vla_size = new_lvar(parser, "", ty_ulong);
+  ty->vla_size = new_lvar(parser, "", C_ty_ulong);
   C_Node *expr = new_binary(parser, ND_ASSIGN, new_var_node(parser, ty->vla_size, tok),
                           new_binary(parser, ND_MUL, ty->vla_len, base_sz, tok),
                           tok);
@@ -2407,7 +2407,7 @@ static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
   // ptr - ptr, which returns how many elements are between the two.
   if (lhs->ty->base && rhs->ty->base) {
 	  C_Node *node = new_binary(parser, ND_SUB, lhs, rhs, tok);
-    node->ty = ty_long;
+    node->ty = C_ty_long;
     return new_binary(parser, ND_DIV, node, new_num(parser, lhs->ty->base->size, tok), tok);
   }
 
@@ -2903,7 +2903,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
     } else if (arg->ty->kind == TY_FLOAT) {
       // If parameter type is omitted (e.g. in "..."), float
       // arguments are promoted to double.
-      arg = C_new_cast(parser, arg, ty_double);
+      arg = C_new_cast(parser, arg, C_ty_double);
     }
 
     cur = cur->next = arg;
@@ -3241,8 +3241,8 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
   fn->params = parser->locals;
 
   if (ty->is_variadic)
-    fn->va_area = new_lvar(parser, "__va_area__", array_of(parser, ty_char, 136));
-  fn->alloca_bottom = new_lvar(parser, "__alloca_size__", pointer_to(parser, ty_char));
+    fn->va_area = new_lvar(parser, "__va_area__", array_of(parser, C_ty_char, 136));
+  fn->alloca_bottom = new_lvar(parser, "__alloca_size__", pointer_to(parser, C_ty_char));
 
   tok = C_skip(parser, tok, "{");
 
@@ -3250,11 +3250,11 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
   // automatically defined as a local variable containing the
   // current function name.
   push_scope(parser, "__func__")->var =
-    new_string_literal(parser, fn->name, array_of(parser, ty_char, strlen(fn->name) + 1));
+    new_string_literal(parser, fn->name, array_of(parser, C_ty_char, strlen(fn->name) + 1));
 
   // [GNU] __FUNCTION__ is yet another name of __func__.
   push_scope(parser, "__FUNCTION__")->var =
-    new_string_literal(parser, fn->name, array_of(parser, ty_char, strlen(fn->name) + 1));
+    new_string_literal(parser, fn->name, array_of(parser, C_ty_char, strlen(fn->name) + 1));
 
   fn->body = compound_stmt(parser, &tok, tok);
   fn->locals = parser->locals;
@@ -3329,15 +3329,15 @@ static void scan_globals(C_parser *parser) {
 }
 
 static void declare_builtin_functions(C_parser *parser) {
-	C_Type *ty = func_type(parser, pointer_to(parser, ty_void));
-  ty->params = copy_type(parser, ty_int);
+	C_Type *ty = func_type(parser, pointer_to(parser, C_ty_void));
+  ty->params = copy_type(parser, C_ty_int);
   parser->builtin_alloca = new_gvar(parser, "alloca", ty);
   parser->builtin_alloca->is_definition = false;
 }
 
 #ifdef RAVI_EXTENSIONS
 C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
-	C_Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
+	C_Obj *fn = new_gvar(parser, name_str, func_type(parser, C_ty_void));
 	fn->is_function = true;
 	fn->is_definition = true;
 	fn->is_static = true;
