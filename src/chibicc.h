@@ -119,7 +119,7 @@ struct C_Token {
 };
 
 noreturn void C_error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
-noreturn void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+noreturn void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 noreturn void error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 void warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 bool equal(C_Token *tok, char *op);
@@ -134,7 +134,7 @@ C_Token *tokenize_file(C_parser *tokenizer, char *filename);
 C_Token *tokenize_buffer(C_parser *tokenizer, char *p);
 
 #define unreachable() \
-  error("internal error at %s:%d", __FILE__, __LINE__)
+  C_error("internal error at %s:%d", __FILE__, __LINE__)
 
 //
 // parse.c

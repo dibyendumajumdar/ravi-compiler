@@ -64,7 +64,7 @@ static void verror_at(C_parser *tokenizer, char *filename, char *input, int line
   fprintf(stderr, "\n");
 }
 
-void error_at(C_parser *tokenizer, char *loc, char *fmt, ...) {
+void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) {
   int line_no = 1;
   for (char *p = tokenizer->current_file->contents; p < loc; p++)
     if (*p == '\n')
@@ -209,7 +209,7 @@ static int read_escaped_char(C_parser *tokenizer, char **new_pos, char *p) {
     // Read a hexadecimal number.
     p++;
     if (!isxdigit(*p))
-      error_at(tokenizer, p, "invalid hex escape sequence");
+	    C_error_at(tokenizer, p, "invalid hex escape sequence");
 
     int c = 0;
     for (; isxdigit(*p); p++)
@@ -250,7 +250,7 @@ static char *string_literal_end(C_parser *tokenizer, char *p) {
   char *start = p;
   for (; *p != '"'; p++) {
     if (*p == '\n' || *p == '\0')
-      error_at(tokenizer, start, "unclosed string literal");
+	    C_error_at(tokenizer, start, "unclosed string literal");
     if (*p == '\\')
       p++;
   }
@@ -336,7 +336,7 @@ static C_Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char
 static C_Token *read_char_literal(C_parser *tokenizer, char *start, char *quote, C_Type *ty) {
   char *p = quote + 1;
   if (*p == '\0')
-    error_at(tokenizer, start, "unclosed char literal");
+	  C_error_at(tokenizer, start, "unclosed char literal");
 
   int c;
   if (*p == '\\')
@@ -346,7 +346,7 @@ static C_Token *read_char_literal(C_parser *tokenizer, char *start, char *quote,
 
   char *end = strchr(p, '\'');
   if (!end)
-    error_at(tokenizer, p, "unclosed char literal");
+	  C_error_at(tokenizer, p, "unclosed char literal");
 
   C_Token *tok = new_token(tokenizer, TK_NUM, start, end + 1);
   tok->val = c;
@@ -526,7 +526,7 @@ C_Token *tokenize(C_parser *tokenizer, C_File *file) {
     if (startswith(p, "/*")) {
       char *q = strstr(p + 2, "*/");
       if (!q)
-        error_at(tokenizer, p, "unclosed block comment");
+	      C_error_at(tokenizer, p, "unclosed block comment");
       p = q + 2;
       tokenizer->has_space = true;
       continue;
@@ -643,7 +643,7 @@ C_Token *tokenize(C_parser *tokenizer, C_File *file) {
       continue;
     }
 
-    error_at(tokenizer, p, "invalid token");
+    C_error_at(tokenizer, p, "invalid token");
   }
 
   cur = cur->next = new_token(tokenizer, TK_EOF, p, p);

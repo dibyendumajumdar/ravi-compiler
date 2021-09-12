@@ -81,12 +81,12 @@ uint32_t decode_utf8(C_parser *tokenizer, char **new_pos, char *p) {
     len = 2;
     c = *p & 0b11111;
   } else {
-    error_at(tokenizer, start, "invalid UTF-8 sequence");
+	  C_error_at(tokenizer, start, "invalid UTF-8 sequence");
   }
 
   for (int i = 1; i < len; i++) {
     if ((unsigned char)p[i] >> 6 != 0b10)
-      error_at(tokenizer, start, "invalid UTF-8 sequence");
+	    C_error_at(tokenizer, start, "invalid UTF-8 sequence");
     c = (c << 6) | (p[i] & 0b111111);
   }
 
