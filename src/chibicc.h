@@ -37,7 +37,7 @@
 typedef struct C_Type C_Type;
 typedef struct C_Node C_Node;
 typedef struct C_Member C_Member;
-typedef struct Relocation Relocation;
+typedef struct C_Relocation C_Relocation;
 typedef struct Hideset Hideset;
 typedef struct C_parser C_parser;
 
@@ -155,7 +155,7 @@ struct Obj {
   bool is_tentative;
   bool is_tls;
   char *init_data;
-  Relocation *rel;
+  C_Relocation *rel;
 
   // Function
   bool is_inline;
@@ -175,9 +175,9 @@ struct Obj {
 // Global variable can be initialized either by a constant expression
 // or a pointer to another global variable. This struct represents the
 // latter.
-typedef struct Relocation Relocation;
-struct Relocation {
-  Relocation *next;
+typedef struct C_Relocation C_Relocation;
+struct C_Relocation {
+	C_Relocation *next;
   int offset;
   char **label;
   long addend;

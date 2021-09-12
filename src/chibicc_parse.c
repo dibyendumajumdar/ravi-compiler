@@ -1388,8 +1388,8 @@ static void write_buf(char *buf, uint64_t val, int sz) {
     unreachable();
 }
 
-static Relocation *
-write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, C_Type *ty, char *buf, int offset) {
+static C_Relocation *
+write_gvar_data(C_parser *parser, C_Relocation *cur, Initializer *init, C_Type *ty, char *buf, int offset) {
   if (ty->kind == TY_ARRAY) {
     int sz = ty->base->size;
     for (int i = 0; i < ty->array_len; i++)
@@ -1446,7 +1446,7 @@ write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, C_Type *ty
     return cur;
   }
 
-  Relocation *rel = calloc(1, sizeof(Relocation));
+  C_Relocation *rel = calloc(1, sizeof(C_Relocation));
   rel->offset = offset;
   rel->label = label;
   rel->addend = val;
@@ -1461,7 +1461,7 @@ write_gvar_data(C_parser *parser, Relocation *cur, Initializer *init, C_Type *ty
 static void gvar_initializer(C_parser *parser, Token **rest, Token *tok, Obj *var) {
   Initializer *init = initializer(parser, rest, tok, var->ty, &var->ty);
 
-  Relocation head = {0};
+  C_Relocation head = {0};
   char *buf = calloc(1, var->ty->size);
   write_gvar_data(parser, &head, init, var->ty, buf, 0);
   var->init_data = buf;
