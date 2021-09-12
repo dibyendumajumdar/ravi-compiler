@@ -1768,7 +1768,7 @@ static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 
   enter_scope(parser);
 
-  while ((!parser->allow_partial_parsing || parser->allow_partial_parsing && tok->kind != TK_EOF) && !C_equal(tok, "}")) {
+  while ((!parser->embedded_mode || parser->embedded_mode && tok->kind != TK_EOF) && !C_equal(tok, "}")) {
     if (is_typename(parser, tok) && !C_equal(tok->next, ":")) {
       VarAttr attr = {0};
       C_Type *basety = declspec(parser, &tok, tok, &attr);

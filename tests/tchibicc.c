@@ -29,7 +29,7 @@ int main(int argc, const char *argv[])
 	strncpy(buffer2, snippet, sizeof buffer2);
 	tok = C_tokenize_buffer(&parser, buffer2);
 	C_convert_pp_tokens(&parser, tok);
-	parser.allow_partial_parsing = true;
+	parser.embedded_mode = true;
 	C_Node *node = C_parse_compound_statement(&scope, &parser, tok);
 	return 0;
 }

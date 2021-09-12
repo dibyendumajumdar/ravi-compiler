@@ -23,6 +23,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef CHIBICC_H
+#define CHIBICC_H
 
 #include <assert.h>
 #include <ctype.h>
@@ -369,7 +371,7 @@ struct C_parser {
   C_Obj *builtin_alloca;
 
 #ifdef RAVI_EXTENSIONS
-  bool allow_partial_parsing;
+  bool embedded_mode;
 #endif
 };
 
@@ -522,3 +524,4 @@ void hashmap_delete2(HashMap *map, char *key, int keylen);
 void hashmap_test(void);
 void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val));
 
+#endif
