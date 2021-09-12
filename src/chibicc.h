@@ -314,9 +314,9 @@ typedef struct {
 } HashMap;
 
 // Represents a block scope.
-typedef struct Scope Scope;
-struct Scope {
-  Scope *next;
+typedef struct C_Scope C_Scope;
+struct C_Scope {
+  C_Scope *next;
 
   // C has two block scopes; one is for variables/typedefs and
   // the other is for struct/union/enum tags.
@@ -345,7 +345,7 @@ struct C_parser {
   // Likewise, global variables are accumulated to this list.
   C_Obj *globals;
 
-  Scope *scope; // = &(Scope){0};
+  C_Scope *scope; // = &(C_Scope){0};
 
   // Points to the function object the parser is currently parsing.
   C_Obj *current_fn;
@@ -371,11 +371,11 @@ struct C_parser {
 
 C_Node *new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
 int64_t const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
-C_Obj *parse(Scope* globalScope, C_parser *parser, C_Token *tok);
+C_Obj *parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
 
 #ifdef RAVI_EXTENSIONS
-C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, C_Token *tok);
-C_Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str);
+C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
+C_Obj *create_function(C_Scope *globalScope, C_parser *parser, char *name_str);
 #endif
 
 //

@@ -18,7 +18,7 @@
 
 #include "chibicc.h"
 
-// Scope for local variables, global variables, typedefs
+// C_Scope for local variables, global variables, typedefs
 // or enum constants
 typedef struct {
 	C_Obj *var;
@@ -133,7 +133,7 @@ static char *str_dup(const char *temp, size_t len) {
 }
 
 static void enter_scope(C_parser *parser) {
-  Scope *sc = calloc(1, sizeof(Scope));
+	C_Scope *sc = calloc(1, sizeof(C_Scope));
   sc->next = parser->scope;
   parser->scope = sc;
 }
@@ -144,7 +144,7 @@ static void leave_scope(C_parser *parser) {
 
 // Find a variable by name.
 static VarScope *find_var(C_parser *parser, C_Token *tok) {
-  for (Scope *sc = parser->scope; sc; sc = sc->next) {
+  for (C_Scope *sc = parser->scope; sc; sc = sc->next) {
     VarScope *sc2 = hashmap_get2(&sc->vars, tok->loc, tok->len);
     if (sc2)
       return sc2;
@@ -153,7 +153,7 @@ static VarScope *find_var(C_parser *parser, C_Token *tok) {
 }
 
 static C_Type *find_tag(C_parser *parser, C_Token *tok) {
-  for (Scope *sc = parser->scope; sc; sc = sc->next) {
+  for (C_Scope *sc = parser->scope; sc; sc = sc->next) {
 	  C_Type *ty = hashmap_get2(&sc->tags, tok->loc, tok->len);
     if (ty)
       return ty;
@@ -3149,7 +3149,7 @@ static void resolve_goto_labels(C_parser *parser) {
 }
 
 static C_Obj *find_func(C_parser *parser, char *name) {
-  Scope *sc = parser->scope;
+	C_Scope *sc = parser->scope;
   while (sc->next)
     sc = sc->next;
 
@@ -3309,7 +3309,7 @@ static void declare_builtin_functions(C_parser *parser) {
 }
 
 #ifdef RAVI_EXTENSIONS
-C_Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str) {
+C_Obj *create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
 	C_Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
 	fn->is_function = true;
 	fn->is_definition = true;
@@ -3325,14 +3325,14 @@ C_Obj *create_function(Scope *globalScope, C_parser *parser, char *name_str) {
 	return fn;
 }
 
-C_Node *parse_compound_statement(Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
 	parser->scope = globalScope;
 	return compound_stmt(parser, &tok, tok);
 }
 #endif
 
 // program = (typedef | function-definition | global-variable)*
-C_Obj *parse(Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Obj *parse(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
   parser->scope = globalScope;
 
   declare_builtin_functions(parser);

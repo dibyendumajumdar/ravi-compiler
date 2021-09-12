@@ -20,7 +20,7 @@ int main(int argc, const char *argv[])
 	C_parser parser = {0};
 	C_Token *tok = tokenize_buffer(&parser, buffer);
 	convert_pp_tokens(&parser, tok);
-	Scope scope = {0};
+	C_Scope scope = {0};
 	C_Obj *obj = parse(&scope, &parser, tok);
 	hashmap_foreach(&scope.vars, printout);
 	create_function(&scope, &parser, "dummy");
