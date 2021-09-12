@@ -24,7 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#define _POSIX_C_SOURCE 200809L
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -37,14 +36,6 @@ SOFTWARE.
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifndef _WIN32
-#include <glob.h>
-#include <libgen.h>
-#include <strings.h>
-#include <stdnoreturn.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#endif
 
 #define RAVI_EXTENSIONS
 
@@ -108,8 +99,8 @@ typedef struct {
 // C_Token type
 typedef struct C_Token C_Token;
 struct C_Token {
-	C_TokenKind kind;   // C_Token kind
-	C_Token *next;      // Next token
+  C_TokenKind kind;   // C_Token kind
+  C_Token *next;      // Next token
   int64_t val;      // If kind is TK_NUM, its value
   long double fval; // If kind is TK_NUM, its value
   char *loc;        // C_Token location
@@ -203,7 +194,7 @@ struct C_Obj {
 // latter.
 typedef struct C_Relocation C_Relocation;
 struct C_Relocation {
-	C_Relocation *next;
+  C_Relocation *next;
   int offset;
   char **label;
   long addend;
@@ -514,11 +505,6 @@ C_Type *enum_type(C_parser *parser);
 C_Type *struct_type(C_parser *parser);
 void add_type(C_parser *parser, C_Node *node);
 
-//
-// codegen.c
-//
-
-void codegen(C_Obj *prog, FILE *out);
 // Round up `n` to the nearest multiple of `align`. For instance,
 // align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
 static inline int align_to(int n, int align) {
@@ -549,13 +535,3 @@ void hashmap_delete2(HashMap *map, char *key, int keylen);
 void hashmap_test(void);
 void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val));
 
-//
-// main.c
-//
-
-bool file_exists(char *path);
-
-extern StringArray include_paths;
-extern bool opt_fpic;
-extern bool opt_fcommon;
-extern char *base_file;
