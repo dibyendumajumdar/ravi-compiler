@@ -137,16 +137,6 @@ C_Token *tokenize_buffer(C_parser *tokenizer, char *p);
   error("internal error at %s:%d", __FILE__, __LINE__)
 
 //
-// preprocess.c
-//
-
-char *search_include_paths(char *filename);
-void init_macros(void);
-void define_macro(char *name, char *buf);
-void undef_macro(char *name);
-C_Token *preprocess(C_Token *tok);
-
-//
 // parse.c
 //
 
