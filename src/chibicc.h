@@ -378,8 +378,8 @@ int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
 C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
 
 #ifdef RAVI_EXTENSIONS
-C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
-C_Obj *create_function(C_Scope *globalScope, C_parser *parser, char *name_str);
+C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
+C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str);
 #endif
 
 //

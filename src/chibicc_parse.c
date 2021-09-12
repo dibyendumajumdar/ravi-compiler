@@ -3336,7 +3336,7 @@ static void declare_builtin_functions(C_parser *parser) {
 }
 
 #ifdef RAVI_EXTENSIONS
-C_Obj *create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
+C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
 	C_Obj *fn = new_gvar(parser, name_str, func_type(parser, ty_void));
 	fn->is_function = true;
 	fn->is_definition = true;
@@ -3352,7 +3352,7 @@ C_Obj *create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
 	return fn;
 }
 
-C_Node *parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
 	parser->scope = globalScope;
 	return compound_stmt(parser, &tok, tok);
 }

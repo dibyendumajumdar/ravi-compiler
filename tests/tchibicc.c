@@ -23,13 +23,13 @@ int main(int argc, const char *argv[])
 	C_Scope scope = {0};
 	C_Obj *obj = C_parse(&scope, &parser, tok);
 	hashmap_foreach(&scope.vars, printout);
-	create_function(&scope, &parser, "dummy");
+	C_create_function(&scope, &parser, "dummy");
 	hashmap_foreach(&scope.vars, printout);
 	const char *snippet = "{ Str s; s.data = \"hello world\"; s.len = sizeof \"hello world\"; }\n";
 	strncpy(buffer2, snippet, sizeof buffer2);
 	tok = C_tokenize_buffer(&parser, buffer2);
 	C_convert_pp_tokens(&parser, tok);
 	parser.allow_partial_parsing = true;
-	C_Node *node = parse_compound_statement(&scope, &parser, tok);
+	C_Node *node = C_parse_compound_statement(&scope, &parser, tok);
 	return 0;
 }
