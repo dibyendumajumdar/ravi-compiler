@@ -67,7 +67,7 @@ typedef enum {
   TK_NUM,     // Numeric literals
   TK_PP_NUM,  // Preprocessing numbers
   TK_EOF,     // End-of-file markers
-} TokenKind;
+} C_TokenKind;
 
 typedef struct {
   char *name;
@@ -82,7 +82,7 @@ typedef struct {
 // Token type
 typedef struct Token Token;
 struct Token {
-  TokenKind kind;   // Token kind
+	C_TokenKind kind;   // Token kind
   Token *next;      // Next token
   int64_t val;      // If kind is TK_NUM, its value
   long double fval; // If kind is TK_NUM, its value

@@ -85,7 +85,7 @@ bool consume(Token **rest, Token *tok, char *str) {
 }
 
 // Create a new token.
-static Token *new_token(C_parser *tokenizer, TokenKind kind, char *start, char *end) {
+static Token *new_token(C_parser *tokenizer, C_TokenKind kind, char *start, char *end) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
   tok->loc = start;
