@@ -143,7 +143,8 @@ enum opcode {
 	op_storeglobal,
 	op_close,
 	op_concat,
-	op_init
+	op_init,
+	op_embed_C
 };
 
 /*
