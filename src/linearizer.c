@@ -148,6 +148,11 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
 	raviX_free(linearizer);
 }
 
+static void add_C_declaration(LinearizerState *linearizer, const StringObject *str)
+{
+	raviX_ptrlist_add(&linearizer->C_declarations, str, &linearizer->ptrlist_allocator);
+}
+
 /**
  * We assume strings are all interned and can be compared by
  * address. Return true if values match else false.
@@ -2293,8 +2298,22 @@ static void linearize_while_statment(Proc *proc, AstNode *node)
 	proc->current_break_scope = previous_break_scope;
 }
 
+static void linearize_embedded_C_decl(Proc *proc, AstNode *node)
+{
+	if (proc != proc->linearizer->main_proc) {
+		handle_error(proc->linearizer->ast_container,
+			     "Embedded C declarations can only be present in the main chunk");
+	}
+	add_C_declaration(proc->linearizer, node->embedded_C_stmt.C_src_snippet);
+}
+
 static void linearize_embedded_C(Proc *proc, AstNode *node)
 {
+	if (node->embedded_C_stmt.is_decl) {
+		linearize_embedded_C_decl(proc, node);
+		return;
+	}
+
 	Instruction *insn = allocate_instruction(proc, op_embed_C, node->line_number);
 	LuaSymbol *sym;
 	FOR_EACH_PTR(node->embedded_C_stmt.symbols, LuaSymbol, sym)

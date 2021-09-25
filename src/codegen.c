@@ -37,6 +37,7 @@
 /*
  * Only 64-bits supported right now
  * Following must be kept in sync with changes in the actual header files
+ * FIXME we need a way to customise this for 32-bit vs 64-bit
  */
 
 static const char Lua_header[] =
@@ -2427,15 +2428,15 @@ static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol 
 {
 	raviX_buffer_add_fstring(&fn->body, " Ravi_StringOrUserData %s = {0};\n", symbol->variable.var_name->str);
 	raviX_buffer_add_string(&fn->body, " {\n");
-	raviX_buffer_add_string(&fn->body, "  TValue *u = ");
+	raviX_buffer_add_fstring(&fn->body, "  TValue *raviX__%s = ", symbol->variable.var_name->str);
 	emit_reg_accessor(fn, symbol->variable.pseudo, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
-	raviX_buffer_add_string(&fn->body, "  if (!ttisfulluserdata(u)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "  if (!ttisfulluserdata(raviX__%s)) {\n", symbol->variable.var_name->str);
 	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
 	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, "  }\n");
-	raviX_buffer_add_fstring(&fn->body, "  %s.ptr = getudatamem(uvalue(u));\n", symbol->variable.var_name->str);
-	raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) sizeudata(gco2u(u));\n", symbol->variable.var_name->str);
+	raviX_buffer_add_fstring(&fn->body, "  %s.ptr = getudatamem(uvalue(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) sizeudata(gco2u(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
 	raviX_buffer_add_string(&fn->body, " }\n");
 }
 
@@ -2468,7 +2469,7 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	}
 	Pseudo *C_code = get_first_target(insn);
 	assert(C_code->type == PSEUDO_CONSTANT && C_code->constant->type == RAVI_TSTRING);
-	output_string_literal(&fn->body, C_code->constant->s->str, C_code->constant->s->len);
+	raviX_buffer_add_string(&fn->body, C_code->constant->s->str);
 	raviX_buffer_add_string(&fn->body, "\n}\n");
 	return 0;
 }
@@ -2954,6 +2955,15 @@ static void preprocess_upvalues(Proc *proc)
 	END_FOR_EACH_PTR(childproc)
 }
 
+static void emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
+{
+	StringObject *str;
+	FOR_EACH_PTR(linearizer->C_declarations, StringObject, str) {
+	    raviX_buffer_add_string(mb, str->str);
+	}
+	END_FOR_EACH_PTR(str)
+}
+
 static void debug_message(void *context, const char *filename, long long line, const char *message)
 {
 	fprintf(stdout, "%s:%lld: %s\n", filename, line, message);
@@ -2984,6 +2994,9 @@ int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_Co
 	/* Add the common header portion */
 	// FIXME we need a way to customise this for 32-bit vs 64-bit
 	raviX_buffer_add_string(mb, Lua_header);
+
+	/* emit C__decl statements in ravi code */
+	emit_embedded_C_declarations(linearizer, mb);
 
 	/* Preprocess upvalue attributes */
 	preprocess_upvalues(linearizer->main_proc);

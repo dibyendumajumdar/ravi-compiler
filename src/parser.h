@@ -284,6 +284,7 @@ struct ForStatement {
 struct EmbeddedCStatement {
 	LuaSymbolList *symbols;
 	const StringObject *C_src_snippet; // C source snippet
+	bool is_decl; // true if the snippet is only supposed to be declarations
 };
 
 /* To access the type field common to all expr objects */

@@ -1,0 +1,13 @@
+C__decl [[
+typedef struct MyStruct {
+    int a;
+} MyStruct;
+]]
+
+function demo(u: Userdata)
+
+    C__unsafe(u) [[
+        MyStruct *s = (MyStruct *) u.ptr;
+    ]]
+
+end
