@@ -2308,7 +2308,7 @@ static void linearize_embedded_C(Proc *proc, AstNode *node)
 		}
 	}
 	END_FOR_EACH_PTR(sym)
-	add_instruction_target(proc, insn, allocate_string_constant(proc, node->embedded_C_stmt.C_src_snippet));
+	add_instruction_target(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, node->embedded_C_stmt.C_src_snippet)));
 	add_instruction(proc, insn);
 }
 

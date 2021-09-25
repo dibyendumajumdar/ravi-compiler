@@ -314,6 +314,8 @@ static const char Lua_header[] =
     "	{ TValue *io=(o); const Udata *iu = (u); \\\n"
     "	  io->value_ = iu->user_; settt_(io, iu->ttuv_); \\\n"
     "	  checkliveness(L,io); }\n"
+    "#define sizeludata(l)  (sizeof(union UUdata) + (l))\n"
+    "#define sizeudata(u)   sizeludata((u)->len)\n"
     "typedef enum {\n"
     "RAVI_TI_NIL,\n"
     "RAVI_TI_FALSE,\n"
@@ -685,7 +687,20 @@ static const char Lua_header[] =
     "#define intop(op,v1,v2) l_castU2S(l_castS2U(v1) op l_castS2U(v2))\n"
     "#define nan (0./0.)\n"
     "#define inf (1./0.)\n"
-    "#define luai_numunm(L,a)        (-(a))\n";
+    "#define luai_numunm(L,a)        (-(a))\n"
+    "typedef struct {\n"
+    "   char *ptr;\n"
+    "   unsigned int len;\n"
+    "} Ravi_StringOrUserData;\n"
+    "typedef struct {\n"
+    "  lua_Integer *ptr;\n"
+    "  unsigned int len;\n"
+    "} Ravi_IntegerArray;\n"
+    "typedef struct {\n"
+    "  lua_Number *ptr;\n"
+    "  unsigned int len;\n"
+    "} Ravi_NumberArray;\n"
+    ;
 
 typedef struct {
 	Proc *proc;
@@ -738,6 +753,8 @@ enum {
 	LUA_OPUNM = 12,
 	LUA_OPBNOT = 13
 };
+
+static void output_string_literal(TextBuffer *mb, const char *s, unsigned int len);
 
 static inline Pseudo *get_operand(Instruction *insn, unsigned idx)
 {
@@ -2406,6 +2423,56 @@ static int emit_op_init(Function *fn, Instruction *insn)
 	return 0;
 }
 
+static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
+{
+	raviX_buffer_add_fstring(&fn->body, " Ravi_StringOrUserData %s = {0};\n", symbol->variable.var_name->str);
+	raviX_buffer_add_string(&fn->body, " {\n");
+	raviX_buffer_add_string(&fn->body, "  TValue *u = ");
+	emit_reg_accessor(fn, symbol->variable.pseudo, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, "  if (!ttisfulluserdata(u)) {\n");
+	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, "  }\n");
+	raviX_buffer_add_fstring(&fn->body, "  %s.ptr = getudatamem(uvalue(u));\n", symbol->variable.var_name->str);
+	raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) sizeudata(gco2u(u));\n", symbol->variable.var_name->str);
+	raviX_buffer_add_string(&fn->body, " }\n");
+}
+
+static int emit_op_embed_C(Function *fn, Instruction *insn)
+{
+	raviX_buffer_add_string(&fn->body, "{\n");
+	for (int i = 0; i < get_num_operands(insn); i++) {
+		Pseudo *pseudo = get_operand(insn, i);
+		if (pseudo->type != PSEUDO_SYMBOL) {
+			handle_error(fn, "Unexpected pseudo");
+			break;
+		}
+		LuaSymbol *symbol = pseudo->symbol;
+		if (symbol->symbol_type != SYM_LOCAL) {
+			handle_error(fn, "Unexpected symbol type");
+			break;
+		}
+		switch (symbol->variable.value_type.type_code) {
+//		case RAVI_TARRAYINT:
+//		case RAVI_TARRAYFLT:
+//		case RAVI_TSTRING:
+		case RAVI_TUSERDATA: {
+			emit_userdata_C_variable(fn, insn, symbol);
+			break;
+		}
+		default:
+			handle_error(fn, "Unsupported type in C bind variable");
+			break;
+		}
+	}
+	Pseudo *C_code = get_first_target(insn);
+	assert(C_code->type == PSEUDO_CONSTANT && C_code->constant->type == RAVI_TSTRING);
+	output_string_literal(&fn->body, C_code->constant->s->str, C_code->constant->s->len);
+	raviX_buffer_add_string(&fn->body, "\n}\n");
+	return 0;
+}
+
 static int output_instruction(Function *fn, Instruction *insn)
 {
 	int rc = 0;
@@ -2603,6 +2670,10 @@ static int output_instruction(Function *fn, Instruction *insn)
 
 	case op_init:
 		rc = emit_op_init(fn, insn);
+		break;
+
+	case op_embed_C:
+		rc = emit_op_embed_C(fn, insn);
 		break;
 
 	default:
