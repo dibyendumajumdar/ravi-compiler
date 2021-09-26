@@ -18,9 +18,12 @@ int main(int argc, const char *argv[])
 	"} Str;\n";
 	strncpy(buffer, code, sizeof buffer);
 	C_parser parser = {0};
+	C_parser_init(&parser);
 	C_Token *tok = C_tokenize_buffer(&parser, buffer);
 	C_convert_pp_tokens(&parser, tok);
 	C_Scope scope = {0};
+	scope.vars.arena = parser.arena;
+	scope.tags.arena = parser.arena;
 	C_Obj *obj = C_parse(&scope, &parser, tok);
 	hashmap_foreach(&scope.vars, printout);
 	C_create_function(&scope, &parser, "dummy");
@@ -31,5 +34,6 @@ int main(int argc, const char *argv[])
 	C_convert_pp_tokens(&parser, tok);
 	parser.embedded_mode = true;
 	C_Node *node = C_parse_compound_statement(&scope, &parser, tok);
+	C_parser_destroy(&parser);
 	return 0;
 }

@@ -113,7 +113,7 @@ bool C_consume(C_Token **rest, C_Token *tok, char *str) {
 
 // Create a new token.
 static C_Token *new_token(C_parser *tokenizer, C_TokenKind kind, char *start, char *end) {
-  C_Token *tok = calloc(1, sizeof(C_Token));
+  C_Token *tok = mspace_calloc(tokenizer->arena, 1, sizeof(C_Token));
   tok->kind = kind;
   tok->loc = start;
   tok->len = end - start;
@@ -257,7 +257,7 @@ static char *string_literal_end(C_parser *tokenizer, char *p) {
 
 static C_Token *read_string_literal(C_parser *tokenizer, char *start, char *quote) {
   char *end = string_literal_end(tokenizer,quote + 1);
-  char *buf = calloc(1, end - quote);
+  char *buf = mspace_calloc(tokenizer->arena, 1, end - quote);
   int len = 0;
 
   for (char *p = quote + 1; p < end;) {
@@ -282,7 +282,7 @@ static C_Token *read_string_literal(C_parser *tokenizer, char *start, char *quot
 // is called a "surrogate pair".
 static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char *quote) {
   char *end = string_literal_end(tokenizer, quote + 1);
-  uint16_t *buf = calloc(2, end - start);
+  uint16_t *buf = mspace_calloc(tokenizer->arena, 2, end - start);
   int len = 0;
 
   for (char *p = quote + 1; p < end;) {
@@ -315,7 +315,7 @@ static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char
 // encoded in 4 bytes.
 static C_Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char *quote, C_Type *ty) {
   char *end = string_literal_end(tokenizer, quote + 1);
-  uint32_t *buf = calloc(4, end - quote);
+  uint32_t *buf = mspace_calloc(tokenizer->arena, 4, end - quote);
   int len = 0;
 
   for (char *p = quote + 1; p < end;) {
@@ -694,8 +694,8 @@ C_File **get_input_files(C_parser *tokenizer) {
 #endif
 
 
-C_File *C_new_file(char *name, int file_no, char *contents) {
-  C_File *file = calloc(1, sizeof(C_File));
+C_File *C_new_file(C_parser *tokenizer, char *name, int file_no, char *contents) {
+  C_File *file = mspace_calloc(tokenizer->arena, 1, sizeof(C_File));
   file->name = name;
   file->display_name = name;
   file->file_no = file_no;
@@ -818,7 +818,7 @@ C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p) {
 
   // Save the filename for assembler .file directive.
   static int file_no;
-  C_File *file = C_new_file("", file_no + 1, p);
+  C_File *file = C_new_file(tokenizer, "", file_no + 1, p);
 
   // Save the filename for assembler .file directive.
   tokenizer->input_files = realloc(tokenizer->input_files, sizeof(char *) * (file_no + 2));

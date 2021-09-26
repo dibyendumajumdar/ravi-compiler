@@ -26,6 +26,8 @@ SOFTWARE.
 #ifndef CHIBICC_H
 #define CHIBICC_H
 
+#include "ravi_alloc.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -70,7 +72,7 @@ typedef struct {
   int len;
 } StringArray;
 
-void strarray_push(StringArray *arr, char *s);
+void strarray_push(mspace arena, StringArray *arr, char *s);
 char *format(char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
 //
@@ -128,7 +130,7 @@ bool C_equal(C_Token *tok, char *op);
 C_Token *C_skip(C_parser *parser, C_Token *tok, char *op);
 bool C_consume(C_Token **rest, C_Token *tok, char *str);
 void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
-C_File *C_new_file(char *name, int file_no, char *contents);
+C_File *C_new_file(C_parser *tokenizer, char *name, int file_no, char *contents);
 C_Token *C_tokenize(C_parser *tokenizer, C_File *file);
 C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p);
 
@@ -317,6 +319,7 @@ typedef struct {
   HashEntry *buckets;
   int capacity;
   int used;
+  mspace arena;
 } HashMap;
 
 // Represents a block scope.
@@ -371,14 +374,18 @@ struct C_parser {
   C_Obj *builtin_alloca;
 
   HashMap keywords;
+  mspace arena; // pointer to memory arena handle
+
 #ifdef RAVI_EXTENSIONS
   bool embedded_mode;
 #endif
 };
 
+void C_parser_init(C_parser *parser);
 C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
 int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
 C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
+void C_parser_destroy(C_parser *parser);
 
 #ifdef RAVI_EXTENSIONS
 C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
