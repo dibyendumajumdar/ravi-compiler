@@ -2426,17 +2426,58 @@ static int emit_op_init(Function *fn, Instruction *insn)
 
 static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
 {
-	raviX_buffer_add_fstring(&fn->body, " Ravi_StringOrUserData %s = {0};\n", symbol->variable.var_name->str);
+	ravitype_t type = symbol->variable.value_type.type_code;
+	if (type == RAVI_TNUMINT) {
+		raviX_buffer_add_fstring(&fn->body, " lua_Integer %s = 0;\n", symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TNUMFLT) {
+		raviX_buffer_add_fstring(&fn->body, " lua_Number %s = 0.0;\n", symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TARRAYINT) {
+		raviX_buffer_add_fstring(&fn->body, " Ravi_IntegerArray %s = {0};\n", symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TARRAYFLT) {
+		raviX_buffer_add_fstring(&fn->body, " Ravi_NumberArray %s = {0};\n", symbol->variable.var_name->str);
+	}
+	else {
+		raviX_buffer_add_fstring(&fn->body, " Ravi_StringOrUserData %s = {0};\n", symbol->variable.var_name->str);
+	}
 	raviX_buffer_add_string(&fn->body, " {\n");
 	raviX_buffer_add_fstring(&fn->body, "  TValue *raviX__%s = ", symbol->variable.var_name->str);
 	emit_reg_accessor(fn, symbol->variable.pseudo, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
-	raviX_buffer_add_fstring(&fn->body, "  if (!ttisfulluserdata(raviX__%s)) {\n", symbol->variable.var_name->str);
-	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
-	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
-	raviX_buffer_add_string(&fn->body, "  }\n");
-	raviX_buffer_add_fstring(&fn->body, "  %s.ptr = getudatamem(uvalue(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
-	raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) sizeudata(gco2u(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	if (type == RAVI_TNUMINT) {
+		raviX_buffer_add_fstring(&fn->body, "  %s = ivalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TNUMFLT) {
+		raviX_buffer_add_fstring(&fn->body, "  %s = fvalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TARRAYINT) {
+		raviX_buffer_add_fstring(&fn->body, "  %s.ptr = (lua_Integer*) arrvalue(raviX__%s)->data;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) arrvalue(raviX__%s)->len;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	}
+	else if (type == RAVI_TARRAYFLT) {
+		raviX_buffer_add_fstring(&fn->body, "  %s.ptr = (lua_Number *) arrvalue(raviX__%s)->data;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) arrvalue(raviX__%s)->len;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+	}
+	else {
+		raviX_buffer_add_fstring(&fn->body, "  if (ttisfulluserdata(raviX__%s)) {\n", symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.ptr = getudatamem(uvalue(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.len = (unsigned int) sizeudata(gco2u(raviX__%s));\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_string(&fn->body, "  }\n");
+		raviX_buffer_add_fstring(&fn->body, "  else if (ttislightuserdata(raviX__%s)) {\n", symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.ptr = pvalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.len = 0;\n", symbol->variable.var_name->str);
+		raviX_buffer_add_string(&fn->body, "  }\n");
+		raviX_buffer_add_fstring(&fn->body, "  else if (ttisstring(raviX__%s)) {\n", symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.ptr = svalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, "   %s.len = vslen(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
+		raviX_buffer_add_string(&fn->body, "  }\n");
+		raviX_buffer_add_string(&fn->body, "  else {\n");
+		raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+		raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
+		raviX_buffer_add_string(&fn->body, "  }\n");
+	}
 	raviX_buffer_add_string(&fn->body, " }\n");
 }
 
@@ -2445,19 +2486,20 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, "{\n");
 	for (int i = 0; i < get_num_operands(insn); i++) {
 		Pseudo *pseudo = get_operand(insn, i);
-		if (pseudo->type != PSEUDO_SYMBOL) {
+		ravitype_t typecode = RAVI_TANY;
+		if (pseudo->type != PSEUDO_SYMBOL &&
+		    !((pseudo->type == PSEUDO_TEMP_FLT || pseudo->type == PSEUDO_TEMP_INT) && pseudo->temp_for_local != NULL)) {
 			handle_error(fn, "Unexpected pseudo");
 			break;
 		}
-		LuaSymbol *symbol = pseudo->symbol;
-		if (symbol->symbol_type != SYM_LOCAL) {
-			handle_error(fn, "Unexpected symbol type");
-			break;
-		}
+		LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
 		switch (symbol->variable.value_type.type_code) {
-//		case RAVI_TARRAYINT:
-//		case RAVI_TARRAYFLT:
-//		case RAVI_TSTRING:
+		case RAVI_TNUMINT:
+		case RAVI_TNUMFLT:
+		case RAVI_TARRAYINT:
+		case RAVI_TARRAYFLT:
+		case RAVI_TSTRING:
+		case RAVI_TANY:
 		case RAVI_TUSERDATA: {
 			emit_userdata_C_variable(fn, insn, symbol);
 			break;
