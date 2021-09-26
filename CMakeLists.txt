@@ -57,6 +57,7 @@ set(SRCS
         src/chibicc_strings.c
         src/chibicc_unicode.c
         src/chibicc_hashmap.c
+        src/ravi_alloc.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
