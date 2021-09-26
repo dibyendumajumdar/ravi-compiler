@@ -170,10 +170,8 @@ static int read_punct(char *p) {
   return ispunct(*p) ? 1 : 0;
 }
 
-static bool is_keyword(C_Token *tok) {
-  static HashMap map;
-
-  if (map.capacity == 0) {
+static bool is_keyword(C_parser *tokenizer, C_Token *tok) {
+  if (tokenizer->keywords.capacity == 0) {
     static char *kw[] = {
       "return", "if", "else", "for", "while", "int", "sizeof", "char",
       "struct", "union", "short", "long", "void", "typedef", "_Bool",
@@ -186,10 +184,10 @@ static bool is_keyword(C_Token *tok) {
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
-      hashmap_put(&map, kw[i], (void *)1);
+      hashmap_put(&tokenizer->keywords, kw[i], (void *)1);
   }
 
-  return hashmap_get2(&map, tok->loc, tok->len);
+  return hashmap_get2(&tokenizer->keywords, tok->loc, tok->len);
 }
 
 static int read_escaped_char(C_parser *tokenizer, char **new_pos, char *p) {
@@ -469,7 +467,7 @@ static void convert_pp_number(C_parser *tokenizer, C_Token *tok) {
 
 void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok) {
   for (C_Token *t = tok; t->kind != TK_EOF; t = t->next) {
-    if (is_keyword(t))
+    if (is_keyword(tokenizer, t))
       t->kind = TK_KEYWORD;
     else if (t->kind == TK_PP_NUM)
       convert_pp_number(tokenizer, t);

@@ -370,6 +370,7 @@ struct C_parser {
 
   C_Obj *builtin_alloca;
 
+  HashMap keywords;
 #ifdef RAVI_EXTENSIONS
   bool embedded_mode;
 #endif
@@ -383,6 +384,8 @@ C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
 C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
 C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str);
 #endif
+
+void C_destroy_parser(C_parser *parser);
 
 //
 // type.c
@@ -523,5 +526,6 @@ void hashmap_delete(HashMap *map, char *key);
 void hashmap_delete2(HashMap *map, char *key, int keylen);
 void hashmap_test(void);
 void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val));
+void hashmap_destroy(HashMap *map);
 
 #endif
