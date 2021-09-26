@@ -191,7 +191,6 @@ static const char Lua_header[] =
     "#define fcfvalue(o) check_exp(ttisfcf(o), val_(o).p)\n"
     "#define hvalue(o)	check_exp(ttistable(o), gco2t(val_(o).gc))\n"
     "#define arrvalue(o) check_exp(ttisarray(o), gco2array(val_(o).gc))\n"
-    "#define arrvalue(o) check_exp(ttisarray(o), gco2array(val_(o).gc))\n"
     "#define bvalue(o)	check_exp(ttisboolean(o), val_(o).b)\n"
     "#define thvalue(o)	check_exp(ttisthread(o), gco2th(val_(o).gc))\n"
     "#define deadvalue(o)	check_exp(ttisdeadkey(o), cast(void *, val_(o).gc))\n"
