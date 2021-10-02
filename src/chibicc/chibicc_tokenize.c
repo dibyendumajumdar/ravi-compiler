@@ -821,7 +821,7 @@ C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p) {
   C_File *file = C_new_file(tokenizer, "", file_no + 1, p);
 
   // Save the filename for assembler .file directive.
-  tokenizer->input_files = realloc(tokenizer->input_files, sizeof(char *) * (file_no + 2));
+  tokenizer->input_files = mspace_realloc(tokenizer->arena, tokenizer->input_files, sizeof(char *) * (file_no + 2));
   tokenizer->input_files[file_no] = file;
   tokenizer->input_files[file_no + 1] = NULL;
   file_no++;
