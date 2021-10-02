@@ -3403,6 +3403,7 @@ void C_parser_init(C_parser *parser)
 
 void C_parser_destroy(C_parser *parser)
 {
+  //mspace_malloc_stats(parser->arena);
   destroy_mspace(parser->arena);
   parser->arena = NULL;
 }
