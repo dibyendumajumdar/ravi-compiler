@@ -37,9 +37,9 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #define RAVI_EXTENSIONS
 
@@ -53,6 +53,8 @@ SOFTWARE.
 # define noreturn
 # define strncasecmp strnicmp
 # define strndup _strndup
+#else
+#include <stdnoreturn.h>
 #endif
 
 typedef struct C_Type C_Type;
@@ -123,9 +125,9 @@ struct C_Token {
 };
 
 noreturn void C_error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
-noreturn void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-noreturn void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
-void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 2, 3)));
+noreturn void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 3, 4)));
+noreturn void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
+void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
 bool C_equal(C_Token *tok, char *op);
 C_Token *C_skip(C_parser *parser, C_Token *tok, char *op);
 bool C_consume(C_Token **rest, C_Token *tok, char *str);

@@ -2485,7 +2485,6 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, "{\n");
 	for (int i = 0; i < get_num_operands(insn); i++) {
 		Pseudo *pseudo = get_operand(insn, i);
-		ravitype_t typecode = RAVI_TANY;
 		if (pseudo->type != PSEUDO_SYMBOL &&
 		    !((pseudo->type == PSEUDO_TEMP_FLT || pseudo->type == PSEUDO_TEMP_INT) && pseudo->temp_for_local != NULL)) {
 			handle_error(fn, "Unexpected pseudo");
