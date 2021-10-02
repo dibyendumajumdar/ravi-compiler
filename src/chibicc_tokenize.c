@@ -56,7 +56,7 @@ static void verror_at(C_parser *tokenizer, char *filename, char *input, int line
   fprintf(stderr, "%.*s\n", (int)(end - line), line);
 
   // Show the error message.
-  int pos = display_width(tokenizer, line, loc - line) + indent;
+  int pos = C_display_width(tokenizer, line, loc - line) + indent;
 
   fprintf(stderr, "%*s", pos, ""); // print pos spaces.
   fprintf(stderr, "^ ");
@@ -134,14 +134,14 @@ static bool startswith(char *p, char *q) {
 // If p does not point to a valid identifier, 0 is returned.
 static int read_ident(C_parser *tokenizer, char *start) {
   char *p = start;
-  uint32_t c = decode_utf8(tokenizer, &p, p);
-  if (!is_ident1(c))
+  uint32_t c = C_decode_utf8(tokenizer, &p, p);
+  if (!C_is_ident1(c))
     return 0;
 
   for (;;) {
     char *q;
-    c = decode_utf8(tokenizer, &q, p);
-    if (!is_ident2(c))
+    c = C_decode_utf8(tokenizer, &q, p);
+    if (!C_is_ident2(c))
       return p - start;
     p = q;
   }
@@ -268,7 +268,7 @@ static C_Token *read_string_literal(C_parser *tokenizer, char *start, char *quot
   }
 
   C_Token *tok = new_token(tokenizer, TK_STR, start, end + 1);
-  tok->ty = array_of(tokenizer, C_ty_char, len + 1);
+  tok->ty = C_array_of(tokenizer, C_ty_char, len + 1);
   tok->str = buf;
   return tok;
 }
@@ -291,7 +291,7 @@ static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char
       continue;
     }
 
-    uint32_t c = decode_utf8(tokenizer, &p, p);
+    uint32_t c = C_decode_utf8(tokenizer, &p, p);
     if (c < 0x10000) {
       // Encode a code point in 2 bytes.
       buf[len++] = c;
@@ -304,7 +304,7 @@ static C_Token *read_utf16_string_literal(C_parser *tokenizer, char *start, char
   }
 
   C_Token *tok = new_token(tokenizer, TK_STR, start, end + 1);
-  tok->ty = array_of(tokenizer, C_ty_ushort, len + 1);
+  tok->ty = C_array_of(tokenizer, C_ty_ushort, len + 1);
   tok->str = (char *)buf;
   return tok;
 }
@@ -322,11 +322,11 @@ static C_Token *read_utf32_string_literal(C_parser *tokenizer, char *start, char
     if (*p == '\\')
       buf[len++] = read_escaped_char(tokenizer, &p, p + 1);
     else
-      buf[len++] = decode_utf8(tokenizer, &p, p);
+      buf[len++] = C_decode_utf8(tokenizer, &p, p);
   }
 
   C_Token *tok = new_token(tokenizer, TK_STR, start, end + 1);
-  tok->ty = array_of(tokenizer, ty, len + 1);
+  tok->ty = C_array_of(tokenizer, ty, len + 1);
   tok->str = (char *)buf;
   return tok;
 }
@@ -340,7 +340,7 @@ static C_Token *read_char_literal(C_parser *tokenizer, char *start, char *quote,
   if (*p == '\\')
     c = read_escaped_char(tokenizer, &p, p + 1);
   else
-    c = decode_utf8(tokenizer, &p, p);
+    c = C_decode_utf8(tokenizer, &p, p);
 
   char *end = strchr(p, '\'');
   if (!end)
@@ -769,7 +769,7 @@ static void convert_universal_chars(char *p) {
       uint32_t c = read_universal_char(p + 2, 4);
       if (c) {
         p += 6;
-        q += encode_utf8(q, c);
+        q += C_encode_utf8(q, c);
       } else {
         *q++ = *p++;
       }
@@ -777,7 +777,7 @@ static void convert_universal_chars(char *p) {
       uint32_t c = read_universal_char(p + 2, 8);
       if (c) {
         p += 10;
-        q += encode_utf8(q, c);
+        q += C_encode_utf8(q, c);
       } else {
         *q++ = *p++;
       }

@@ -493,22 +493,22 @@ extern C_Type *C_ty_float;
 extern C_Type *C_ty_double;
 extern C_Type *C_ty_ldouble;
 
-bool is_integer(C_Type *ty);
-bool is_flonum(C_Type *ty);
-bool is_numeric(C_Type *ty);
-bool is_compatible(C_Type *t1, C_Type *t2);
-C_Type *copy_type(C_parser *parser, C_Type *ty);
-C_Type *pointer_to(C_parser *parser, C_Type *base);
-C_Type *func_type(C_parser *parser, C_Type *return_ty);
-C_Type *array_of(C_parser *parser, C_Type *base, int size);
-C_Type *vla_of(C_parser *parser, C_Type *base, C_Node *expr);
-C_Type *enum_type(C_parser *parser);
-C_Type *struct_type(C_parser *parser);
-void add_type(C_parser *parser, C_Node *node);
+bool C_is_integer(C_Type *ty);
+bool C_is_flonum(C_Type *ty);
+bool C_is_numeric(C_Type *ty);
+bool C_is_compatible(C_Type *t1, C_Type *t2);
+C_Type *C_copy_type(C_parser *parser, C_Type *ty);
+C_Type *C_pointer_to(C_parser *parser, C_Type *base);
+C_Type *C_func_type(C_parser *parser, C_Type *return_ty);
+C_Type *C_array_of(C_parser *parser, C_Type *base, int size);
+C_Type *C_vla_of(C_parser *parser, C_Type *base, C_Node *expr);
+C_Type *C_enum_type(C_parser *parser);
+C_Type *C_struct_type(C_parser *parser);
+void C_add_type(C_parser *parser, C_Node *node);
 
 // Round up `n` to the nearest multiple of `align`. For instance,
 // align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
-static inline int align_to(int n, int align) {
+static inline int C_align_to(int n, int align) {
 	return (n + align - 1) / align * align;
 }
 
@@ -517,11 +517,11 @@ static inline int align_to(int n, int align) {
 // unicode.c
 //
 
-int encode_utf8(char *buf, uint32_t c);
-uint32_t decode_utf8(C_parser *tokenizer, char **new_pos, char *p);
-bool is_ident1(uint32_t c);
-bool is_ident2(uint32_t c);
-int display_width(C_parser *tokenizer, char *p, int len);
+int C_encode_utf8(char *buf, uint32_t c);
+uint32_t C_decode_utf8(C_parser *tokenizer, char **new_pos, char *p);
+bool C_is_ident1(uint32_t c);
+bool C_is_ident2(uint32_t c);
+int C_display_width(C_parser *tokenizer, char *p, int len);
 
 //
 // hashmap.c
