@@ -25,7 +25,7 @@ set(HEADERS
         src/optimizer.h
         src/parser.h
         src/codegen.h
-        src/chibicc.h)
+        src/chibicc/chibicc.h)
 
 set(SRCS
         src/allocate.c
@@ -51,12 +51,12 @@ set(SRCS
         src/df_liveness.c
         src/codegen.c
         src/ravi_binding.c
-        src/chibicc_tokenize.c
-        src/chibicc_parse.c
-        src/chibicc_type.c
-        src/chibicc_strings.c
-        src/chibicc_unicode.c
-        src/chibicc_hashmap.c
+        src/chibicc/chibicc_tokenize.c
+        src/chibicc/chibicc_parse.c
+        src/chibicc/chibicc_type.c
+        src/chibicc/chibicc_strings.c
+        src/chibicc/chibicc_unicode.c
+        src/chibicc/chibicc_hashmap.c
         src/ravi_alloc.c
         )
 

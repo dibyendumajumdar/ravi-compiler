@@ -1,4 +1,4 @@
-#include <chibicc.h>
+#include <chibicc/chibicc.h>
 
 #include <string.h>
 
