@@ -2555,6 +2555,145 @@ typedef struct C_Code_Analysis {
 	int is_tags;
 } C_Code_Analysis;
 
+static void walk_node(C_Node *node)
+{
+	switch (node->kind) {
+	case ND_BLOCK: {
+		for (C_Node *n = node->body; n; n = n->next)
+			walk_node(n);
+		break;
+	}
+	case ND_IF: {
+		walk_node(node->cond);
+		walk_node(node->then);
+		if (node->els)
+			walk_node(node->els);
+		break;
+	}
+	case ND_FOR: {
+		if (node->init)
+			walk_node(node->init);
+		if (node->cond)
+			walk_node(node->cond);
+		if (node->inc)
+			walk_node(node->inc);
+		break;
+	}
+	case ND_DO: {
+		walk_node(node->then);
+		walk_node(node->cond);
+		break;
+	}
+	case ND_SWITCH: {
+		walk_node(node->cond);
+		for (C_Node *n = node->case_next; n; n = n->case_next) {
+			walk_node(n);
+		}
+		if (node->default_case)
+			walk_node(node->default_case);
+		break;
+	}
+	case ND_CASE:
+		walk_node(node->lhs);
+		break;
+	case ND_GOTO_EXPR:
+		walk_node(node->lhs);
+		break;
+	case ND_LABEL:
+		walk_node(node->lhs);
+		break;
+	case ND_RETURN:
+		if (node->lhs)
+			walk_node(node->lhs);
+		break;
+	case ND_EXPR_STMT:
+		walk_node(node->lhs);
+		break;
+	case ND_ASM:
+		break;
+	case ND_NULL_EXPR:
+		break;
+	case ND_NUM:
+		break;
+	case ND_NEG:
+		walk_node(node->lhs);
+		break;
+	case ND_VAR:
+		break;
+	case ND_MEMBER:
+		break;
+	case ND_DEREF:
+		walk_node(node->lhs);
+		break;
+	case ND_ADDR:
+		walk_node(node->lhs);
+		break;
+	case ND_ASSIGN:
+		walk_node(node->lhs);
+		walk_node(node->rhs);
+		break;
+	case ND_STMT_EXPR: {
+		for (C_Node *n = node->body; n; n = n->next)
+			walk_node(n);
+		break;
+	}
+	case ND_COMMA:
+		walk_node(node->lhs);
+		walk_node(node->rhs);
+		break;
+	case ND_CAST:
+		walk_node(node->lhs);
+		break;
+	case ND_MEMZERO:
+		break;
+	case ND_COND:
+		walk_node(node->cond);
+		walk_node(node->then);
+		walk_node(node->els);
+		break;
+	case ND_NOT:
+		walk_node(node->lhs);
+		break;
+	case ND_BITNOT:
+		walk_node(node->lhs);
+		break;
+	case ND_LOGAND:
+	case ND_LOGOR:
+		walk_node(node->lhs);
+		walk_node(node->rhs);
+		break;
+	case ND_FUNCALL:
+		walk_node(node->lhs);
+		for (C_Node *arg = node->args; arg; arg = arg->next) {
+			walk_node(arg);
+		}
+		break;
+	case ND_LABEL_VAL:
+		break;
+	case ND_CAS:
+		break;
+	case ND_EXCH:
+		break;
+	case ND_ADD:
+	case ND_SUB:
+	case ND_MUL:
+	case ND_DIV:
+	case ND_EQ:
+	case ND_NE:
+	case ND_LT:
+	case ND_LE:
+	case ND_MOD:
+	case ND_BITAND:
+	case ND_BITOR:
+	case ND_BITXOR:
+	case ND_SHL:
+	case ND_SHR:
+		walk_node(node->lhs);
+		walk_node(node->rhs);
+		break;
+	}
+}
+
 static int analyze_C_code(LinearizerState *linearizer, TextBuffer *C_code)
 {
 	TextBuffer code;
