@@ -2464,6 +2464,88 @@ static int emit_op_init(Function *fn, Instruction *insn)
 	return 0;
 }
 
+
+typedef struct C_Decl_Analysis {
+	C_Parser *parser;
+	C_Scope *global_scope;
+	int status;
+	int is_tags;
+} C_Decl_Analysis;
+
+static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
+{
+	if (ty->kind == TY_STRUCT) {
+		for (C_Member *mem = ty->members; mem; mem = mem->next) {
+			analyze_C_types(analysis, mem->ty);
+		}
+	}
+	else if (ty->kind == TY_PTR) {
+		fprintf(stderr, "Declaring pointer type is not allowed\n");
+		analysis->status--;
+	}
+	else if (ty->kind == TY_UNION) {
+		fprintf(stderr, "Declaring union type is not allowed\n");
+		analysis->status--;
+	}
+}
+
+static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
+{
+	if (vc->var) {
+		fprintf(stderr, "Declaring objects is not allowed: %s\n", vc->var->name);
+		analysis->status--;
+	}
+	else if (vc->type_def) {
+		analyze_C_types(analysis, vc->type_def);
+	}
+}
+
+static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
+{
+	static char* builtins[] = {
+	    "alloca",
+	    "int64_t",
+	    "lua_Number",
+	    "lua_Integer",
+	    "TValue",
+	    "ivalue",
+	    "fvalue",
+	    "Ravi_Arr",
+	    "arrvalue",
+	    "ttisfulluserdata",
+	    "ttislightuserdata",
+	    "ttisstring",
+	    "uvalue",
+	    "pvalue",
+	    "svalue",
+	    "getudatamem",
+	    "gco2u",
+	    "sizeudata",
+	    "vslen",
+	    "R",
+	    "Ravi_StringOrUserData",
+	    "Ravi_IntegerArray",
+	    "Ravi_NumberArray",
+	    NULL
+	};
+	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
+	for (int i = 0; builtins[i]; i++) {
+		if (strncmp(key, builtins[i], keylen) == 0) {
+			// builtin so skip
+			//fprintf(stderr, "Skipping builtin %.*s\n", keylen, key);
+			return;
+		}
+	}
+	if (analysis->is_tags) {
+		C_Type *ty = val;
+		analyze_C_types(analysis, ty);
+	}
+	else {
+		C_VarScope *vc = val;
+		analyze_C_vars(analysis, vc);
+	}
+}
+
 static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
 {
 	ravitype_t type = symbol->variable.value_type.type_code;
@@ -3034,87 +3116,6 @@ static void preprocess_upvalues(Proc *proc)
 	Proc *child_proc;
 	FOR_EACH_PTR(proc->procs, Proc, child_proc) { preprocess_upvalues(child_proc); }
 	END_FOR_EACH_PTR(childproc)
-}
-
-typedef struct C_Decl_Analysis {
-	C_Parser *parser;
-	C_Scope *global_scope;
-	int status;
-	int is_tags;
-} C_Decl_Analysis;
-
-static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
-{
-	if (ty->kind == TY_STRUCT) {
-		for (C_Member *mem = ty->members; mem; mem = mem->next) {
-			analyze_C_types(analysis, mem->ty);
-		}
-	}
-	else if (ty->kind == TY_PTR) {
-		fprintf(stderr, "Declaring pointer type is not allowed\n");
-		analysis->status--;
-	}
-	else if (ty->kind == TY_UNION) {
-		fprintf(stderr, "Declaring pointer type is not allowed\n");
-		analysis->status--;
-	}
-}
-
-static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
-{
-	if (vc->var) {
-		fprintf(stderr, "Declaring objects is now allowed: %s\n", vc->var->name);
-		analysis->status--;
-	}
-	else if (vc->type_def) {
-		analyze_C_types(analysis, vc->type_def);
-	}
-}
-
-static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
-{
-	static char* builtins[] = {
-	    "alloca",
-	    "int64_t",
-	    "lua_Number",
-	    "lua_Integer",
-	    "TValue",
-	    "ivalue",
-	    "fvalue",
-	    "Ravi_Arr",
-	    "arrvalue",
-	    "ttisfulluserdata",
-	    "ttislightuserdata",
-	    "ttisstring",
-	    "uvalue",
-	    "pvalue",
-	    "svalue",
-	    "getudatamem",
-	    "gco2u",
-	    "sizeudata",
-	    "vslen",
-	    "R",
-	    "Ravi_StringOrUserData",
-	    "Ravi_IntegerArray",
-	    "Ravi_NumberArray",
-	    NULL
-	};
-	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
-	for (int i = 0; builtins[i]; i++) {
-		if (strncmp(key, builtins[i], keylen) == 0) {
-			// builtin so skip
-			//fprintf(stderr, "Skipping builtin %.*s\n", keylen, key);
-			return;
-		}
-	}
-	if (analysis->is_tags) {
-		C_Type *ty = val;
-		analyze_C_types(analysis, ty);
-	}
-	else {
-		C_VarScope *vc = val;
-		analyze_C_vars(analysis, vc);
-	}
 }
 
 static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
