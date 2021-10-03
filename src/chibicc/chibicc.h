@@ -375,7 +375,8 @@ struct C_parser {
 
   C_Obj *builtin_alloca;
 
-  HashMap keywords;
+  HashMap keywords; // used by tokenizer
+  HashMap typewords; // used by parser
   mspace arena; // pointer to memory arena handle
 
 #ifdef RAVI_EXTENSIONS
@@ -384,6 +385,7 @@ struct C_parser {
 };
 
 void C_parser_init(C_parser *parser);
+C_Scope *C_global_scope(C_parser *parser);
 C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
 int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
 C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);

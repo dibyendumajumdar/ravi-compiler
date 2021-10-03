@@ -159,6 +159,13 @@ static char *str_dup(mspace arena, const char *temp, size_t len) {
   return p;
 }
 
+C_Scope *C_global_scope(C_parser *parser) {
+  C_Scope *sc = mspace_calloc(parser->arena, 1, sizeof(C_Scope));
+  sc->vars.arena = parser->arena;
+  sc->tags.arena = parser->arena;
+  return sc;
+}
+
 static void enter_scope(C_parser *parser) {
   C_Scope *sc = mspace_calloc(parser->arena, 1, sizeof(C_Scope));
   sc->vars.arena = parser->arena;
@@ -1498,7 +1505,7 @@ static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_O
 
 // Returns true if a given token represents a type.
 static bool is_typename(C_parser *parser, C_Token *tok) {
-  if (parser->keywords.capacity == 0) {
+  if (parser->typewords.capacity == 0) {
     static char *kw[] = {
       "void", "_Bool", "char", "short", "int", "long", "struct", "union",
       "typedef", "enum", "static", "extern", "_Alignas", "signed", "unsigned",
@@ -1508,10 +1515,9 @@ static bool is_typename(C_parser *parser, C_Token *tok) {
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
-      hashmap_put(&parser->keywords, kw[i], (void *)1);
+      hashmap_put(&parser->typewords, kw[i], (void *)1);
   }
-
-  return hashmap_get2(&parser->keywords, tok->loc, tok->len) || find_typedef(parser, tok);
+  return hashmap_get2(&parser->typewords, tok->loc, tok->len) || find_typedef(parser, tok);
 }
 
 // asm-stmt = "asm" ("volatile" | "inline")* "(" string-literal ")"
@@ -3399,6 +3405,7 @@ void C_parser_init(C_parser *parser)
   memset(parser, 0, sizeof *parser);
   parser->arena = create_mspace(0, 0);
   parser->keywords.arena = parser->arena;
+  parser->typewords.arena = parser->arena;
 }
 
 void C_parser_destroy(C_parser *parser)
