@@ -3060,7 +3060,7 @@ static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
 	}
 }
 
-static void analyze_C_vars(C_Decl_Analysis *analysis, VarScope *vc)
+static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
 {
 	if (vc->var) {
 		fprintf(stderr, "Declaring objects is now allowed: %s\n", vc->var->name);
@@ -3112,7 +3112,7 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 		analyze_C_types(analysis, ty);
 	}
 	else {
-		VarScope *vc = val;
+		C_VarScope *vc = val;
 		analyze_C_vars(analysis, vc);
 	}
 }

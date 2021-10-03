@@ -169,9 +169,9 @@ static void leave_scope(C_Parser *parser) {
 }
 
 // Find a variable by name.
-static VarScope *find_var(C_Parser *parser, C_Token *tok) {
+static C_VarScope *find_var(C_Parser *parser, C_Token *tok) {
   for (C_Scope *sc = parser->scope; sc; sc = sc->next) {
-    VarScope *sc2 = hashmap_get2(&sc->vars, tok->loc, tok->len);
+    C_VarScope *sc2 = hashmap_get2(&sc->vars, tok->loc, tok->len);
     if (sc2)
       return sc2;
   }
@@ -250,8 +250,8 @@ C_Node *C_new_cast(C_Parser *parser, C_Node *expr, C_Type *ty) {
   return node;
 }
 
-static VarScope *push_scope(C_Parser *parser, char *name) {
-  VarScope *sc = mspace_calloc(parser->arena,1, sizeof(VarScope));
+static C_VarScope *push_scope(C_Parser *parser, char *name) {
+  C_VarScope *sc = mspace_calloc(parser->arena,1, sizeof(C_VarScope));
   hashmap_put(&parser->scope->vars, name, sc);
   return sc;
 }
@@ -348,7 +348,7 @@ static char *get_ident(C_Parser *parser, C_Token *tok) {
 
 static C_Type *find_typedef(C_Parser *parser, C_Token *tok) {
   if (tok->kind == TK_IDENT) {
-    VarScope *sc = find_var(parser, tok);
+    C_VarScope *sc = find_var(parser, tok);
     if (sc)
       return sc->type_def;
   }
@@ -783,7 +783,7 @@ static C_Type *enum_specifier(C_Parser *parser, C_Token **rest, C_Token *tok) {
     if (C_equal(tok, "="))
       val = C_const_expr(parser, &tok, tok->next);
 
-    VarScope *sc = push_scope(parser, name);
+    C_VarScope *sc = push_scope(parser, name);
     sc->enum_ty = ty;
     sc->enum_val = val++;
   }
@@ -3079,7 +3079,7 @@ static C_Node *primary(C_Parser *parser, C_Token **rest, C_Token *tok) {
 
   if (tok->kind == TK_IDENT) {
     // Variable or enum constant
-    VarScope *sc = find_var(parser, tok);
+    C_VarScope *sc = find_var(parser, tok);
     *rest = tok->next;
 
     // For "static inline" function
@@ -3176,7 +3176,7 @@ static C_Obj *find_func(C_Parser *parser, char *name) {
   while (sc->next)
     sc = sc->next;
 
-  VarScope *sc2 = hashmap_get(&sc->vars, name);
+  C_VarScope *sc2 = hashmap_get(&sc->vars, name);
   if (sc2 && sc2->var && sc2->var->is_function)
     return sc2->var;
   return NULL;

@@ -331,7 +331,7 @@ struct C_Scope {
 
   // C has two block scopes; one is for variables/typedefs and
   // the other is for struct/union/enum tags.
-  HashMap vars; // values are VarScope *
+  HashMap vars; // values are C_VarScope *
   HashMap tags; // values are C_Type *
 };
 
@@ -342,7 +342,7 @@ typedef struct {
   C_Type *type_def;
   C_Type *enum_ty;
   int enum_val;
-} VarScope;
+} C_VarScope;
 
 struct C_Parser {
   int file_no;
