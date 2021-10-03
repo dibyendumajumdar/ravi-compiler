@@ -30,6 +30,7 @@
 
 #include "codegen.h"
 #include "ravi_api.h"
+#include "chibicc/chibicc.h"
 
 #include <assert.h>
 #include <setjmp.h>
@@ -688,6 +689,46 @@ static const char Lua_header[] =
     "#define nan (0./0.)\n"
     "#define inf (1./0.)\n"
     "#define luai_numunm(L,a)        (-(a))\n"
+    "typedef struct {\n"
+    "   char *ptr;\n"
+    "   unsigned int len;\n"
+    "} Ravi_StringOrUserData;\n"
+    "typedef struct {\n"
+    "  lua_Integer *ptr;\n"
+    "  unsigned int len;\n"
+    "} Ravi_IntegerArray;\n"
+    "typedef struct {\n"
+    "  lua_Number *ptr;\n"
+    "  unsigned int len;\n"
+    "} Ravi_NumberArray;\n"
+    ;
+
+static const char Embedded_C_header[] =
+
+    "typedef long long int64_t;\n"
+    "typedef double lua_Number;\n"
+    "typedef int64_t lua_Integer;\n"
+    "typedef struct {\n"
+    "   int i;\n"
+    "} TValue;\n"
+    "static lua_Integer ivalue(const TValue *v) { return 0; }\n"
+    "static lua_Number  fvalue(const TValue *v) { return 0.0; }\n"
+    "typedef struct {\n"
+    "   char *data;\n"
+    "   unsigned int len;\n"
+    "} Ravi_Arr;\n"
+    "static Ravi_Arr *arrvalue(const TValue *v) { return (Ravi_Arr *)v; }\n"
+    "static int ttisfulluserdata(const TValue *v) { return 0; }\n"
+    "static int ttislightuserdata(const TValue *v) { return 0; }\n"
+    "static int ttisstring(const TValue *v) { return 0; }\n"
+    "static void *uvalue(const TValue *v) { return (void*)0; }\n"
+    "static void *pvalue(const TValue *v) { return (void*)0; }\n"
+    "static void *svalue(const TValue *v) { return (void*)0; }\n"
+    "static void *getudatamem(const TValue *v) { return (void*)0; }\n"
+    "static void *gco2u(const TValue *v) { return (void*)0; }\n"
+    "static unsigned int sizeudata(const void *p) { return 0; }\n"
+    "static unsigned int vslen(const TValue *v) { return 0; }\n"
+    "TValue *R(int reg) { return (void*)0; }\n"
     "typedef struct {\n"
     "   char *ptr;\n"
     "   unsigned int len;\n"
@@ -2995,13 +3036,113 @@ static void preprocess_upvalues(Proc *proc)
 	END_FOR_EACH_PTR(childproc)
 }
 
+typedef struct C_Decl_Analysis {
+	C_parser *parser;
+	C_Scope *global_scope;
+	int status;
+	int is_tags;
+} C_Decl_Analysis;
+
+static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
+{
+	if (ty->kind == TY_STRUCT) {
+		for (C_Member *mem = ty->members; mem; mem = mem->next) {
+			analyze_C_types(analysis, mem->ty);
+		}
+	}
+	else if (ty->kind == TY_PTR) {
+		fprintf(stderr, "Declaring pointer type is not allowed\n");
+		analysis->status--;
+	}
+	else if (ty->kind == TY_UNION) {
+		fprintf(stderr, "Declaring pointer type is not allowed\n");
+		analysis->status--;
+	}
+}
+
+static void analyze_C_vars(C_Decl_Analysis *analysis, VarScope *vc)
+{
+	if (vc->var) {
+		fprintf(stderr, "Declaring objects is now allowed: %s\n", vc->var->name);
+		analysis->status--;
+	}
+	else if (vc->type_def) {
+		analyze_C_types(analysis, vc->type_def);
+	}
+}
+
+static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
+{
+	static char* builtins[] = {
+	    "alloca",
+	    "int64_t",
+	    "lua_Number",
+	    "lua_Integer",
+	    "TValue",
+	    "ivalue",
+	    "fvalue",
+	    "Ravi_Arr",
+	    "arrvalue",
+	    "ttisfulluserdata",
+	    "ttislightuserdata",
+	    "ttisstring",
+	    "uvalue",
+	    "pvalue",
+	    "svalue",
+	    "getudatamem",
+	    "gco2u",
+	    "sizeudata",
+	    "vslen",
+	    "R",
+	    "Ravi_StringOrUserData",
+	    "Ravi_IntegerArray",
+	    "Ravi_NumberArray",
+	    NULL
+	};
+	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
+	for (int i = 0; builtins[i]; i++) {
+		if (strncmp(key, builtins[i], keylen) == 0) {
+			// builtin so skip
+			//fprintf(stderr, "Skipping builtin %.*s\n", keylen, key);
+			return;
+		}
+	}
+	if (analysis->is_tags) {
+		C_Type *ty = val;
+		analyze_C_types(analysis, ty);
+	}
+	else {
+		VarScope *vc = val;
+		analyze_C_vars(analysis, vc);
+	}
+}
+
 static void emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
 {
 	StringObject *str;
+	TextBuffer code;
+	raviX_buffer_init(&code, 1024);
+	raviX_buffer_add_string(&code, Embedded_C_header);
 	FOR_EACH_PTR(linearizer->C_declarations, StringObject, str) {
 	    raviX_buffer_add_string(mb, str->str);
+	    raviX_buffer_add_string(&code, str->str);
 	}
 	END_FOR_EACH_PTR(str)
+
+	C_parser parser;
+	C_parser_init(&parser);
+	C_Scope *global_scope = C_global_scope(&parser);
+	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
+	C_convert_pp_tokens(&parser, tok);
+	C_parse(global_scope, &parser, tok);
+
+	C_Decl_Analysis analysis = {&parser, global_scope, 0};
+	analysis.is_tags = 1;
+	hashmap_foreach(&global_scope->tags, analyze_C_declarations, &analysis);
+	analysis.is_tags = 0;
+	hashmap_foreach(&global_scope->vars, analyze_C_declarations, &analysis);
+	C_parser_destroy(&parser);
+	raviX_buffer_free(&code);
 }
 
 static void debug_message(void *context, const char *filename, long long line, const char *message)
