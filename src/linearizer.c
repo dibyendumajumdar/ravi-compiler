@@ -138,6 +138,7 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
 			raviX_destroy_graph(proc->cfg);
 	}
 	END_FOR_EACH_PTR(proc)
+	raviX_buffer_free(&linearizer->C_declarations);
 	raviX_allocator_destroy(&linearizer->instruction_allocator);
 	raviX_allocator_destroy(&linearizer->ptrlist_allocator);
 	raviX_allocator_destroy(&linearizer->pseudo_allocator);
@@ -150,7 +151,7 @@ void raviX_destroy_linearizer(LinearizerState *linearizer)
 
 static void add_C_declaration(LinearizerState *linearizer, const StringObject *str)
 {
-	raviX_ptrlist_add(&linearizer->C_declarations, str, &linearizer->ptrlist_allocator);
+	raviX_buffer_add_string(&linearizer->C_declarations, str->str);
 }
 
 /**

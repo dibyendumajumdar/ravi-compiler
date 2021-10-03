@@ -3117,17 +3117,15 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 	}
 }
 
-static void emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
+static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
 {
-	StringObject *str;
+	if (linearizer->C_declarations.buf == NULL || linearizer->C_declarations.buf[0] == 0)
+		return 0;
+
 	TextBuffer code;
 	raviX_buffer_init(&code, 1024);
 	raviX_buffer_add_string(&code, Embedded_C_header);
-	FOR_EACH_PTR(linearizer->C_declarations, StringObject, str) {
-	    raviX_buffer_add_string(mb, str->str);
-	    raviX_buffer_add_string(&code, str->str);
-	}
-	END_FOR_EACH_PTR(str)
+	raviX_buffer_add_string(&code, linearizer->C_declarations.buf);
 
 	C_Parser parser;
 	C_parser_init(&parser);
@@ -3143,6 +3141,8 @@ static void emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer
 	hashmap_foreach(&global_scope->vars, analyze_C_declarations, &analysis);
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
+
+	return analysis.status;
 }
 
 static void debug_message(void *context, const char *filename, long long line, const char *message)
@@ -3177,7 +3177,9 @@ int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_Co
 	raviX_buffer_add_string(mb, Lua_header);
 
 	/* emit C__decl statements in ravi code */
-	emit_embedded_C_declarations(linearizer, mb);
+	if (emit_embedded_C_declarations(linearizer, mb) != 0) {
+		return -1;
+	}
 
 	/* Preprocess upvalue attributes */
 	preprocess_upvalues(linearizer->main_proc);
