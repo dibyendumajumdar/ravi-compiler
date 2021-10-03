@@ -741,6 +741,7 @@ static const char Embedded_C_header[] =
     "  lua_Number *ptr;\n"
     "  unsigned int len;\n"
     "} Ravi_NumberArray;\n"
+    "int error_code = 0;\n"
     ;
 
 typedef struct {
@@ -2526,6 +2527,7 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 	    "Ravi_StringOrUserData",
 	    "Ravi_IntegerArray",
 	    "Ravi_NumberArray",
+	    "error_code",
 	    NULL
 	};
 	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
@@ -2544,6 +2546,38 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 		C_VarScope *vc = val;
 		analyze_C_vars(analysis, vc);
 	}
+}
+
+typedef struct C_Code_Analysis {
+	C_Parser *parser;
+	C_Scope *global_scope;
+	int status;
+	int is_tags;
+} C_Code_Analysis;
+
+static int analyze_C_code(LinearizerState *linearizer, TextBuffer *C_code)
+{
+	TextBuffer code;
+	raviX_buffer_init(&code, 1024);
+	raviX_buffer_add_string(&code, Embedded_C_header);
+	raviX_buffer_add_string(&code, linearizer->C_declarations.buf);
+
+	C_Parser parser;
+	C_parser_init(&parser);
+	C_Scope *global_scope = C_global_scope(&parser);
+	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
+	C_convert_pp_tokens(&parser, tok);
+	C_parse(global_scope, &parser, tok);
+
+	tok = C_tokenize_buffer(&parser, C_code->buf);
+	C_convert_pp_tokens(&parser, tok);
+	parser.embedded_mode = true;
+	C_Node *node = C_parse_compound_statement(global_scope, &parser, tok);
+
+	C_parser_destroy(&parser);
+	raviX_buffer_free(&code);
+
+	return 0;
 }
 
 static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
@@ -2605,6 +2639,12 @@ static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol 
 
 static int emit_op_embed_C(Function *fn, Instruction *insn)
 {
+	// Save the buffer and switch to new one temporarily
+	TextBuffer saved = fn->body;
+	fn->body.buf = NULL; fn->body.pos = 0; fn->body.capacity = 0;
+
+	// FIXME error handling - as we will leak memory if longjmp occurs
+
 	raviX_buffer_add_string(&fn->body, "{\n");
 	for (int i = 0; i < get_num_operands(insn); i++) {
 		Pseudo *pseudo = get_operand(insn, i);
@@ -2634,6 +2674,15 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	assert(C_code->type == PSEUDO_CONSTANT && C_code->constant->type == RAVI_TSTRING);
 	raviX_buffer_add_string(&fn->body, C_code->constant->s->str);
 	raviX_buffer_add_string(&fn->body, "\n}\n");
+
+	TextBuffer code = fn->body;
+	fn->body = saved; // Restore original output buffer
+
+	if (analyze_C_code(fn->proc->linearizer, &code) != 0) {
+
+	}
+	raviX_buffer_add_string(&fn->body, code.buf);
+	raviX_buffer_free(&code);
 	return 0;
 }
 
