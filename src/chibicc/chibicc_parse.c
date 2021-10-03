@@ -45,16 +45,6 @@ SOFTWARE.
 
 #include "chibicc.h"
 
-// C_Scope for local variables, global variables, typedefs
-// or enum constants
-typedef struct {
-  C_Obj *var;
-  C_Type *type_def;
-  C_Type *enum_ty;
-  int enum_val;
-} VarScope;
-
-
 // Variable attributes such as typedef or extern.
 typedef struct {
   bool is_typedef;

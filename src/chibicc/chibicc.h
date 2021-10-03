@@ -331,9 +331,18 @@ struct C_Scope {
 
   // C has two block scopes; one is for variables/typedefs and
   // the other is for struct/union/enum tags.
-  HashMap vars;
-  HashMap tags;
+  HashMap vars; // values are VarScope *
+  HashMap tags; // values are C_Type *
 };
+
+// C_Scope for local variables, global variables, typedefs
+// or enum constants
+typedef struct {
+  C_Obj *var;
+  C_Type *type_def;
+  C_Type *enum_ty;
+  int enum_val;
+} VarScope;
 
 struct C_parser {
   int file_no;
@@ -536,7 +545,7 @@ void hashmap_put2(HashMap *map, char *key, int keylen, void *val);
 void hashmap_delete(HashMap *map, char *key);
 void hashmap_delete2(HashMap *map, char *key, int keylen);
 void hashmap_test(void);
-void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val));
+void hashmap_foreach(HashMap *map, void (*f)(void *userdata, char *key, int keylen, void *val), void *userdata);
 void hashmap_destroy(HashMap *map);
 
 #endif
