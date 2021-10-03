@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-static void printout(char *key, int keylen, void *val)
+static void printout(void *userdata, char *key, int keylen, void *val)
 {
 	printf("name: %d %.*s\n", keylen, keylen, key);
 }
@@ -25,9 +25,9 @@ int main(int argc, const char *argv[])
 	scope.vars.arena = parser.arena;
 	scope.tags.arena = parser.arena;
 	C_Obj *obj = C_parse(&scope, &parser, tok);
-	hashmap_foreach(&scope.vars, printout);
+	hashmap_foreach(&scope.vars, printout, NULL);
 	C_create_function(&scope, &parser, "dummy");
-	hashmap_foreach(&scope.vars, printout);
+	hashmap_foreach(&scope.vars, printout, NULL);
 	const char *snippet = "{ Str s; s.data = \"hello world\"; s.len = sizeof \"hello world\"; }\n";
 	strncpy(buffer2, snippet, sizeof buffer2);
 	tok = C_tokenize_buffer(&parser, buffer2);

@@ -162,11 +162,11 @@ void hashmap_delete2(HashMap *map, char *key, int keylen) {
     ent->key = TOMBSTONE;
 }
 
-void hashmap_foreach(HashMap *map, void (*f)(char *key, int keylen, void *val)) {
+void hashmap_foreach(HashMap *map, void (*f)(void *userdata, char *key, int keylen, void *val), void *userdata) {
   for (int i = 0; i < map->capacity; i++) {
     HashEntry *ent = &map->buckets[i];
     if (ent->key && ent->key != TOMBSTONE)
-      f(ent->key, ent->keylen, ent->val);
+      f(userdata, ent->key, ent->keylen, ent->val);
   }
 }
 
