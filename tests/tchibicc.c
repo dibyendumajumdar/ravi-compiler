@@ -17,7 +17,7 @@ int main(int argc, const char *argv[])
 	" int len;\n" \
 	"} Str;\n";
 	strncpy(buffer, code, sizeof buffer);
-	C_parser parser = {0};
+	C_Parser parser = {0};
 	C_parser_init(&parser);
 	C_Token *tok = C_tokenize_buffer(&parser, buffer);
 	C_convert_pp_tokens(&parser, tok);

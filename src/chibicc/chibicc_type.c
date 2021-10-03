@@ -43,7 +43,7 @@ C_Type *C_ty_float = &(C_Type){TY_FLOAT, 4, 4};
 C_Type *C_ty_double = &(C_Type){TY_DOUBLE, 8, 8};
 C_Type *C_ty_ldouble = &(C_Type){TY_LDOUBLE, 16, 16};
 
-static C_Type *new_type(C_parser *parser, TypeKind kind, int size, int align) {
+static C_Type *new_type(C_Parser *parser, TypeKind kind, int size, int align) {
   C_Type *ty = mspace_calloc(parser->arena, 1, sizeof(C_Type));
   ty->kind = kind;
   ty->size = size;
@@ -113,21 +113,21 @@ bool C_is_compatible(C_Type *t1, C_Type *t2) {
   return false;
 }
 
-C_Type *C_copy_type(C_parser *parser, C_Type *ty) {
+C_Type *C_copy_type(C_Parser *parser, C_Type *ty) {
   C_Type *ret = mspace_calloc(parser->arena, 1, sizeof(C_Type));
   *ret = *ty;
   ret->origin = ty;
   return ret;
 }
 
-C_Type *C_pointer_to(C_parser *parser, C_Type *base) {
+C_Type *C_pointer_to(C_Parser *parser, C_Type *base) {
   C_Type *ty = new_type(parser, TY_PTR, 8, 8);
   ty->base = base;
   ty->is_unsigned = true;
   return ty;
 }
 
-C_Type *C_func_type(C_parser *parser, C_Type *return_ty) {
+C_Type *C_func_type(C_Parser *parser, C_Type *return_ty) {
   // The C spec disallows sizeof(<function type>), but
   // GCC allows that and the expression is evaluated to 1.
   C_Type *ty = new_type(parser, TY_FUNC, 1, 1);
@@ -135,29 +135,29 @@ C_Type *C_func_type(C_parser *parser, C_Type *return_ty) {
   return ty;
 }
 
-C_Type *C_array_of(C_parser *parser, C_Type *base, int size) {
+C_Type *C_array_of(C_Parser *parser, C_Type *base, int size) {
   C_Type *ty = new_type(parser, TY_ARRAY, base->size * size, base->align);
   ty->base = base;
   ty->array_len = size;
   return ty;
 }
 
-C_Type *C_vla_of(C_parser *parser, C_Type *base, C_Node *expr) {
+C_Type *C_vla_of(C_Parser *parser, C_Type *base, C_Node *expr) {
   C_Type *ty = new_type(parser, TY_VLA, 8, 8);
   ty->base = base;
   ty->vla_len = expr;
   return ty;
 }
 
-C_Type *C_enum_type(C_parser *parser) {
+C_Type *C_enum_type(C_Parser *parser) {
   return new_type(parser, TY_ENUM, 4, 4);
 }
 
-C_Type *C_struct_type(C_parser *parser) {
+C_Type *C_struct_type(C_Parser *parser) {
   return new_type(parser, TY_STRUCT, 0, 1);
 }
 
-static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
+static C_Type *get_common_type(C_Parser *parser, C_Type *ty1, C_Type *ty2) {
   if (ty1->base)
     return C_pointer_to(parser, ty1->base);
 
@@ -193,13 +193,13 @@ static C_Type *get_common_type(C_parser *parser, C_Type *ty1, C_Type *ty2) {
 // be promoted to match with the other.
 //
 // This operation is called the "usual arithmetic conversion".
-static void usual_arith_conv(C_parser *parser, C_Node **lhs, C_Node **rhs) {
+static void usual_arith_conv(C_Parser *parser, C_Node **lhs, C_Node **rhs) {
   C_Type *ty = get_common_type(parser, (*lhs)->ty, (*rhs)->ty);
   *lhs = C_new_cast(parser, *lhs, ty);
   *rhs = C_new_cast(parser, *rhs, ty);
 }
 
-void C_add_type(C_parser *parser, C_Node *node) {
+void C_add_type(C_Parser *parser, C_Node *node) {
   if (!node || node->ty)
     return;
 

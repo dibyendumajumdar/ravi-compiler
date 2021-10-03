@@ -3037,7 +3037,7 @@ static void preprocess_upvalues(Proc *proc)
 }
 
 typedef struct C_Decl_Analysis {
-	C_parser *parser;
+	C_Parser *parser;
 	C_Scope *global_scope;
 	int status;
 	int is_tags;
@@ -3129,7 +3129,7 @@ static void emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer
 	}
 	END_FOR_EACH_PTR(str)
 
-	C_parser parser;
+	C_Parser parser;
 	C_parser_init(&parser);
 	C_Scope *global_scope = C_global_scope(&parser);
 	C_Token *tok = C_tokenize_buffer(&parser, code.buf);

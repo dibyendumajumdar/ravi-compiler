@@ -88,55 +88,55 @@ struct InitDesg {
 };
 
 
-static bool is_typename(C_parser *parser, C_Token *tok);
-static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr *attr);
-static C_Type *typename(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Type *typeof_specifier(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty);
-static C_Type *declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty);
-static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *basety, VarAttr *attr);
-static void array_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init, int i);
-static void struct_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init, C_Member *mem);
-static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init);
-static Initializer *initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, C_Type **new_ty);
-static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
-static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
-static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *expr(C_parser *parser, C_Token **rest, C_Token *tok);
-static int64_t eval(C_parser *parser, C_Node *node);
-static int64_t eval2(C_parser *parser, C_Node *node, char ***label);
-static int64_t eval_rval(C_parser *parser, C_Node *node, char ***label);
-static bool is_const_expr(C_parser *parser, C_Node *node);
-static C_Node *assign(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *logor(C_parser *parser, C_Token **rest, C_Token *tok);
-static double eval_double(C_parser *parser, C_Node *node);
-static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *logand(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *bitor(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *bitxor(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *bitand(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *equality(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *relational(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *shift(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *add(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *new_add(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok);
-static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok);
-static C_Node *mul(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Member *get_struct_member(C_parser *parser, C_Type *ty, C_Token *tok);
-static C_Type *struct_decl(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Type *union_decl(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *node);
-static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok);
-static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety);
-static bool is_function(C_parser *parser, C_Token *tok);
-static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr);
-static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr);
+static bool is_typename(C_Parser *parser, C_Token *tok);
+static C_Type *declspec(C_Parser *parser, C_Token **rest, C_Token *tok, VarAttr *attr);
+static C_Type *typename(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Type *enum_specifier(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Type *typeof_specifier(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Type *type_suffix(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty);
+static C_Type *declarator(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty);
+static C_Node *declaration(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *basety, VarAttr *attr);
+static void array_initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init, int i);
+static void struct_initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init, C_Member *mem);
+static void initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init);
+static Initializer *initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, C_Type **new_ty);
+static C_Node *lvar_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
+static void gvar_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Obj *var);
+static C_Node *compound_stmt(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *stmt(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *expr_stmt(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *expr(C_Parser *parser, C_Token **rest, C_Token *tok);
+static int64_t eval(C_Parser *parser, C_Node *node);
+static int64_t eval2(C_Parser *parser, C_Node *node, char ***label);
+static int64_t eval_rval(C_Parser *parser, C_Node *node, char ***label);
+static bool is_const_expr(C_Parser *parser, C_Node *node);
+static C_Node *assign(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *logor(C_Parser *parser, C_Token **rest, C_Token *tok);
+static double eval_double(C_Parser *parser, C_Node *node);
+static C_Node *conditional(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *logand(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *bitor(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *bitxor(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *bitand(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *equality(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *relational(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *shift(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *add(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *new_add(C_Parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok);
+static C_Node *new_sub(C_Parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok);
+static C_Node *mul(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *cast(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Member *get_struct_member(C_Parser *parser, C_Type *ty, C_Token *tok);
+static C_Type *struct_decl(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Type *union_decl(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *postfix(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *funcall(C_Parser *parser, C_Token **rest, C_Token *tok, C_Node *node);
+static C_Node *unary(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Node *primary(C_Parser *parser, C_Token **rest, C_Token *tok);
+static C_Token *parse_typedef(C_Parser *parser, C_Token *tok, C_Type *basety);
+static bool is_function(C_Parser *parser, C_Token *tok);
+static C_Token *function(C_Parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr);
+static C_Token *global_variable(C_Parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr);
 
 static int align_down(int n, int align) {
   return C_align_to(n - align + 1, align);
@@ -149,14 +149,14 @@ static char *str_dup(mspace arena, const char *temp, size_t len) {
   return p;
 }
 
-C_Scope *C_global_scope(C_parser *parser) {
+C_Scope *C_global_scope(C_Parser *parser) {
   C_Scope *sc = mspace_calloc(parser->arena, 1, sizeof(C_Scope));
   sc->vars.arena = parser->arena;
   sc->tags.arena = parser->arena;
   return sc;
 }
 
-static void enter_scope(C_parser *parser) {
+static void enter_scope(C_Parser *parser) {
   C_Scope *sc = mspace_calloc(parser->arena, 1, sizeof(C_Scope));
   sc->vars.arena = parser->arena;
   sc->tags.arena = parser->arena;
@@ -164,12 +164,12 @@ static void enter_scope(C_parser *parser) {
   parser->scope = sc;
 }
 
-static void leave_scope(C_parser *parser) {
+static void leave_scope(C_Parser *parser) {
   parser->scope = parser->scope->next;
 }
 
 // Find a variable by name.
-static VarScope *find_var(C_parser *parser, C_Token *tok) {
+static VarScope *find_var(C_Parser *parser, C_Token *tok) {
   for (C_Scope *sc = parser->scope; sc; sc = sc->next) {
     VarScope *sc2 = hashmap_get2(&sc->vars, tok->loc, tok->len);
     if (sc2)
@@ -178,7 +178,7 @@ static VarScope *find_var(C_parser *parser, C_Token *tok) {
   return NULL;
 }
 
-static C_Type *find_tag(C_parser *parser, C_Token *tok) {
+static C_Type *find_tag(C_Parser *parser, C_Token *tok) {
   for (C_Scope *sc = parser->scope; sc; sc = sc->next) {
     C_Type *ty = hashmap_get2(&sc->tags, tok->loc, tok->len);
     if (ty)
@@ -187,59 +187,59 @@ static C_Type *find_tag(C_parser *parser, C_Token *tok) {
   return NULL;
 }
 
-static C_Node *new_node(C_parser *parser, C_NodeKind kind, C_Token *tok) {
+static C_Node *new_node(C_Parser *parser, C_NodeKind kind, C_Token *tok) {
   C_Node *node = mspace_calloc(parser->arena,1, sizeof(C_Node));
   node->kind = kind;
   node->tok = tok;
   return node;
 }
 
-static C_Node *new_binary(C_parser *parser, C_NodeKind kind, C_Node *lhs, C_Node *rhs, C_Token *tok) {
+static C_Node *new_binary(C_Parser *parser, C_NodeKind kind, C_Node *lhs, C_Node *rhs, C_Token *tok) {
   C_Node *node = new_node(parser, kind, tok);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
-static C_Node *new_unary(C_parser *parser, C_NodeKind kind, C_Node *expr, C_Token *tok) {
+static C_Node *new_unary(C_Parser *parser, C_NodeKind kind, C_Node *expr, C_Token *tok) {
   C_Node *node = new_node(parser, kind, tok);
   node->lhs = expr;
   return node;
 }
 
-static C_Node *new_num(C_parser *parser, int64_t val, C_Token *tok) {
+static C_Node *new_num(C_Parser *parser, int64_t val, C_Token *tok) {
   C_Node *node = new_node(parser, ND_NUM, tok);
   node->val = val;
   return node;
 }
 
-static C_Node *new_long(C_parser *parser, int64_t val, C_Token *tok) {
+static C_Node *new_long(C_Parser *parser, int64_t val, C_Token *tok) {
   C_Node *node = new_node(parser, ND_NUM, tok);
   node->val = val;
   node->ty = C_ty_long;
   return node;
 }
 
-static C_Node *new_ulong(C_parser *parser, long val, C_Token *tok) {
+static C_Node *new_ulong(C_Parser *parser, long val, C_Token *tok) {
   C_Node *node = new_node(parser, ND_NUM, tok);
   node->val = val;
   node->ty = C_ty_ulong;
   return node;
 }
 
-static C_Node *new_var_node(C_parser *parser, C_Obj *var, C_Token *tok) {
+static C_Node *new_var_node(C_Parser *parser, C_Obj *var, C_Token *tok) {
   C_Node *node = new_node(parser, ND_VAR, tok);
   node->var = var;
   return node;
 }
 
-static C_Node *new_vla_ptr(C_parser *parser, C_Obj *var, C_Token *tok) {
+static C_Node *new_vla_ptr(C_Parser *parser, C_Obj *var, C_Token *tok) {
   C_Node *node = new_node(parser, ND_VLA_PTR, tok);
   node->var = var;
   return node;
 }
 
-C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty) {
+C_Node *C_new_cast(C_Parser *parser, C_Node *expr, C_Type *ty) {
   C_add_type(parser, expr);
 
   C_Node *node = mspace_calloc( parser->arena,1, sizeof(C_Node));
@@ -250,13 +250,13 @@ C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty) {
   return node;
 }
 
-static VarScope *push_scope(C_parser *parser, char *name) {
+static VarScope *push_scope(C_Parser *parser, char *name) {
   VarScope *sc = mspace_calloc(parser->arena,1, sizeof(VarScope));
   hashmap_put(&parser->scope->vars, name, sc);
   return sc;
 }
 
-static Initializer *new_initializer(C_parser *parser, C_Type *ty, bool is_flexible) {
+static Initializer *new_initializer(C_Parser *parser, C_Type *ty, bool is_flexible) {
   Initializer *init = mspace_calloc(parser->arena,1, sizeof(Initializer));
   init->ty = ty;
 
@@ -296,7 +296,7 @@ static Initializer *new_initializer(C_parser *parser, C_Type *ty, bool is_flexib
   return init;
 }
 
-static C_Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
+static C_Obj *new_var(C_Parser *parser, char *name, C_Type *ty) {
   C_Obj *var = mspace_calloc(parser->arena, 1, sizeof(C_Obj));
   var->name = name;
   var->ty = ty;
@@ -305,7 +305,7 @@ static C_Obj *new_var(C_parser *parser, char *name, C_Type *ty) {
   return var;
 }
 
-static C_Obj *new_lvar(C_parser *parser, char *name, C_Type *ty) {
+static C_Obj *new_lvar(C_Parser *parser, char *name, C_Type *ty) {
   C_Obj *var = new_var(parser, name, ty);
   var->is_local = true;
   var->next = parser->locals;
@@ -313,7 +313,7 @@ static C_Obj *new_lvar(C_parser *parser, char *name, C_Type *ty) {
   return var;
 }
 
-static C_Obj *new_gvar(C_parser *parser, char *name, C_Type *ty) {
+static C_Obj *new_gvar(C_Parser *parser, char *name, C_Type *ty) {
   C_Obj *var = new_var(parser, name, ty);
   var->next = parser->globals;
   var->is_static = true;
@@ -330,23 +330,23 @@ static char *new_unique_name(mspace arena) {
   return str_dup(arena, temp, strlen(temp));
 }
 
-static C_Obj *new_anon_gvar(C_parser *parser, C_Type *ty) {
+static C_Obj *new_anon_gvar(C_Parser *parser, C_Type *ty) {
   return new_gvar(parser, new_unique_name(parser->arena), ty);
 }
 
-static C_Obj *new_string_literal(C_parser *parser, char *p, C_Type *ty) {
+static C_Obj *new_string_literal(C_Parser *parser, char *p, C_Type *ty) {
   C_Obj *var = new_anon_gvar(parser, ty);
   var->init_data = p;
   return var;
 }
 
-static char *get_ident(C_parser *parser, C_Token *tok) {
+static char *get_ident(C_Parser *parser, C_Token *tok) {
   if (tok->kind != TK_IDENT)
     C_error_tok(parser, tok, "expected an identifier");
   return str_dup(parser->arena, tok->loc, tok->len);
 }
 
-static C_Type *find_typedef(C_parser *parser, C_Token *tok) {
+static C_Type *find_typedef(C_Parser *parser, C_Token *tok) {
   if (tok->kind == TK_IDENT) {
     VarScope *sc = find_var(parser, tok);
     if (sc)
@@ -355,7 +355,7 @@ static C_Type *find_typedef(C_parser *parser, C_Token *tok) {
   return NULL;
 }
 
-static void push_tag_scope(C_parser *parser, C_Token *tok, C_Type *ty) {
+static void push_tag_scope(C_Parser *parser, C_Token *tok, C_Type *ty) {
   hashmap_put2(&parser->scope->tags, tok->loc, tok->len, ty);
 }
 
@@ -379,7 +379,7 @@ static void push_tag_scope(C_parser *parser, C_Token *tok, C_Type *ty) {
 // while keeping the "current" type object that the typenames up
 // until that point represent. When we reach a non-typename token,
 // we returns the current type object.
-static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr *attr) {
+static C_Type *declspec(C_Parser *parser, C_Token **rest, C_Token *tok, VarAttr *attr) {
   // We use a single integer as counters for all typenames.
   // For example, bits 0 and 1 represents how many times we saw the
   // keyword "void" so far. With this, we can use a switch statement
@@ -581,7 +581,7 @@ static C_Type *declspec(C_parser *parser, C_Token **rest, C_Token *tok, VarAttr 
 
 // func-params = ("void" | param ("," param)* ("," "...")?)? ")"
 // param       = declspec declarator
-static C_Type *func_params(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *func_params(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   if (C_equal(tok, "void") && C_equal(tok->next, ")")) {
     *rest = tok->next->next;
     return C_func_type(parser, ty);
@@ -633,7 +633,7 @@ static C_Type *func_params(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 }
 
 // array-dimensions = ("static" | "restrict")* const-expr? "]" type-suffix
-static C_Type *array_dimensions(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *array_dimensions(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   while (C_equal(tok, "static") || C_equal(tok, "restrict"))
     tok = tok->next;
 
@@ -654,7 +654,7 @@ static C_Type *array_dimensions(C_parser *parser, C_Token **rest, C_Token *tok, 
 // type-suffix = "(" func-params
 //             | "[" array-dimensions
 //             | ε
-static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *type_suffix(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   if (C_equal(tok, "("))
     return func_params(parser, rest, tok->next, ty);
 
@@ -666,7 +666,7 @@ static C_Type *type_suffix(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 }
 
 // pointers = ("*" ("const" | "volatile" | "restrict")*)*
-static C_Type *pointers(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *pointers(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   while (C_consume(&tok, tok, "*")) {
     ty = C_pointer_to(parser, ty);
     while (C_equal(tok, "const") || C_equal(tok, "volatile") || C_equal(tok, "restrict") || C_equal(tok, "__restrict") ||
@@ -678,7 +678,7 @@ static C_Type *pointers(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *
 }
 
 // declarator = pointers ("(" ident ")" | "(" declarator ")" | ident) type-suffix
-static C_Type *declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *declarator(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
   if (C_equal(tok, "(")) {
@@ -705,7 +705,7 @@ static C_Type *declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type
 }
 
 // abstract-declarator = pointers ("(" abstract-declarator ")")? type-suffix
-static C_Type *abstract_declarator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Type *abstract_declarator(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   ty = pointers(parser, &tok, tok, ty);
 
   if (C_equal(tok, "(")) {
@@ -721,7 +721,7 @@ static C_Type *abstract_declarator(C_parser *parser, C_Token **rest, C_Token *to
 }
 
 // type-name = declspec abstract-declarator
-static C_Type *typename(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *typename(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Type *ty = declspec(parser, &tok, tok, NULL);
   return abstract_declarator(parser, rest, tok, ty);
 }
@@ -748,7 +748,7 @@ static bool consume_end(C_Token **rest, C_Token *tok) {
 //                | ident ("{" enum-list? "}")?
 //
 // enum-list      = ident ("=" num)? ("," ident ("=" num)?)* ","?
-static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *enum_specifier(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Type *ty = C_enum_type(parser);
 
   // Read a struct tag.
@@ -794,7 +794,7 @@ static C_Type *enum_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // typeof-specifier = "(" (expr | typename) ")"
-static C_Type *typeof_specifier(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *typeof_specifier(C_Parser *parser, C_Token **rest, C_Token *tok) {
   tok = C_skip(parser, tok, "(");
 
   C_Type *ty;
@@ -810,7 +810,7 @@ static C_Type *typeof_specifier(C_parser *parser, C_Token **rest, C_Token *tok) 
 }
 
 // Generate code for computing a VLA size.
-static C_Node *compute_vla_size(C_parser *parser, C_Type *ty, C_Token *tok) {
+static C_Node *compute_vla_size(C_Parser *parser, C_Type *ty, C_Token *tok) {
   C_Node *node = new_node(parser, ND_NULL_EXPR, tok);
   if (ty->base)
     node = new_binary(parser, ND_COMMA, node, compute_vla_size(parser, ty->base, tok), tok);
@@ -831,7 +831,7 @@ static C_Node *compute_vla_size(C_parser *parser, C_Type *ty, C_Token *tok) {
   return new_binary(parser, ND_COMMA, node, expr, tok);
 }
 
-static C_Node *new_alloca(C_parser *parser, C_Node *sz) {
+static C_Node *new_alloca(C_Parser *parser, C_Node *sz) {
   C_Node *node = new_unary(parser, ND_FUNCALL, new_var_node(parser, parser->builtin_alloca, sz->tok), sz->tok);
   node->func_ty = parser->builtin_alloca->ty;
   node->ty = parser->builtin_alloca->ty->return_ty;
@@ -841,7 +841,7 @@ static C_Node *new_alloca(C_parser *parser, C_Node *sz) {
 }
 
 // declaration = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
-static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *basety, VarAttr *attr) {
+static C_Node *declaration(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *basety, VarAttr *attr) {
   C_Node head = {0};
   C_Node *cur = &head;
   int i = 0;
@@ -908,7 +908,7 @@ static C_Node *declaration(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
   return node;
 }
 
-static C_Token *skip_excess_element(C_parser *parser, C_Token *tok) {
+static C_Token *skip_excess_element(C_Parser *parser, C_Token *tok) {
   if (C_equal(tok, "{")) {
     tok = skip_excess_element(parser, tok->next);
     return C_skip(parser, tok, "}");
@@ -919,7 +919,7 @@ static C_Token *skip_excess_element(C_parser *parser, C_Token *tok) {
 }
 
 // string-initializer = string-literal
-static void string_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void string_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   if (init->is_flexible)
     *init = *new_initializer(parser, C_array_of(parser, init->ty->base, tok->ty->array_len), false);
 
@@ -976,7 +976,7 @@ static void string_initializer(C_parser *parser, C_Token **rest, C_Token *tok, I
 //   struct { int a, b, c; } x = { .c=5 };
 //
 // The above initializer sets x.c to 5.
-static void array_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, int *begin, int *end) {
+static void array_designator(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, int *begin, int *end) {
   *begin = C_const_expr(parser, &tok, tok->next);
   if (*begin >= ty->array_len)
     C_error_tok(parser, tok, "array designator index exceeds array bounds");
@@ -995,7 +995,7 @@ static void array_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_T
 }
 
 // struct-designator = "." ident
-static C_Member *struct_designator(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static C_Member *struct_designator(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   C_Token *start = tok;
   tok = C_skip(parser, tok, ".");
   if (tok->kind != TK_IDENT)
@@ -1022,7 +1022,7 @@ static C_Member *struct_designator(C_parser *parser, C_Token **rest, C_Token *to
 }
 
 // designation = ("[" const-expr "]" | "." ident)* "="? initializer
-static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void designation(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   if (C_equal(tok, "[")) {
     if (init->ty->kind != TY_ARRAY)
       C_error_tok(parser, tok, "array index in non-array initializer");
@@ -1063,7 +1063,7 @@ static void designation(C_parser *parser, C_Token **rest, C_Token *tok, Initiali
 // An array length can be omitted if an array has an initializer
 // (e.g. `int x[] = {1,2,3}`). If it's omitted, count the number
 // of initializer elements.
-static int count_array_init_elements(C_parser *parser, C_Token *tok, C_Type *ty) {
+static int count_array_init_elements(C_Parser *parser, C_Token *tok, C_Type *ty) {
   bool first = true;
   Initializer *dummy = new_initializer(parser, ty->base, true);
 
@@ -1091,7 +1091,7 @@ static int count_array_init_elements(C_parser *parser, C_Token *tok, C_Type *ty)
 }
 
 // array-initializer1 = "{" initializer ("," initializer)* ","? "}"
-static void array_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void array_initializer1(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   tok = C_skip(parser, tok, "{");
 
   if (init->is_flexible) {
@@ -1131,7 +1131,7 @@ static void array_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, I
 }
 
 // array-initializer2 = initializer ("," initializer)*
-static void array_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init, int i) {
+static void array_initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init, int i) {
   if (init->is_flexible) {
     int len = count_array_init_elements(parser, tok, init->ty);
     *init = *new_initializer(parser, C_array_of(parser, init->ty->base, len), false);
@@ -1153,7 +1153,7 @@ static void array_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, I
 }
 
 // struct-initializer1 = "{" initializer ("," initializer)* ","? "}"
-static void struct_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void struct_initializer1(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   tok = C_skip(parser, tok, "{");
 
   C_Member *mem = init->ty->members;
@@ -1181,7 +1181,7 @@ static void struct_initializer1(C_parser *parser, C_Token **rest, C_Token *tok, 
 }
 
 // struct-initializer2 = initializer ("," initializer)*
-static void struct_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init, C_Member *mem) {
+static void struct_initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init, C_Member *mem) {
   bool first = true;
 
   for (; mem && !is_end(tok); mem = mem->next) {
@@ -1201,7 +1201,7 @@ static void struct_initializer2(C_parser *parser, C_Token **rest, C_Token *tok, 
   *rest = tok;
 }
 
-static void union_initializer(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void union_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   // Unlike structs, union initializers take only one initializer,
   // and that initializes the first union member by default.
   // You can initialize other member using a designated initializer.
@@ -1227,7 +1227,7 @@ static void union_initializer(C_parser *parser, C_Token **rest, C_Token *tok, In
 // initializer = string-initializer | array-initializer
 //             | struct-initializer | union-initializer
 //             | assign
-static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
+static void initializer2(C_Parser *parser, C_Token **rest, C_Token *tok, Initializer *init) {
   if (init->ty->kind == TY_ARRAY && tok->kind == TK_STR) {
     string_initializer(parser, rest, tok, init);
     return;
@@ -1277,7 +1277,7 @@ static void initializer2(C_parser *parser, C_Token **rest, C_Token *tok, Initial
   init->expr = assign(parser, rest, tok);
 }
 
-static C_Type *copy_struct_type(C_parser *parser, C_Type *ty) {
+static C_Type *copy_struct_type(C_Parser *parser, C_Type *ty) {
   ty = C_copy_type(parser, ty);
 
   C_Member head = {0};
@@ -1292,7 +1292,7 @@ static C_Type *copy_struct_type(C_parser *parser, C_Type *ty) {
   return ty;
 }
 
-static Initializer *initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, C_Type **new_ty) {
+static Initializer *initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty, C_Type **new_ty) {
   Initializer *init = new_initializer(parser, ty, true);
   initializer2(parser, rest, tok, init);
 
@@ -1313,7 +1313,7 @@ static Initializer *initializer(C_parser *parser, C_Token **rest, C_Token *tok, 
   return init;
 }
 
-static C_Node *init_desg_expr(C_parser *parser, InitDesg *desg, C_Token *tok) {
+static C_Node *init_desg_expr(C_Parser *parser, InitDesg *desg, C_Token *tok) {
   if (desg->var)
     return new_var_node(parser, desg->var, tok);
 
@@ -1328,7 +1328,7 @@ static C_Node *init_desg_expr(C_parser *parser, InitDesg *desg, C_Token *tok) {
   return new_unary(parser, ND_DEREF, new_add(parser, lhs, rhs, tok), tok);
 }
 
-static C_Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty, InitDesg *desg, C_Token *tok) {
+static C_Node *create_lvar_init(C_Parser *parser, Initializer *init, C_Type *ty, InitDesg *desg, C_Token *tok) {
   if (ty->kind == TY_ARRAY) {
     C_Node *node = new_node(parser, ND_NULL_EXPR, tok);
     for (int i = 0; i < ty->array_len; i++) {
@@ -1373,7 +1373,7 @@ static C_Node *create_lvar_init(C_parser *parser, Initializer *init, C_Type *ty,
 //   x[0][1] = 7;
 //   x[1][0] = 8;
 //   x[1][1] = 9;
-static C_Node *lvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
+static C_Node *lvar_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
   Initializer *init = initializer(parser, rest, tok, var->ty, &var->ty);
   InitDesg desg = {NULL, 0, NULL, var};
 
@@ -1414,7 +1414,7 @@ static void write_buf(char *buf, uint64_t val, int sz) {
 }
 
 static C_Relocation *
-write_gvar_data(C_parser *parser, C_Relocation *cur, Initializer *init, C_Type *ty, char *buf, int offset) {
+write_gvar_data(C_Parser *parser, C_Relocation *cur, Initializer *init, C_Type *ty, char *buf, int offset) {
   if (ty->kind == TY_ARRAY) {
     int sz = ty->base->size;
     for (int i = 0; i < ty->array_len; i++)
@@ -1483,7 +1483,7 @@ write_gvar_data(C_parser *parser, C_Relocation *cur, Initializer *init, C_Type *
 // embedded to .data section. This function serializes Initializer
 // objects to a flat byte array. It is a compile error if an
 // initializer list contains a non-constant expression.
-static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
+static void gvar_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, C_Obj *var) {
   Initializer *init = initializer(parser, rest, tok, var->ty, &var->ty);
 
   C_Relocation head = {0};
@@ -1494,7 +1494,7 @@ static void gvar_initializer(C_parser *parser, C_Token **rest, C_Token *tok, C_O
 }
 
 // Returns true if a given token represents a type.
-static bool is_typename(C_parser *parser, C_Token *tok) {
+static bool is_typename(C_Parser *parser, C_Token *tok) {
   if (parser->typewords.capacity == 0) {
     static char *kw[] = {
       "void", "_Bool", "char", "short", "int", "long", "struct", "union",
@@ -1511,7 +1511,7 @@ static bool is_typename(C_parser *parser, C_Token *tok) {
 }
 
 // asm-stmt = "asm" ("volatile" | "inline")* "(" string-literal ")"
-static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *asm_stmt(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = new_node(parser, ND_ASM, tok);
   tok = tok->next;
 
@@ -1541,7 +1541,7 @@ static C_Node *asm_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 //      | ident ":" stmt
 //      | "{" compound-stmt
 //      | expr-stmt
-static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *stmt(C_Parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, "return")) {
     C_Node *node = new_node(parser, ND_RETURN, tok);
     if (C_consume(rest, tok->next, ";"))
@@ -1757,7 +1757,7 @@ static C_Node *stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // compound-stmt = (typedef | declaration | stmt)* "}"
-static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *compound_stmt(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = new_node(parser, ND_BLOCK, tok);
   C_Node head = {0};
   C_Node *cur = &head;
@@ -1799,7 +1799,7 @@ static C_Node *compound_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // expr-stmt = expr? ";"
-static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *expr_stmt(C_Parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, ";")) {
     *rest = tok->next;
     return new_node(parser, ND_BLOCK, tok);
@@ -1812,7 +1812,7 @@ static C_Node *expr_stmt(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // expr = assign ("," expr)?
-static C_Node *expr(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *expr(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = assign(parser, &tok, tok);
 
   if (C_equal(tok, ","))
@@ -1822,7 +1822,7 @@ static C_Node *expr(C_parser *parser, C_Token **rest, C_Token *tok) {
   return node;
 }
 
-static int64_t eval(C_parser *parser, C_Node *node) {
+static int64_t eval(C_Parser *parser, C_Node *node) {
   return eval2(parser, node, NULL);
 }
 
@@ -1832,7 +1832,7 @@ static int64_t eval(C_parser *parser, C_Node *node) {
 // is a pointer to a global variable and n is a postiive/negative
 // number. The latter form is accepted only as an initialization
 // expression for a global variable.
-static int64_t eval2(C_parser *parser, C_Node *node, char ***label) {
+static int64_t eval2(C_Parser *parser, C_Node *node, char ***label) {
   C_add_type(parser, node);
 
   if (C_is_flonum(node->ty))
@@ -1927,7 +1927,7 @@ static int64_t eval2(C_parser *parser, C_Node *node, char ***label) {
   C_error_tok(parser, node->tok, "not a compile-time constant");
 }
 
-static int64_t eval_rval(C_parser *parser, C_Node *node, char ***label) {
+static int64_t eval_rval(C_Parser *parser, C_Node *node, char ***label) {
   switch (node->kind) {
   case ND_VAR:
     if (node->var->is_local)
@@ -1943,7 +1943,7 @@ static int64_t eval_rval(C_parser *parser, C_Node *node, char ***label) {
   C_error_tok(parser, node->tok, "invalid initializer");
 }
 
-static bool is_const_expr(C_parser *parser, C_Node *node) {
+static bool is_const_expr(C_Parser *parser, C_Node *node) {
   C_add_type(parser, node);
 
   switch (node->kind) {
@@ -1981,12 +1981,12 @@ static bool is_const_expr(C_parser *parser, C_Node *node) {
   return false;
 }
 
-int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok) {
+int64_t C_const_expr(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = conditional(parser, rest, tok);
   return eval(parser, node);
 }
 
-static double eval_double(C_parser *parser, C_Node *node) {
+static double eval_double(C_Parser *parser, C_Node *node) {
   C_add_type(parser, node);
 
   if (C_is_integer(node->ty)) {
@@ -2027,7 +2027,7 @@ static double eval_double(C_parser *parser, C_Node *node) {
 // However, if a given expression is of form `A.x op= C`, the input is
 // converted to `tmp = &A, (*tmp).x = (*tmp).x op C` to handle assignments
 // to bitfields.
-static C_Node *to_assign(C_parser *parser, C_Node *binary) {
+static C_Node *to_assign(C_Parser *parser, C_Node *binary) {
   C_add_type(parser, binary->lhs);
   C_add_type(parser, binary->rhs);
   C_Token *tok = binary->tok;
@@ -2139,7 +2139,7 @@ static C_Node *to_assign(C_parser *parser, C_Node *binary) {
 // assign    = conditional (assign-op assign)?
 // assign-op = "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "&=" | "|=" | "^="
 //           | "<<=" | ">>="
-static C_Node *assign(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *assign(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = conditional(parser, &tok, tok);
 
   if (C_equal(tok, "="))
@@ -2180,7 +2180,7 @@ static C_Node *assign(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // conditional = logor ("?" expr? ":" conditional)?
-static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *conditional(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *cond = logor(parser, &tok, tok);
 
   if (!C_equal(tok, "?")) {
@@ -2209,7 +2209,7 @@ static C_Node *conditional(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // logor = logand ("||" logand)*
-static C_Node *logor(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *logor(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = logand(parser, &tok, tok);
   while (C_equal(tok, "||")) {
     C_Token *start = tok;
@@ -2220,7 +2220,7 @@ static C_Node *logor(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // logand = bitor ("&&" bitor)*
-static C_Node *logand(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *logand(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = bitor(parser, &tok, tok);
   while (C_equal(tok, "&&")) {
     C_Token *start = tok;
@@ -2231,7 +2231,7 @@ static C_Node *logand(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // bitor = bitxor ("|" bitxor)*
-static C_Node *bitor(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *bitor(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = bitxor(parser, &tok, tok);
   while (C_equal(tok, "|")) {
     C_Token *start = tok;
@@ -2242,7 +2242,7 @@ static C_Node *bitor(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // bitxor = bitand ("^" bitand)*
-static C_Node *bitxor(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *bitxor(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = bitand(parser, &tok, tok);
   while (C_equal(tok, "^")) {
     C_Token *start = tok;
@@ -2253,7 +2253,7 @@ static C_Node *bitxor(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // bitand = equality ("&" equality)*
-static C_Node *bitand(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *bitand(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = equality(parser, &tok, tok);
   while (C_equal(tok, "&")) {
     C_Token *start = tok;
@@ -2264,7 +2264,7 @@ static C_Node *bitand(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // equality = relational ("==" relational | "!=" relational)*
-static C_Node *equality(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *equality(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = relational(parser, &tok, tok);
 
   for (;;) {
@@ -2286,7 +2286,7 @@ static C_Node *equality(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // relational = shift ("<" shift | "<=" shift | ">" shift | ">=" shift)*
-static C_Node *relational(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *relational(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = shift(parser, &tok, tok);
 
   for (;;) {
@@ -2318,7 +2318,7 @@ static C_Node *relational(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // shift = add ("<<" add | ">>" add)*
-static C_Node *shift(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *shift(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = add(parser, &tok, tok);
 
   for (;;) {
@@ -2344,7 +2344,7 @@ static C_Node *shift(C_parser *parser, C_Token **rest, C_Token *tok) {
 // so that p+n points to the location n elements (not bytes) ahead of p.
 // In other words, we need to scale an integer value before adding to a
 // pointer value. This function takes care of the scaling.
-static C_Node *new_add(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok) {
+static C_Node *new_add(C_Parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok) {
   C_add_type(parser, lhs);
   C_add_type(parser, rhs);
 
@@ -2374,7 +2374,7 @@ static C_Node *new_add(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
 }
 
 // Like `+`, `-` is overloaded for the pointer type.
-static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok) {
+static C_Node *new_sub(C_Parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok) {
   C_add_type(parser, lhs);
   C_add_type(parser, rhs);
 
@@ -2411,7 +2411,7 @@ static C_Node *new_sub(C_parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
 }
 
 // add = mul ("+" mul | "-" mul)*
-static C_Node *add(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *add(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = mul(parser, &tok, tok);
 
   for (;;) {
@@ -2433,7 +2433,7 @@ static C_Node *add(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // mul = cast ("*" cast | "/" cast | "%" cast)*
-static C_Node *mul(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *mul(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Node *node = cast(parser, &tok, tok);
 
   for (;;) {
@@ -2460,7 +2460,7 @@ static C_Node *mul(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // cast = "(" type-name ")" cast | unary
-static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *cast(C_Parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, "(") && is_typename(parser, tok->next)) {
     C_Token *start = tok;
     C_Type *ty = typename(parser, &tok, tok->next);
@@ -2483,7 +2483,7 @@ static C_Node *cast(C_parser *parser, C_Token **rest, C_Token *tok) {
 //       | ("++" | "--") unary
 //       | "&&" ident
 //       | postfix
-static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *unary(C_Parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, "+"))
     return cast(parser, rest, tok->next);
 
@@ -2538,7 +2538,7 @@ static C_Node *unary(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // struct-members = (declspec declarator (","  declarator)* ";")*
-static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
+static void struct_members(C_Parser *parser, C_Token **rest, C_Token *tok, C_Type *ty) {
   C_Member head = {0};
   C_Member *cur = &head;
   int idx = 0;
@@ -2592,7 +2592,7 @@ static void struct_members(C_parser *parser, C_Token **rest, C_Token *tok, C_Typ
 }
 
 // attribute = ("__attribute__" "(" "(" "packed" ")" ")")*
-static C_Token *attribute_list(C_parser *parser, C_Token *tok, C_Type *ty) {
+static C_Token *attribute_list(C_Parser *parser, C_Token *tok, C_Type *ty) {
   while (C_consume(&tok, tok, "__attribute__")) {
     tok = C_skip(parser, tok, "(");
     tok = C_skip(parser, tok, "(");
@@ -2626,7 +2626,7 @@ static C_Token *attribute_list(C_parser *parser, C_Token *tok, C_Type *ty) {
 }
 
 // struct-union-decl = attribute? ident? ("{" struct-members)?
-static C_Type *struct_union_decl(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *struct_union_decl(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Type *ty = C_struct_type(parser);
   tok = attribute_list(parser, tok, ty);
 
@@ -2671,7 +2671,7 @@ static C_Type *struct_union_decl(C_parser *parser, C_Token **rest, C_Token *tok)
 }
 
 // struct-decl = struct-union-decl
-static C_Type *struct_decl(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *struct_decl(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Type *ty = struct_union_decl(parser, rest, tok);
   ty->kind = TY_STRUCT;
 
@@ -2710,7 +2710,7 @@ static C_Type *struct_decl(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // union-decl = struct-union-decl
-static C_Type *union_decl(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Type *union_decl(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Type *ty = struct_union_decl(parser, rest, tok);
   ty->kind = TY_UNION;
 
@@ -2731,7 +2731,7 @@ static C_Type *union_decl(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // Find a struct member by name.
-static C_Member *get_struct_member(C_parser *parser, C_Type *ty, C_Token *tok) {
+static C_Member *get_struct_member(C_Parser *parser, C_Type *ty, C_Token *tok) {
   for (C_Member *mem = ty->members; mem; mem = mem->next) {
     // Anonymous struct member
     if ((mem->ty->kind == TY_STRUCT || mem->ty->kind == TY_UNION) &&
@@ -2762,7 +2762,7 @@ static C_Member *get_struct_member(C_parser *parser, C_Type *ty, C_Token *tok) {
 // member "a" of the anonymous struct as "x.a".
 //
 // This function takes care of anonymous structs.
-static C_Node *struct_ref(C_parser *parser, C_Node *node, C_Token *tok) {
+static C_Node *struct_ref(C_Parser *parser, C_Node *node, C_Token *tok) {
   C_add_type(parser, node);
   if (node->ty->kind != TY_STRUCT && node->ty->kind != TY_UNION)
     C_error_tok(parser, node->tok, "not a struct nor a union");
@@ -2783,7 +2783,7 @@ static C_Node *struct_ref(C_parser *parser, C_Node *node, C_Token *tok) {
 }
 
 // Convert A++ to `(typeof A)((A += 1) - 1)`
-static C_Node *new_inc_dec(C_parser *parser, C_Node *node, C_Token *tok, int addend) {
+static C_Node *new_inc_dec(C_Parser *parser, C_Node *node, C_Token *tok, int addend) {
   C_add_type(parser, node);
   return C_new_cast(parser,
                     new_add(parser, to_assign(parser, new_add(parser, node, new_num(parser, addend, tok), tok)),
@@ -2801,7 +2801,7 @@ static C_Node *new_inc_dec(C_parser *parser, C_Node *node, C_Token *tok, int add
 //              | "->" ident
 //              | "++"
 //              | "--"
-static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *postfix(C_Parser *parser, C_Token **rest, C_Token *tok) {
   if (C_equal(tok, "(") && is_typename(parser, tok->next)) {
     // Compound literal
     C_Token *start = tok;
@@ -2869,7 +2869,7 @@ static C_Node *postfix(C_parser *parser, C_Token **rest, C_Token *tok) {
 }
 
 // funcall = (assign ("," assign)*)? ")"
-static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *fn) {
+static C_Node *funcall(C_Parser *parser, C_Token **rest, C_Token *tok, C_Node *fn) {
   C_add_type(parser, fn);
 
   if (fn->ty->kind != TY_FUNC &&
@@ -2926,7 +2926,7 @@ static C_Node *funcall(C_parser *parser, C_Token **rest, C_Token *tok, C_Node *f
 //
 // generic-assoc = type-name ":" assign
 //               | "default" ":" assign
-static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *generic_selection(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Token *start = tok;
   tok = C_skip(parser, tok, "(");
 
@@ -2978,7 +2978,7 @@ static C_Node *generic_selection(C_parser *parser, C_Token **rest, C_Token *tok)
 //         | ident
 //         | str
 //         | num
-static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
+static C_Node *primary(C_Parser *parser, C_Token **rest, C_Token *tok) {
   C_Token *start = tok;
 
   if (C_equal(tok, "(") && C_equal(tok->next, "{")) {
@@ -3125,7 +3125,7 @@ static C_Node *primary(C_parser *parser, C_Token **rest, C_Token *tok) {
   C_error_tok(parser, tok, "expected an expression");
 }
 
-static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety) {
+static C_Token *parse_typedef(C_Parser *parser, C_Token *tok, C_Type *basety) {
   bool first = true;
 
   while (!C_consume(&tok, tok, ";")) {
@@ -3141,7 +3141,7 @@ static C_Token *parse_typedef(C_parser *parser, C_Token *tok, C_Type *basety) {
   return tok;
 }
 
-static void create_param_lvars(C_parser *parser, C_Type *param) {
+static void create_param_lvars(C_Parser *parser, C_Type *param) {
   if (param) {
     create_param_lvars(parser, param->next);
     if (!param->name)
@@ -3155,7 +3155,7 @@ static void create_param_lvars(C_parser *parser, C_Type *param) {
 // We cannot resolve gotos as we C_parse a function because gotos
 // can refer a label that appears later in the function.
 // So, we need to do this after we C_parse the entire function.
-static void resolve_goto_labels(C_parser *parser) {
+static void resolve_goto_labels(C_Parser *parser) {
   for (C_Node *x = parser->gotos; x; x = x->goto_next) {
     for (C_Node *y = parser->labels; y; y = y->goto_next) {
       if (!strcmp(x->label, y->label)) {
@@ -3171,7 +3171,7 @@ static void resolve_goto_labels(C_parser *parser) {
   parser->gotos = parser->labels = NULL;
 }
 
-static C_Obj *find_func(C_parser *parser, char *name) {
+static C_Obj *find_func(C_Parser *parser, char *name) {
   C_Scope *sc = parser->scope;
   while (sc->next)
     sc = sc->next;
@@ -3182,7 +3182,7 @@ static C_Obj *find_func(C_parser *parser, char *name) {
   return NULL;
 }
 
-static void mark_live(C_parser *parser, C_Obj *var) {
+static void mark_live(C_Parser *parser, C_Obj *var) {
   if (!var->is_function || var->is_live)
     return;
   var->is_live = true;
@@ -3194,7 +3194,7 @@ static void mark_live(C_parser *parser, C_Obj *var) {
   }
 }
 
-static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
+static C_Token *function(C_Parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
   C_Type *ty = declarator(parser, &tok, tok, basety);
   if (!ty->name)
     C_error_tok(parser, ty->name_pos, "function name omitted");
@@ -3259,7 +3259,7 @@ static C_Token *function(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr
   return tok;
 }
 
-static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
+static C_Token *global_variable(C_Parser *parser, C_Token *tok, C_Type *basety, VarAttr *attr) {
   bool first = true;
 
   while (!C_consume(&tok, tok, ";")) {
@@ -3288,7 +3288,7 @@ static C_Token *global_variable(C_parser *parser, C_Token *tok, C_Type *basety, 
 
 // Lookahead tokens and returns true if a given token is a start
 // of a function definition or declaration.
-static bool is_function(C_parser *parser, C_Token *tok) {
+static bool is_function(C_Parser *parser, C_Token *tok) {
   if (C_equal(tok, ";"))
     return false;
 
@@ -3298,7 +3298,7 @@ static bool is_function(C_parser *parser, C_Token *tok) {
 }
 
 // Remove redundant tentative definitions.
-static void scan_globals(C_parser *parser) {
+static void scan_globals(C_Parser *parser) {
   C_Obj head;
   C_Obj *cur = &head;
 
@@ -3324,7 +3324,7 @@ static void scan_globals(C_parser *parser) {
   parser->globals = head.next;
 }
 
-static void declare_builtin_functions(C_parser *parser) {
+static void declare_builtin_functions(C_Parser *parser) {
   C_Type *ty = C_func_type(parser, C_pointer_to(parser, C_ty_void));
   ty->params = C_copy_type(parser, C_ty_int);
   parser->builtin_alloca = new_gvar(parser, "alloca", ty);
@@ -3332,7 +3332,7 @@ static void declare_builtin_functions(C_parser *parser) {
 }
 
 #ifdef RAVI_EXTENSIONS
-C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str) {
+C_Obj *C_create_function(C_Scope *globalScope, C_Parser *parser, char *name_str) {
   C_Obj *fn = new_gvar(parser, name_str, C_func_type(parser, C_ty_void));
   fn->is_function = true;
   fn->is_definition = true;
@@ -3348,14 +3348,14 @@ C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str)
   return fn;
 }
 
-C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Node *C_parse_compound_statement(C_Scope *globalScope, C_Parser *parser, C_Token *tok) {
   parser->scope = globalScope;
   return compound_stmt(parser, &tok, tok);
 }
 #endif
 
 // program = (typedef | function-definition | global-variable)*
-C_Obj *C_parse(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
+C_Obj *C_parse(C_Scope *globalScope, C_Parser *parser, C_Token *tok) {
   parser->scope = globalScope;
 
   declare_builtin_functions(parser);
@@ -3390,7 +3390,7 @@ C_Obj *C_parse(C_Scope *globalScope, C_parser *parser, C_Token *tok) {
   return parser->globals;
 }
 
-void C_parser_init(C_parser *parser)
+void C_parser_init(C_Parser *parser)
 {
   memset(parser, 0, sizeof *parser);
   parser->arena = create_mspace(0, 0);
@@ -3398,7 +3398,7 @@ void C_parser_init(C_parser *parser)
   parser->typewords.arena = parser->arena;
 }
 
-void C_parser_destroy(C_parser *parser)
+void C_parser_destroy(C_Parser *parser)
 {
   //mspace_malloc_stats(parser->arena);
   destroy_mspace(parser->arena);

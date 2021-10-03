@@ -61,7 +61,7 @@ int C_encode_utf8(char *buf, uint32_t c) {
 // encoded in one to four bytes. One byte UTF-8 code points are
 // identical to ASCII. Non-ASCII characters are encoded using more
 // than one byte.
-uint32_t C_decode_utf8(C_parser *tokenizer, char **new_pos, char *p) {
+uint32_t C_decode_utf8(C_Parser *tokenizer, char **new_pos, char *p) {
   if ((unsigned char)*p < 128) {
     *new_pos = p + 1;
     return *p;
@@ -205,7 +205,7 @@ static int char_width(uint32_t c) {
 
 // Returns the number of columns needed to display a given
 // string in a fixed-width font.
-int C_display_width(C_parser *tokenizer, char *p, int len) {
+int C_display_width(C_Parser *tokenizer, char *p, int len) {
   char *start = p;
   int w = 0;
   while (p - start < len) {

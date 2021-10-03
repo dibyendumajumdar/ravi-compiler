@@ -62,7 +62,7 @@ typedef struct C_Node C_Node;
 typedef struct C_Member C_Member;
 typedef struct C_Relocation C_Relocation;
 typedef struct C_Hideset C_Hideset;
-typedef struct C_parser C_parser;
+typedef struct C_Parser C_Parser;
 
 //
 // strings.c
@@ -125,16 +125,16 @@ struct C_Token {
 };
 
 noreturn void C_error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
-noreturn void C_error_at(C_parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 3, 4)));
-noreturn void C_error_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
-void C_warn_tok(C_parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
+noreturn void C_error_at(C_Parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 3, 4)));
+noreturn void C_error_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
+void C_warn_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
 bool C_equal(C_Token *tok, char *op);
-C_Token *C_skip(C_parser *parser, C_Token *tok, char *op);
+C_Token *C_skip(C_Parser *parser, C_Token *tok, char *op);
 bool C_consume(C_Token **rest, C_Token *tok, char *str);
-void C_convert_pp_tokens(C_parser *tokenizer, C_Token *tok);
-C_File *C_new_file(C_parser *tokenizer, char *name, int file_no, char *contents);
-C_Token *C_tokenize(C_parser *tokenizer, C_File *file);
-C_Token *C_tokenize_buffer(C_parser *tokenizer, char *p);
+void C_convert_pp_tokens(C_Parser *tokenizer, C_Token *tok);
+C_File *C_new_file(C_Parser *tokenizer, char *name, int file_no, char *contents);
+C_Token *C_tokenize(C_Parser *tokenizer, C_File *file);
+C_Token *C_tokenize_buffer(C_Parser *tokenizer, char *p);
 
 #define unreachable() \
   C_error("internal error at %s:%d", __FILE__, __LINE__)
@@ -344,7 +344,7 @@ typedef struct {
   int enum_val;
 } VarScope;
 
-struct C_parser {
+struct C_Parser {
   int file_no;
   // Input file
   C_File *current_file;
@@ -393,19 +393,19 @@ struct C_parser {
 #endif
 };
 
-void C_parser_init(C_parser *parser);
-C_Scope *C_global_scope(C_parser *parser);
-C_Node *C_new_cast(C_parser *parser, C_Node *expr, C_Type *ty);
-int64_t C_const_expr(C_parser *parser, C_Token **rest, C_Token *tok);
-C_Obj *C_parse(C_Scope * globalScope, C_parser *parser, C_Token *tok);
-void C_parser_destroy(C_parser *parser);
+void C_parser_init(C_Parser *parser);
+C_Scope *C_global_scope(C_Parser *parser);
+C_Node *C_new_cast(C_Parser *parser, C_Node *expr, C_Type *ty);
+int64_t C_const_expr(C_Parser *parser, C_Token **rest, C_Token *tok);
+C_Obj *C_parse(C_Scope * globalScope, C_Parser *parser, C_Token *tok);
+void C_parser_destroy(C_Parser *parser);
 
 #ifdef RAVI_EXTENSIONS
-C_Node *C_parse_compound_statement(C_Scope *globalScope, C_parser *parser, C_Token *tok);
-C_Obj *C_create_function(C_Scope *globalScope, C_parser *parser, char *name_str);
+C_Node *C_parse_compound_statement(C_Scope *globalScope, C_Parser *parser, C_Token *tok);
+C_Obj *C_create_function(C_Scope *globalScope, C_Parser *parser, char *name_str);
 #endif
 
-void C_destroy_parser(C_parser *parser);
+void C_destroy_parser(C_Parser *parser);
 
 //
 // type.c
@@ -508,14 +508,14 @@ bool C_is_integer(C_Type *ty);
 bool C_is_flonum(C_Type *ty);
 bool C_is_numeric(C_Type *ty);
 bool C_is_compatible(C_Type *t1, C_Type *t2);
-C_Type *C_copy_type(C_parser *parser, C_Type *ty);
-C_Type *C_pointer_to(C_parser *parser, C_Type *base);
-C_Type *C_func_type(C_parser *parser, C_Type *return_ty);
-C_Type *C_array_of(C_parser *parser, C_Type *base, int size);
-C_Type *C_vla_of(C_parser *parser, C_Type *base, C_Node *expr);
-C_Type *C_enum_type(C_parser *parser);
-C_Type *C_struct_type(C_parser *parser);
-void C_add_type(C_parser *parser, C_Node *node);
+C_Type *C_copy_type(C_Parser *parser, C_Type *ty);
+C_Type *C_pointer_to(C_Parser *parser, C_Type *base);
+C_Type *C_func_type(C_Parser *parser, C_Type *return_ty);
+C_Type *C_array_of(C_Parser *parser, C_Type *base, int size);
+C_Type *C_vla_of(C_Parser *parser, C_Type *base, C_Node *expr);
+C_Type *C_enum_type(C_Parser *parser);
+C_Type *C_struct_type(C_Parser *parser);
+void C_add_type(C_Parser *parser, C_Node *node);
 
 // Round up `n` to the nearest multiple of `align`. For instance,
 // align_to(5, 8) returns 8 and align_to(11, 8) returns 16.
@@ -529,10 +529,10 @@ static inline int C_align_to(int n, int align) {
 //
 
 int C_encode_utf8(char *buf, uint32_t c);
-uint32_t C_decode_utf8(C_parser *tokenizer, char **new_pos, char *p);
+uint32_t C_decode_utf8(C_Parser *tokenizer, char **new_pos, char *p);
 bool C_is_ident1(uint32_t c);
 bool C_is_ident2(uint32_t c);
-int C_display_width(C_parser *tokenizer, char *p, int len);
+int C_display_width(C_Parser *tokenizer, char *p, int len);
 
 //
 // hashmap.c
