@@ -709,7 +709,7 @@ static const char Embedded_C_header[] =
     "typedef double lua_Number;\n"
     "typedef int64_t lua_Integer;\n"
     "typedef struct {\n"
-    "   int i;\n"
+    "   union { lua_Integer i; lua_Number n; } value_;\n"
     "} TValue;\n"
     "static lua_Integer ivalue(const TValue *v) { return 0; }\n"
     "static lua_Number  fvalue(const TValue *v) { return 0.0; }\n"
@@ -728,7 +728,17 @@ static const char Embedded_C_header[] =
     "static void *gco2u(const TValue *v) { return (void*)0; }\n"
     "static unsigned int sizeudata(const void *p) { return 0; }\n"
     "static unsigned int vslen(const TValue *v) { return 0; }\n"
+    "static void settt_(TValue *v, int tt) {}\n"
     "TValue *R(int reg) { return (void*)0; }\n"
+    "static const int LUA_TNIL = 0;\n"
+    "static const int LUA_TBOOLEAN = 1;\n"
+    "static const int LUA_TLIGHTUSERDATA = 2;\n"
+    "static const int LUA_TNUMBER = 3;\n"
+    "static const int LUA_TSTRING = 4;\n"
+    "static const int LUA_TTABLE = 5;\n"
+    "static const int LUA_TFUNCTION = 6;\n"
+    "static const int LUA_TUSERDATA = 7;\n"
+    "static const int LUA_TTHREAD = 8;\n"
     "typedef struct {\n"
     "   char *ptr;\n"
     "   unsigned int len;\n"
@@ -741,7 +751,7 @@ static const char Embedded_C_header[] =
     "  lua_Number *ptr;\n"
     "  unsigned int len;\n"
     "} Ravi_NumberArray;\n"
-    "int error_code = 0;\n"
+    "int error_code;\n"
     ;
 
 typedef struct {
@@ -749,6 +759,7 @@ typedef struct {
 	TextBuffer prologue;
 	TextBuffer body;
 	TextBuffer tb; // Temp buf
+	TextBuffer C_local_declarations;
 	struct Ravi_CompilerInterface *api;
 	jmp_buf env;
 } Function;
@@ -879,6 +890,7 @@ static void initfn(Function *fn, Proc *proc, struct Ravi_CompilerInterface *api)
 	raviX_buffer_init(&fn->prologue, 4096);
 	raviX_buffer_init(&fn->body, 4096);
 	raviX_buffer_init(&fn->tb, 256);
+	raviX_buffer_init(&fn->C_local_declarations, 256);
 	raviX_buffer_add_fstring(&fn->prologue, "static int %s(lua_State *L) {\n", proc->funcname);
 	raviX_buffer_add_string(&fn->prologue, "int error_code = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "int result = 0;\n");
@@ -888,6 +900,8 @@ static void initfn(Function *fn, Proc *proc, struct Ravi_CompilerInterface *api)
 	raviX_buffer_add_string(&fn->prologue, "StkId base = ci->u.l.base;\n");
 	emit_vars("lua_Integer", int_var_prefix, &proc->temp_int_pseudos, &fn->prologue);
 	emit_vars("lua_Number", flt_var_prefix, &proc->temp_flt_pseudos, &fn->prologue);
+	emit_vars("lua_Integer", int_var_prefix, &proc->temp_int_pseudos, &fn->C_local_declarations);
+	emit_vars("lua_Number", flt_var_prefix, &proc->temp_flt_pseudos, &fn->C_local_declarations);
 	// Following are temp dummy regs
 	// In ops like luaV_settable we may use up to two variables, hence we create
 	// two of each
@@ -908,6 +922,7 @@ static void cleanup(Function *fn)
 	raviX_buffer_free(&fn->prologue);
 	raviX_buffer_free(&fn->body);
 	raviX_buffer_free(&fn->tb);
+	raviX_buffer_free(&fn->C_local_declarations);
 }
 
 /* Outputs an l-value/r-value variable name for a primitive C int / float type */
@@ -2501,7 +2516,7 @@ static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
 	}
 }
 
-static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
+static int is_builtin(char *key, int keylen)
 {
 	static char* builtins[] = {
 	    "alloca",
@@ -2528,16 +2543,32 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 	    "Ravi_IntegerArray",
 	    "Ravi_NumberArray",
 	    "error_code",
+	    "LUA_TBOOLEAN",
+	    "LUA_TNIL",
+	    "LUA_TNUMBER",
+	    "LUA_TUSERDATA",
+	    "LUA_TLIGHTUSERDATA",
+	    "LUA_TTHREAD",
+	    "LUA_TTABLE",
+	    "LUA_TFUNCTION",
+	    "LUA_TSTRING",
+	    "LUA_TTABLE",
+	    "settt_",
 	    NULL
 	};
-	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
 	for (int i = 0; builtins[i]; i++) {
 		if (strncmp(key, builtins[i], keylen) == 0) {
-			// builtin so skip
-			//fprintf(stderr, "Skipping builtin %.*s\n", keylen, key);
-			return;
+			return 1;
 		}
 	}
+	return 0;
+}
+
+static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
+{
+	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
+	if (is_builtin(key, keylen))
+		return;
 	if (analysis->is_tags) {
 		C_Type *ty = val;
 		analyze_C_types(analysis, ty);
@@ -2549,65 +2580,64 @@ static void analyze_C_declarations(void *userdata, char *key, int keylen, void *
 }
 
 typedef struct C_Code_Analysis {
-	C_Parser *parser;
-	C_Scope *global_scope;
 	int status;
-	int is_tags;
 } C_Code_Analysis;
 
-static void walk_node(C_Node *node)
+static void walk_node(C_Code_Analysis *analysis, C_Node *node)
 {
 	switch (node->kind) {
 	case ND_BLOCK: {
 		for (C_Node *n = node->body; n; n = n->next)
-			walk_node(n);
+			walk_node(analysis, n);
 		break;
 	}
 	case ND_IF: {
-		walk_node(node->cond);
-		walk_node(node->then);
+		walk_node(analysis, node->cond);
+		walk_node(analysis, node->then);
 		if (node->els)
-			walk_node(node->els);
+			walk_node(analysis, node->els);
 		break;
 	}
 	case ND_FOR: {
 		if (node->init)
-			walk_node(node->init);
+			walk_node(analysis, node->init);
 		if (node->cond)
-			walk_node(node->cond);
+			walk_node(analysis, node->cond);
 		if (node->inc)
-			walk_node(node->inc);
+			walk_node(analysis, node->inc);
 		break;
 	}
 	case ND_DO: {
-		walk_node(node->then);
-		walk_node(node->cond);
+		walk_node(analysis, node->then);
+		walk_node(analysis, node->cond);
 		break;
 	}
 	case ND_SWITCH: {
-		walk_node(node->cond);
+		walk_node(analysis, node->cond);
 		for (C_Node *n = node->case_next; n; n = n->case_next) {
-			walk_node(n);
+			walk_node(analysis, n);
 		}
 		if (node->default_case)
-			walk_node(node->default_case);
+			walk_node(analysis, node->default_case);
 		break;
 	}
 	case ND_CASE:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_GOTO_EXPR:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_LABEL:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_RETURN:
+		fprintf(stderr, "Trying to return from embedded C code is not allowed\n");
+		analysis->status--;
 		if (node->lhs)
-			walk_node(node->lhs);
+			walk_node(analysis, node->lhs);
 		break;
 	case ND_EXPR_STMT:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_ASM:
 		break;
@@ -2616,56 +2646,60 @@ static void walk_node(C_Node *node)
 	case ND_NUM:
 		break;
 	case ND_NEG:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_VAR:
 		break;
 	case ND_MEMBER:
 		break;
 	case ND_DEREF:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_ADDR:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_ASSIGN:
-		walk_node(node->lhs);
-		walk_node(node->rhs);
+		walk_node(analysis, node->lhs);
+		walk_node(analysis, node->rhs);
 		break;
 	case ND_STMT_EXPR: {
 		for (C_Node *n = node->body; n; n = n->next)
-			walk_node(n);
+			walk_node(analysis, n);
 		break;
 	}
 	case ND_COMMA:
-		walk_node(node->lhs);
-		walk_node(node->rhs);
+		walk_node(analysis, node->lhs);
+		walk_node(analysis, node->rhs);
 		break;
 	case ND_CAST:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_MEMZERO:
 		break;
 	case ND_COND:
-		walk_node(node->cond);
-		walk_node(node->then);
-		walk_node(node->els);
+		walk_node(analysis, node->cond);
+		walk_node(analysis, node->then);
+		walk_node(analysis, node->els);
 		break;
 	case ND_NOT:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_BITNOT:
-		walk_node(node->lhs);
+		walk_node(analysis, node->lhs);
 		break;
 	case ND_LOGAND:
 	case ND_LOGOR:
-		walk_node(node->lhs);
-		walk_node(node->rhs);
+		walk_node(analysis, node->lhs);
+		walk_node(analysis, node->rhs);
 		break;
 	case ND_FUNCALL:
-		walk_node(node->lhs);
+		if (!is_builtin(node->func_ty->name->loc, node->func_ty->name->len)) {
+			fprintf(stderr, "Calling functions from embedded C code is not allowed\n");
+			analysis->status--;
+		}
+		walk_node(analysis, node->lhs);
 		for (C_Node *arg = node->args; arg; arg = arg->next) {
-			walk_node(arg);
+			walk_node(analysis, arg);
 		}
 		break;
 	case ND_LABEL_VAL:
@@ -2688,18 +2722,32 @@ static void walk_node(C_Node *node)
 	case ND_BITXOR:
 	case ND_SHL:
 	case ND_SHR:
-		walk_node(node->lhs);
-		walk_node(node->rhs);
+		walk_node(analysis, node->lhs);
+		walk_node(analysis, node->rhs);
 		break;
 	}
 }
 
-static int analyze_C_code(LinearizerState *linearizer, TextBuffer *C_code)
+static int analyze_C_code(Function *fn, TextBuffer *C_code)
 {
+	static const char* addition_decls =     "\n"
+	    					"TValue ival0;\n"
+						"TValue fval0;\n"
+						"TValue bval0;\n"
+						"TValue ival1;\n"
+						"TValue fval1;\n"
+						"TValue bval1;\n"
+						"TValue ival2;\n"
+						"TValue fval2;\n"
+						"TValue bval2;\n"
+	;
 	TextBuffer code;
 	raviX_buffer_init(&code, 1024);
 	raviX_buffer_add_string(&code, Embedded_C_header);
-	raviX_buffer_add_string(&code, linearizer->C_declarations.buf);
+	raviX_buffer_add_string(&code, addition_decls);
+	raviX_buffer_add_string(&code, fn->proc->linearizer->C_declarations.buf);
+	if (fn->C_local_declarations.buf)
+		raviX_buffer_add_string(&code, fn->C_local_declarations.buf);
 
 	C_Parser parser;
 	C_parser_init(&parser);
@@ -2713,10 +2761,13 @@ static int analyze_C_code(LinearizerState *linearizer, TextBuffer *C_code)
 	parser.embedded_mode = true;
 	C_Node *node = C_parse_compound_statement(global_scope, &parser, tok);
 
+	C_Code_Analysis analysis = {0};
+	walk_node(&analysis, node);
+
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
 
-	return 0;
+	return analysis.status;
 }
 
 static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
@@ -2817,7 +2868,7 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	TextBuffer code = fn->body;
 	fn->body = saved; // Restore original output buffer
 
-	if (analyze_C_code(fn->proc->linearizer, &code) != 0) {
+	if (analyze_C_code(fn, &code) != 0) {
 
 	}
 	raviX_buffer_add_string(&fn->body, code.buf);
