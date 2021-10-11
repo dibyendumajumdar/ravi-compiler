@@ -31,6 +31,7 @@ SOFTWARE.
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -124,7 +125,7 @@ struct C_Token {
   C_Token *origin;    // If this is expanded from a macro, the original token
 };
 
-noreturn void C_error(char *fmt, ...) __attribute__((format(printf, 1, 2)));
+noreturn void C_error(C_Parser *tokenizer, char *fmt, ...) __attribute__((format(printf, 2, 3)));
 noreturn void C_error_at(C_Parser *tokenizer, char *loc, char *fmt, ...) __attribute__((format(printf, 3, 4)));
 noreturn void C_error_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
 void C_warn_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) __attribute__((format(printf, 3, 4)));
@@ -136,8 +137,8 @@ C_File *C_new_file(C_Parser *tokenizer, char *name, int file_no, char *contents)
 C_Token *C_tokenize(C_Parser *tokenizer, C_File *file);
 C_Token *C_tokenize_buffer(C_Parser *tokenizer, char *p);
 
-#define unreachable() \
-  C_error("internal error at %s:%d", __FILE__, __LINE__)
+#define unreachable(parser) \
+  C_error(parser, "internal error at %s:%d", __FILE__, __LINE__)
 
 //
 // C_parse.c
@@ -388,9 +389,12 @@ struct C_Parser {
   HashMap typewords; // used by parser
   mspace arena; // pointer to memory arena handle
 
+  jmp_buf env;		 /* For error handling */
+
 #ifdef RAVI_EXTENSIONS
   bool embedded_mode;
 #endif
+
 };
 
 void C_parser_init(C_Parser *parser);

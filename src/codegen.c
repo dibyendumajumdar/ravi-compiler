@@ -2693,6 +2693,7 @@ static void walk_node(C_Code_Analysis *analysis, C_Node *node)
 		walk_node(analysis, node->rhs);
 		break;
 	case ND_FUNCALL:
+		//fprintf(stderr, "Calling function %.*s\n", node->func_ty->name->len, node->func_ty->name->loc);
 		if (!is_builtin(node->func_ty->name->loc, node->func_ty->name->len)) {
 			fprintf(stderr, "Calling functions from embedded C code is not allowed\n");
 			analysis->status--;
@@ -2749,21 +2750,37 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 	if (fn->C_local_declarations.buf)
 		raviX_buffer_add_string(&code, fn->C_local_declarations.buf);
 
+	C_Code_Analysis analysis = {0};
 	C_Parser parser;
 	C_parser_init(&parser);
 	C_Scope *global_scope = C_global_scope(&parser);
 	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
+	if (tok == NULL) {
+		analysis.status = -1;
+		goto Lexit;
+	}
 	C_convert_pp_tokens(&parser, tok);
-	C_parse(global_scope, &parser, tok);
+	C_Node *node = C_parse(global_scope, &parser, tok);
+	if (node == NULL){
+		analysis.status = -1;
+		goto Lexit;
+	}
 
 	tok = C_tokenize_buffer(&parser, C_code->buf);
+	if (tok == NULL){
+		analysis.status = -1;
+		goto Lexit;
+	}
 	C_convert_pp_tokens(&parser, tok);
 	parser.embedded_mode = true;
-	C_Node *node = C_parse_compound_statement(global_scope, &parser, tok);
-
-	C_Code_Analysis analysis = {0};
+	node = C_parse_compound_statement(global_scope, &parser, tok);
+	if (node == NULL){
+		analysis.status = -1;
+		goto Lexit;
+	}
 	walk_node(&analysis, node);
 
+Lexit:
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
 
@@ -2869,7 +2886,7 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	fn->body = saved; // Restore original output buffer
 
 	if (analyze_C_code(fn, &code) != 0) {
-
+		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, code.buf);
 	raviX_buffer_free(&code);

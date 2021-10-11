@@ -503,7 +503,7 @@ static C_Type *declspec(C_Parser *parser, C_Token **rest, C_Token *tok, VarAttr 
     else if (C_equal(tok, "unsigned"))
       counter |= UNSIGNED;
     else
-      unreachable();
+      unreachable(parser);
 
     switch (counter) {
     case VOID:
@@ -945,7 +945,7 @@ static void string_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, I
     break;
   }
   default:
-    unreachable();
+    unreachable(parser);
   }
 
   *rest = tok->next;
@@ -1388,7 +1388,7 @@ static C_Node *lvar_initializer(C_Parser *parser, C_Token **rest, C_Token *tok, 
   return new_binary(parser, ND_COMMA, lhs, rhs, tok);
 }
 
-static uint64_t read_buf(char *buf, int sz) {
+static uint64_t read_buf(C_Parser *parser, char *buf, int sz) {
   if (sz == 1)
     return *buf;
   if (sz == 2)
@@ -1397,10 +1397,10 @@ static uint64_t read_buf(char *buf, int sz) {
     return *(uint32_t *)buf;
   if (sz == 8)
     return *(uint64_t *)buf;
-  unreachable();
+  unreachable(parser);
 }
 
-static void write_buf(char *buf, uint64_t val, int sz) {
+static void write_buf(C_Parser *parser, char *buf, uint64_t val, int sz) {
   if (sz == 1)
     *buf = val;
   else if (sz == 2)
@@ -1410,7 +1410,7 @@ static void write_buf(char *buf, uint64_t val, int sz) {
   else if (sz == 8)
     *(uint64_t *)buf = val;
   else
-    unreachable();
+    unreachable(parser);
 }
 
 static C_Relocation *
@@ -1430,11 +1430,11 @@ write_gvar_data(C_Parser *parser, C_Relocation *cur, Initializer *init, C_Type *
           break;
 
         char *loc = buf + offset + mem->offset;
-        uint64_t oldval = read_buf(loc, mem->ty->size);
+        uint64_t oldval = read_buf(parser, loc, mem->ty->size);
         uint64_t newval = eval(parser, expr);
         uint64_t mask = (1L << mem->bit_width) - 1;
         uint64_t combined = oldval | ((newval & mask) << mem->bit_offset);
-        write_buf(loc, combined, mem->ty->size);
+        write_buf(parser, loc, combined, mem->ty->size);
       } else {
         cur = write_gvar_data(parser, cur, init->children[mem->idx], mem->ty, buf,
                               offset + mem->offset);
@@ -1467,7 +1467,7 @@ write_gvar_data(C_Parser *parser, C_Relocation *cur, Initializer *init, C_Type *
   uint64_t val = eval2(parser, init->expr, &label);
 
   if (!label) {
-    write_buf(buf + offset, val, ty->size);
+    write_buf(parser, buf + offset, val, ty->size);
     return cur;
   }
 
@@ -2353,6 +2353,8 @@ static C_Node *new_add(C_Parser *parser, C_Node *lhs, C_Node *rhs, C_Token *tok)
     return new_binary(parser, ND_ADD, lhs, rhs, tok);
 
   if (lhs->ty->base && rhs->ty->base)
+    C_error_tok(parser, tok, "invalid operands");
+  if (!lhs->ty->base && !rhs->ty->base)
     C_error_tok(parser, tok, "invalid operands");
 
   // Canonicalize `num + ptr` to `ptr + num`.
@@ -3349,6 +3351,9 @@ C_Obj *C_create_function(C_Scope *globalScope, C_Parser *parser, char *name_str)
 }
 
 C_Node *C_parse_compound_statement(C_Scope *globalScope, C_Parser *parser, C_Token *tok) {
+  if (setjmp(parser->env) != 0) {
+    return NULL;
+  }
   parser->scope = globalScope;
   return compound_stmt(parser, &tok, tok);
 }
@@ -3356,6 +3361,10 @@ C_Node *C_parse_compound_statement(C_Scope *globalScope, C_Parser *parser, C_Tok
 
 // program = (typedef | function-definition | global-variable)*
 C_Obj *C_parse(C_Scope *globalScope, C_Parser *parser, C_Token *tok) {
+  if (setjmp(parser->env) != 0) {
+    return NULL;
+  }
+
   parser->scope = globalScope;
 
   declare_builtin_functions(parser);
