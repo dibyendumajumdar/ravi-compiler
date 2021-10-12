@@ -759,7 +759,7 @@ typedef struct {
 	TextBuffer prologue;
 	TextBuffer body;
 	TextBuffer tb; // Temp buf
-	TextBuffer C_local_declarations;
+	TextBuffer C_local_declarations; // Declarations of temp int/float vars required when analysing embedded C code
 	struct Ravi_CompilerInterface *api;
 	jmp_buf env;
 } Function;
@@ -2488,6 +2488,7 @@ typedef struct C_Decl_Analysis {
 	int is_tags;
 } C_Decl_Analysis;
 
+/* Checks type declarations do not contain pointers and unions */
 static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
 {
 	if (ty->kind == TY_STRUCT) {
@@ -2505,6 +2506,7 @@ static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
 	}
 }
 
+/* Checks that there are no entities being created in the global scope */
 static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
 {
 	if (vc->var) {
@@ -2516,6 +2518,7 @@ static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
 	}
 }
 
+/* Built-ins are excluded from analysis */
 static int is_builtin(char *key, int keylen)
 {
 	static char* builtins[] = {
@@ -2564,6 +2567,7 @@ static int is_builtin(char *key, int keylen)
 	return 0;
 }
 
+/* Perform code analysis. status will be set < 0 if issues found */
 static void analyze_C_declarations(void *userdata, char *key, int keylen, void *val)
 {
 	C_Decl_Analysis *analysis = (C_Decl_Analysis *)userdata;
@@ -2747,7 +2751,7 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 	raviX_buffer_add_string(&code, Embedded_C_header);
 	raviX_buffer_add_string(&code, addition_decls);
 	raviX_buffer_add_string(&code, fn->proc->linearizer->C_declarations.buf);
-	if (fn->C_local_declarations.buf)
+	if (fn->C_local_declarations.buf) /* declarations of temp integer and float vars */
 		raviX_buffer_add_string(&code, fn->C_local_declarations.buf);
 
 	C_Code_Analysis analysis = {0};
@@ -2760,8 +2764,7 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 		goto Lexit;
 	}
 	C_convert_pp_tokens(&parser, tok);
-	C_Node *node = C_parse(global_scope, &parser, tok);
-	if (node == NULL){
+	if (C_parse(global_scope, &parser, tok) == NULL){
 		analysis.status = -1;
 		goto Lexit;
 	}
@@ -2773,7 +2776,7 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 	}
 	C_convert_pp_tokens(&parser, tok);
 	parser.embedded_mode = true;
-	node = C_parse_compound_statement(global_scope, &parser, tok);
+	C_Node *node = C_parse_compound_statement(global_scope, &parser, tok);
 	if (node == NULL){
 		analysis.status = -1;
 		goto Lexit;
@@ -3374,6 +3377,7 @@ static void preprocess_upvalues(Proc *proc)
 	END_FOR_EACH_PTR(childproc)
 }
 
+/* Emits top level C__decl contents */
 static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
 {
 	if (linearizer->C_declarations.buf == NULL || linearizer->C_declarations.buf[0] == 0)
@@ -3387,15 +3391,25 @@ static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer 
 	C_Parser parser;
 	C_parser_init(&parser);
 	C_Scope *global_scope = C_global_scope(&parser);
-	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
-	C_convert_pp_tokens(&parser, tok);
-	C_parse(global_scope, &parser, tok);
-
 	C_Decl_Analysis analysis = {&parser, global_scope, 0};
+
+	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
+	if (tok == NULL) {
+		analysis.status = -1;
+		goto Lexit;
+	}
+	C_convert_pp_tokens(&parser, tok);
+	if (C_parse(global_scope, &parser, tok) == NULL) {
+		analysis.status = -1;
+		goto Lexit;
+	}
+
 	analysis.is_tags = 1;
 	hashmap_foreach(&global_scope->tags, analyze_C_declarations, &analysis);
 	analysis.is_tags = 0;
 	hashmap_foreach(&global_scope->vars, analyze_C_declarations, &analysis);
+
+Lexit:
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
 
