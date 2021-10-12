@@ -45,6 +45,7 @@ typedef struct Graph Graph;
 DECLARE_PTR_LIST(InstructionList, Instruction);
 DECLARE_PTR_LIST(PseudoList, Pseudo);
 DECLARE_PTR_LIST(ProcList, Proc);
+DECLARE_PTR_LIST(StringObjectList, StringObject);
 
 #define container_of(ptr, type, member) ((type *)((char *)(ptr)-offsetof(type, member)))
 
@@ -143,7 +144,8 @@ enum opcode {
 	op_storeglobal,
 	op_close,
 	op_concat,
-	op_init
+	op_init,
+	op_embed_C
 };
 
 /*
@@ -277,6 +279,7 @@ struct LinearizerState {
 	ProcList *all_procs; /* All procs allocated by the linearizer */
 	Proc *current_proc;  /* proc being compiled */
 	uint32_t proc_id;
+	TextBuffer C_declarations; /* List of top level C declarations to be added to generated code, build from C__decl statements */
 };
 
 // Get string name of an op code

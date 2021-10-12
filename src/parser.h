@@ -280,6 +280,13 @@ struct ForStatement {
 	Scope *for_body;
 	AstNodeList *for_statement_list; /* statements in this block */
 };
+/* for embedded C */
+struct EmbeddedCStatement {
+	LuaSymbolList *symbols;
+	const StringObject *C_src_snippet; // C source snippet
+	bool is_decl; // true if the snippet is only supposed to be declarations
+};
+
 /* To access the type field common to all expr objects */
 /* all expr types must be compatible with base_expression */
 
@@ -404,6 +411,7 @@ struct AstNode {
 		IfStatement if_stmt;
 		WhileOrRepeatStatement while_or_repeat_stmt;
 		ForStatement for_stmt;
+		EmbeddedCStatement embedded_C_stmt;
 		BaseExpression common_expr;
 		LiteralExpression literal_expr;
 		SymbolExpression symbol_expr;

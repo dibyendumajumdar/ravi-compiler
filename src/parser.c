@@ -1188,6 +1188,53 @@ static AstNode *parse_goto_statment(ParserState *parser)
 	return goto_stmt;
 }
 
+static AstNode *parse_embedded_C(ParserState *parser, bool is_decl) {
+	LexerState *ls = parser->ls;
+	/* stat -> C (NAME {',' NAME}) string */
+	AstNode *node = raviX_allocate_ast_node(parser, STMT_EMBEDDED_C);
+	node->embedded_C_stmt.C_src_snippet = NULL;
+	node->embedded_C_stmt.symbols = NULL;
+	node->embedded_C_stmt.is_decl = is_decl;
+	raviX_next(ls);
+	if (!is_decl && testnext(ls, '(')) {
+		switch (ls->t.token) {
+		case ')': {
+			raviX_next(ls);
+			break;
+		}
+		case TOK_NAME: {
+			const StringObject *varname = ls->t.seminfo.ts;
+			bool is_local = 0;
+			LuaSymbol *symbol = search_for_variable(parser, varname, &is_local);
+			if (symbol && is_local)
+				raviX_add_symbol(parser->container, &node->embedded_C_stmt.symbols, symbol);
+			else {
+				raviX_syntaxerror(ls, "Argument must be local variable");
+			}
+			raviX_next(ls);
+			while (testnext(ls, ',')) {
+				varname = check_name_and_next(ls);
+				symbol = search_for_variable(parser, varname, &is_local);
+				if (symbol && is_local)
+					raviX_add_symbol(parser->container, &node->embedded_C_stmt.symbols, symbol);
+				else {
+					raviX_syntaxerror(ls, "Argument must be local variable");
+				}
+			}
+			checknext(ls, ')');
+			break;
+		}
+		default: {
+			raviX_syntaxerror(ls, "Expected set of arguments");
+		}
+		}
+	}
+	check(ls, TOK_STRING);
+	node->embedded_C_stmt.C_src_snippet = ls->t.seminfo.ts;
+	raviX_next(ls);
+	return node;
+}
+
 /* skip no-op statements */
 static void skip_noop_statements(ParserState *parser)
 {
@@ -1622,6 +1669,11 @@ static AstNode *parse_statement(ParserState *parser)
 	case TOK_break:	 /* stat -> breakstat */
 	case TOK_goto: { /* stat -> 'goto' NAME */
 		stmt = parse_goto_statment(parser);
+		break;
+	}
+	case TOK_C__unsafe:
+	case TOK_C__decl: {
+		stmt = parse_embedded_C(parser, ls->t.token == TOK_C__decl);
 		break;
 	}
 	default: { /* stat -> func | assignment */

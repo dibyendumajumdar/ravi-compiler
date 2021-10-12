@@ -24,7 +24,8 @@ set(HEADERS
         src/dataflow_framework.h
         src/optimizer.h
         src/parser.h
-        src/codegen.h)
+        src/codegen.h
+        src/chibicc/chibicc.h)
 
 set(SRCS
         src/allocate.c
@@ -50,6 +51,13 @@ set(SRCS
         src/df_liveness.c
         src/codegen.c
         src/ravi_binding.c
+        src/chibicc/chibicc_tokenize.c
+        src/chibicc/chibicc_parse.c
+        src/chibicc/chibicc_type.c
+        src/chibicc/chibicc_strings.c
+        src/chibicc/chibicc_unicode.c
+        src/chibicc/chibicc_hashmap.c
+        src/ravi_alloc.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
@@ -123,6 +131,13 @@ target_include_directories(trun
 add_executable(tgraph tests/tgraph.c)
 target_link_libraries(tgraph ravicomp)
 target_include_directories(tgraph
+        PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
+        PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
+
+add_executable(tchibicc tests/tchibicc.c)
+target_link_libraries(tchibicc ravicomp)
+target_include_directories(tchibicc
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")

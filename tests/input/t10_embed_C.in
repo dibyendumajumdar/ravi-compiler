@@ -1,0 +1,26 @@
+C__decl [[
+typedef struct MyStruct {
+    int a;
+} MyStruct;
+]]
+
+function demo(u: Userdata)
+
+    C__unsafe(u) [[
+        MyStruct *s = (MyStruct *) u.ptr;
+    ]]
+
+end
+#
+C__decl [[
+   typedef struct {
+      int i;
+  } MyStruct;
+]]
+
+local i: integer = 1
+local j: integer = 2
+
+C__unsafe(i,j) [[
+     long long k = i+j; // Okay as primitive types
+]]

@@ -463,6 +463,12 @@ void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pend\n", level);
 		break;
 	}
+	case STMT_EMBEDDED_C: {
+		printf_buf(buf, "%pC (\n", level);
+		print_symbol_list(buf, node->embedded_C_stmt.symbols, level + 1, ",");
+		printf_buf(buf, "%p  ) '%t'\n", level, node->embedded_C_stmt.C_src_snippet);
+		break;
+	}
 	case EXPR_SUFFIXED: {
 		printf_buf(buf, "%p%c %T\n", level, "[suffixed expr start]", &node->suffixed_expr.type);
 		printf_buf(buf, "%p%c %T\n", level + 1, "[primary start]",
