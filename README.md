@@ -26,6 +26,7 @@ The compiler library consists of distinct modules:
 
 ## Status
 
+* 12-Oct-2021 Initial proof of concept for [new embedded C syntax](https://github.com/dibyendumajumdar/ravi-compiler/wiki/Embedding-C)
 * 22-Jun-2021 Increased coverage of Lua syntax to cover string concatenations and generic for loops.
 * 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 * 01-Dec-2020 The generated code is now also suitable for AOT compilation but requires special loading facility in Ravi.
@@ -34,6 +35,7 @@ The compiler library consists of distinct modules:
 ## LICENSE
 
 The project is available under MIT license.
+It includes code from [chibicc](https://github.com/rui314/chibicc) copyrighted by Rui Ueyama.
 
 ## Documentation
 
