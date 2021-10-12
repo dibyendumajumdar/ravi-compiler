@@ -3399,16 +3399,14 @@ C_Obj *C_parse(C_Scope *globalScope, C_Parser *parser, C_Token *tok) {
   return parser->globals;
 }
 
-void C_parser_init(C_Parser *parser)
-{
+void C_parser_init(C_Parser *parser) {
   memset(parser, 0, sizeof *parser);
   parser->arena = create_mspace(0, 0);
   parser->keywords.arena = parser->arena;
   parser->typewords.arena = parser->arena;
 }
 
-void C_parser_destroy(C_Parser *parser)
-{
+void C_parser_destroy(C_Parser *parser) {
   //mspace_malloc_stats(parser->arena);
   destroy_mspace(parser->arena);
   parser->arena = NULL;

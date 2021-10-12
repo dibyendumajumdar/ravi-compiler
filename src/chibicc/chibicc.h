@@ -391,6 +391,8 @@ struct C_Parser {
 
   jmp_buf env;		 /* For error handling */
 
+  char *error_message; // Error reporting arg
+
 #ifdef RAVI_EXTENSIONS
   bool embedded_mode;
 #endif

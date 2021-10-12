@@ -27,12 +27,56 @@ SOFTWARE.
 
 #include "chibicc.h"
 
+static int error_sprintf(C_Parser *parser, const char *fmt, ...) {
+  va_list args;
+  int pos = parser->error_message ? (int)strlen(parser->error_message) : 0;
+  int estimated_size = 128;
+  int n = 0;
+  for (int i = 0; i < 2; i++) {
+    parser->error_message = mspace_realloc(parser->arena, parser->error_message, pos + estimated_size); // ensure we have at least estimated_size free space
+    va_start(args, fmt);
+    n = vsnprintf(parser->error_message + pos, estimated_size, fmt, args);
+    va_end(args);
+    if (n >= estimated_size) {
+      estimated_size = n + 1; // allow for 0 byte
+    } else if (n < 0) {
+      fprintf(stderr, "Buffer conversion error\n");
+      assert(false);
+      break;
+    } else {
+      break;
+    }
+  }
+  return n;
+}
+
+static int error_vsprintf(C_Parser *parser, const char *fmt, va_list args) {
+  int estimated_size = 128;
+  int pos = parser->error_message ? (int)strlen(parser->error_message) : 0;
+  int n = 0;
+  for (int i = 0; i < 2; i++) {
+    parser->error_message = mspace_realloc(parser->arena, parser->error_message, pos + estimated_size); // ensure we have at least estimated_size free space
+    n = vsnprintf(parser->error_message + pos, estimated_size, fmt, args);
+    if (n >= estimated_size) {
+      estimated_size = n + 1; // allow for 0 byte
+    } else if (n < 0) {
+      fprintf(stderr, "Buffer conversion error\n");
+      assert(false);
+      break;
+    } else {
+      break;
+    }
+  }
+  return n;
+}
+
+
 // Reports an error and exit.
 void C_error(C_Parser *parser, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
+  error_vsprintf(parser, fmt, ap);
+  error_sprintf(parser, "\n");
   longjmp(&parser->env, 1);
 }
 
@@ -52,16 +96,16 @@ static void verror_at(C_Parser *tokenizer, char *filename, char *input, int line
     end++;
 
   // Print out the line.
-  int indent = fprintf(stderr, "%s:%d: ", filename, line_no);
-  fprintf(stderr, "%.*s\n", (int)(end - line), line);
+  int indent = error_sprintf(tokenizer, "%s:%d: ", filename, line_no);
+  error_sprintf(tokenizer, "%.*s\n", (int)(end - line), line);
 
   // Show the error message.
   int pos = C_display_width(tokenizer, line, loc - line) + indent;
 
-  fprintf(stderr, "%*s", pos, ""); // print pos spaces.
-  fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
+  error_sprintf(tokenizer, "%*s", pos, ""); // print pos spaces.
+  error_sprintf(tokenizer, "^ ");
+  error_vsprintf(tokenizer, fmt, ap);
+  error_sprintf(tokenizer, "\n");
 }
 
 void C_error_at(C_Parser *tokenizer, char *loc, char *fmt, ...) {

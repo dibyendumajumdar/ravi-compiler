@@ -2784,6 +2784,9 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 	walk_node(&analysis, node);
 
 Lexit:
+	if (analysis.status < 0 && parser.error_message) {
+		fn->api->error_message(fn->api->context, parser.error_message);
+	}
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
 
@@ -3378,7 +3381,7 @@ static void preprocess_upvalues(Proc *proc)
 }
 
 /* Emits top level C__decl contents */
-static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer *mb)
+static int emit_embedded_C_declarations(LinearizerState *linearizer, struct Ravi_CompilerInterface *api, TextBuffer *mb)
 {
 	if (linearizer->C_declarations.buf == NULL || linearizer->C_declarations.buf[0] == 0)
 		return 0;
@@ -3410,6 +3413,9 @@ static int emit_embedded_C_declarations(LinearizerState *linearizer, TextBuffer 
 	hashmap_foreach(&global_scope->vars, analyze_C_declarations, &analysis);
 
 Lexit:
+	if (analysis.status < 0 && parser.error_message) {
+		api->error_message(api->context, parser.error_message);
+	}
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
 
@@ -3420,7 +3426,7 @@ static void debug_message(void *context, const char *filename, long long line, c
 {
 	fprintf(stdout, "%s:%lld: %s\n", filename, line, message);
 }
-static void error_message(void *context, const char *message) { fprintf(stdout, "ERROR: %s\n", message); }
+static void error_message(void *context, const char *message) { fprintf(stderr, "%s\n", message); }
 
 static struct Ravi_CompilerInterface stub_compilerInterface = {
     .context = NULL,
@@ -3448,7 +3454,7 @@ int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_Co
 	raviX_buffer_add_string(mb, Lua_header);
 
 	/* emit C__decl statements in ravi code */
-	if (emit_embedded_C_declarations(linearizer, mb) != 0) {
+	if (emit_embedded_C_declarations(linearizer, ravi_interface, mb) != 0) {
 		return -1;
 	}
 
