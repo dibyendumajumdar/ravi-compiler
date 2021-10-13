@@ -77,7 +77,7 @@ void C_error(C_Parser *parser, char *fmt, ...) {
   va_start(ap, fmt);
   error_vsprintf(parser, fmt, ap);
   error_sprintf(parser, "\n");
-  longjmp(parser->env, 1);
+  longjmp(&parser->env, 1);
 }
 
 // Reports an error message in the following format.
@@ -117,14 +117,14 @@ void C_error_at(C_Parser *tokenizer, char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(tokenizer, tokenizer->current_file->name, tokenizer->current_file->contents, line_no, loc, fmt, ap);
-  longjmp(tokenizer->env, 1);
+  longjmp(&tokenizer->env, 1);
 }
 
 void C_error_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   verror_at(tokenizer, tok->file->name, tok->file->contents, tok->line_no, tok->loc, fmt, ap);
-  longjmp(tokenizer->env, 1);
+  longjmp(&tokenizer->env, 1);
 }
 
 void C_warn_tok(C_Parser *tokenizer, C_Token *tok, char *fmt, ...) {
@@ -849,7 +849,7 @@ C_Token *C_tokenize_buffer(C_Parser *tokenizer, char *p) {
   if (!p)
     return NULL;
 
-  if (setjmp(tokenizer->env) != 0)
+  if (setjmp(&tokenizer->env) != 0)
     return NULL;
 
   // UTF-8 texts may start with a 3-byte "BOM" marker sequence.

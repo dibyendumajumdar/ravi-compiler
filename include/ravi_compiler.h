@@ -71,7 +71,6 @@ enum TokenType {
 	TOK_defer,
 	TOK_C__decl,
 	TOK_C__unsafe,
-	TOK_C__new,
 	TOK_nil,
 	TOK_not,
 	TOK_or,
