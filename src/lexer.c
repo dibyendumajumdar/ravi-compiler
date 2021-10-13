@@ -47,6 +47,7 @@ static inline char lua_getlocaledecpoint(void) { return localeconv()->decimal_po
 #define ARRAY_SIZE(array) ((int)(sizeof(array) / sizeof(array[0])))
 /*Note: Following array was generated using utils/tokenstr.h */
 static const char *const luaX_tokens[] = {
+
     "and",
     "break",
     "do",
@@ -63,6 +64,7 @@ static const char *const luaX_tokens[] = {
     "defer",
     "C__decl",
     "C__unsafe",
+    "C__new",
     "nil",
     "not",
     "or",
@@ -96,6 +98,7 @@ static const char *const luaX_tokens[] = {
     "<name>",
     "<string>",
 };
+
 /* Says whether the given string represents a Lua/Ravi keyword  i.e. reserved word */
 static inline int is_reserved(const StringObject *s) { return s->reserved; }
 

@@ -1188,13 +1188,19 @@ static AstNode *parse_goto_statment(ParserState *parser)
 	return goto_stmt;
 }
 
+static AstNode *parse_embedded_C_alloc(ParserState *parser) {
+	LexerState *ls = parser->ls;
+	raviX_syntaxerror(ls, "C__new not yet implemented");
+	return NULL;
+}
+
 static AstNode *parse_embedded_C(ParserState *parser, bool is_decl) {
 	LexerState *ls = parser->ls;
 	/* stat -> C (NAME {',' NAME}) string */
 	AstNode *node = raviX_allocate_ast_node(parser, STMT_EMBEDDED_C);
+	node->embedded_C_stmt.c_statement_type = is_decl ? C__DECL : C__UNSAFE;
 	node->embedded_C_stmt.C_src_snippet = NULL;
 	node->embedded_C_stmt.symbols = NULL;
-	node->embedded_C_stmt.is_decl = is_decl;
 	raviX_next(ls);
 	if (!is_decl && testnext(ls, '(')) {
 		switch (ls->t.token) {
@@ -1669,6 +1675,10 @@ static AstNode *parse_statement(ParserState *parser)
 	case TOK_break:	 /* stat -> breakstat */
 	case TOK_goto: { /* stat -> 'goto' NAME */
 		stmt = parse_goto_statment(parser);
+		break;
+	}
+	case TOK_C__new: {
+		stmt = parse_embedded_C_alloc(parser);
 		break;
 	}
 	case TOK_C__unsafe:

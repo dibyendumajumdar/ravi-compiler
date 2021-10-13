@@ -2310,7 +2310,7 @@ static void linearize_embedded_C_decl(Proc *proc, AstNode *node)
 
 static void linearize_embedded_C(Proc *proc, AstNode *node)
 {
-	if (node->embedded_C_stmt.is_decl) {
+	if (node->embedded_C_stmt.c_statement_type == C__DECL) {
 		linearize_embedded_C_decl(proc, node);
 		return;
 	}

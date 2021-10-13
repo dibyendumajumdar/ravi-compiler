@@ -281,10 +281,21 @@ struct ForStatement {
 	AstNodeList *for_statement_list; /* statements in this block */
 };
 /* for embedded C */
+enum EmbeddedCStatementType {
+	C__DECL,
+	C__UNSAFE,
+	C__NEW
+};
 struct EmbeddedCStatement {
-	LuaSymbolList *symbols;
+	enum EmbeddedCStatementType c_statement_type;
 	const StringObject *C_src_snippet; // C source snippet
-	bool is_decl; // true if the snippet is only supposed to be declarations
+	union {
+		LuaSymbolList *symbols;
+		struct {
+			const StringObject *lua_namespace; // Userdata namespace
+			AstNode *size_expr;
+		} new_expr;
+	};
 };
 
 /* To access the type field common to all expr objects */
