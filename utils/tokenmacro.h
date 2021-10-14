@@ -2,7 +2,7 @@
 #define TKDEF(_, __, ___)                                                                                              \
     _(and) _(break) _(do) _(else) _(elseif) _(end) \
     _(false) _(for) _(function) _(goto) _(if) _(in) _(local) \
-    _(defer) _(C__decl) _(C__unsafe) /* Ravi extensions */ \
+    _(defer) _(C__decl) _(C__unsafe) _(C__new) /* Ravi extensions */ \
     _(nil) _(not) _(or) \
     _(repeat) _(return) _(then) _(true) _(until) _(while) \
     /* other terminal symbols */ \

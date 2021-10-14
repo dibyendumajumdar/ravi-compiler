@@ -610,6 +610,8 @@ static void typecheck_ast_node(CompilerState *container, AstNode *function, AstN
 		infer_table_type(container, function, node);
 		break;
 	}
+	case EXPR_BUILTIN:
+		break;
 	default:
 		assert(0);
 	}

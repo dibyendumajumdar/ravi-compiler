@@ -88,7 +88,7 @@ static AstNode *raviX_allocate_ast_node(ParserState *parser, enum AstNodeType ty
 
 static AstNode *allocate_expr_ast_node(ParserState *parser, enum AstNodeType type)
 {
-	assert(type >= EXPR_LITERAL && type <= EXPR_CONCAT);
+	assert(type >= EXPR_LITERAL && type <= EXPR_BUILTIN);
 	AstNode *node = raviX_allocate_ast_node(parser, type);
 	node->common_expr.truncate_results = 0;
 	set_typecode(&node->common_expr.type, RAVI_TANY);
@@ -865,6 +865,48 @@ static AstNode *parse_primary_expression(ParserState *parser)
 	return primary_expr;
 }
 
+static AstNode *parse_builtin_expression(ParserState *parser)
+{
+	LexerState *ls = parser->ls;
+
+	AstNode *builtin_expr = allocate_expr_ast_node(parser, EXPR_BUILTIN);
+	builtin_expr->builtin_expr.type.type_code = RAVI_TUSERDATA;
+	builtin_expr->builtin_expr.type.type_name = NULL;
+	builtin_expr->builtin_expr.type_name = NULL;
+	builtin_expr->builtin_expr.type_prefix = NULL;
+	builtin_expr->builtin_expr.size_expr = NULL;
+
+	raviX_next(ls);
+	checknext(ls, '(');
+	check(ls, TOK_STRING);
+	builtin_expr->builtin_expr.type_prefix = ls->t.seminfo.ts;
+	raviX_next(ls);
+	checknext(ls, ',');
+	check(ls, TOK_STRING);
+	builtin_expr->builtin_expr.type_name = ls->t.seminfo.ts;
+	raviX_next(ls);
+	checknext(ls, ',');
+	builtin_expr->builtin_expr.size_expr = parse_expression(parser);
+	if (builtin_expr->builtin_expr.size_expr == NULL) {
+		raviX_syntaxerror(ls, "Expected a size expression as third argument to C__new");
+	}
+	checknext(ls, ')');
+
+	TextBuffer buf;
+	uint32_t len = builtin_expr->builtin_expr.type_prefix->len + builtin_expr->builtin_expr.type_name->len;
+	raviX_buffer_init(&buf, len+ 1);
+	raviX_buffer_add_string(&buf, builtin_expr->builtin_expr.type_prefix->str);
+	raviX_buffer_add_string(&buf, ".");
+	raviX_buffer_add_string(&buf, builtin_expr->builtin_expr.type_name->str);
+
+	const StringObject *typename = raviX_create_string(parser->container, buf.buf, buf.pos);
+	builtin_expr->builtin_expr.type.type_name = typename;
+
+	raviX_buffer_free(&buf);
+
+	return builtin_expr;
+}
+
 /* variable or field access or function call */
 static AstNode *parse_suffixed_expression(ParserState *parser)
 {
@@ -872,6 +914,9 @@ static AstNode *parse_suffixed_expression(ParserState *parser)
 	/* suffixedexp ->
 	primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	int line = ls->linenumber;
+	if (ls->t.token == TOK_C__new) {
+		return parse_builtin_expression(parser);
+	}
 	AstNode *suffixed_expr = allocate_expr_ast_node(parser, EXPR_SUFFIXED);
 	suffixed_expr->suffixed_expr.primary_expr = parse_primary_expression(parser);
 	suffixed_expr->suffixed_expr.type = suffixed_expr->suffixed_expr.primary_expr->common_expr.type;

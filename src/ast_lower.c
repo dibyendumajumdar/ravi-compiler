@@ -80,6 +80,8 @@ static void process_expression(CompilerState *container, AstNode *node)
 	case EXPR_TABLE_LITERAL:
 		process_expression_list(container, node->table_expr.expr_list);
 		break;
+	case EXPR_BUILTIN:
+		break;
 	default:
 		assert(0);
 		break;

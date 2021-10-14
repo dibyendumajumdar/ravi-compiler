@@ -1575,6 +1575,7 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 	case EXPR_CONCAT: {
 		result = linearize_concat_expression(proc, expr);
 	} break;
+		// FIXME EXPR_BUILTIN
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;

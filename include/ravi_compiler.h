@@ -71,6 +71,7 @@ enum TokenType {
 	TOK_defer,
 	TOK_C__decl,
 	TOK_C__unsafe,
+	TOK_C__new,
 	TOK_nil,
 	TOK_not,
 	TOK_or,
@@ -313,7 +314,8 @@ enum AstNodeType {
 	EXPR_FUNCTION,	    /* function literal */
 	EXPR_TABLE_LITERAL, /* table constructor */
 	EXPR_FUNCTION_CALL,
-	EXPR_CONCAT
+	EXPR_CONCAT,
+	EXPR_BUILTIN
 };
 
 typedef struct Statement Statement;
@@ -342,6 +344,7 @@ typedef struct TableLiteralExpression TableLiteralExpression;
 typedef struct SuffixedExpression SuffixedExpression;
 typedef struct FunctionCallExpression FunctionCallExpression;
 typedef struct StringConcatenationExpression StringConcatenationExpression;
+typedef struct BuiltinExpression BuiltinExpression;
 
 typedef struct Scope Scope;
 

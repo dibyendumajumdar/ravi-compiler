@@ -24,3 +24,11 @@ local j: integer = 2
 C__unsafe(i,j) [[
      long long k = i+j; // Okay as primitive types
 ]]
+#
+C__decl [[
+   typedef struct {
+      int i;
+  } MyStruct;
+]]
+
+local u = C__new('tt', 'MyStruct', 1)

@@ -374,6 +374,13 @@ struct FunctionCallExpression {
 	AstNodeList *arg_list;		 /* Call arguments */
 	int num_results;			 /* How many results do we expect, -1 means all available results */
 };
+struct BuiltinExpression {
+	/* Currently only for C__new but potentially could be other builtins */
+	BASE_EXPRESSION_FIELDS;
+	const StringObject *type_prefix; /* Namespace */
+	const StringObject *type_name; /* Name of the C struct type */
+	AstNode *size_expr; /* Number of elements of type - > 1 means array */
+};
 #undef BASE_EXPRESSION_FIELDS
 
 /* ALL AST nodes start with following fields */
@@ -424,6 +431,7 @@ struct AstNode {
 		SuffixedExpression suffixed_expr;
 		FunctionCallExpression function_call_expr;
 		StringConcatenationExpression string_concatenation_expr;
+		BuiltinExpression builtin_expr;
 	};
 };
 #undef BASE_AST_FIELDS

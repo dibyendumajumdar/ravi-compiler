@@ -63,6 +63,7 @@ static const char *const luaX_tokens[] = {
     "defer",
     "C__decl",
     "C__unsafe",
+    "C__new",
     "nil",
     "not",
     "or",
