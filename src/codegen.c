@@ -2899,6 +2899,57 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	return 0;
 }
 
+static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
+	LinearizerState *linearizer = fn->proc->linearizer;
+
+	TextBuffer code;
+	raviX_buffer_init(&code, 1024);
+	raviX_buffer_add_string(&code, Embedded_C_header);
+	raviX_buffer_add_string(&code, linearizer->C_declarations.buf);
+
+	int status = -1;
+	C_Parser parser;
+	C_parser_init(&parser);
+	C_Scope *global_scope = C_global_scope(&parser);
+	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
+	if (tok == NULL) {
+		goto Lexit;
+	}
+	C_convert_pp_tokens(&parser, tok);
+	if (C_parse(global_scope, &parser, tok) == NULL) {
+		goto Lexit;
+	}
+	Pseudo *prefix = get_operand(insn, 0);
+	Pseudo *tagname = get_operand(insn, 1);
+	Pseudo *size = get_operand(insn, 2);
+
+	C_Type *ty = hashmap_get(&global_scope->tags, tagname->constant->s->str);
+	size_t tagsz = 0;
+	if (ty != NULL) {
+		tagsz = ty->size;
+	}
+	else {
+		C_VarScope *vc = hashmap_get(&global_scope->vars, tagname->constant->s->str);
+		if (vc && vc->type_def) {
+			tagsz = vc->type_def->size;
+		}
+		else {
+			TextBuffer message;
+			raviX_buffer_init(&message, 128);
+			raviX_buffer_add_fstring(&message, "Unknown type '%s'", tagname->constant->s->str);
+			fn->api->error_message(fn->api->context, message.buf);
+			raviX_buffer_free(&message);
+			goto Lexit;
+		}
+	}
+
+Lexit:
+	C_parser_destroy(&parser);
+	raviX_buffer_free(&code);
+
+	return status;
+}
+
 static int output_instruction(Function *fn, Instruction *insn)
 {
 	int rc = 0;
@@ -3100,6 +3151,10 @@ static int output_instruction(Function *fn, Instruction *insn)
 
 	case op_embed_C:
 		rc = emit_op_embed_C(fn, insn);
+		break;
+
+	case op_embed_C__new:
+		rc = emit_op_embed_C__new(fn, insn);
 		break;
 
 	default:
