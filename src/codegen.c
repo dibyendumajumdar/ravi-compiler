@@ -2922,7 +2922,7 @@ static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
 	Pseudo *prefix = get_operand(insn, 0);
 	Pseudo *tagname = get_operand(insn, 1);
 	Pseudo *size = get_operand(insn, 2);
-
+	Pseudo *target = get_target(insn, 0);
 	C_Type *ty = hashmap_get(&global_scope->tags, tagname->constant->s->str);
 	size_t tagsz = 0;
 	if (ty != NULL) {
@@ -2947,12 +2947,21 @@ static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
 	raviX_buffer_add_string(&fn->body, "  TValue *raviX__elements = ");
 	emit_reg_accessor(fn, size, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, "  TValue *raviX__target = ");
+	emit_reg_accessor(fn, target, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+
 	raviX_buffer_add_string(&fn->body, "  if (ttisinteger(raviX__elements)) {\n");
 	raviX_buffer_add_string(&fn->body, "   lua_Integer n = ivalue(raviX__elements);\n");
-	raviX_buffer_add_fstring(&fn->body, "   void *p = raviL_newuserdata(L, %d * n, \"%s\");\n", (int)tagsz, tagname->constant->s->str);
-
+	raviX_buffer_add_fstring(&fn->body, "   Udata *u = luaS_newudata(L, %d * n);\n", (int)tagsz);
+	raviX_buffer_add_string(&fn->body, "   setuvalue(L, raviX__target, u);\n");
+	raviX_buffer_add_string(&fn->body, "  }\n");
+	raviX_buffer_add_string(&fn->body, "  else {\n");
+	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
+	raviX_buffer_add_string(&fn->body, "  }\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
-
+	status = 0;
 
 Lexit:
 	C_parser_destroy(&parser);
