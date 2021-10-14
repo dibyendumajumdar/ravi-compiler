@@ -1543,6 +1543,23 @@ static void linearize_local_statement(Proc *proc, AstNode *stmt)
 	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv);
 }
 
+static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
+{
+	Instruction *insn = allocate_instruction(proc, op_embed_C__new, expr->line_number);
+	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type_prefix)));
+	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type_name)));
+	Pseudo *size_expr = linearize_expression(proc, expr->builtin_expr.size_expr);
+	add_instruction_operand(proc, insn, size_expr);
+
+	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TUSERDATA);
+	add_instruction_target(proc, insn, target);
+	add_instruction_target(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type.type_name)));
+	add_instruction(proc, insn);
+
+	free_temp_pseudo(proc, size_expr, false);
+	return target;
+}
+
 static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 {
 	Pseudo *result = NULL;
@@ -1575,7 +1592,9 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 	case EXPR_CONCAT: {
 		result = linearize_concat_expression(proc, expr);
 	} break;
-		// FIXME EXPR_BUILTIN
+	case EXPR_BUILTIN: {
+		result = linearize_builtin_expression(proc, expr);
+	} break;
 	default:
 		handle_error(proc->linearizer->ast_container, "feature not yet implemented");
 		break;
@@ -2678,7 +2697,7 @@ static const char *op_codenames[] = {
     "PUTik",	  "PUTsk",  "TPUT", "TPUTik", "TPUTsk",	    "IAPUT",	 "IAPUTiv",   "FAPUT",	   "FAPUTfv",
     "CBR",	  "BR",	    "MOV",  "MOVi",   "MOVif",	    "MOVf",	 "MOVfi",     "CALL",	   "GET",
     "GETik",	  "GETsk",  "TGET", "TGETik", "TGETsk",	    "IAGET",	 "IAGETik",   "FAGET",	   "FAGETik",
-    "STOREGLOBAL", "CLOSE", "CONCAT", "INIT", "EMBED_C"};
+    "STOREGLOBAL", "CLOSE", "CONCAT", "INIT", "EMBED_C",    "EMBED_C__NEW"};
 
 static void output_pseudo_list(PseudoList *list, TextBuffer *mb)
 {
