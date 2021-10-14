@@ -2943,6 +2943,17 @@ static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
 		}
 	}
 
+	raviX_buffer_add_string(&fn->body, "{\n");
+	raviX_buffer_add_string(&fn->body, "  TValue *raviX__elements = ");
+	emit_reg_accessor(fn, size, 0);
+	raviX_buffer_add_string(&fn->body, ";\n");
+	raviX_buffer_add_string(&fn->body, "  if (ttisinteger(raviX__elements)) {\n");
+	raviX_buffer_add_string(&fn->body, "   lua_Integer n = ivalue(raviX__elements);\n");
+	raviX_buffer_add_fstring(&fn->body, "   void *p = raviL_newuserdata(L, %d * n, \"%s\");\n", (int)tagsz, tagname->constant->s->str);
+
+	raviX_buffer_add_string(&fn->body, "}\n");
+
+
 Lexit:
 	C_parser_destroy(&parser);
 	raviX_buffer_free(&code);
