@@ -873,36 +873,19 @@ static AstNode *parse_builtin_expression(ParserState *parser)
 	builtin_expr->builtin_expr.type.type_code = RAVI_TUSERDATA;
 	builtin_expr->builtin_expr.type.type_name = NULL;
 	builtin_expr->builtin_expr.type_name = NULL;
-	builtin_expr->builtin_expr.type_prefix = NULL;
 	builtin_expr->builtin_expr.size_expr = NULL;
 
 	raviX_next(ls);
 	checknext(ls, '(');
-	check(ls, TOK_STRING);
-	builtin_expr->builtin_expr.type_prefix = ls->t.seminfo.ts;
-	raviX_next(ls);
-	checknext(ls, ',');
 	check(ls, TOK_STRING);
 	builtin_expr->builtin_expr.type_name = ls->t.seminfo.ts;
 	raviX_next(ls);
 	checknext(ls, ',');
 	builtin_expr->builtin_expr.size_expr = parse_expression(parser);
 	if (builtin_expr->builtin_expr.size_expr == NULL) {
-		raviX_syntaxerror(ls, "Expected a size expression as third argument to C__new");
+		raviX_syntaxerror(ls, "Expected a size expression as second argument to C__new");
 	}
 	checknext(ls, ')');
-
-	TextBuffer buf;
-	uint32_t len = builtin_expr->builtin_expr.type_prefix->len + builtin_expr->builtin_expr.type_name->len;
-	raviX_buffer_init(&buf, len+ 1);
-	raviX_buffer_add_string(&buf, builtin_expr->builtin_expr.type_prefix->str);
-	raviX_buffer_add_string(&buf, ".");
-	raviX_buffer_add_string(&buf, builtin_expr->builtin_expr.type_name->str);
-
-	const StringObject *typename = raviX_create_string(parser->container, buf.buf, buf.pos);
-	builtin_expr->builtin_expr.type.type_name = typename;
-
-	raviX_buffer_free(&buf);
 
 	return builtin_expr;
 }

@@ -31,4 +31,4 @@ C__decl [[
   } MyStruct;
 ]]
 
-local u = C__new('tt', 'MyStruct', 1)
+local u = C__new('MyStruct', 1)

@@ -2919,10 +2919,10 @@ static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
 	if (C_parse(global_scope, &parser, tok) == NULL) {
 		goto Lexit;
 	}
-	Pseudo *prefix = get_operand(insn, 0);
-	Pseudo *tagname = get_operand(insn, 1);
-	Pseudo *size = get_operand(insn, 2);
+	Pseudo *tagname = get_operand(insn, 0);
+	Pseudo *size = get_operand(insn, 1);
 	Pseudo *target = get_target(insn, 0);
+	// Add utility in chibicc to find a type
 	C_Type *ty = hashmap_get(&global_scope->tags, tagname->constant->s->str);
 	size_t tagsz = 0;
 	if (ty != NULL) {
@@ -2957,6 +2957,7 @@ static int emit_op_embed_C__new(Function *fn, Instruction *insn) {
 	raviX_buffer_add_string(&fn->body, "   setuvalue(L, raviX__target, u);\n");
 	raviX_buffer_add_string(&fn->body, "  }\n");
 	raviX_buffer_add_string(&fn->body, "  else {\n");
+	// FIXME need specific error code
 	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
 	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, "  }\n");

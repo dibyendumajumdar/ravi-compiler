@@ -74,7 +74,10 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 			type = va_arg(ap, const VariableType *);
 			if (type->type_code == RAVI_TUSERDATA) {
 				const StringObject *s = type->type_name;
-				raviX_buffer_add_string(buf, s->str);
+				if (s != NULL)
+					raviX_buffer_add_string(buf, s->str);
+				else
+					raviX_buffer_add_string(buf, "userdata");
 			} else {
 				raviX_buffer_add_string(buf, raviX_get_type_name(type->type_code));
 			}
@@ -582,9 +585,9 @@ void raviX_print_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_BUILTIN: {
-		printf_buf(buf, "%p%c %T\n", level, "C__new(", &node->string_concatenation_expr.type);
+		printf_buf(buf, "%p%s %c%T\n", level, "C__new(", "", &node->builtin_expr.type);
 		// TODO print contents
-		printf_buf(buf, "%p%c\n", level, ")");
+		printf_buf(buf, "%p)\n", level);
 		break;
 	}
 	default:

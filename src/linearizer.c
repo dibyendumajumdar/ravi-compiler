@@ -1546,16 +1546,12 @@ static void linearize_local_statement(Proc *proc, AstNode *stmt)
 static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
 {
 	Instruction *insn = allocate_instruction(proc, op_embed_C__new, expr->line_number);
-	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type_prefix)));
 	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type_name)));
 	Pseudo *size_expr = linearize_expression(proc, expr->builtin_expr.size_expr);
 	add_instruction_operand(proc, insn, size_expr);
-
 	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TUSERDATA);
 	add_instruction_target(proc, insn, target);
-	add_instruction_target(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type.type_name)));
 	add_instruction(proc, insn);
-
 	free_temp_pseudo(proc, size_expr, false);
 	return target;
 }
