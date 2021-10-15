@@ -2750,7 +2750,8 @@ static int analyze_C_code(Function *fn, TextBuffer *C_code)
 	raviX_buffer_init(&code, 1024);
 	raviX_buffer_add_string(&code, Embedded_C_header);
 	raviX_buffer_add_string(&code, addition_decls);
-	raviX_buffer_add_string(&code, fn->proc->linearizer->C_declarations.buf);
+	if (fn->proc->linearizer->C_declarations.buf)
+		raviX_buffer_add_string(&code, fn->proc->linearizer->C_declarations.buf);
 	if (fn->C_local_declarations.buf) /* declarations of temp integer and float vars */
 		raviX_buffer_add_string(&code, fn->C_local_declarations.buf);
 
@@ -2850,6 +2851,21 @@ static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol 
 	raviX_buffer_add_string(&fn->body, " }\n");
 }
 
+static void emit_userdata_C_variable_store(Function *fn, Instruction *insn, LuaSymbol *symbol)
+{
+	ravitype_t type = symbol->variable.value_type.type_code;
+	if (type != RAVI_TNUMINT && type != RAVI_TNUMFLT) {
+		return;
+	}
+	raviX_buffer_add_string(&fn->body, " {\n");
+	raviX_buffer_add_string(&fn->body, "  ");
+	emit_varname(fn, symbol->variable.pseudo);
+	raviX_buffer_add_string(&fn->body, " = ");
+	raviX_buffer_add_fstring(&fn->body, "%s;\n", symbol->variable.var_name->str);
+	raviX_buffer_add_string(&fn->body, " }\n");
+}
+
+
 static int emit_op_embed_C(Function *fn, Instruction *insn)
 {
 	// Save the buffer and switch to new one temporarily
@@ -2886,6 +2902,16 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	Pseudo *C_code = get_first_target(insn);
 	assert(C_code->type == PSEUDO_CONSTANT && C_code->constant->type == RAVI_TSTRING);
 	raviX_buffer_add_string(&fn->body, C_code->constant->s->str);
+
+	for (int i = 0; i < get_num_operands(insn); i++) {
+		Pseudo *pseudo = get_operand(insn, i);
+		LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
+		if (symbol->variable.value_type.type_code == RAVI_TNUMINT ||
+		    symbol->variable.value_type.type_code == RAVI_TNUMFLT) {
+			emit_userdata_C_variable_store(fn, insn, symbol);
+		}
+	}
+
 	raviX_buffer_add_string(&fn->body, "\n}\n");
 
 	TextBuffer code = fn->body;

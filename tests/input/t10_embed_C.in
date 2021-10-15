@@ -12,17 +12,12 @@ function demo(u: Userdata)
 
 end
 #
-C__decl [[
-   typedef struct {
-      int i;
-  } MyStruct;
-]]
-
 local i: integer = 1
 local j: integer = 2
+local k: integer
 
-C__unsafe(i,j) [[
-     long long k = i+j; // Okay as primitive types
+C__unsafe(i,j,k) [[
+     k = i+j; // Okay as primitive types
 ]]
 #
 C__decl [[
@@ -32,3 +27,12 @@ C__decl [[
 ]]
 
 local u = C__new('MyStruct', 1)
+
+local i: integer = 42
+local j: integer
+
+C__unsafe(i,j,u) [[
+    MyStruct *s = (MyStruct *) u.ptr;
+    s->i = i;
+    j = s->i;
+]]
