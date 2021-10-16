@@ -36,3 +36,5 @@ C__unsafe(i,j,u) [[
     s->i = i;
     j = s->i;
 ]]
+
+return j

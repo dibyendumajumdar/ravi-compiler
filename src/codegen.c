@@ -2794,14 +2794,27 @@ Lexit:
 	return analysis.status;
 }
 
-static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol *symbol)
+/* Load variables from Ravi/Lua to C */
+static void emit_userdata_C_variable_load(Function *fn, Instruction *insn, Pseudo *pseudo)
 {
+	if (pseudo->type != PSEUDO_SYMBOL &&
+	    !((pseudo->type == PSEUDO_TEMP_FLT || pseudo->type == PSEUDO_TEMP_INT) && pseudo->temp_for_local != NULL)) {
+		handle_error_bad_pseudo(fn, pseudo, "Unsupported pseudo type in C bind variables");
+		return;
+	}
+	LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
 	ravitype_t type = symbol->variable.value_type.type_code;
 	if (type == RAVI_TNUMINT) {
-		raviX_buffer_add_fstring(&fn->body, " lua_Integer %s = 0;\n", symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, " lua_Integer %s = ", symbol->variable.var_name->str);
+		emit_varname_or_constant(fn, pseudo);
+		raviX_buffer_add_string(&fn->body, ";\n");
+		return;
 	}
 	else if (type == RAVI_TNUMFLT) {
-		raviX_buffer_add_fstring(&fn->body, " lua_Number %s = 0.0;\n", symbol->variable.var_name->str);
+		raviX_buffer_add_fstring(&fn->body, " lua_Number %s = ", symbol->variable.var_name->str);
+		emit_varname_or_constant(fn, pseudo);
+		raviX_buffer_add_string(&fn->body, ";\n");
+		return;
 	}
 	else if (type == RAVI_TARRAYINT) {
 		raviX_buffer_add_fstring(&fn->body, " Ravi_IntegerArray %s = {0};\n", symbol->variable.var_name->str);
@@ -2809,20 +2822,19 @@ static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol 
 	else if (type == RAVI_TARRAYFLT) {
 		raviX_buffer_add_fstring(&fn->body, " Ravi_NumberArray %s = {0};\n", symbol->variable.var_name->str);
 	}
-	else {
+	else if (type == RAVI_TSTRING || type == RAVI_TUSERDATA || type == RAVI_TANY) {
+		// We assume ANY is userdata - runtime check generated below.
 		raviX_buffer_add_fstring(&fn->body, " Ravi_StringOrUserData %s = {0};\n", symbol->variable.var_name->str);
+	}
+	else {
+		handle_error_bad_pseudo(fn, pseudo, "Unsupported symbol type in C bind variable");
+		return;
 	}
 	raviX_buffer_add_string(&fn->body, " {\n");
 	raviX_buffer_add_fstring(&fn->body, "  TValue *raviX__%s = ", symbol->variable.var_name->str);
 	emit_reg_accessor(fn, symbol->variable.pseudo, 0);
 	raviX_buffer_add_string(&fn->body, ";\n");
-	if (type == RAVI_TNUMINT) {
-		raviX_buffer_add_fstring(&fn->body, "  %s = ivalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
-	}
-	else if (type == RAVI_TNUMFLT) {
-		raviX_buffer_add_fstring(&fn->body, "  %s = fvalue(raviX__%s);\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
-	}
-	else if (type == RAVI_TARRAYINT) {
+	if (type == RAVI_TARRAYINT) {
 		raviX_buffer_add_fstring(&fn->body, "  %s.ptr = (lua_Integer*) arrvalue(raviX__%s)->data;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
 		raviX_buffer_add_fstring(&fn->body, "  %s.len = (unsigned int) arrvalue(raviX__%s)->len;\n", symbol->variable.var_name->str, symbol->variable.var_name->str);
 	}
@@ -2851,8 +2863,10 @@ static void emit_userdata_C_variable(Function *fn, Instruction *insn, LuaSymbol 
 	raviX_buffer_add_string(&fn->body, " }\n");
 }
 
-static void emit_userdata_C_variable_store(Function *fn, Instruction *insn, LuaSymbol *symbol)
+/* Store variables from C back to Ravi/Lua */
+static void emit_userdata_C_variable_store(Function *fn, Instruction *insn, Pseudo *pseudo)
 {
+	LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
 	ravitype_t type = symbol->variable.value_type.type_code;
 	if (type != RAVI_TNUMINT && type != RAVI_TNUMFLT) {
 		return;
@@ -2873,42 +2887,26 @@ static int emit_op_embed_C(Function *fn, Instruction *insn)
 	fn->body.buf = NULL; fn->body.pos = 0; fn->body.capacity = 0;
 
 	// FIXME error handling - as we will leak memory if longjmp occurs
-
 	raviX_buffer_add_string(&fn->body, "{\n");
+
+	// Load the Ravi/Lua symbols into C code
 	for (int i = 0; i < get_num_operands(insn); i++) {
 		Pseudo *pseudo = get_operand(insn, i);
-		if (pseudo->type != PSEUDO_SYMBOL &&
-		    !((pseudo->type == PSEUDO_TEMP_FLT || pseudo->type == PSEUDO_TEMP_INT) && pseudo->temp_for_local != NULL)) {
-			handle_error(fn, "Unexpected pseudo");
-			break;
-		}
-		LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
-		switch (symbol->variable.value_type.type_code) {
-		case RAVI_TNUMINT:
-		case RAVI_TNUMFLT:
-		case RAVI_TARRAYINT:
-		case RAVI_TARRAYFLT:
-		case RAVI_TSTRING:
-		case RAVI_TANY:
-		case RAVI_TUSERDATA: {
-			emit_userdata_C_variable(fn, insn, symbol);
-			break;
-		}
-		default:
-			handle_error(fn, "Unsupported type in C bind variable");
-			break;
-		}
+		emit_userdata_C_variable_load(fn, insn, pseudo);
 	}
+
+	// output C code
 	Pseudo *C_code = get_first_target(insn);
 	assert(C_code->type == PSEUDO_CONSTANT && C_code->constant->type == RAVI_TSTRING);
 	raviX_buffer_add_string(&fn->body, C_code->constant->s->str);
 
+	// Store values back to Ravi/Lua variables
 	for (int i = 0; i < get_num_operands(insn); i++) {
 		Pseudo *pseudo = get_operand(insn, i);
 		LuaSymbol *symbol = pseudo->type == PSEUDO_SYMBOL ? pseudo->symbol : pseudo->temp_for_local;
 		if (symbol->variable.value_type.type_code == RAVI_TNUMINT ||
 		    symbol->variable.value_type.type_code == RAVI_TNUMFLT) {
-			emit_userdata_C_variable_store(fn, insn, symbol);
+			emit_userdata_C_variable_store(fn, insn, pseudo);
 		}
 	}
 
