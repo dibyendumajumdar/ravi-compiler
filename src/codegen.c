@@ -673,6 +673,7 @@ static const char Lua_header[] =
     "extern LClosure *luaF_newLclosure (lua_State *L, int n);\n"
     "extern TString *luaS_newlstr (lua_State *L, const char *str, size_t l);\n"
     "extern Proto *luaF_newproto (lua_State *L);\n"
+    "extern Udata *luaS_newudata (lua_State *L, size_t s);\n"
     "extern void luaD_inctop (lua_State *L);\n"
     "#define luaM_reallocv(L,b,on,n,e) luaM_realloc_(L, (b), (on)*(e), (n)*(e))\n"
     "#define luaM_newvector(L,n,t) cast(t *, luaM_reallocv(L, NULL, 0, n, sizeof(t)))\n"
@@ -3511,6 +3512,10 @@ static int emit_embedded_C_declarations(LinearizerState *linearizer, struct Ravi
 	hashmap_foreach(&global_scope->tags, analyze_C_declarations, &analysis);
 	analysis.is_tags = 0;
 	hashmap_foreach(&global_scope->vars, analyze_C_declarations, &analysis);
+
+	if (analysis.status == 0) {
+		raviX_buffer_add_string(mb, linearizer->C_declarations.buf);
+	}
 
 Lexit:
 	if (analysis.status < 0 && parser.error_message) {
