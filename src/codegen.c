@@ -2588,61 +2588,67 @@ typedef struct C_Code_Analysis {
 	int status;
 } C_Code_Analysis;
 
-static void walk_node(C_Code_Analysis *analysis, C_Node *node)
+static void walk_node(struct Ravi_CompilerInterface *api, C_Code_Analysis *analysis, C_Node *node)
 {
 	switch (node->kind) {
 	case ND_BLOCK: {
 		for (C_Node *n = node->body; n; n = n->next)
-			walk_node(analysis, n);
+			walk_node(api, analysis, n);
 		break;
 	}
 	case ND_IF: {
-		walk_node(analysis, node->cond);
-		walk_node(analysis, node->then);
+		walk_node(api, analysis, node->cond);
+		walk_node(api, analysis, node->then);
 		if (node->els)
-			walk_node(analysis, node->els);
+			walk_node(api, analysis, node->els);
 		break;
 	}
 	case ND_FOR: {
 		if (node->init)
-			walk_node(analysis, node->init);
+			walk_node(api, analysis, node->init);
 		if (node->cond)
-			walk_node(analysis, node->cond);
+			walk_node(api, analysis, node->cond);
 		if (node->inc)
-			walk_node(analysis, node->inc);
+			walk_node(api, analysis, node->inc);
 		break;
 	}
 	case ND_DO: {
-		walk_node(analysis, node->then);
-		walk_node(analysis, node->cond);
+		walk_node(api, analysis, node->then);
+		walk_node(api, analysis, node->cond);
 		break;
 	}
 	case ND_SWITCH: {
-		walk_node(analysis, node->cond);
+		walk_node(api, analysis, node->cond);
 		for (C_Node *n = node->case_next; n; n = n->case_next) {
-			walk_node(analysis, n);
+			walk_node(api, analysis, n);
 		}
 		if (node->default_case)
-			walk_node(analysis, node->default_case);
+			walk_node(api, analysis, node->default_case);
 		break;
 	}
 	case ND_CASE:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
+		break;
+	case ND_GOTO:
+		api->error_message(api->context, "Goto statements not allowed in embedded C code\n");
+		analysis->status--;
 		break;
 	case ND_GOTO_EXPR:
-		walk_node(analysis, node->lhs);
+		api->error_message(api->context, "Computed gotos not allowed in embedded C code\n");
+		analysis->status--;
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_LABEL:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_RETURN:
-		fprintf(stderr, "Trying to return from embedded C code is not allowed\n");
+		api->error_message(api->context, "Trying to return from embedded C code is not allowed\n");
 		analysis->status--;
 		if (node->lhs)
-			walk_node(analysis, node->lhs);
+			walk_node(api, analysis, node->lhs);
 		break;
 	case ND_EXPR_STMT:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_ASM:
 		break;
@@ -2651,61 +2657,61 @@ static void walk_node(C_Code_Analysis *analysis, C_Node *node)
 	case ND_NUM:
 		break;
 	case ND_NEG:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_VAR:
 		break;
 	case ND_MEMBER:
 		break;
 	case ND_DEREF:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_ADDR:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_ASSIGN:
-		walk_node(analysis, node->lhs);
-		walk_node(analysis, node->rhs);
+		walk_node(api, analysis, node->lhs);
+		walk_node(api, analysis, node->rhs);
 		break;
 	case ND_STMT_EXPR: {
 		for (C_Node *n = node->body; n; n = n->next)
-			walk_node(analysis, n);
+			walk_node(api, analysis, n);
 		break;
 	}
 	case ND_COMMA:
-		walk_node(analysis, node->lhs);
-		walk_node(analysis, node->rhs);
+		walk_node(api, analysis, node->lhs);
+		walk_node(api, analysis, node->rhs);
 		break;
 	case ND_CAST:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_MEMZERO:
 		break;
 	case ND_COND:
-		walk_node(analysis, node->cond);
-		walk_node(analysis, node->then);
-		walk_node(analysis, node->els);
+		walk_node(api, analysis, node->cond);
+		walk_node(api, analysis, node->then);
+		walk_node(api, analysis, node->els);
 		break;
 	case ND_NOT:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_BITNOT:
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_LOGAND:
 	case ND_LOGOR:
-		walk_node(analysis, node->lhs);
-		walk_node(analysis, node->rhs);
+		walk_node(api, analysis, node->lhs);
+		walk_node(api, analysis, node->rhs);
 		break;
 	case ND_FUNCALL:
 		//fprintf(stderr, "Calling function %.*s\n", node->func_ty->name->len, node->func_ty->name->loc);
 		if (!is_builtin(node->func_ty->name->loc, node->func_ty->name->len)) {
-			fprintf(stderr, "Calling functions from embedded C code is not allowed\n");
+			api->error_message(api->context, "Calling functions from embedded C code is not allowed\n");
 			analysis->status--;
 		}
-		walk_node(analysis, node->lhs);
+		walk_node(api, analysis, node->lhs);
 		for (C_Node *arg = node->args; arg; arg = arg->next) {
-			walk_node(analysis, arg);
+			walk_node(api, analysis, arg);
 		}
 		break;
 	case ND_LABEL_VAL:
@@ -2728,8 +2734,8 @@ static void walk_node(C_Code_Analysis *analysis, C_Node *node)
 	case ND_BITXOR:
 	case ND_SHL:
 	case ND_SHR:
-		walk_node(analysis, node->lhs);
-		walk_node(analysis, node->rhs);
+		walk_node(api, analysis, node->lhs);
+		walk_node(api, analysis, node->rhs);
 		break;
 	}
 }
@@ -2787,7 +2793,7 @@ static int analyze_C_code(Function *fn, TextBuffer *user_code)
 		analysis.status = -1;
 		goto Lexit;
 	}
-	walk_node(&analysis, node);
+	walk_node(fn->api, &analysis, node);
 
 Lexit:
 	if (analysis.status < 0 && parser.error_message) {
