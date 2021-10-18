@@ -2421,7 +2421,7 @@ static int emit_op_movfi(Function *fn, Instruction *insn)
 		emit_reg_accessor(fn, target, 0);
 		raviX_buffer_add_string(&fn->body, ";\n setivalue(ra, i);\n");
 	} else {
-		handle_error(fn, "Unexpected pseudo");
+		handle_error_bad_pseudo(fn, target, "Unexpected target pseudo");
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
