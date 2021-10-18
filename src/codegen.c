@@ -2487,20 +2487,22 @@ typedef struct C_Decl_Analysis {
 	C_Scope *global_scope;
 	int status;
 	int is_tags;
+	struct Ravi_CompilerInterface *api;
 } C_Decl_Analysis;
 
 /* Checks type declarations do not contain pointers and unions */
 static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
 {
+	struct Ravi_CompilerInterface *api = analysis->api;
 	if (ty->kind == TY_STRUCT) {
 		for (C_Member *mem = ty->members; mem; mem = mem->next) {
 			analyze_C_types(analysis, mem->ty);
 		}
 	} else if (ty->kind == TY_PTR) {
-		fprintf(stderr, "Declaring pointer type is not allowed\n");
+		api->error_message(api->context, "Declaring pointer type is not allowed\n");
 		analysis->status--;
 	} else if (ty->kind == TY_UNION) {
-		fprintf(stderr, "Declaring union type is not allowed\n");
+		api->error_message(api->context, "Declaring union type is not allowed\n");
 		analysis->status--;
 	}
 }
@@ -2508,8 +2510,10 @@ static void analyze_C_types(C_Decl_Analysis *analysis, C_Type *ty)
 /* Checks that there are no entities being created in the global scope */
 static void analyze_C_vars(C_Decl_Analysis *analysis, C_VarScope *vc)
 {
+	struct Ravi_CompilerInterface *api = analysis->api;
 	if (vc->var) {
-		fprintf(stderr, "Declaring objects is not allowed: %s\n", vc->var->name);
+		api->error_message(api->context, "Declaring objects is not allowed: ");
+		api->error_message(api->context, vc->var->name); // FIXME error formatting
 		analysis->status--;
 	} else if (vc->type_def) {
 		analyze_C_types(analysis, vc->type_def);
@@ -3506,7 +3510,7 @@ static int emit_C__decl(LinearizerState *linearizer, struct Ravi_CompilerInterfa
 	C_Parser parser;
 	C_parser_init(&parser);
 	C_Scope *global_scope = C_global_scope(&parser);
-	C_Decl_Analysis analysis = {&parser, global_scope, 0};
+	C_Decl_Analysis analysis = {&parser, global_scope, 0, 0, api};
 
 	C_Token *tok = C_tokenize_buffer(&parser, code.buf);
 	if (tok == NULL) {
@@ -3519,6 +3523,8 @@ static int emit_C__decl(LinearizerState *linearizer, struct Ravi_CompilerInterfa
 		goto Lexit;
 	}
 
+	// analyze declarations - do not allow pointers or unions in structs
+	// or global object declarations
 	analysis.is_tags = 1;
 	hashmap_foreach(&global_scope->tags, analyze_C_declarations, &analysis);
 	analysis.is_tags = 0;
