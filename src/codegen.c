@@ -712,7 +712,9 @@ static const char Embedded_C_header[] =
     "   union { lua_Integer i; lua_Number n; } value_;\n"
     "} TValue;\n"
     "static lua_Integer ivalue(const TValue *v) { return 0; }\n"
+    "static void setivalue(TValue *v, lua_Integer i) {}\n"
     "static lua_Number  fvalue(const TValue *v) { return 0.0; }\n"
+    "static void setfltvalue(TValue *v, lua_Number f) {}\n"
     "typedef struct {\n"
     "   char *data;\n"
     "   unsigned int len;\n"
@@ -933,7 +935,7 @@ static void emit_varname(Function *fn, const Pseudo *pseudo)
 	} else if (pseudo->type == PSEUDO_TEMP_FLT) {
 		raviX_buffer_add_fstring(mb, "%s%d", flt_var_prefix, pseudo->regnum);
 	} else {
-		handle_error(fn, "Unexpected pseudo type");
+		handle_error_bad_pseudo(fn, pseudo, "Unexpected pseudo type");
 	}
 }
 
@@ -2161,7 +2163,7 @@ static int emit_generic_comp(Function *fn, Instruction *insn)
 		emit_varname(fn, target);
 		raviX_buffer_add_string(&fn->body, " = result != 0;\n");
 	} else {
-		handle_error(fn, "Unexpected pseudo");
+		handle_error_bad_pseudo(fn, target, "Unexpected pseudo");
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
@@ -2366,7 +2368,7 @@ static int emit_op_unmi_unmf(Function *fn, Instruction *insn)
 		}
 		raviX_buffer_add_string(&fn->body, ");\n");
 	} else {
-		handle_error(fn, "Unexpected pseudo");
+		handle_error_bad_pseudo(fn, target, "Unexpected pseudo");
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
@@ -2451,7 +2453,7 @@ static int emit_op_movif(Function *fn, Instruction *insn)
 		emit_reg_accessor(fn, target, 0);
 		raviX_buffer_add_string(&fn->body, ";\n setfltvalue(ra, n);\n");
 	} else {
-		handle_error(fn, "Unexpected pseudo");
+		handle_error_bad_pseudo(fn, target,"Unexpected pseudo");
 		return -1;
 	}
 	raviX_buffer_add_string(&fn->body, "}\n");
@@ -2476,7 +2478,7 @@ static int emit_op_init(Function *fn, Instruction *insn)
 		// FIXME we need to check for initialization of integer[], number[] or table
 		emit_move(fn, &src, dst);
 	} else {
-		handle_error(fn, "Unexpected pseudo");
+		handle_error_bad_pseudo(fn, dst, "Unexpected pseudo");
 		return -1;
 	}
 	return 0;
@@ -2529,7 +2531,9 @@ static int is_builtin(char *key, int keylen)
 				   "lua_Integer",
 				   "TValue",
 				   "ivalue",
+				   "setivalue",
 				   "fvalue",
+				   "setfltvalue",
 				   "Ravi_Arr",
 				   "arrvalue",
 				   "ttisfulluserdata",
@@ -2628,8 +2632,8 @@ static void walk_node(struct Ravi_CompilerInterface *api, C_Code_Analysis *analy
 		walk_node(api, analysis, node->lhs);
 		break;
 	case ND_GOTO:
-		api->error_message(api->context, "Goto statements not allowed in embedded C code\n");
-		analysis->status--;
+		//api->error_message(api->context, "Goto statements not allowed in embedded C code\n");
+		//analysis->status--;
 		break;
 	case ND_GOTO_EXPR:
 		api->error_message(api->context, "Computed gotos not allowed in embedded C code\n");
@@ -2887,9 +2891,24 @@ static void emit_userdata_C_variable_store(Function *fn, Instruction *insn, Pseu
 	}
 	raviX_buffer_add_string(&fn->body, " {\n");
 	raviX_buffer_add_string(&fn->body, "  ");
-	emit_varname(fn, symbol->variable.pseudo);
-	raviX_buffer_add_string(&fn->body, " = ");
-	raviX_buffer_add_fstring(&fn->body, "%s;\n", symbol->variable.var_name->str);
+	if (symbol->variable.pseudo->type == PSEUDO_TEMP_INT || symbol->variable.pseudo->type == PSEUDO_TEMP_BOOL ||
+	    symbol->variable.pseudo->type == PSEUDO_TEMP_FLT) {
+		emit_varname(fn, symbol->variable.pseudo);
+		raviX_buffer_add_string(&fn->body, " = ");
+		raviX_buffer_add_fstring(&fn->body, "%s;\n", symbol->variable.var_name->str);
+	}
+	else if (symbol->variable.pseudo->type == PSEUDO_SYMBOL) {
+		raviX_buffer_add_string(&fn->body, " TValue *raviX__var = ");
+		emit_reg_accessor(fn, symbol->variable.pseudo, 0);
+		raviX_buffer_add_string(&fn->body, ";\n");
+		if (type == RAVI_TNUMINT) {
+			raviX_buffer_add_fstring(&fn->body, "setivalue(raviX__var, %s);\n", symbol->variable.var_name->str);
+		}
+		else {
+			assert(type == RAVI_TNUMFLT);
+			raviX_buffer_add_fstring(&fn->body, "setfltvalue(raviX__var, %s);\n", symbol->variable.var_name->str);
+		}
+	}
 	raviX_buffer_add_string(&fn->body, " }\n");
 }
 
@@ -3281,9 +3300,9 @@ static void output_string_literal(TextBuffer *mb, const char *s, unsigned int le
 	// simplistic escaping of chars
 	// FIXME
 	static const char *scapes[] = {
-	    "\\0",  "\\1",  "\\2",  "\\3",  "\\4",  "\\5",  "\\6",  "\\7",  "\\8",  "\\9",  "\\n",
-	    "\\11", "\\12", "\\r",  "\\14", "\\15", "\\16", "\\17", "\\18", "\\19", "\\20", "\\21",
-	    "\\22", "\\23", "\\24", "\\25", "\\26", "\\27", "\\28", "\\29", "\\30", "\\31",
+	    "\\00",  "\\01",  "\\02",  "\\03",  "\\04",  "\\05",  "\\06",  "\\07",  "\\010",  "\\t",  "\\n",
+	    "\\013", "\\f", "\\r",  "\\016", "\\017", "\\020", "\\021", "\\022", "\\023", "\\024", "\\025",
+	    "\\026", "\\027", "\\030", "\\031", "\\032", "\\033", "\\034", "\\035", "\\036", "\\037",
 	};
 
 	for (unsigned i = 0; i < len; i++) {
