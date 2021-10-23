@@ -28,12 +28,15 @@
 
 #include <stdlib.h>
 
-typedef struct Ravi_MemoryAllocatorInterface {
+#ifndef C_MEMORYALLOCATOR_DEFINED
+#define C_MEMORYALLOCATOR_DEFINED
+typedef struct C_MemoryAllocator {
 	void *arena;
 	void *(*realloc)(void *arena, void* mem, size_t newsize);
 	void *(*calloc)(void *arena,  size_t n_elements, size_t elem_size);
 	void (*free)(void *arena, void *p);
-} Ravi_MemoryAllocatorInterface;
+} C_MemoryAllocator;
+#endif
 
 typedef struct Ravi_CompilerInterface {
 	/* ------------------------ Inputs ------------------------------ */
@@ -46,7 +49,7 @@ typedef struct Ravi_CompilerInterface {
 
 	char main_func_name[31]; /* Name of the generated function that when called will set up the Lua closure */
 
-	Ravi_MemoryAllocatorInterface *memory_allocator;
+	C_MemoryAllocator *memory_allocator;
 
 	/* ------------------------- Outputs ------------------------------ */
 	const char* generated_code;  /* Output of the compiler, must be freed by caller. */
