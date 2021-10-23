@@ -17,13 +17,18 @@ int main(int argc, const char *argv[])
 	" int len;\n" \
 	"} Str;\n";
 	strncpy(buffer, code, sizeof buffer);
+	C_MemoryAllocator allocator;
+	allocator.arena = create_mspace(0, 0);
+	allocator.free = mspace_free;
+	allocator.calloc = mspace_calloc;
+	allocator.realloc = mspace_realloc;
 	C_Parser parser = {0};
-	C_parser_init(&parser);
+	C_parser_init(&parser, &allocator);
 	C_Token *tok = C_tokenize_buffer(&parser, buffer);
 	C_convert_pp_tokens(&parser, tok);
 	C_Scope scope = {0};
-	scope.vars.arena = parser.arena;
-	scope.tags.arena = parser.arena;
+	scope.vars.allocator = parser.memory_allocator;
+	scope.tags.allocator = parser.memory_allocator;
 	C_Obj *obj = C_parse(&scope, &parser, tok);
 	hashmap_foreach(&scope.vars, printout, NULL);
 	C_create_function(&scope, &parser, "dummy");
