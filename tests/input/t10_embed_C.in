@@ -1,6 +1,7 @@
 C__decl [[
 typedef struct MyStruct {
-    int a;
+    long a;
+    int variable_length[];
 } MyStruct;
 ]]
 
@@ -9,6 +10,7 @@ function demo(u: Userdata)
     C__unsafe(u) [[
         MyStruct *s = (MyStruct *) u.ptr;
     ]]
+    local u1 = C__new('MyStruct',1)
 
 end
 #
