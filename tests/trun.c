@@ -118,7 +118,7 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 	int rc = 0;
 
 	if (args->gen_C) {
-		fprintf(stdout, "/*\n");
+		fprintf(stdout, "#if 0\n");
 	}
 	if (args->codump) {
 		printf("%s\n", code);
@@ -180,8 +180,9 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		}
 	}
 	if (args->gen_C) {
-		fprintf(stdout, "\n*/\n");
+		fprintf(stdout, "\n#endif\n");
 		raviX_generate_C_tofile(linearizer, args->mainfunc, stdout);
+		fflush(stdout);
 	}
 
 L_linend:

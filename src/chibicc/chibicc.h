@@ -26,8 +26,6 @@ SOFTWARE.
 #ifndef CHIBICC_H
 #define CHIBICC_H
 
-#include "../../tests/ravi_alloc.h"
-
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>

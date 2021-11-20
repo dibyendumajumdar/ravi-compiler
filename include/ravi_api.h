@@ -42,7 +42,7 @@ typedef struct Ravi_CompilerInterface {
 	C_MemoryAllocator *memory_allocator;
 
 	/* ------------------------- Outputs ------------------------------ */
-	const char* generated_code;  /* Output of the compiler, must be freed by caller. */
+	const char* generated_code;  /* Output of the compiler. */
 
 	/* ------------------------ Debugging and error handling ----------------------------------------- */
 	void (*debug_message)(void *context, const char *filename, long long line, const char *message);
@@ -56,6 +56,7 @@ typedef struct Ravi_CompilerInterface {
  * @return 0 for success, non-zero for failure
  */
 RAVICOMP_EXPORT int raviX_compile(Ravi_CompilerInterface *compiler_interface);
+/* Releases memory etc held by the compiler context */
 RAVICOMP_EXPORT void raviX_release(Ravi_CompilerInterface *compiler_interface);
 
 #endif

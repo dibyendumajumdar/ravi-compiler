@@ -2771,6 +2771,8 @@ static int analyze_C_code(Function *fn, TextBuffer *user_code)
 	C_Parser parser;
 
 	C_parser_init(&parser, &allocator);
+	parser.embedded_mode = true;
+
 	C_Scope *global_scope = C_global_scope(&parser);
 	C_Token *tok = C_tokenize_buffer(&parser, canned_code.buf);
 	if (tok == NULL) {
@@ -2792,7 +2794,6 @@ static int analyze_C_code(Function *fn, TextBuffer *user_code)
 	C_convert_pp_tokens(&parser, tok);
 	/* Note user supplied code is parsed as compound statement in global scope - i.e.
 	 * not inside a function! */
-	parser.embedded_mode = true;
 	C_Node *node = C_parse_compound_statement(global_scope, &parser, tok);
 	if (node == NULL) {
 		analysis.status = -1;

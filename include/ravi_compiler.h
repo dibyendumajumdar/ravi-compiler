@@ -50,7 +50,7 @@ typedef double lua_Number;
  * one pointer. Ideally the arena create/destroy functions should be separate.
  * Also the api below is based on the dlmalloc api.
  *
- * Note that this struct below is also defined in allocate.h/chibicc.h and both
+ * Note that this struct below is also defined in allocate.h/chibicc.h and all
  * definitions must be kept in sync.
  */
 typedef struct C_MemoryAllocator {
