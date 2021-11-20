@@ -2,6 +2,19 @@
 
 #include <string.h>
 
+static void create_allocator(C_MemoryAllocator *allocator) {
+	allocator->arena = create_mspace(0, 0);
+	allocator->realloc = mspace_realloc;
+	allocator->calloc = mspace_calloc;
+	allocator->free = mspace_free;
+	allocator->create_arena = create_mspace;
+	allocator->destroy_arena = destroy_mspace;
+}
+
+static void destroy_allocator(C_MemoryAllocator *allocator) {
+	allocator->destroy_arena(allocator->arena);
+}
+
 static void printout(void *userdata, char *key, int keylen, void *val)
 {
 	printf("name: %d %.*s\n", keylen, keylen, key);
@@ -18,10 +31,7 @@ int main(int argc, const char *argv[])
 	"} Str;\n";
 	strncpy(buffer, code, sizeof buffer);
 	C_MemoryAllocator allocator;
-	allocator.arena = create_mspace(0, 0);
-	allocator.free = mspace_free;
-	allocator.calloc = mspace_calloc;
-	allocator.realloc = mspace_realloc;
+	create_allocator(&allocator);
 	C_Parser parser = {0};
 	C_parser_init(&parser, &allocator);
 	C_Token *tok = C_tokenize_buffer(&parser, buffer);
@@ -40,5 +50,6 @@ int main(int argc, const char *argv[])
 	parser.embedded_mode = true;
 	C_Node *node = C_parse_compound_statement(&scope, &parser, tok);
 	C_parser_destroy(&parser);
+	destroy_allocator(&allocator);
 	return 0;
 }

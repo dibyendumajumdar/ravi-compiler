@@ -22,6 +22,7 @@
  ******************************************************************************/
 
 #include "tcommon.h"
+#include "ravi_alloc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,4 +132,17 @@ void destroy_arguments(struct arguments *args)
 {
 	free((void *)args->filename);
 	free((void *)args->code);
+}
+
+void create_allocator(C_MemoryAllocator *allocator) {
+	allocator->arena = create_mspace(0, 0);
+	allocator->realloc = mspace_realloc;
+	allocator->calloc = mspace_calloc;
+	allocator->free = mspace_free;
+	allocator->create_arena = create_mspace;
+	allocator->destroy_arena = destroy_mspace;
+}
+
+void destroy_allocator(C_MemoryAllocator *allocator) {
+	allocator->destroy_arena(allocator->arena);
 }

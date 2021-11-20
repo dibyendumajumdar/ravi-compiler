@@ -29,6 +29,7 @@
  * walker.
  */
 
+#include "ravi_alloc.h"
 #include "ravi_compiler.h"
 #include "tcommon.h"
 
@@ -337,12 +338,15 @@ int main(int argc, const char *argv[])
 		code = args.code;
 	}
 	int rc = 0;
+	CompilerState *container = NULL;
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
 	if (!code) {
 		fprintf(stderr, "No code to process\n");
 		rc = 1;
 		goto L_exit;
 	}
-	CompilerState *container = raviX_init_compiler();
+	container = raviX_init_compiler(&allocator);
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
@@ -357,8 +361,9 @@ int main(int argc, const char *argv[])
 	walk_ast(container);
 
 L_exit:
-	raviX_destroy_compiler(container);
+	if (container)
+		raviX_destroy_compiler(container);
 	destroy_arguments(&args);
-
+	destroy_allocator(&allocator);
 	return rc;
 }

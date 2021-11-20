@@ -39,7 +39,7 @@ int raviX_compile(struct Ravi_CompilerInterface *compiler_interface)
 		dump_ir = strstr(compiler_interface->compiler_options, "--dump-ir") != NULL;
 	}
 	compiler_interface->generated_code = NULL;
-	CompilerState *container = raviX_init_compiler();
+	CompilerState *container = raviX_init_compiler(compiler_interface->memory_allocator);
 	LinearizerState* linearizer = raviX_init_linearizer(container);
 	rc = raviX_parse(container, compiler_interface->source, compiler_interface->source_len,
 			 compiler_interface->source_name);

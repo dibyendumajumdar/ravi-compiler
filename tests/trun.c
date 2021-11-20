@@ -42,8 +42,7 @@
 DECLARE_PTR_LIST(string_list, char);
 
 struct chunk_data {
-	Allocator string_allocator;
-	Allocator ptrlist_allocator;
+	C_MemoryAllocator allocator;
 	struct string_list *list;
 };
 
@@ -65,9 +64,9 @@ static const char *scan_next(const char *cp, const char *endp)
 static void add_chunk(struct chunk_data *chunks, TextBuffer *buf)
 {
 	size_t len = raviX_buffer_len(buf);
-	char *s = (char *) raviX_allocator_allocate(&chunks->string_allocator, len + 1);
+	char *s = (char *) chunks->allocator.calloc(chunks->allocator.arena, len + 1, sizeof(char));
 	raviX_string_copy(s, raviX_buffer_data(buf), len + 1);
-	raviX_ptrlist_add((PtrList **)&chunks->list, s, &chunks->ptrlist_allocator);
+	raviX_ptrlist_add((PtrList **)&chunks->list, s, &chunks->allocator);
 }
 
 /* Input text is supposed to contain multiple chunks
@@ -105,19 +104,16 @@ static uint32_t read_chunks(const char *input, struct chunk_data *chunks, const 
 
 static void init_chunks(struct chunk_data *chunks)
 {
-	raviX_allocator_init(&chunks->ptrlist_allocator, "ptrlists", sizeof(PtrList), sizeof(double),
-			     sizeof(PtrList) * 32);
-	raviX_allocator_init(&chunks->string_allocator, "strings", 0, sizeof(double), 1024 * 1024);
+	create_allocator(&chunks->allocator);
 	chunks->list = NULL;
 }
 
 static void destroy_chunks(struct chunk_data *chunks)
 {
-	raviX_allocator_destroy(&chunks->ptrlist_allocator);
-	raviX_allocator_destroy(&chunks->string_allocator);
+	destroy_allocator(&chunks->allocator);
 }
 
-static int do_code(const char *code, const struct arguments *args)
+static int do_code(C_MemoryAllocator *allocator, const char *code, const struct arguments *args)
 {
 	int rc = 0;
 
@@ -128,7 +124,7 @@ static int do_code(const char *code, const struct arguments *args)
 		printf("%s\n", code);
 	}
 
-	CompilerState *container = raviX_init_compiler();
+	CompilerState *container = raviX_init_compiler(allocator);
 	rc = raviX_parse(container, code, strlen(code), "input");
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(container));
@@ -226,7 +222,7 @@ int main(int argc, const char *argv[])
 	const char *chunk = NULL;
 	FOR_EACH_PTR(chunks.list, const char, chunk)
 	{
-		if (do_code(chunk, &args) != 0) {
+		if (do_code(&chunks.allocator, chunk, &args) != 0) {
 			rc = 1;
 		}
 	}

@@ -21,13 +21,29 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 
-#include "graph.h"
 #include "dominator.h"
+#include "graph.h"
+#include "ravi_alloc.h"
+
+static void create_allocator(C_MemoryAllocator *allocator) {
+	allocator->arena = create_mspace(0, 0);
+	allocator->realloc = mspace_realloc;
+	allocator->calloc = mspace_calloc;
+	allocator->free = mspace_free;
+	allocator->create_arena = create_mspace;
+	allocator->destroy_arena = destroy_mspace;
+}
+
+static void destroy_allocator(C_MemoryAllocator *allocator) {
+	allocator->destroy_arena(allocator->arena);
+}
 
 static int test1(void)
 {
 	int errcount = 0;
-	Graph *g = raviX_init_graph(0, 2, NULL);
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
+	Graph *g = raviX_init_graph(0, 2, NULL, &allocator);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	if (!raviX_has_edge(g, 0, 1))
@@ -38,12 +54,13 @@ static int test1(void)
 		errcount += 1;
 	raviX_draw_graph(g, stdout);
 	raviX_destroy_graph(g);
+	destroy_allocator(&allocator);
 	return errcount;
 }
 
-static Graph *make_graph(void)
+static Graph *make_graph(C_MemoryAllocator *allocator)
 {
-	Graph *g = raviX_init_graph(0, 5, NULL);
+	Graph *g = raviX_init_graph(0, 5, NULL, allocator);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	raviX_add_edge(g, 2, 3);
@@ -61,7 +78,9 @@ static Graph *make_graph(void)
 static int test2(void)
 {
 	int errcount = 0;
-	Graph *g = make_graph();
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
+	Graph *g = make_graph(&allocator);
 	raviX_classify_edges(g);
 	if (raviX_get_edge_type(g, 0, 1) != EDGE_TYPE_TREE)
 		errcount++;
@@ -87,12 +106,13 @@ static int test2(void)
 		errcount++;
 	raviX_draw_graph(g, stdout);
 	raviX_destroy_graph(g);
+	destroy_allocator(&allocator);
 	return errcount;
 }
 
-static Graph *make_graph2(void)
+static Graph *make_graph2(C_MemoryAllocator *allocator)
 {
-	Graph *g = raviX_init_graph(0, 4, NULL);
+	Graph *g = raviX_init_graph(0, 4, NULL, allocator);
 	raviX_add_edge(g, 0, 1);
 	raviX_add_edge(g, 1, 2);
 	raviX_add_edge(g, 1, 5);
@@ -110,20 +130,25 @@ static Graph *make_graph2(void)
 static int test3(void)
 {
 	int errcount = 0;
-	Graph *g = make_graph2();
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
+	Graph *g = make_graph2(&allocator);
 	raviX_classify_edges(g);
 	DominatorTree *tree = raviX_new_dominator_tree(g);
 	raviX_calculate_dominator_tree(tree);
 	raviX_dominator_tree_output(tree, stdout);
 	raviX_destroy_dominator_tree(tree);
 	raviX_destroy_graph(g);
+	destroy_allocator(&allocator);
 	return errcount;
 }
 
 static int test4(void)
 {
 	int errcount = 0;
-	Graph *g = make_graph2();
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
+	Graph *g = make_graph2(&allocator);
 	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 1))) != 2)
 		errcount++;
 	if (raviX_node_list_size(raviX_successors(raviX_graph_node(g, 2))) != 1)
@@ -138,6 +163,7 @@ static int test4(void)
 	if (raviX_node_list_size(preds) != 0)
 		errcount++;
 	raviX_destroy_graph(g);
+	destroy_allocator(&allocator);
 	return errcount;
 }
 

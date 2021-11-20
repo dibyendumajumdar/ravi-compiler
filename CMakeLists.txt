@@ -57,7 +57,6 @@ set(SRCS
         src/chibicc/chibicc_strings.c
         src/chibicc/chibicc_unicode.c
         src/chibicc/chibicc_hashmap.c
-        src/ravi_alloc.c
         )
 
 message("SOURCE dir is ${RaviCompiler_SOURCE_DIR}")
@@ -108,34 +107,34 @@ target_link_libraries(ravicomp ${EXTRA_LIBRARIES})
 include(GenerateExportHeader)
 generate_export_header(ravicomp)
 
-add_executable(tmisc tests/tmisc.c)
+add_executable(tmisc tests/tmisc.c tests/ravi_alloc.c)
 target_link_libraries(tmisc ravicomp)
 target_include_directories(tmisc
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
-add_executable(tastwalk tests/tastwalk.c tests/tcommon.c tests/tcommon.h)
+add_executable(tastwalk tests/tastwalk.c tests/ravi_alloc.c tests/tcommon.c tests/tcommon.h)
 target_link_libraries(tastwalk ravicomp)
 target_include_directories(tastwalk
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
-add_executable(trun tests/trun.c tests/tcommon.c tests/tcommon.h)
+add_executable(trun tests/trun.c tests/tcommon.c tests/ravi_alloc.c tests/tcommon.h)
 target_link_libraries(trun ravicomp)
 target_include_directories(trun
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
-add_executable(tgraph tests/tgraph.c)
+add_executable(tgraph tests/tgraph.c tests/ravi_alloc.c)
 target_link_libraries(tgraph ravicomp)
 target_include_directories(tgraph
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/src"
         PRIVATE "${RaviCompiler_SOURCE_DIR}/include")
 
-add_executable(tchibicc tests/tchibicc.c)
+add_executable(tchibicc tests/tchibicc.c tests/ravi_alloc.c)
 target_link_libraries(tchibicc ravicomp)
 target_include_directories(tchibicc
         PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"

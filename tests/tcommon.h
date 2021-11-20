@@ -24,6 +24,8 @@
 #ifndef ravicomp_TCOMMON_H
 #define ravicomp_TCOMMON_H
 
+#include "ravi_compiler.h"
+
 struct arguments {
 	const char *filename;
 	const char *code;
@@ -34,5 +36,8 @@ struct arguments {
 extern void parse_arguments(struct arguments *args, int argc, const char *argv[]);
 extern void destroy_arguments(struct arguments *args);
 extern const char *read_file(const char *filename);
+
+extern void create_allocator(C_MemoryAllocator *allocator);
+extern void destroy_allocator(C_MemoryAllocator *allocator);
 
 #endif

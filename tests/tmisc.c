@@ -27,9 +27,26 @@
 #include <string.h>
 #include <bitset.h>
 
+#include "ravi_alloc.h"
+
+static void create_allocator(C_MemoryAllocator *allocator) {
+	allocator->arena = create_mspace(0, 0);
+	allocator->realloc = mspace_realloc;
+	allocator->calloc = mspace_calloc;
+	allocator->free = mspace_free;
+	allocator->create_arena = create_mspace;
+	allocator->destroy_arena = destroy_mspace;
+}
+
+static void destroy_allocator(C_MemoryAllocator *allocator) {
+	allocator->destroy_arena(allocator->arena);
+}
+
 static int test_stringset(void)
 {
-	CompilerState *container = raviX_init_compiler();
+	C_MemoryAllocator allocator;
+	create_allocator(&allocator);
+	CompilerState *container = raviX_init_compiler(&allocator);
 	int rc = 0;
 
 	const char *s1 = "local";
@@ -46,6 +63,7 @@ static int test_stringset(void)
 	if (s2->hash != s3->hash)
 		rc++;
 	raviX_destroy_compiler(container);
+	destroy_allocator(&allocator);
 	return rc;
 }
 
