@@ -384,7 +384,7 @@ struct BuiltinExpression {
 struct Statement {
 	BASE_AST_FIELDS;
 };
-/* Expression AST nodes have following common fields
+/* Expression AST nodes have the following common fields
 */
 struct Expression {
 	BASE_AST_FIELDS;
