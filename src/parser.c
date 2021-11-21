@@ -869,28 +869,38 @@ static AstNode *parse_primary_expression(ParserState *parser)
 	return primary_expr;
 }
 
-/* Parse C__new '(' string ',' expr ')' */
-static AstNode *parse_builtin_expression(ParserState *parser)
+/* Parse builtins:
+ * C__new '(' string ',' expr ')'
+ */
+static AstNode *parse_builtin_expression(ParserState *parser, int token)
 {
 	LexerState *ls = parser->ls;
+
+	if (token != TOK_C__new) {
+		raviX_syntaxerror(ls, "Unsupported builtin: expecting C__new");
+	}
 
 	AstNode *builtin_expr = allocate_expr_ast_node(parser, EXPR_BUILTIN);
 	builtin_expr->builtin_expr.type.type_code = RAVI_TUSERDATA;
 	builtin_expr->builtin_expr.type.type_name = NULL;
-	builtin_expr->builtin_expr.type_name = NULL;
-	builtin_expr->builtin_expr.size_expr = NULL;
+	builtin_expr->builtin_expr.token = token;
+	builtin_expr->builtin_expr.arg_list = NULL;
 
 	raviX_next(ls);
 	checknext(ls, '(');
-	check(ls, TOK_STRING);
-	builtin_expr->builtin_expr.type_name = ls->t.seminfo.ts;
-	raviX_next(ls);
+	AstNode *expr1 = parse_expression(parser);
+	if (expr1->type != EXPR_LITERAL && expr1->literal_expr.type.type_code != RAVI_TSTRING) {
+		raviX_syntaxerror(ls, "Expected a size expression as second argument to C__new");
+	}
 	checknext(ls, ',');
-	builtin_expr->builtin_expr.size_expr = parse_expression(parser);
-	if (builtin_expr->builtin_expr.size_expr == NULL) {
+	AstNode *expr2 = parse_expression(parser);
+	if (expr2 == NULL) {
 		raviX_syntaxerror(ls, "Expected a size expression as second argument to C__new");
 	}
 	checknext(ls, ')');
+
+	add_ast_node(parser->compiler_state, &builtin_expr->builtin_expr.arg_list, expr1);
+	add_ast_node(parser->compiler_state, &builtin_expr->builtin_expr.arg_list, expr2);
 
 	return builtin_expr;
 }
@@ -903,7 +913,7 @@ static AstNode *parse_suffixed_expression(ParserState *parser)
 	primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs } */
 	int line = ls->linenumber;
 	if (ls->t.token == TOK_C__new) {
-		return parse_builtin_expression(parser);
+		return parse_builtin_expression(parser, TOK_C__new);
 	}
 	AstNode *suffixed_expr = allocate_expr_ast_node(parser, EXPR_SUFFIXED);
 	suffixed_expr->suffixed_expr.primary_expr = parse_primary_expression(parser);

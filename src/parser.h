@@ -372,8 +372,8 @@ struct FunctionCallExpression {
 struct BuiltinExpression {
 	/* Currently only for C__new but potentially could be other builtins */
 	BASE_EXPRESSION_FIELDS;
-	const StringObject *type_name; /* Name of the C struct type */
-	AstNode *size_expr; /* Number of elements of type - > 1 means array */
+	int token;
+	AstNodeList *arg_list;
 };
 #undef BASE_EXPRESSION_FIELDS
 

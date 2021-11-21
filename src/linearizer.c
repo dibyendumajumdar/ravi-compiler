@@ -74,6 +74,11 @@ static void linearize_function(LinearizerState *linearizer);
 static Instruction *allocate_instruction(Proc *proc, enum opcode op, unsigned line_number);
 static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_local);
 
+static AstNode* astlist_get(AstNodeList *list, unsigned int i)
+{
+	return (AstNode*) raviX_ptrlist_nth_entry((struct PtrList *) list, i);
+}
+
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
  * allocating a new one
@@ -1537,9 +1542,14 @@ static void linearize_local_statement(Proc *proc, AstNode *stmt)
 
 static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
 {
+	// For now the only built-in is C__new
+	if (expr->builtin_expr.token != TOK_C__new) {
+		handle_error(proc->linearizer->compiler_state, "feature not yet implemented");
+	}
 	Instruction *insn = allocate_instruction(proc, op_C__new, expr->line_number);
-	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, expr->builtin_expr.type_name)));
-	Pseudo *size_expr = linearize_expression(proc, expr->builtin_expr.size_expr);
+	const StringObject *type_name = astlist_get(expr->builtin_expr.arg_list, 0)->literal_expr.u.ts;
+	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, type_name)));
+	Pseudo *size_expr = linearize_expression(proc, astlist_get(expr->builtin_expr.arg_list, 1));
 	add_instruction_operand(proc, insn, size_expr);
 	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TUSERDATA);
 	add_instruction_target(proc, insn, target);
