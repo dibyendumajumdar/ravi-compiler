@@ -756,7 +756,7 @@ static const char Embedded_C_header[] =
     "  lua_Number *ptr;\n"
     "  unsigned int len;\n"
     "} Ravi_NumberArray;\n"
-    "int error_code;\n";
+    "int raviX__error_code;\n";
 
 typedef struct {
 	Proc *proc;
@@ -769,8 +769,8 @@ typedef struct {
 } Function;
 
 /* readonly statics */
-static const char *int_var_prefix = "i_";
-static const char *flt_var_prefix = "f_";
+static const char *int_var_prefix = "raviX__i_";
+static const char *flt_var_prefix = "raviX__f_";
 // static Pseudo NIL_pseudo = {.type = PSEUDO_NIL};
 
 enum errorcode {
@@ -896,7 +896,7 @@ static void initfn(Function *fn, Proc *proc, struct Ravi_CompilerInterface *api)
 	raviX_buffer_init(&fn->tb, 256);
 	raviX_buffer_init(&fn->C_local_declarations, 256);
 	raviX_buffer_add_fstring(&fn->prologue, "static int %s(lua_State *L) {\n", proc->funcname);
-	raviX_buffer_add_string(&fn->prologue, "int error_code = 0;\n");
+	raviX_buffer_add_string(&fn->prologue, "int raviX__error_code = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "int result = 0;\n");
 	raviX_buffer_add_string(&fn->prologue, "CallInfo *ci = L->ci;\n");
 	raviX_buffer_add_string(&fn->prologue, "LClosure *cl = clLvalue(ci->func);\n");
@@ -1980,22 +1980,22 @@ static int emit_op_totype(Function *fn, Instruction *insn)
 	emit_reg_accessor(fn, get_first_target(insn), 0);
 	if (insn->opcode == op_toiarray) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisiarray(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_array_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_integer_array_expected);
 	} else if (insn->opcode == op_tofarray) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisfarray(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_array_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_number_array_expected);
 	} else if (insn->opcode == op_totable) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisLtable(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_table_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_table_expected);
 	} else if (insn->opcode == op_toclosure) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisclosure(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_closure_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_closure_expected);
 	} else if (insn->opcode == op_tostring) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisstring(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_string_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_string_expected);
 	} else if (insn->opcode == op_toint) {
 		raviX_buffer_add_string(&fn->body, ";\n if (!ttisinteger(ra)) {\n");
-		raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_expected);
+		raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_integer_expected);
 	} else {
 		handle_error(fn, "Unexpected opcode");
 		return -1;
@@ -2014,7 +2014,7 @@ static int emit_op_toflt(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, " if (ttisnumber(ra)) { n = (ttisinteger(ra) ? (double) ivalue(ra) : "
 					   "fltvalue(ra)); setfltvalue(ra, n); }\n");
 	raviX_buffer_add_string(&fn->body, " else {\n");
-	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_expected);
+	raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_number_expected);
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n}\n");
 	return 0;
@@ -2032,7 +2032,7 @@ static int emit_op_tousertype(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, ";\n");
 	raviX_buffer_add_string(&fn->body,
 				"  if (!ttisshrstring(rb) || !raviV_check_usertype(L, tsvalue(rb), ra)) {\n");
-	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+	raviX_buffer_add_fstring(&fn->body, "   raviX__error_code = %d;\n", Error_type_mismatch);
 	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, "  }\n");
 	raviX_buffer_add_string(&fn->body, " }\n");
@@ -2413,7 +2413,7 @@ static int emit_op_movfi(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, ";\n");
 	raviX_buffer_add_string(&fn->body, " lua_Integer i = 0;\n");
 	raviX_buffer_add_string(&fn->body, " if (!tointegerns(rb, &i)) {\n");
-	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_integer_expected);
+	raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_integer_expected);
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n");
 	if (target->type == PSEUDO_TEMP_INT) {
@@ -2443,7 +2443,7 @@ static int emit_op_movif(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, ";\n");
 	raviX_buffer_add_string(&fn->body, " lua_Number n = 0.0;\n");
 	raviX_buffer_add_string(&fn->body, " if (!tonumberns(rb, n)) {\n");
-	raviX_buffer_add_fstring(&fn->body, "  error_code = %d;\n", Error_number_expected);
+	raviX_buffer_add_fstring(&fn->body, "  raviX__error_code = %d;\n", Error_number_expected);
 	raviX_buffer_add_string(&fn->body, "  goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, " }\n");
 	if (target->type == PSEUDO_TEMP_FLT) {
@@ -2553,7 +2553,7 @@ static int is_builtin(char *key, int keylen)
 				   "Ravi_StringOrUserData",
 				   "Ravi_IntegerArray",
 				   "Ravi_NumberArray",
-				   "error_code",
+				   "raviX__error_code",
 				   "LUA_TBOOLEAN",
 				   "LUA_TNIL",
 				   "LUA_TNUMBER",
@@ -2883,7 +2883,7 @@ static void emit_userdata_C_variable_load(Function *fn, Instruction *insn, Pseud
 					 symbol->variable.var_name->str);
 		raviX_buffer_add_string(&fn->body, "  }\n");
 		raviX_buffer_add_string(&fn->body, "  else {\n");
-		raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+		raviX_buffer_add_fstring(&fn->body, "   raviX__error_code = %d;\n", Error_type_mismatch);
 		raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
 		raviX_buffer_add_string(&fn->body, "  }\n");
 	}
@@ -3060,7 +3060,7 @@ static int emit_op_C__new(Function *fn, Instruction *insn)
 	raviX_buffer_add_string(&fn->body, "  }\n");
 	raviX_buffer_add_string(&fn->body, "  else {\n");
 	// FIXME need specific error code
-	raviX_buffer_add_fstring(&fn->body, "   error_code = %d;\n", Error_type_mismatch);
+	raviX_buffer_add_fstring(&fn->body, "   raviX__error_code = %d;\n", Error_type_mismatch);
 	raviX_buffer_add_string(&fn->body, "   goto Lraise_error;\n");
 	raviX_buffer_add_string(&fn->body, "  }\n");
 	raviX_buffer_add_string(&fn->body, "}\n");
@@ -3323,7 +3323,7 @@ static int output_basic_block(Function *fn, BasicBlock *bb)
 	if (bb->index == EXIT_BLOCK) {
 		raviX_buffer_add_string(&fn->body, " return result;\n");
 		raviX_buffer_add_string(&fn->body, "Lraise_error:\n");
-		raviX_buffer_add_string(&fn->body, " raviV_raise_error(L, error_code); /* does not return */\n");
+		raviX_buffer_add_string(&fn->body, " raviV_raise_error(L, raviX__error_code); /* does not return */\n");
 		raviX_buffer_add_string(&fn->body, " return result;\n");
 	}
 	return rc;
