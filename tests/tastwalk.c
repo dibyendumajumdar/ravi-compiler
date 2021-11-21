@@ -190,6 +190,18 @@ static void walk_expression(void *data, const Expression *expression)
 		walk_index_expression(data, raviX_index_expression(expression));
 		break;
 	}
+	case EXPR_BUILTIN: {
+		const BuiltinExpression *builtin_expression = raviX_builtin_expression(expression);
+		int token = raviX_builtin_expression_token(builtin_expression);
+		(void)token;
+		raviX_builtin_expression_foreach_argument(builtin_expression, data, walk_expression);
+		break;
+	}
+	case EXPR_CONCAT: {
+		const StringConcatenationExpression *string_concatenation_expression = raviX_string_concatenation_expression(expression);
+		raviX_string_concatenation_expression_foreach_argument(string_concatenation_expression, data, walk_expression);
+		break;
+	}
 	default: {
 		// cannot happen
 		assert(false);

@@ -237,6 +237,11 @@ const FunctionCallExpression *raviX_function_call_expression(const Expression *e
 	assert(expr->type == EXPR_FUNCTION_CALL);
 	return &n(expr)->function_call_expr;
 }
+const StringConcatenationExpression *raviX_string_concatenation_expression(const Expression *expr)
+{
+	assert(expr->type == EXPR_CONCAT);
+	return &n(expr)->string_concatenation_expr;
+}
 const BuiltinExpression *raviX_builtin_expression(const Expression *expr)
 {
 	assert(expr->type == EXPR_BUILTIN);
@@ -606,16 +611,43 @@ void raviX_function_call_expression_foreach_argument(const FunctionCallExpressio
 	}
 	END_FOR_EACH_PTR(node)
 }
+void
+raviX_string_concatenation_expression_foreach_argument(const StringConcatenationExpression *expression, void *userdata,
+						       void (*callback)(void *, const Expression *expr))
+{
+	AstNode *node;
+	FOR_EACH_PTR(expression->expr_list, AstNode, node)
+	{
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_BUILTIN);
+		callback(userdata, (Expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
+int raviX_builtin_expression_token(const BuiltinExpression *expression)
+{
+	return expression->token;
+}
+void raviX_builtin_expression_foreach_argument(const BuiltinExpression *expression, void *userdata,
+					  void (*callback)(void *, const Expression *expr))
+{
+	AstNode *node;
+	FOR_EACH_PTR(expression->arg_list, AstNode, node)
+	{
+		assert(node->type >= EXPR_LITERAL && node->type <= EXPR_BUILTIN);
+		callback(userdata, (Expression *)node);
+	}
+	END_FOR_EACH_PTR(node)
+}
 const FunctionExpression *raviX_scope_owning_function(const Scope *scope)
 {
 	assert(scope->function->type == EXPR_FUNCTION);
 	return &scope->function->function_expr;
 }
-RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope)
+const Scope *raviX_scope_parent_scope(const Scope *scope)
 {
 	return scope->parent;
 }
-RAVICOMP_EXPORT void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
+void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
 						void (*callback)(void *userdata, const LuaSymbol *symbol))
 {
 	LuaSymbol *symbol;
