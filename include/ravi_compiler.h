@@ -587,6 +587,7 @@ raviX_table_element_assignment_expression(const Expression *expr);
 RAVICOMP_EXPORT const TableLiteralExpression *raviX_table_literal_expression(const Expression *expr);
 RAVICOMP_EXPORT const SuffixedExpression *raviX_suffixed_expression(const Expression *expr);
 RAVICOMP_EXPORT const FunctionCallExpression *raviX_function_call_expression(const Expression *expr);
+RAVICOMP_EXPORT const BuiltinExpression *raviX_builtin_expression(const Expression *expr);
 
 RAVICOMP_EXPORT const FunctionExpression *raviX_scope_owning_function(const Scope *scope);
 RAVICOMP_EXPORT const Scope *raviX_scope_parent_scope(const Scope *scope);

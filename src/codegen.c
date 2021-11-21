@@ -2767,7 +2767,7 @@ static int analyze_C_code(Function *fn, TextBuffer *user_code)
 	if (fn->C_local_declarations.buf) /* declarations of temp integer and float vars */
 		raviX_buffer_add_string(&canned_code, fn->C_local_declarations.buf);
 
-	C_MemoryAllocator allocator = *fn->proc->linearizer->ast_container->allocator;
+	C_MemoryAllocator allocator = *fn->proc->linearizer->compiler_state->allocator;
 	allocator.arena = allocator.create_arena(0, 0);
 
 	C_Code_Analysis analysis = {0};
@@ -3013,7 +3013,7 @@ static int emit_op_C__new(Function *fn, Instruction *insn)
 
 	int status = -1;
 
-	C_MemoryAllocator allocator = *fn->proc->linearizer->ast_container->allocator;
+	C_MemoryAllocator allocator = *fn->proc->linearizer->compiler_state->allocator;
 	allocator.arena = allocator.create_arena(0, 0);
 
 	C_Parser parser;
@@ -3578,7 +3578,7 @@ static int emit_C__decl(LinearizerState *linearizer, struct Ravi_CompilerInterfa
 	raviX_buffer_add_string(&code, Embedded_C_header);
 	raviX_buffer_add_string(&code, linearizer->C_declarations.buf);
 
-	C_MemoryAllocator allocator = *linearizer->ast_container->allocator;
+	C_MemoryAllocator allocator = *linearizer->compiler_state->allocator;
 	allocator.arena = allocator.create_arena(0, 0);
 
 	C_Parser parser;
@@ -3644,7 +3644,7 @@ int raviX_generate_C(LinearizerState *linearizer, TextBuffer *mb, struct Ravi_Co
 		ravi_interface = &stub_compilerInterface;
 
 	// _ENV is the name of the Lua up-value that points to the globals table
-	raviX_create_string(linearizer->ast_container, "_ENV", 4);
+	raviX_create_string(linearizer->compiler_state, "_ENV", 4);
 
 	/* Add the common header portion */
 	// FIXME we need a way to customise this for 32-bit vs 64-bit

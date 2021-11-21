@@ -211,7 +211,7 @@ struct Instruction {
  * references blocks by the block's index.
  */
 struct BasicBlock {
-	nodeId_t index;		/* The index of the block is a key to enable retrieving the block from its container */
+	nodeId_t index;		/* The index of the block is a key to enable retrieving the block from its compiler_state */
 	InstructionList *insns; /* Note that if number of instructions is 0 then the block was logically deleted */
 };
 DECLARE_PTR_LIST(BasicBlockList, BasicBlock);
@@ -268,7 +268,7 @@ struct Proc {
 };
 
 struct LinearizerState {
-	CompilerState *ast_container;
+	CompilerState *compiler_state;
 	Proc *main_proc;     /* The root of the compiled chunk of code */
 	ProcList *all_procs; /* All procs allocated by the linearizer */
 	Proc *current_proc;  /* proc being compiled */

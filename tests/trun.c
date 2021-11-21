@@ -124,42 +124,42 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		printf("%s\n", code);
 	}
 
-	CompilerState *container = raviX_init_compiler(allocator);
-	rc = raviX_parse(container, code, strlen(code), "input");
+	CompilerState *compiler_state = raviX_init_compiler(allocator);
+	rc = raviX_parse(compiler_state, code, strlen(code), "input");
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
 	if (args->astdump) {
-		raviX_output_ast(container, stdout);
+		raviX_output_ast(compiler_state, stdout);
 	}
-	rc = raviX_ast_lower(container);
+	rc = raviX_ast_lower(compiler_state);
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
-	rc = raviX_ast_typecheck(container);
+	rc = raviX_ast_typecheck(compiler_state);
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
 	if (args->astdump) {
-		raviX_output_ast(container, stdout);
+		raviX_output_ast(compiler_state, stdout);
 	}
 	if (args->simplify_ast) {
-		rc = raviX_ast_simplify(container);
+		rc = raviX_ast_simplify(compiler_state);
 		if (rc != 0) {
-			fprintf(stderr, "%s\n", raviX_get_last_error(container));
+			fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 			goto L_exit;
 		}
 		if (args->astdump) {
-			raviX_output_ast(container, stdout);
+			raviX_output_ast(compiler_state, stdout);
 		}
 	}
-	LinearizerState *linearizer = raviX_init_linearizer(container);
+	LinearizerState *linearizer = raviX_init_linearizer(compiler_state);
 	rc = raviX_ast_linearize(linearizer);
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_linend;
 	}
 	if (args->irdump) {
@@ -189,7 +189,7 @@ L_linend:
 	raviX_destroy_linearizer(linearizer);
 
 L_exit:
-	raviX_destroy_compiler(container);
+	raviX_destroy_compiler(compiler_state);
 
 	return rc;
 }

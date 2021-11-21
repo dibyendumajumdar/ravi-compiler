@@ -237,6 +237,11 @@ const FunctionCallExpression *raviX_function_call_expression(const Expression *e
 	assert(expr->type == EXPR_FUNCTION_CALL);
 	return &n(expr)->function_call_expr;
 }
+const BuiltinExpression *raviX_builtin_expression(const Expression *expr)
+{
+	assert(expr->type == EXPR_BUILTIN);
+	return &n(expr)->builtin_expr;
+}
 #undef n
 
 void raviX_return_statement_foreach_expression(const ReturnStatement *statement, void *userdata,

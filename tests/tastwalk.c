@@ -313,13 +313,13 @@ static void walk_function(void *data, const FunctionExpression *function)
 	walk_scope(state, scope);
 }
 
-static void walk_ast(CompilerState *container)
+static void walk_ast(CompilerState *compiler_state)
 {
 	// Dummy struct - in a useful implementation this is where you
 	// would maintain state
 	struct ast_state state = {0};
 	// First lets get the main function from the parse tree
-	const FunctionExpression *main_function = raviX_ast_get_main_function(container);
+	const FunctionExpression *main_function = raviX_ast_get_main_function(compiler_state);
 	walk_function(&state, main_function);
 	// Now walk all the child functions
 	raviX_function_foreach_child(main_function, &state, walk_function);
@@ -338,7 +338,7 @@ int main(int argc, const char *argv[])
 		code = args.code;
 	}
 	int rc = 0;
-	CompilerState *container = NULL;
+	CompilerState *compiler_state = NULL;
 	C_MemoryAllocator allocator;
 	create_allocator(&allocator);
 	if (!code) {
@@ -346,23 +346,23 @@ int main(int argc, const char *argv[])
 		rc = 1;
 		goto L_exit;
 	}
-	container = raviX_init_compiler(&allocator);
-	rc = raviX_parse(container, code, strlen(code), "input");
+	compiler_state = raviX_init_compiler(&allocator);
+	rc = raviX_parse(compiler_state, code, strlen(code), "input");
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
-	rc = raviX_ast_typecheck(container);
+	rc = raviX_ast_typecheck(compiler_state);
 	if (rc != 0) {
-		fprintf(stderr, "%s\n", raviX_get_last_error(container));
+		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
 
-	walk_ast(container);
+	walk_ast(compiler_state);
 
 L_exit:
-	if (container)
-		raviX_destroy_compiler(container);
+	if (compiler_state)
+		raviX_destroy_compiler(compiler_state);
 	destroy_arguments(&args);
 	destroy_allocator(&allocator);
 	return rc;
