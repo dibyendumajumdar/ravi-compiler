@@ -703,8 +703,11 @@ static const char Lua_header[] =
     "  unsigned int len;\n"
     "} Ravi_NumberArray;\n";
 
+/* When analysing embedded C code we need some
+ * dummy declarations to satisfy references in embedded
+ * code.
+ */
 static const char Embedded_C_header[] =
-
     "typedef long long int64_t;\n"
     "typedef double lua_Number;\n"
     "typedef int64_t lua_Integer;\n"
@@ -853,7 +856,7 @@ static void emit_vars(const char *type, const char *prefix, PseudoGenerator *gen
 		if (i == 0) {
 			raviX_buffer_add_fstring(mb, "%s ", type);
 		}
-		if (i > 0) {
+		else {
 			raviX_buffer_add_string(mb, " = 0, ");
 		}
 		raviX_buffer_add_fstring(mb, "%s%d", prefix, i);
