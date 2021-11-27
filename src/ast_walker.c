@@ -107,6 +107,14 @@ const Scope *raviX_variable_symbol_scope(const LuaVariableSymbol *lua_local_symb
 {
 	return lua_local_symbol->block;
 }
+bool raviX_variable_symbol_is_function_parameter(const LuaVariableSymbol *lua_local_symbol)
+{
+	return lua_local_symbol->function_parameter ? true : false;
+}
+bool raviX_variable_symbol_has_escaped(const LuaVariableSymbol *lua_local_symbol)
+{
+	return lua_local_symbol->escaped ? true : false;
+}
 
 #define n(v) ((AstNode *)v)
 const ReturnStatement *raviX_return_statement(const Statement *stmt)
@@ -653,6 +661,10 @@ void raviX_scope_foreach_symbol(const Scope *scope, void *userdata,
 	LuaSymbol *symbol;
 	FOR_EACH_PTR(scope->symbol_list, LuaSymbol, symbol) { callback(userdata, symbol); }
 	END_FOR_EACH_PTR(node)
+}
+bool raviX_scope_needs_closing(const Scope *scope)
+{
+	return scope->need_close ? true: false;
 }
 enum SymbolType raviX_symbol_type(const LuaSymbol *symbol) { return symbol->symbol_type; }
 const LuaVariableSymbol *raviX_symbol_variable(const LuaSymbol *symbol)
