@@ -172,7 +172,7 @@ const ForStatement *raviX_for_statement(const Statement *stmt)
 	assert(stmt->type == STMT_FOR_IN || stmt->type == STMT_FOR_NUM);
 	return &n(stmt)->for_stmt;
 }
-const EmbeddedCStatement *raviX_embedded_C_statment(const Statement *stmt)
+const EmbeddedCStatement *raviX_embedded_C_statement(const Statement *stmt)
 {
 	assert(stmt->type == STMT_EMBEDDED_C);
 	return &n(stmt)->embedded_C_stmt;
@@ -356,7 +356,7 @@ void raviX_function_statement_foreach_selector(const FunctionStatement *statemen
 	AstNode *node;
 	FOR_EACH_PTR(statement->selectors, AstNode, node)
 	{
-		assert(node->type == EXPR_Y_INDEX || node->type == EXPR_FIELD_SELECTOR);
+		assert(/* node->type == EXPR_Y_INDEX ||*/ node->type == EXPR_FIELD_SELECTOR);
 		callback(userdata, &node->index_expr);
 	}
 	END_FOR_EACH_PTR(node)

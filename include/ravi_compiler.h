@@ -441,7 +441,7 @@ RAVICOMP_EXPORT const TestThenStatement *raviX_test_then_statement(const Stateme
 RAVICOMP_EXPORT const IfStatement *raviX_if_statement(const Statement *stmt);
 RAVICOMP_EXPORT const WhileOrRepeatStatement *raviX_while_or_repeat_statement(const Statement *stmt);
 RAVICOMP_EXPORT const ForStatement *raviX_for_statement(const Statement *stmt);
-RAVICOMP_EXPORT const EmbeddedCStatement *raviX_embedded_C_statment(const Statement *stmt);
+RAVICOMP_EXPORT const EmbeddedCStatement *raviX_embedded_C_statement(const Statement *stmt);
 
 /* return statement walking */
 RAVICOMP_EXPORT void raviX_return_statement_foreach_expression(const ReturnStatement *statement, void *userdata,
@@ -464,6 +464,7 @@ RAVICOMP_EXPORT void raviX_local_statement_foreach_symbol(const LocalStatement *
 							  void (*callback)(void *, const LuaVariableSymbol *expr));
 
 /* expression or assignment statement walking */
+/* here we have expressions to the left and right of equal sign */
 RAVICOMP_EXPORT void
 raviX_expression_statement_foreach_lhs_expression(const ExpressionStatement *statement, void *userdata,
 						  void (*callback)(void *, const Expression *expr));
@@ -487,7 +488,7 @@ RAVICOMP_EXPORT void raviX_do_statement_foreach_statement(const DoStatement *sta
 /* if statement walking */
 /* Lua if statements are a mix of select/case and if/else statements in
  * other languages. The AST represents the initial if condition block and all subsequent
- * elseif blocks as test_then_statments. The final else block is treated as an optional
+ * elseif blocks as TestThenStatements. The final else block is treated as an optional
  * else block.
  */
 RAVICOMP_EXPORT void raviX_if_statement_foreach_test_then_statement(const IfStatement *statement, void *userdata,
