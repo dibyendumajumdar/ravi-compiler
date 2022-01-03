@@ -85,6 +85,7 @@ static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 static inline int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 {
 	if (generator->free_pos == 0)
+		// No registers so no
 		return 0;
 	for (int i = generator->free_pos-1; i >= 0; i--) {
 		if (generator->free_regs[i])
@@ -95,23 +96,26 @@ static inline int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 
 static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 {
-	assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
+	unsigned N = sizeof generator->free_regs / sizeof generator->free_regs[0];
+	assert(reg < N);
+	assert(generator->free_regs[reg]);
 	generator->free_regs[reg] = 0;
-	unsigned free_pos = reg+1;
-	if (free_pos == generator->free_pos) {
+	unsigned next_reg = reg+1;
+	if (next_reg == generator->free_pos) {
+		// We released the top most register
 		generator->free_pos--;
 	}
-	else if (free_pos < generator->free_pos) {
+	else if (next_reg < generator->free_pos) {
 		unsigned n = generator->free_pos;
-		for (int i = n-1; i >= free_pos; i--) {
+		for (int i = n-1; i >= next_reg; i--) {
 			if (generator->free_regs[i]) {
 				generator->free_pos = i+1;
 				break;
 			}
 		}
 	}
-	else {
-		assert(0);
+	for (int i = generator->free_pos; i < N; i++) {
+		assert(!generator->free_regs[i]);
 	}
 }
 
@@ -128,6 +132,8 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 	unsigned reg = generator->free_pos++;
 	assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
 	generator->free_regs[reg] = 1;
+	if (generator->next_reg < generator->free_pos)
+		generator->next_reg = generator->free_pos;
 	return reg;
 }
 
