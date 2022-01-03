@@ -535,8 +535,7 @@ L3
 L4
 	MOV {Tint(1)} {Tint(0)}
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	CALL {T(1), Tint(0)} {T(1..), 1 Kint(0)}
+	CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L5
 	RET {L1}
@@ -567,8 +566,7 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L4 -> L2
@@ -676,8 +674,7 @@ L4
 L5
 	MOV {Tint(1)} {Tint(0)}
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	CALL {T(1), Tint(0)} {T(1..), 1 Kint(1)}
+	CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}
 	BR {L2}
 L6
 	RET {L1}
@@ -718,8 +715,7 @@ L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0)} {T(1..), 1 Kint(1)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L5 -> L2
@@ -785,8 +781,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L2}
 L4
 	RET {L1}
@@ -805,8 +800,7 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L3 -> L2
@@ -890,9 +884,8 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(2)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(1)}
 	BR {L2}
 L4
 	RET {L1}
@@ -911,9 +904,8 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'brek' Ks(2)} {T(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L3 -> L2
@@ -983,8 +975,7 @@ L2
 	CBR {true} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}
+	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
 	BR {L4}
 L4
 	RET {L1}
@@ -1005,8 +996,7 @@ L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), 'forever' Ks(1)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4
@@ -2367,9 +2357,8 @@ L3
 	BR {L4}
 L4
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
-	MOV {T(0)} {T(1)}
-	EQ {local(x, 0), 13 Kint(2)} {T(2)}
-	CALL {T(1), T(2)} {T(1..), 1 Kint(1)}
+	EQ {local(x, 0), 13 Kint(2)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L5
 	BR {L2}
@@ -2400,9 +2389,8 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(1)}</TD></TR>
-<TR><TD>EQ {local(x, 0), 13 Kint(2)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(1), T(2)} {T(1..), 1 Kint(1)}</TD></TR>
+<TR><TD>EQ {local(x, 0), 13 Kint(2)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L4 -> L1
