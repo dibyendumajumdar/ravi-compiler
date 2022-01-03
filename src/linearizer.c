@@ -117,22 +117,18 @@ static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 
 static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 {
-	if (top) {
-	L_get_top:
-		unsigned reg = generator->free_pos++;
-		assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
-		generator->free_regs[reg] = 1;
-		return reg;
-	}
-	else {
+	if (!top) {
 		for (unsigned i = 0; i < generator->free_pos; i++) {
 			if (generator->free_regs[i] == 0) {
 				generator->free_regs[i] = 1;
 				return i;
 			}
 		}
-		goto L_get_top;
 	}
+	unsigned reg = generator->free_pos++;
+	assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
+	generator->free_regs[reg] = 1;
+	return reg;
 }
 
 /**
