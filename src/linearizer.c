@@ -82,13 +82,13 @@ static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 /**
  * Is given register top of the stack of registers?
  */
-static inline int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
+static int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 {
 	if (generator->free_pos == 0)
 		// No registers so no
 		return 0;
 	for (int i = generator->free_pos-1; i >= 0; i--) {
-		if (generator->free_regs[i])
+		if (generator->regs_in_use[i])
 			return ((unsigned)i)==reg;
 	}
 	return 0;
@@ -96,10 +96,10 @@ static inline int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 
 static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 {
-	unsigned N = sizeof generator->free_regs / sizeof generator->free_regs[0];
+	unsigned N = sizeof generator->regs_in_use / sizeof generator->regs_in_use[0];
 	assert(reg < N);
-	assert(generator->free_regs[reg]);
-	generator->free_regs[reg] = 0;
+	assert(generator->regs_in_use[reg]);
+	generator->regs_in_use[reg] = 0;
 	unsigned next_reg = reg+1;
 	if (next_reg == generator->free_pos) {
 		// We released the top most register
@@ -108,14 +108,15 @@ static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 	else if (next_reg < generator->free_pos) {
 		unsigned n = generator->free_pos;
 		for (int i = n-1; i >= next_reg; i--) {
-			if (generator->free_regs[i]) {
+			if (generator->regs_in_use[i]) {
 				generator->free_pos = i+1;
 				break;
 			}
 		}
 	}
+	// For debugging
 	for (int i = generator->free_pos; i < N; i++) {
-		assert(!generator->free_regs[i]);
+		assert(!generator->regs_in_use[i]);
 	}
 }
 
@@ -123,17 +124,17 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 {
 	if (!top) {
 		for (unsigned i = 0; i < generator->free_pos; i++) {
-			if (generator->free_regs[i] == 0) {
-				generator->free_regs[i] = 1;
+			if (generator->regs_in_use[i] == 0) {
+				generator->regs_in_use[i] = 1;
 				return i;
 			}
 		}
 	}
 	unsigned reg = generator->free_pos++;
-	assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
-	generator->free_regs[reg] = 1;
-	if (generator->next_reg < generator->free_pos)
-		generator->next_reg = generator->free_pos;
+	assert(reg < (sizeof generator->regs_in_use / sizeof generator->regs_in_use[0]));
+	generator->regs_in_use[reg] = 1;
+	if (generator->max_reg < generator->free_pos)
+		generator->max_reg = generator->free_pos;
 	return reg;
 }
 
@@ -143,10 +144,6 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
  */
 static inline unsigned allocate_register(PseudoGenerator *generator, bool top)
 {
-//	if (generator->free_pos > 0) {
-//		return generator->free_regs[--generator->free_pos];
-//	}
-//	return generator->next_reg++;
 	return pseudo_gen_alloc(generator, top);
 }
 
@@ -155,16 +152,6 @@ static inline unsigned allocate_register(PseudoGenerator *generator, bool top)
  */
 static inline void free_register(Proc *proc, PseudoGenerator *generator, unsigned reg)
 {
-//	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
-//		/* TODO proper error handling */
-//		handle_error(proc->linearizer->compiler_state, "Out of register space\n");
-//		return;
-//	}
-//	// Debug check - ensure register being freed hasn't already been freed
-//	for (int i = 0; i < generator->free_pos; i++) {
-//		assert(generator->free_regs[i] != reg);
-//	}
-//	generator->free_regs[generator->free_pos++] = (uint8_t)reg;
 	pseudo_gen_free(generator, reg);
 }
 
