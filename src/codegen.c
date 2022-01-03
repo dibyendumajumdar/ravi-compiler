@@ -1,7 +1,7 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 /******************************************************************************
- * Copyright (C) 2020-2021 Dibyendu Majumdar
+ * Copyright (C) 2020-2022 Dibyendu Majumdar
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
