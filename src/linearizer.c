@@ -80,15 +80,72 @@ static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 }
 
 /**
+ * Is given register top of the stack of registers?
+ */
+static inline int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
+{
+	if (generator->free_pos == 0)
+		return 0;
+	for (int i = generator->free_pos-1; i >= 0; i--) {
+		if (generator->free_regs[i])
+			return ((unsigned)i)==reg;
+	}
+	return 0;
+}
+
+static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
+{
+	assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
+	generator->free_regs[reg] = 0;
+	unsigned free_pos = reg+1;
+	if (free_pos == generator->free_pos) {
+		generator->free_pos--;
+	}
+	else if (free_pos < generator->free_pos) {
+		unsigned n = generator->free_pos;
+		for (int i = n-1; i >= free_pos; i--) {
+			if (generator->free_regs[i]) {
+				generator->free_pos = i+1;
+				break;
+			}
+		}
+	}
+	else {
+		assert(0);
+	}
+}
+
+static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
+{
+	if (top) {
+	L_get_top:
+		unsigned reg = generator->free_pos++;
+		assert(reg < (sizeof generator->free_regs / sizeof generator->free_regs[0]));
+		generator->free_regs[reg] = 1;
+		return reg;
+	}
+	else {
+		for (unsigned i = 0; i < generator->free_pos; i++) {
+			if (generator->free_regs[i] == 0) {
+				generator->free_regs[i] = 1;
+				return i;
+			}
+		}
+		goto L_get_top;
+	}
+}
+
+/**
  * Allocates a register by reusing a free'd register if possible otherwise
  * allocating a new one
  */
-static inline unsigned allocate_register(PseudoGenerator *generator)
+static inline unsigned allocate_register(PseudoGenerator *generator, bool top)
 {
-	if (generator->free_pos > 0) {
-		return generator->free_regs[--generator->free_pos];
-	}
-	return generator->next_reg++;
+//	if (generator->free_pos > 0) {
+//		return generator->free_regs[--generator->free_pos];
+//	}
+//	return generator->next_reg++;
+	return pseudo_gen_alloc(generator, top);
 }
 
 /**
@@ -96,16 +153,17 @@ static inline unsigned allocate_register(PseudoGenerator *generator)
  */
 static inline void free_register(Proc *proc, PseudoGenerator *generator, unsigned reg)
 {
-	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
-		/* TODO proper error handling */
-		handle_error(proc->linearizer->compiler_state, "Out of register space\n");
-		return;
-	}
-	// Debug check - ensure register being freed hasn't already been freed
-	for (int i = 0; i < generator->free_pos; i++) {
-		assert(generator->free_regs[i] != reg);
-	}
-	generator->free_regs[generator->free_pos++] = (uint8_t)reg;
+//	if (generator->free_pos == (sizeof generator->free_regs / sizeof generator->free_regs[0])) {
+//		/* TODO proper error handling */
+//		handle_error(proc->linearizer->compiler_state, "Out of register space\n");
+//		return;
+//	}
+//	// Debug check - ensure register being freed hasn't already been freed
+//	for (int i = 0; i < generator->free_pos; i++) {
+//		assert(generator->free_regs[i] != reg);
+//	}
+//	generator->free_regs[generator->free_pos++] = (uint8_t)reg;
+	pseudo_gen_free(generator, reg);
 }
 
 /* Linearizer initialization  */
@@ -357,7 +415,7 @@ to represent multiple return values. Most of the time these get converted
 back to normal temp pseudo, but in some cases we need to reference
 a particular value in the range and for that we use PSEUDO_RANGE_SELECT.
 */
-static Pseudo *allocate_temp_pseudo(Proc *proc, ravitype_t type)
+static Pseudo *allocate_temp_pseudo(Proc *proc, ravitype_t type, bool top)
 {
 	C_MemoryAllocator *allocator = proc->linearizer->compiler_state->allocator;
 	PseudoGenerator *gen;
@@ -377,7 +435,7 @@ static Pseudo *allocate_temp_pseudo(Proc *proc, ravitype_t type)
 		pseudo_type = PSEUDO_TEMP_ANY;
 		break;
 	}
-	unsigned reg = allocate_register(gen);
+	unsigned reg = allocate_register(gen, top);
 	Pseudo *pseudo = (Pseudo *) allocator->calloc(allocator->arena, 1, sizeof(Pseudo));
 	pseudo->type = pseudo_type;
 	pseudo->regnum = reg;
@@ -643,10 +701,10 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 		add_instruction_operand(proc, insn, tname_pseudo);
 	} else if (op == UNOPR_NOT || op == UNOPR_BNOT) {
 		add_instruction_operand(proc, insn, target);
-		target = allocate_temp_pseudo(proc, RAVI_TANY);
+		target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	} else if (op == UNOPR_MINUS || op == UNOPR_LEN) {
 		add_instruction_operand(proc, insn, target);
-		target = allocate_temp_pseudo(proc, subexpr_type);
+		target = allocate_temp_pseudo(proc, subexpr_type, false);
 	}
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
@@ -654,7 +712,7 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 	if (targetop == op_toint || targetop == op_toflt) {
 		insn = allocate_instruction(proc, op_mov, node->line_number);
 		add_instruction_operand(proc, insn, target);
-		target = allocate_temp_pseudo(proc, targetop == op_toint ? RAVI_TNUMINT: RAVI_TNUMFLT);
+		target = allocate_temp_pseudo(proc, targetop == op_toint ? RAVI_TNUMINT: RAVI_TNUMFLT, false);
 		add_instruction_target(proc, insn, target);
 		add_instruction(proc, insn);
 	}
@@ -732,7 +790,7 @@ static Pseudo *linearize_bool(Proc *proc, AstNode *node, bool is_and)
 	BasicBlock *first_block = create_block(proc);
 	BasicBlock *end_block = create_block(proc);
 
-	Pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY);
+	Pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	Pseudo *operand1 = linearize_expression(proc, e1);
 	instruct_move(proc, op_mov, result, operand1, node->line_number);
 	free_temp_pseudo(proc, operand1, false);
@@ -912,19 +970,19 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 	}
 
 	ravitype_t target_type = node->binary_expr.type.type_code;
-	Pseudo *target = allocate_temp_pseudo(proc, target_type);
+	free_temp_pseudo(proc, operand1, false);
+	free_temp_pseudo(proc, operand2, false);
+	Pseudo *target = allocate_temp_pseudo(proc, target_type, false);
 	create_binary_instruction(proc, (enum opcode) targetop, operand1, operand2, target, node->line_number);
 	if (op == BINOPR_NE) {
 		Pseudo *temp = target;
 		Instruction *not_insn = allocate_instruction(proc, op_not, node->line_number);
 		add_instruction_operand(proc, not_insn, target);
-		target = allocate_temp_pseudo(proc, target_type);
+		free_temp_pseudo(proc, temp, false);
+		target = allocate_temp_pseudo(proc, target_type, false);
 		add_instruction_target(proc, not_insn, target);
 		add_instruction(proc, not_insn);
-		free_temp_pseudo(proc, temp, false);
 	}
-	free_temp_pseudo(proc, operand1, false);
-	free_temp_pseudo(proc, operand2, false);
 
 	return target;
 }
@@ -935,7 +993,7 @@ static Pseudo *linearize_concat_expression(Proc *proc, AstNode *expr)
 {
 	Instruction *insn = allocate_instruction(proc, op_concat, expr->line_number);
 	ravitype_t target_type = expr->string_concatenation_expr.type.type_code;
-	Pseudo *target = allocate_temp_pseudo(proc, target_type);
+	Pseudo *target = allocate_temp_pseudo(proc, target_type, true);
 	AstNode *n;
 	FOR_EACH_PTR(expr->string_concatenation_expr.expr_list, AstNode, n) {
 		Pseudo *operand = linearize_expression(proc, n);
@@ -956,7 +1014,7 @@ static Pseudo *linearize_function_expr(Proc *proc, AstNode *expr)
 	linearize_function(proc->linearizer);
 	set_current_proc(proc->linearizer, curproc); // restore the proc
 	ravitype_t target_type = expr->function_expr.type.type_code;
-	Pseudo *target = allocate_temp_pseudo(proc, target_type);
+	Pseudo *target = allocate_temp_pseudo(proc, target_type, false);
 	Pseudo *operand = allocate_closure_pseudo(newproc);
 	Instruction *insn = allocate_instruction(proc, op_closure, expr->line_number);
 	add_instruction_operand(proc, insn, operand);
@@ -971,7 +1029,7 @@ static Pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 	LuaSymbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
-		Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY);
+		Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		Pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		Pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
@@ -1024,7 +1082,7 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	default:
 		break;
 	}
-	Pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type);
+	Pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type, false);
 	Instruction *insn = allocate_instruction(proc, (enum opcode)op, line_number);
 	add_instruction_operand(proc, insn, container_pseudo);
 	add_instruction_operand(proc, insn, key_pseudo);
@@ -1165,13 +1223,14 @@ static Pseudo *linearize_function_call_expression(Proc *proc, AstNode *expr,
 	Instruction *insn = allocate_instruction(proc, op_call, expr->line_number);
 
 	// if call site is a symbol copy to temp so that when return values are copied they end up in the temp space
-	//if (callsite_pseudo->type == PSEUDO_SYMBOL) {
+	if (callsite_pseudo->type != PSEUDO_TEMP_ANY ||
+	    callsite_pseudo->type == PSEUDO_TEMP_ANY && !pseudo_gen_is_top(&proc->temp_pseudos, callsite_pseudo->regnum)) {
 	// FIXME are there scenarios where we can avoid the move?
 	// I think callsite would need to be at the top of the stack / and be a temp?
-		Pseudo *temp = allocate_temp_pseudo(proc, RAVI_TANY);
+		Pseudo *temp = allocate_temp_pseudo(proc, RAVI_TANY, true);
 		instruct_move(proc, op_mov, temp, callsite_pseudo, expr->line_number);
 		callsite_pseudo = temp;
-	//}
+	}
 
 	Pseudo *self_arg = NULL; /* For method call */
 	if (expr->function_call_expr.method_name) {
@@ -1279,7 +1338,7 @@ static int linearize_indexed_assign(Proc *proc, Pseudo *table, ravitype_t table_
 static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
 {
 	/* constructor -> '{' [ field { sep field } [sep] ] '}' where sep -> ',' | ';' */
-	Pseudo *target = allocate_temp_pseudo(proc, expr->table_expr.type.type_code);
+	Pseudo *target = allocate_temp_pseudo(proc, expr->table_expr.type.type_code, false);
 	enum opcode op = op_newtable;
 	if (expr->table_expr.type.type_code == RAVI_TARRAYINT)
 		op = op_newiarray;
@@ -1382,7 +1441,7 @@ static ravitype_t get_type(LuaSymbol *symbol) {
 
 static Pseudo *copy_to_temp_if_necessary(Proc *proc, Pseudo *original, unsigned line_number) {
 	if (original->type == PSEUDO_SYMBOL) {
-		Pseudo *copy = allocate_temp_pseudo(proc, get_type(original->symbol));
+		Pseudo *copy = allocate_temp_pseudo(proc, get_type(original->symbol), false);
 		instruct_move(proc, op_mov, copy, original, line_number);
 		// TODO we may need to set type more specifically
 		return copy;
@@ -1551,7 +1610,7 @@ static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
 	add_instruction_operand(proc, insn, allocate_constant_pseudo(proc, allocate_string_constant(proc, type_name)));
 	Pseudo *size_expr = linearize_expression(proc, astlist_get(expr->builtin_expr.arg_list, 1));
 	add_instruction_operand(proc, insn, size_expr);
-	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TUSERDATA);
+	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TUSERDATA, false);
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 	free_temp_pseudo(proc, size_expr, false);
@@ -2084,14 +2143,14 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number);
 
 	if (step_expr == NULL)
@@ -2102,10 +2161,10 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 			convert_range_to_temp(t); // Only accept one result
 		}
 	}
-	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, step_pseudo, t, node->line_number);
 
-	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
+	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo, node->line_number);
 
 	BasicBlock *L1 = create_block(proc);
@@ -2203,14 +2262,14 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number);
 
 	if (step_expr == NULL)
@@ -2221,14 +2280,14 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 			convert_range_to_temp(t); // Only accept one result
 		}
 	}
-	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, step_pseudo, t, node->line_number);
 
-	Pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
+	Pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
 				  step_pseudo, step_positive, node->line_number);
 
-	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN);
+	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo, node->line_number);
 
 	BasicBlock *L1 = create_block(proc);
@@ -2532,14 +2591,14 @@ static void start_scope(LinearizerState *linearizer, Proc *proc, Scope *scope)
 			     sym->variable.value_type.type_code == RAVI_TNUMINT)) {
 				Pseudo *pseudo;
 				if (sym->variable.value_type.type_code == RAVI_TNUMFLT)
-					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMFLT);
+					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMFLT, true);
 				else
-					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT);
+					pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, true);
 				sym->variable.pseudo = pseudo;
 				pseudo->temp_for_local = sym; /* Note that this temp is for a local */
 			}
 			else {
-				reg = allocate_register(&proc->local_pseudos);
+				reg = allocate_register(&proc->local_pseudos, true);
 				allocate_symbol_pseudo(proc, sym, reg);
 			}
 		}
