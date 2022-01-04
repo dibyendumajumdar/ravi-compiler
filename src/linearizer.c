@@ -100,23 +100,28 @@ static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 	assert(reg < N);
 	assert(generator->regs_in_use[reg]);
 	generator->regs_in_use[reg] = 0;
-	unsigned next_reg = reg+1;
-	if (next_reg == generator->free_pos) {
+	if (reg+1 == generator->free_pos) {
 		// We released the top most register
 		generator->free_pos--;
 	}
-	else if (next_reg < generator->free_pos) {
-		unsigned n = generator->free_pos;
-		for (int i = n-1; i >= next_reg; i--) {
+	if (generator->free_pos > 0 && !generator->regs_in_use[generator->free_pos-1]) {
+		bool set = false;
+		for (int i = generator->free_pos-1; i >= 0; i--) {
 			if (generator->regs_in_use[i]) {
 				generator->free_pos = i+1;
+				set = true;
 				break;
 			}
 		}
+		if (!set)
+			generator->free_pos = 0;
 	}
 	// For debugging
 	for (int i = generator->free_pos; i < N; i++) {
 		assert(!generator->regs_in_use[i]);
+	}
+	if (generator->free_pos > 0) {
+		assert(generator->regs_in_use[generator->free_pos-1]);
 	}
 }
 
@@ -690,9 +695,11 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 		add_instruction_operand(proc, insn, tname_pseudo);
 	} else if (op == UNOPR_NOT || op == UNOPR_BNOT) {
 		add_instruction_operand(proc, insn, target);
+		free_temp_pseudo(proc, target, false);
 		target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	} else if (op == UNOPR_MINUS || op == UNOPR_LEN) {
 		add_instruction_operand(proc, insn, target);
+		free_temp_pseudo(proc, target, false);
 		target = allocate_temp_pseudo(proc, subexpr_type, false);
 	}
 	add_instruction_target(proc, insn, target);
@@ -701,6 +708,7 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 	if (targetop == op_toint || targetop == op_toflt) {
 		insn = allocate_instruction(proc, op_mov, node->line_number);
 		add_instruction_operand(proc, insn, target);
+		free_temp_pseudo(proc, target, false);
 		target = allocate_temp_pseudo(proc, targetop == op_toint ? RAVI_TNUMINT: RAVI_TNUMFLT, false);
 		add_instruction_target(proc, insn, target);
 		add_instruction(proc, insn);
