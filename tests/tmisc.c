@@ -24,6 +24,7 @@
 #include <allocate.h>
 #include <ravi_compiler.h>
 
+#include <assert.h>
 #include <string.h>
 #include <bitset.h>
 
@@ -202,8 +203,127 @@ static int test_bitset(void)
 	return !status;
 }
 
+typedef struct PseudoGenerator {
+	uint64_t bits[4]; /* bitset of registers */
+	unsigned max_reg;
+} PseudoGenerator;
+enum {
+	MAXBIT = 4*sizeof(uint64_t)*8,
+	ESIZE = sizeof(uint64_t)*8
+};
+
+static int top_reg( PseudoGenerator *generator )
+{
+	for (int i = 3; i >= 0; i--) {
+		if (!generator->bits[i])
+			continue;
+		uint64_t bit = generator->bits[i];
+		int x = i*sizeof(uint64_t)*8-1;
+		while (bit != 0) {
+			bit >>= 1;
+			x++;
+		}
+		return x;
+	}
+	return -1;
+}
+
+static unsigned raviX_max_reg(PseudoGenerator *generator)
+{
+	return generator->max_reg;
+}
+
+/**
+ * Is given register top of the stack of registers?
+ */
+static int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
+{
+	int top = top_reg(generator);
+	if (top < 0)
+		return 0;
+	return top == reg;
+}
+
+static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
+{
+	assert ( reg < MAXBIT );
+	unsigned n = reg / ESIZE;
+	reg = reg % ESIZE;
+	generator->bits[n] &= ~(1ull << reg);
+}
+
+static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
+{
+	unsigned reg;
+	if (top) {
+		int current_top = top_reg(generator);
+		reg = current_top + 1;
+	} else {
+		reg = 0;
+		int is_set = 1;
+		for (int i = 0; is_set && i < 4; i++) {
+			uint64_t bit = generator->bits[i];
+			for (int j = 0; is_set && j < sizeof(uint64_t) * 8; j++) {
+				is_set = (bit & (1ull << j)) != 0;
+				if (is_set)
+					reg++;
+			}
+		}
+	}
+	unsigned i = reg / ESIZE;
+	unsigned j = reg % ESIZE;
+	generator->bits[i] |= (1ull << j);
+	assert(reg <= generator->max_reg);
+	if (reg == generator->max_reg)
+		generator->max_reg += 1;
+	return reg;
+}
 int main(int argc, const char *argv[])
 {
+	PseudoGenerator generator = {0};
+	for (int i = 0; i < 255; i++) {
+		unsigned max_reg = raviX_max_reg(&generator);
+		if (i != max_reg)
+		assert(max_reg == i);
+		unsigned reg = pseudo_gen_alloc(&generator, false);
+		if (top_reg(&generator) != reg)
+			assert(pseudo_gen_is_top(&generator, reg));
+	}
+
+	pseudo_gen_free(&generator, 240);
+	assert(raviX_max_reg(&generator) == 255);
+	unsigned reg = pseudo_gen_alloc(&generator, false);
+	assert(reg == 240);
+	
+	for (int i = 0; i < 3; i++) {
+		pseudo_gen_free(&generator, 63);
+		pseudo_gen_free(&generator, 64);
+		assert(raviX_max_reg(&generator) == 255);
+		reg = pseudo_gen_alloc(&generator, false);
+		assert(reg == 63);
+		reg = pseudo_gen_alloc(&generator, false);
+		assert(reg == 64);
+	}
+
+	generator = (PseudoGenerator){0};
+	for (int i = 0; i < 100; i++) {
+		unsigned max_reg = raviX_max_reg(&generator);
+		if (i != max_reg)
+			assert(max_reg == i);
+		unsigned reg = pseudo_gen_alloc(&generator, false);
+		assert(pseudo_gen_is_top(&generator, reg));
+	}
+
+
+	assert(pseudo_gen_is_top(&generator, 99));
+	reg = pseudo_gen_alloc(&generator, true);
+	assert(reg == 100);
+	pseudo_gen_free(&generator, reg);
+	reg = pseudo_gen_alloc(&generator, true);
+	assert(reg == 100);
+	reg = pseudo_gen_alloc(&generator, true);
+	assert(reg == 101);
+
 	int rc = test_stringset();
 	rc += test_memalloc();
 	rc += test_bitset();
