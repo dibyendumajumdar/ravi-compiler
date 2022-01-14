@@ -60,3 +60,9 @@ $command -f input/t09_bugs.in > results.out
 #cp results.out expected/t09_bugs.expected
 diff expected/t09_bugs.expected results.out
 rm results.out
+
+echo "testing t10_embed_C"
+$command -f input/t10_embed_C.in > results.out
+#cp results.out expected/t10_embed_C.expected
+diff expected/t10_embed_C.expected results.out
+rm results.out

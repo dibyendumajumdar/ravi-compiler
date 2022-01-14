@@ -1857,31 +1857,31 @@ L0 (entry)
 	TOTABLE {local(b, 1)}
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
 	TGETik {local(a, 0), 1 Kint(0)} {T(1)}
-	LEN {T(1)} {T(2)}
+	LEN {T(1)} {T(1)}
+	TOINT {T(1)}
+	MOV {T(1)} {Tint(3)}
+	LEN {local(b, 1)} {T(1)}
+	EQ {Tint(3), T(1)} {T(1)}
+	MOV {T(0)} {T(2)}
+	CALL {T(2), T(1)} {T(2..), 1 Kint(0)}
+	LEN {local(a, 0)} {T(1)}
+	TGETik {local(a, 0), 1 Kint(0)} {T(2)}
+	LEN {T(2)} {T(2)}
+	TGETik {local(b, 1), 1 Kint(0)} {T(3)}
+	LEN {T(3)} {T(3)}
+	NEWTABLE {T(4)}
+	TOINT {T(1)}
+	MOVi {T(1)} {Tint(0)}
 	TOINT {T(2)}
-	MOV {T(2)} {Tint(3)}
-	LEN {local(b, 1)} {T(3)}
-	EQ {Tint(3), T(3)} {T(3)}
-	CALL {T(0), T(3)} {T(0..), 1 Kint(0)}
-	LEN {local(a, 0)} {T(3)}
-	TGETik {local(a, 0), 1 Kint(0)} {T(4)}
-	LEN {T(4)} {T(5)}
-	TGETik {local(b, 1), 1 Kint(0)} {T(6)}
-	LEN {T(6)} {T(7)}
-	NEWTABLE {T(8)}
+	MOVi {T(2)} {Tint(1)}
 	TOINT {T(3)}
-	MOVi {T(3)} {Tint(0)}
-	TOINT {T(5)}
-	MOVi {T(5)} {Tint(1)}
-	TOINT {T(7)}
-	MOVi {T(7)} {Tint(2)}
-	MOV {T(8)} {local(x, 2)}
-	LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(3)}
-	GETsk {T(3), 'T' Ks(2)} {T(5)}
-	MOV {T(5)} {T(8)}
-	CALL {T(8), local(b, 1)} {T(8..), 1 Kint(0)}
-	TOTABLE {T(8[8..])}
-	MOV {T(8[8..])} {local(c, 3)}
+	MOVi {T(3)} {Tint(2)}
+	MOV {T(4)} {local(x, 2)}
+	LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(1)}
+	GETsk {T(1), 'T' Ks(2)} {T(2)}
+	CALL {T(2), local(b, 1)} {T(2..), 1 Kint(0)}
+	TOTABLE {T(2[2..])}
+	MOV {T(2[2..])} {local(c, 3)}
 	MOV {1 Kint(0)} {Tint(4)}
 	MOV {Tint(0)} {Tint(5)}
 	MOV {1 Kint(0)} {Tint(6)}
@@ -1896,13 +1896,13 @@ L3
 	CBR {Tbool(7)} {L5, L4}
 L4
 	MOV {Tint(4)} {Tint(3)}
-	LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(7)}
-	GETsk {T(7), 'numarray' Ks(4)} {T(9)}
-	CALL {T(9), Tint(2), 0E0 Kflt(0)} {T(9..), 1 Kint(0)}
-	TOFARRAY {T(9[9..])}
-	MOV {T(9[9..])} {local(xi, 4)}
-	MOV {local(xi, 4)} {T(11)}
-	TPUTik {T(11)} {local(x, 2), Tint(3)}
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(2)}
+	GETsk {T(2), 'numarray' Ks(4)} {T(3)}
+	CALL {T(3), Tint(2), 0E0 Kflt(0)} {T(3..), 1 Kint(0)}
+	TOFARRAY {T(3[3..])}
+	MOV {T(3[3..])} {local(xi, 4)}
+	MOV {local(xi, 4)} {T(4)}
+	TPUTik {T(4)} {local(x, 2), Tint(3)}
 	MOV {1 Kint(0)} {Tint(9)}
 	MOV {Tint(2)} {Tint(10)}
 	MOV {1 Kint(0)} {Tint(11)}
@@ -1918,13 +1918,13 @@ L7
 	CBR {Tbool(12)} {L9, L8}
 L8
 	MOV {Tint(9)} {Tint(8)}
-	TGETik {local(a, 0), Tint(3)} {T(10)}
-	TOFARRAY {T(10)}
-	TGETik {local(c, 3), Tint(8)} {T(11)}
-	TOFARRAY {T(11)}
+	TGETik {local(a, 0), Tint(3)} {T(3)}
+	TOFARRAY {T(3)}
+	TGETik {local(c, 3), Tint(8)} {T(4)}
+	TOFARRAY {T(4)}
 	MOVf {0E0 Kflt(0)} {Tflt(0)}
-	MOV {T(10)} {local(ai, 5)}
-	MOV {T(11)} {local(cj, 6)}
+	MOV {T(3)} {local(ai, 5)}
+	MOV {T(4)} {local(cj, 6)}
 	MOV {1 Kint(0)} {Tint(14)}
 	MOV {Tint(1)} {Tint(15)}
 	MOV {1 Kint(0)} {Tint(16)}
@@ -1965,31 +1965,31 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOTABLE {local(b, 1)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>LEN {T(1)} {T(2)}</TD></TR>
+<TR><TD>LEN {T(1)} {T(1)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {Tint(3)}</TD></TR>
+<TR><TD>LEN {local(b, 1)} {T(1)}</TD></TR>
+<TR><TD>EQ {Tint(3), T(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), T(1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LEN {local(a, 0)} {T(1)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(2)}</TD></TR>
+<TR><TD>LEN {T(2)} {T(2)}</TD></TR>
+<TR><TD>TGETik {local(b, 1), 1 Kint(0)} {T(3)}</TD></TR>
+<TR><TD>LEN {T(3)} {T(3)}</TD></TR>
+<TR><TD>NEWTABLE {T(4)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOVi {T(1)} {Tint(0)}</TD></TR>
 <TR><TD>TOINT {T(2)}</TD></TR>
-<TR><TD>MOV {T(2)} {Tint(3)}</TD></TR>
-<TR><TD>LEN {local(b, 1)} {T(3)}</TD></TR>
-<TR><TD>EQ {Tint(3), T(3)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(0), T(3)} {T(0..), 1 Kint(0)}</TD></TR>
-<TR><TD>LEN {local(a, 0)} {T(3)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(4)}</TD></TR>
-<TR><TD>LEN {T(4)} {T(5)}</TD></TR>
-<TR><TD>TGETik {local(b, 1), 1 Kint(0)} {T(6)}</TD></TR>
-<TR><TD>LEN {T(6)} {T(7)}</TD></TR>
-<TR><TD>NEWTABLE {T(8)}</TD></TR>
+<TR><TD>MOVi {T(2)} {Tint(1)}</TD></TR>
 <TR><TD>TOINT {T(3)}</TD></TR>
-<TR><TD>MOVi {T(3)} {Tint(0)}</TD></TR>
-<TR><TD>TOINT {T(5)}</TD></TR>
-<TR><TD>MOVi {T(5)} {Tint(1)}</TD></TR>
-<TR><TD>TOINT {T(7)}</TD></TR>
-<TR><TD>MOVi {T(7)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {T(8)} {local(x, 2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(3)}</TD></TR>
-<TR><TD>GETsk {T(3), 'T' Ks(2)} {T(5)}</TD></TR>
-<TR><TD>MOV {T(5)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(b, 1)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOTABLE {T(8[8..])}</TD></TR>
-<TR><TD>MOV {T(8[8..])} {local(c, 3)}</TD></TR>
+<TR><TD>MOVi {T(3)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {T(4)} {local(x, 2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(1), 'T' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(b, 1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOTABLE {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(c, 3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(4)}</TD></TR>
 <TR><TD>MOV {Tint(0)} {Tint(5)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
@@ -2013,13 +2013,13 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(4)} {Tint(3)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(7)}</TD></TR>
-<TR><TD>GETsk {T(7), 'numarray' Ks(4)} {T(9)}</TD></TR>
-<TR><TD>CALL {T(9), Tint(2), 0E0 Kflt(0)} {T(9..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOFARRAY {T(9[9..])}</TD></TR>
-<TR><TD>MOV {T(9[9..])} {local(xi, 4)}</TD></TR>
-<TR><TD>MOV {local(xi, 4)} {T(11)}</TD></TR>
-<TR><TD>TPUTik {T(11)} {local(x, 2), Tint(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'numarray' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(3), Tint(2), 0E0 Kflt(0)} {T(3..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOFARRAY {T(3[3..])}</TD></TR>
+<TR><TD>MOV {T(3[3..])} {local(xi, 4)}</TD></TR>
+<TR><TD>MOV {local(xi, 4)} {T(4)}</TD></TR>
+<TR><TD>TPUTik {T(4)} {local(x, 2), Tint(3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(10)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(11)}</TD></TR>
@@ -2048,13 +2048,13 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(8)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), Tint(3)} {T(10)}</TD></TR>
-<TR><TD>TOFARRAY {T(10)}</TD></TR>
-<TR><TD>TGETik {local(c, 3), Tint(8)} {T(11)}</TD></TR>
-<TR><TD>TOFARRAY {T(11)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), Tint(3)} {T(3)}</TD></TR>
+<TR><TD>TOFARRAY {T(3)}</TD></TR>
+<TR><TD>TGETik {local(c, 3), Tint(8)} {T(4)}</TD></TR>
+<TR><TD>TOFARRAY {T(4)}</TD></TR>
 <TR><TD>MOVf {0E0 Kflt(0)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {T(10)} {local(ai, 5)}</TD></TR>
-<TR><TD>MOV {T(11)} {local(cj, 6)}</TD></TR>
+<TR><TD>MOV {T(3)} {local(ai, 5)}</TD></TR>
+<TR><TD>MOV {T(4)} {local(cj, 6)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(14)}</TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(15)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(16)}</TD></TR>
@@ -2105,31 +2105,31 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOTABLE {local(b, 1)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>LEN {T(1)} {T(2)}</TD></TR>
+<TR><TD>LEN {T(1)} {T(1)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {Tint(3)}</TD></TR>
+<TR><TD>LEN {local(b, 1)} {T(1)}</TD></TR>
+<TR><TD>EQ {Tint(3), T(1)} {T(1)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), T(1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LEN {local(a, 0)} {T(1)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(2)}</TD></TR>
+<TR><TD>LEN {T(2)} {T(2)}</TD></TR>
+<TR><TD>TGETik {local(b, 1), 1 Kint(0)} {T(3)}</TD></TR>
+<TR><TD>LEN {T(3)} {T(3)}</TD></TR>
+<TR><TD>NEWTABLE {T(4)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOVi {T(1)} {Tint(0)}</TD></TR>
 <TR><TD>TOINT {T(2)}</TD></TR>
-<TR><TD>MOV {T(2)} {Tint(3)}</TD></TR>
-<TR><TD>LEN {local(b, 1)} {T(3)}</TD></TR>
-<TR><TD>EQ {Tint(3), T(3)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(0), T(3)} {T(0..), 1 Kint(0)}</TD></TR>
-<TR><TD>LEN {local(a, 0)} {T(3)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), 1 Kint(0)} {T(4)}</TD></TR>
-<TR><TD>LEN {T(4)} {T(5)}</TD></TR>
-<TR><TD>TGETik {local(b, 1), 1 Kint(0)} {T(6)}</TD></TR>
-<TR><TD>LEN {T(6)} {T(7)}</TD></TR>
-<TR><TD>NEWTABLE {T(8)}</TD></TR>
+<TR><TD>MOVi {T(2)} {Tint(1)}</TD></TR>
 <TR><TD>TOINT {T(3)}</TD></TR>
-<TR><TD>MOVi {T(3)} {Tint(0)}</TD></TR>
-<TR><TD>TOINT {T(5)}</TD></TR>
-<TR><TD>MOVi {T(5)} {Tint(1)}</TD></TR>
-<TR><TD>TOINT {T(7)}</TD></TR>
-<TR><TD>MOVi {T(7)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {T(8)} {local(x, 2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(3)}</TD></TR>
-<TR><TD>GETsk {T(3), 'T' Ks(2)} {T(5)}</TD></TR>
-<TR><TD>MOV {T(5)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(b, 1)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOTABLE {T(8[8..])}</TD></TR>
-<TR><TD>MOV {T(8[8..])} {local(c, 3)}</TD></TR>
+<TR><TD>MOVi {T(3)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {T(4)} {local(x, 2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'matrix' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(1), 'T' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(b, 1)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOTABLE {T(2[2..])}</TD></TR>
+<TR><TD>MOV {T(2[2..])} {local(c, 3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(4)}</TD></TR>
 <TR><TD>MOV {Tint(0)} {Tint(5)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(6)}</TD></TR>
@@ -2153,13 +2153,13 @@ L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>MOV {Tint(4)} {Tint(3)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(7)}</TD></TR>
-<TR><TD>GETsk {T(7), 'numarray' Ks(4)} {T(9)}</TD></TR>
-<TR><TD>CALL {T(9), Tint(2), 0E0 Kflt(0)} {T(9..), 1 Kint(0)}</TD></TR>
-<TR><TD>TOFARRAY {T(9[9..])}</TD></TR>
-<TR><TD>MOV {T(9[9..])} {local(xi, 4)}</TD></TR>
-<TR><TD>MOV {local(xi, 4)} {T(11)}</TD></TR>
-<TR><TD>TPUTik {T(11)} {local(x, 2), Tint(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(3)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'numarray' Ks(4)} {T(3)}</TD></TR>
+<TR><TD>CALL {T(3), Tint(2), 0E0 Kflt(0)} {T(3..), 1 Kint(0)}</TD></TR>
+<TR><TD>TOFARRAY {T(3[3..])}</TD></TR>
+<TR><TD>MOV {T(3[3..])} {local(xi, 4)}</TD></TR>
+<TR><TD>MOV {local(xi, 4)} {T(4)}</TD></TR>
+<TR><TD>TPUTik {T(4)} {local(x, 2), Tint(3)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(9)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(10)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(11)}</TD></TR>
@@ -2188,13 +2188,13 @@ L7 -> L8
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
 <TR><TD>MOV {Tint(9)} {Tint(8)}</TD></TR>
-<TR><TD>TGETik {local(a, 0), Tint(3)} {T(10)}</TD></TR>
-<TR><TD>TOFARRAY {T(10)}</TD></TR>
-<TR><TD>TGETik {local(c, 3), Tint(8)} {T(11)}</TD></TR>
-<TR><TD>TOFARRAY {T(11)}</TD></TR>
+<TR><TD>TGETik {local(a, 0), Tint(3)} {T(3)}</TD></TR>
+<TR><TD>TOFARRAY {T(3)}</TD></TR>
+<TR><TD>TGETik {local(c, 3), Tint(8)} {T(4)}</TD></TR>
+<TR><TD>TOFARRAY {T(4)}</TD></TR>
 <TR><TD>MOVf {0E0 Kflt(0)} {Tflt(0)}</TD></TR>
-<TR><TD>MOV {T(10)} {local(ai, 5)}</TD></TR>
-<TR><TD>MOV {T(11)} {local(cj, 6)}</TD></TR>
+<TR><TD>MOV {T(3)} {local(ai, 5)}</TD></TR>
+<TR><TD>MOV {T(4)} {local(cj, 6)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(14)}</TD></TR>
 <TR><TD>MOV {Tint(1)} {Tint(15)}</TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Tint(16)}</TD></TR>
@@ -2262,15 +2262,15 @@ end
 define Proc%1
 L0 (entry)
 	NEWTABLE {T(0)}
-	LEN {T(0)} {T(1)}
-	RET {T(1)} {L1}
+	LEN {T(0)} {T(0)}
+	RET {T(0)} {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>NEWTABLE {T(0)}</TD></TR>
-<TR><TD>LEN {T(0)} {T(1)}</TD></TR>
-<TR><TD>RET {T(1)} {L1}</TD></TR>
+<TR><TD>LEN {T(0)} {T(0)}</TD></TR>
+<TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
 }

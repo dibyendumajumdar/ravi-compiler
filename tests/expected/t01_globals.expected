@@ -832,8 +832,9 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'y' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'x' Ks(1)} {T(1)}
 	CALL {T(1)} {T(1..), -1 Kint(0)}
-	CALL {T(0), T(1..)} {T(0..), -1 Kint(0)}
-	RET {T(0..)} {L1}
+	MOV {T(0)} {T(2)}
+	CALL {T(2), T(1..)} {T(2..), -1 Kint(0)}
+	RET {T(2..)} {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
@@ -841,8 +842,9 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'y' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'x' Ks(1)} {T(1)}</TD></TR>
 <TR><TD>CALL {T(1)} {T(1..), -1 Kint(0)}</TD></TR>
-<TR><TD>CALL {T(0), T(1..)} {T(0..), -1 Kint(0)}</TD></TR>
-<TR><TD>RET {T(0..)} {L1}</TD></TR>
+<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), T(1..)} {T(2..), -1 Kint(0)}</TD></TR>
+<TR><TD>RET {T(2..)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
 }
@@ -996,7 +998,8 @@ L0 (entry)
 	GETik {T(0), 1 Kint(0)} {T(1)}
 	LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(2)}
 	LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}
-	CALL {T(1), T(2), T(3)} {T(1..), 1 Kint(0)}
+	MOV {T(1)} {T(4)}
+	CALL {T(4), T(2), T(3)} {T(4..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1007,7 +1010,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>GETik {T(0), 1 Kint(0)} {T(1)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(1)} {T(2)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'b' Ks(2)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(1), T(2), T(3)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(4)}</TD></TR>
+<TR><TD>CALL {T(4), T(2), T(3)} {T(4..), 1 Kint(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1929,9 +1933,11 @@ L0 (entry)
 	GETik {T(2), 10 Kint(0)} {T(3)}
 	LOADGLOBAL {Upval(_ENV), 'z' Ks(3)} {T(4)}
 	CALL {T(4)} {T(4..), -1 Kint(2)}
-	CALL {T(1), T(3), 5 Kint(1), T(4..)} {T(1..), -1 Kint(2)}
-	CALL {T(0), T(1..)} {T(0), 1 Kint(3)}
-	PUTik {9 Kint(4)} {T(0), 1 Kint(3)}
+	MOV {T(1)} {T(5)}
+	CALL {T(5), T(3), 5 Kint(1), T(4..)} {T(5..), -1 Kint(2)}
+	MOV {T(0)} {T(6)}
+	CALL {T(6), T(5..)} {T(6), 1 Kint(3)}
+	PUTik {9 Kint(4)} {T(6), 1 Kint(3)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1943,9 +1949,11 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>GETik {T(2), 10 Kint(0)} {T(3)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'z' Ks(3)} {T(4)}</TD></TR>
 <TR><TD>CALL {T(4)} {T(4..), -1 Kint(2)}</TD></TR>
-<TR><TD>CALL {T(1), T(3), 5 Kint(1), T(4..)} {T(1..), -1 Kint(2)}</TD></TR>
-<TR><TD>CALL {T(0), T(1..)} {T(0), 1 Kint(3)}</TD></TR>
-<TR><TD>PUTik {9 Kint(4)} {T(0), 1 Kint(3)}</TD></TR>
+<TR><TD>MOV {T(1)} {T(5)}</TD></TR>
+<TR><TD>CALL {T(5), T(3), 5 Kint(1), T(4..)} {T(5..), -1 Kint(2)}</TD></TR>
+<TR><TD>MOV {T(0)} {T(6)}</TD></TR>
+<TR><TD>CALL {T(6), T(5..)} {T(6), 1 Kint(3)}</TD></TR>
+<TR><TD>PUTik {9 Kint(4)} {T(6), 1 Kint(3)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

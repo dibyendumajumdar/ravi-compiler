@@ -933,8 +933,8 @@ L4
 	BR {L6}
 L5
 	CLOSE {local(j, 1)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}
-	CALL {T(1), local(x, 0)} {T(1..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
+	CALL {T(0), local(x, 0)} {T(0..), 1 Kint(0)}
 	CLOSE {local(x, 0)}
 	RET {L1}
 L6
@@ -1034,8 +1034,8 @@ L0 -> L1
 L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
 <TR><TD>CLOSE {local(j, 1)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), local(x, 0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(x, 0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>CLOSE {local(x, 0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
