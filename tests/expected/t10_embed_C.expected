@@ -1,0 +1,1633 @@
+C__decl [[
+typedef struct MyStruct {
+    long a;
+    int variable_length[];
+} MyStruct;
+]]
+
+function demo(u: Userdata)
+
+    C__unsafe(u) [[
+        MyStruct *s = (MyStruct *) u.ptr;
+    ]]
+    local u1 = C__new('MyStruct',1)
+
+end
+
+function()
+--upvalues  _ENV*
+  C (
+    ) 'typedef struct MyStruct {
+    long a;
+    int variable_length[];
+} MyStruct;
+'
+   demo --global symbol any 
+   =
+    function(
+      u --local symbol userdata Userdata
+    )
+    --[local symbols] u, u1
+      C (
+        u --local symbol userdata Userdata
+        ) '        MyStruct *s = (MyStruct *) u.ptr;
+    '
+      local
+      --[symbols]
+        u1 --local symbol any 
+      --[expressions]
+        C__new( --userdata
+        )
+    end
+end
+function()
+--upvalues  _ENV*
+  C (
+    ) 'typedef struct MyStruct {
+    long a;
+    int variable_length[];
+} MyStruct;
+'
+   demo --global symbol any 
+   =
+    function(
+      u --local symbol userdata Userdata
+    )
+    --[local symbols] u, u1
+      C (
+        u --local symbol userdata Userdata
+        ) '        MyStruct *s = (MyStruct *) u.ptr;
+    '
+      local
+      --[symbols]
+        u1 --local symbol any 
+      --[expressions]
+        C__new( --userdata
+        )
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(1)}
+	STOREGLOBAL {T(1)} {Upval(_ENV), 'demo' Ks(0)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	TOTYPE {'Userdata' Ks(0)} {local(u, 0)}
+	C__UNSAFE {local(u, 0)} { C code }
+	C__NEW {'MyStruct' Ks(2), 1 Kint(0)} {T(0)}
+	MOV {T(0)} {local(u1, 1)}
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(1)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(1)} {Upval(_ENV), 'demo' Ks(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOTYPE {'Userdata' Ks(0)} {local(u, 0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(u, 0)} { C code }</TD></TR>
+<TR><TD>C__NEW {'MyStruct' Ks(2), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(u1, 1)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOTYPE {'Userdata' Ks(0)} {local(u, 0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(u, 0)} { C code }</TD></TR>
+<TR><TD>C__NEW {'MyStruct' Ks(2), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(u1, 1)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+local i: integer = 1
+local j: integer = 2
+local k: integer
+
+C__unsafe(i,j,k) [[
+     k = i+j; // Okay as primitive types
+]]
+
+function()
+--upvalues  _ENV*
+--[local symbols] i, j, k
+  local
+  --[symbols]
+    i --local symbol integer 
+  --[expressions]
+    1
+  local
+  --[symbols]
+    j --local symbol integer 
+  --[expressions]
+    2
+  local
+  --[symbols]
+    k --local symbol integer 
+  C (
+    i --local symbol integer 
+   ,
+    j --local symbol integer 
+   ,
+    k --local symbol integer 
+    ) '     k = i+j; // Okay as primitive types
+'
+end
+function()
+--upvalues  _ENV*
+--[local symbols] i, j, k
+  local
+  --[symbols]
+    i --local symbol integer 
+  --[expressions]
+    1
+  local
+  --[symbols]
+    j --local symbol integer 
+  --[expressions]
+    2
+  local
+  --[symbols]
+    k --local symbol integer 
+  C (
+    i --local symbol integer 
+   ,
+    j --local symbol integer 
+   ,
+    k --local symbol integer 
+    ) '     k = i+j; // Okay as primitive types
+'
+end
+define Proc%1
+L0 (entry)
+	MOVi {1 Kint(0)} {Tint(0)}
+	MOVi {2 Kint(1)} {Tint(1)}
+	INIT {Tint(2)}
+	C__UNSAFE {Tint(0), Tint(1), Tint(2)} { C code }
+	RET {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>MOVi {1 Kint(0)} {Tint(0)}</TD></TR>
+<TR><TD>MOVi {2 Kint(1)} {Tint(1)}</TD></TR>
+<TR><TD>INIT {Tint(2)}</TD></TR>
+<TR><TD>C__UNSAFE {Tint(0), Tint(1), Tint(2)} { C code }</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+C__decl [[
+   typedef struct {
+      int i;
+  } MyStruct;
+]]
+
+local u = C__new('MyStruct', 1)
+
+local i: integer = 42
+local j: integer
+
+C__unsafe(i,j,u) [[
+    MyStruct *s = (MyStruct *) u.ptr;
+    s->i = i;
+    j = s->i;
+]]
+
+return j
+
+function()
+--upvalues  _ENV*
+--[local symbols] u, i, j
+  C (
+    ) '   typedef struct {
+      int i;
+  } MyStruct;
+'
+  local
+  --[symbols]
+    u --local symbol any 
+  --[expressions]
+    C__new( --userdata
+    )
+  local
+  --[symbols]
+    i --local symbol integer 
+  --[expressions]
+    42
+  local
+  --[symbols]
+    j --local symbol integer 
+  C (
+    i --local symbol integer 
+   ,
+    j --local symbol integer 
+   ,
+    u --local symbol any 
+    ) '    MyStruct *s = (MyStruct *) u.ptr;
+    s->i = i;
+    j = s->i;
+'
+  return
+    --[suffixed expr start] integer
+     --[primary start] integer
+       j --local symbol integer 
+     --[primary end]
+    --[suffixed expr end]
+end
+function()
+--upvalues  _ENV*
+--[local symbols] u, i, j
+  C (
+    ) '   typedef struct {
+      int i;
+  } MyStruct;
+'
+  local
+  --[symbols]
+    u --local symbol any 
+  --[expressions]
+    C__new( --userdata
+    )
+  local
+  --[symbols]
+    i --local symbol integer 
+  --[expressions]
+    42
+  local
+  --[symbols]
+    j --local symbol integer 
+  C (
+    i --local symbol integer 
+   ,
+    j --local symbol integer 
+   ,
+    u --local symbol any 
+    ) '    MyStruct *s = (MyStruct *) u.ptr;
+    s->i = i;
+    j = s->i;
+'
+  return
+    --[suffixed expr start] integer
+     --[primary start] integer
+       j --local symbol integer 
+     --[primary end]
+    --[suffixed expr end]
+end
+define Proc%1
+L0 (entry)
+	C__NEW {'MyStruct' Ks(0), 1 Kint(0)} {T(0)}
+	MOV {T(0)} {local(u, 0)}
+	MOVi {42 Kint(1)} {Tint(0)}
+	INIT {Tint(1)}
+	C__UNSAFE {Tint(0), Tint(1), local(u, 0)} { C code }
+	RET {Tint(1)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>C__NEW {'MyStruct' Ks(0), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(u, 0)}</TD></TR>
+<TR><TD>MOVi {42 Kint(1)} {Tint(0)}</TD></TR>
+<TR><TD>INIT {Tint(1)}</TD></TR>
+<TR><TD>C__UNSAFE {Tint(0), Tint(1), local(u, 0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(1)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+-- implement a date type using embedded C
+
+
+C__decl [[
+typedef struct {
+    unsigned char d;
+    unsigned char m;
+    short y;
+    int serial;
+} Date;
+]]
+
+DateFunctions = {}
+function DateFunctions.make_date(d: integer, m: integer, y: integer)
+    local date = C__new('Date', 1)
+
+    C__unsafe(date, d, m, y) [[
+        Date *dateptr = (Date *) date.ptr;
+        dateptr->d = (unsigned char)d;
+        dateptr->m = (unsigned char)m;
+        dateptr->y = (short)y;
+        y -= m <= 2;
+        int era = (y >= 0 ? y : y - 399) / 400;
+        unsigned yoe = (unsigned)(y - era * 400);	   // [0, 399]
+        unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1; // [0, 365]
+        unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;	  // [0, 146096]
+        dateptr->serial = era * 146097 + (int)doe - 719468 + 25569; // +25569 adjusts the serial number to match Excel
+    ]]
+
+    return date
+end
+
+function DateFunctions.print_date(date: any)
+
+    local d: integer
+    local m: integer
+    local y: integer
+    local j: integer
+    C__unsafe(date, d, m, y, j) [[
+            Date *dateptr = (Date *) date.ptr;
+            d = dateptr->d;
+            m = dateptr->m;
+            y = dateptr->y;
+            j = dateptr->serial;
+    ]]
+
+    print(d,m,y,j)
+end
+
+function DateFunctions.get_day(date: any)
+
+    local v: integer
+    C__unsafe(date, v) [[
+            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->d;
+    ]]
+
+    return v
+end
+
+function DateFunctions.get_month(date: any)
+
+    local v: integer
+    C__unsafe(date, v) [[
+            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->m;
+    ]]
+
+    return v
+end
+
+function DateFunctions.get_year(date: any)
+
+    local v: integer
+    C__unsafe(date, v) [[
+            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->y;
+    ]]
+
+    return v
+end
+
+function DateFunctions.get_serial(date: any)
+
+    local v: integer
+    C__unsafe(date, v) [[
+            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->serial;
+    ]]
+
+    return v
+end
+
+local d = DateFunctions.make_date(1,1,1900)
+DateFunctions.print_date(d)
+assert(1900 == DateFunctions.get_year(d))
+assert(1 == DateFunctions.get_month(d))
+assert(1 == DateFunctions.get_day(d))
+assert(2 == DateFunctions.get_serial(d))
+function()
+--upvalues  _ENV*
+--[local symbols] d
+  C (
+    ) 'typedef struct {
+    unsigned char d;
+    unsigned char m;
+    short y;
+    int serial;
+} Date;
+'
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        DateFunctions --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     { --[table constructor start] table
+     } --[table constructor end]
+   --[expression list end]
+  --[expression statement end]
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'make_date'
+     --[field selector end]
+   =
+    function(
+      d --local symbol integer 
+     ,
+      m --local symbol integer 
+     ,
+      y --local symbol integer 
+    )
+    --[local symbols] d, m, y, date
+      local
+      --[symbols]
+        date --local symbol any 
+      --[expressions]
+        C__new( --userdata
+        )
+      C (
+        date --local symbol any 
+       ,
+        d --local symbol integer 
+       ,
+        m --local symbol integer 
+       ,
+        y --local symbol integer 
+        ) '        Date *dateptr = (Date *) date.ptr;
+        dateptr->d = (unsigned char)d;
+        dateptr->m = (unsigned char)m;
+        dateptr->y = (short)y;
+        y -= m <= 2;
+        int era = (y >= 0 ? y : y - 399) / 400;
+        unsigned yoe = (unsigned)(y - era * 400);	   // [0, 399]
+        unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1; // [0, 365]
+        unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;	  // [0, 146096]
+        dateptr->serial = era * 146097 + (int)doe - 719468 + 25569; // +25569 adjusts the serial number to match Excel
+    '
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           date --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'print_date'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --upvalues  _ENV*
+    --[local symbols] date, d, m, y, j
+      local
+      --[symbols]
+        d --local symbol integer 
+      local
+      --[symbols]
+        m --local symbol integer 
+      local
+      --[symbols]
+        y --local symbol integer 
+      local
+      --[symbols]
+        j --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        d --local symbol integer 
+       ,
+        m --local symbol integer 
+       ,
+        y --local symbol integer 
+       ,
+        j --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            d = dateptr->d;
+            m = dateptr->m;
+            y = dateptr->y;
+            j = dateptr->serial;
+    '
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            print --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  d --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  m --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  y --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  j --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_day'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->d;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_month'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->m;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_year'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->y;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_serial'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->serial;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+  local
+  --[symbols]
+    d --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       DateFunctions --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[field selector start] any
+        .
+         'make_date'
+       --[field selector end]
+       --[function call start] any
+        (
+          1
+         ,
+          1
+         ,
+          1900
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        DateFunctions --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[field selector start] any
+         .
+          'print_date'
+        --[field selector end]
+        --[function call start] any
+         (
+           --[suffixed expr start] any
+            --[primary start] any
+              d --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1900
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_year'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_month'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_day'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            2
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_serial'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+function()
+--upvalues  _ENV*
+--[local symbols] d
+  C (
+    ) 'typedef struct {
+    unsigned char d;
+    unsigned char m;
+    short y;
+    int serial;
+} Date;
+'
+  --[expression statement start]
+   --[var list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        DateFunctions --global symbol any 
+      --[primary end]
+     --[suffixed expr end]
+   = --[var list end]
+   --[expression list start]
+     { --[table constructor start] table
+     } --[table constructor end]
+   --[expression list end]
+  --[expression statement end]
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'make_date'
+     --[field selector end]
+   =
+    function(
+      d --local symbol integer 
+     ,
+      m --local symbol integer 
+     ,
+      y --local symbol integer 
+    )
+    --[local symbols] d, m, y, date
+      local
+      --[symbols]
+        date --local symbol any 
+      --[expressions]
+        C__new( --userdata
+        )
+      C (
+        date --local symbol any 
+       ,
+        d --local symbol integer 
+       ,
+        m --local symbol integer 
+       ,
+        y --local symbol integer 
+        ) '        Date *dateptr = (Date *) date.ptr;
+        dateptr->d = (unsigned char)d;
+        dateptr->m = (unsigned char)m;
+        dateptr->y = (short)y;
+        y -= m <= 2;
+        int era = (y >= 0 ? y : y - 399) / 400;
+        unsigned yoe = (unsigned)(y - era * 400);	   // [0, 399]
+        unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1; // [0, 365]
+        unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;	  // [0, 146096]
+        dateptr->serial = era * 146097 + (int)doe - 719468 + 25569; // +25569 adjusts the serial number to match Excel
+    '
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           date --local symbol any 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'print_date'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --upvalues  _ENV*
+    --[local symbols] date, d, m, y, j
+      local
+      --[symbols]
+        d --local symbol integer 
+      local
+      --[symbols]
+        m --local symbol integer 
+      local
+      --[symbols]
+        y --local symbol integer 
+      local
+      --[symbols]
+        j --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        d --local symbol integer 
+       ,
+        m --local symbol integer 
+       ,
+        y --local symbol integer 
+       ,
+        j --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            d = dateptr->d;
+            m = dateptr->m;
+            y = dateptr->y;
+            j = dateptr->serial;
+    '
+      --[expression statement start]
+       --[expression list start]
+         --[suffixed expr start] any
+          --[primary start] any
+            print --global symbol any 
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             (
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  d --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  m --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  y --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+              ,
+               --[suffixed expr start] integer
+                --[primary start] integer
+                  j --local symbol integer 
+                --[primary end]
+               --[suffixed expr end]
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+       --[expression list end]
+      --[expression statement end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_day'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->d;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_month'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->m;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_year'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->y;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+   DateFunctions --global symbol any 
+   --[selectors]
+     --[field selector start] any
+      .
+       'get_serial'
+     --[field selector end]
+   =
+    function(
+      date --local symbol any 
+    )
+    --[local symbols] date, v
+      local
+      --[symbols]
+        v --local symbol integer 
+      C (
+        date --local symbol any 
+       ,
+        v --local symbol integer 
+        ) '            Date *dateptr = (Date *) date.ptr;
+            v = dateptr->serial;
+    '
+      return
+        --[suffixed expr start] integer
+         --[primary start] integer
+           v --local symbol integer 
+         --[primary end]
+        --[suffixed expr end]
+    end
+  local
+  --[symbols]
+    d --local symbol any 
+  --[expressions]
+    --[suffixed expr start] any
+     --[primary start] any
+       DateFunctions --global symbol any 
+     --[primary end]
+     --[suffix list start]
+       --[field selector start] any
+        .
+         'make_date'
+       --[field selector end]
+       --[function call start] any
+        (
+          1
+         ,
+          1
+         ,
+          1900
+        )
+       --[function call end]
+     --[suffix list end]
+    --[suffixed expr end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        DateFunctions --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[field selector start] any
+         .
+          'print_date'
+        --[field selector end]
+        --[function call start] any
+         (
+           --[suffixed expr start] any
+            --[primary start] any
+              d --local symbol any 
+            --[primary end]
+           --[suffixed expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1900
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_year'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_month'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            1
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_day'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+  --[expression statement start]
+   --[expression list start]
+     --[suffixed expr start] any
+      --[primary start] any
+        assert --global symbol any 
+      --[primary end]
+      --[suffix list start]
+        --[function call start] any
+         (
+           --[binary expr start] any
+            2
+           ==
+            --[suffixed expr start] any
+             --[primary start] any
+               DateFunctions --global symbol any 
+             --[primary end]
+             --[suffix list start]
+               --[field selector start] any
+                .
+                 'get_serial'
+               --[field selector end]
+               --[function call start] any
+                (
+                  --[suffixed expr start] any
+                   --[primary start] any
+                     d --local symbol any 
+                   --[primary end]
+                  --[suffixed expr end]
+                )
+               --[function call end]
+             --[suffix list end]
+            --[suffixed expr end]
+           --[binary expr end]
+         )
+        --[function call end]
+      --[suffix list end]
+     --[suffixed expr end]
+   --[expression list end]
+  --[expression statement end]
+end
+define Proc%1
+L0 (entry)
+	NEWTABLE {T(1)}
+	STOREGLOBAL {T(1)} {Upval(_ENV), 'DateFunctions' Ks(0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%2} {T(2)}
+	PUTsk {T(2)} {T(0), 'make_date' Ks(1)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(1)}
+	CLOSURE {Proc%3} {T(3)}
+	PUTsk {T(3)} {T(1), 'print_date' Ks(2)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}
+	CLOSURE {Proc%4} {T(4)}
+	PUTsk {T(4)} {T(2), 'get_day' Ks(3)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(3)}
+	CLOSURE {Proc%5} {T(5)}
+	PUTsk {T(5)} {T(3), 'get_month' Ks(4)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(4)}
+	CLOSURE {Proc%6} {T(6)}
+	PUTsk {T(6)} {T(4), 'get_year' Ks(5)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(5)}
+	CLOSURE {Proc%7} {T(7)}
+	PUTsk {T(7)} {T(5), 'get_serial' Ks(6)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}
+	GETsk {T(6), 'make_date' Ks(1)} {T(7)}
+	CALL {T(7), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(7..), 1 Kint(0)}
+	MOV {T(7[7..])} {local(d, 0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(7)}
+	GETsk {T(7), 'print_date' Ks(2)} {T(8)}
+	CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(8)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(9)}
+	GETsk {T(9), 'get_year' Ks(5)} {T(10)}
+	CALL {T(10), local(d, 0)} {T(10..), 1 Kint(0)}
+	EQ {1900 Kint(1), T(10..)} {T(10)}
+	MOV {T(8)} {T(11)}
+	CALL {T(11), T(10)} {T(11..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(10)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(11)}
+	GETsk {T(11), 'get_month' Ks(4)} {T(12)}
+	CALL {T(12), local(d, 0)} {T(12..), 1 Kint(0)}
+	EQ {1 Kint(0), T(12..)} {T(12)}
+	MOV {T(10)} {T(13)}
+	CALL {T(13), T(12)} {T(13..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(12)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(13)}
+	GETsk {T(13), 'get_day' Ks(3)} {T(14)}
+	CALL {T(14), local(d, 0)} {T(14..), 1 Kint(0)}
+	EQ {1 Kint(0), T(14..)} {T(14)}
+	MOV {T(12)} {T(15)}
+	CALL {T(15), T(14)} {T(15..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(14)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(15)}
+	GETsk {T(15), 'get_serial' Ks(6)} {T(16)}
+	CALL {T(16), local(d, 0)} {T(16..), 1 Kint(0)}
+	EQ {2 Kint(2), T(16..)} {T(16)}
+	MOV {T(14)} {T(17)}
+	CALL {T(17), T(16)} {T(17..), 1 Kint(0)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	TOINT {local(d, 0)}
+	TOINT {local(m, 1)}
+	TOINT {local(y, 2)}
+	C__NEW {'Date' Ks(0), 1 Kint(0)} {T(0)}
+	MOV {T(0)} {local(date, 3)}
+	C__UNSAFE {local(date, 3), local(d, 0), local(m, 1), local(y, 2)} { C code }
+	RET {local(date, 3)} {L1}
+L1 (exit)
+define Proc%3
+L0 (entry)
+	INIT {Tint(0)}
+	INIT {Tint(1)}
+	INIT {Tint(2)}
+	INIT {Tint(3)}
+	C__UNSAFE {local(date, 0), Tint(0), Tint(1), Tint(2), Tint(3)} { C code }
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}
+	CALL {T(0), Tint(0), Tint(1), Tint(2), Tint(3)} {T(0..), 1 Kint(0)}
+	RET {L1}
+L1 (exit)
+define Proc%4
+L0 (entry)
+	INIT {Tint(0)}
+	C__UNSAFE {local(date, 0), Tint(0)} { C code }
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%5
+L0 (entry)
+	INIT {Tint(0)}
+	C__UNSAFE {local(date, 0), Tint(0)} { C code }
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%6
+L0 (entry)
+	INIT {Tint(0)}
+	C__UNSAFE {local(date, 0), Tint(0)} { C code }
+	RET {Tint(0)} {L1}
+L1 (exit)
+define Proc%7
+L0 (entry)
+	INIT {Tint(0)}
+	C__UNSAFE {local(date, 0), Tint(0)} { C code }
+	RET {Tint(0)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWTABLE {T(1)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(1)} {Upval(_ENV), 'DateFunctions' Ks(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(2)}</TD></TR>
+<TR><TD>PUTsk {T(2)} {T(0), 'make_date' Ks(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(3)}</TD></TR>
+<TR><TD>PUTsk {T(3)} {T(1), 'print_date' Ks(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(4)}</TD></TR>
+<TR><TD>PUTsk {T(4)} {T(2), 'get_day' Ks(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>CLOSURE {Proc%5} {T(5)}</TD></TR>
+<TR><TD>PUTsk {T(5)} {T(3), 'get_month' Ks(4)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(4)}</TD></TR>
+<TR><TD>CLOSURE {Proc%6} {T(6)}</TD></TR>
+<TR><TD>PUTsk {T(6)} {T(4), 'get_year' Ks(5)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(5)}</TD></TR>
+<TR><TD>CLOSURE {Proc%7} {T(7)}</TD></TR>
+<TR><TD>PUTsk {T(7)} {T(5), 'get_serial' Ks(6)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}</TD></TR>
+<TR><TD>GETsk {T(6), 'make_date' Ks(1)} {T(7)}</TD></TR>
+<TR><TD>CALL {T(7), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(7..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(7[7..])} {local(d, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(7)}</TD></TR>
+<TR><TD>GETsk {T(7), 'print_date' Ks(2)} {T(8)}</TD></TR>
+<TR><TD>CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(8)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(9)}</TD></TR>
+<TR><TD>GETsk {T(9), 'get_year' Ks(5)} {T(10)}</TD></TR>
+<TR><TD>CALL {T(10), local(d, 0)} {T(10..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1900 Kint(1), T(10..)} {T(10)}</TD></TR>
+<TR><TD>MOV {T(8)} {T(11)}</TD></TR>
+<TR><TD>CALL {T(11), T(10)} {T(11..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(10)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(11)}</TD></TR>
+<TR><TD>GETsk {T(11), 'get_month' Ks(4)} {T(12)}</TD></TR>
+<TR><TD>CALL {T(12), local(d, 0)} {T(12..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1 Kint(0), T(12..)} {T(12)}</TD></TR>
+<TR><TD>MOV {T(10)} {T(13)}</TD></TR>
+<TR><TD>CALL {T(13), T(12)} {T(13..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(12)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(13)}</TD></TR>
+<TR><TD>GETsk {T(13), 'get_day' Ks(3)} {T(14)}</TD></TR>
+<TR><TD>CALL {T(14), local(d, 0)} {T(14..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1 Kint(0), T(14..)} {T(14)}</TD></TR>
+<TR><TD>MOV {T(12)} {T(15)}</TD></TR>
+<TR><TD>CALL {T(15), T(14)} {T(15..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(14)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(15)}</TD></TR>
+<TR><TD>GETsk {T(15), 'get_serial' Ks(6)} {T(16)}</TD></TR>
+<TR><TD>CALL {T(16), local(d, 0)} {T(16..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {2 Kint(2), T(16..)} {T(16)}</TD></TR>
+<TR><TD>MOV {T(14)} {T(17)}</TD></TR>
+<TR><TD>CALL {T(17), T(16)} {T(17..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOINT {local(d, 0)}</TD></TR>
+<TR><TD>TOINT {local(m, 1)}</TD></TR>
+<TR><TD>TOINT {local(y, 2)}</TD></TR>
+<TR><TD>C__NEW {'Date' Ks(0), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(date, 3)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 3), local(d, 0), local(m, 1), local(y, 2)} { C code }</TD></TR>
+<TR><TD>RET {local(date, 3)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>INIT {Tint(1)}</TD></TR>
+<TR><TD>INIT {Tint(2)}</TD></TR>
+<TR><TD>INIT {Tint(3)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0), Tint(1), Tint(2), Tint(3)} { C code }</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), Tint(1), Tint(2), Tint(3)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>TOINT {local(d, 0)}</TD></TR>
+<TR><TD>TOINT {local(m, 1)}</TD></TR>
+<TR><TD>TOINT {local(y, 2)}</TD></TR>
+<TR><TD>C__NEW {'Date' Ks(0), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(date, 3)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 3), local(d, 0), local(m, 1), local(y, 2)} { C code }</TD></TR>
+<TR><TD>RET {local(date, 3)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>INIT {Tint(1)}</TD></TR>
+<TR><TD>INIT {Tint(2)}</TD></TR>
+<TR><TD>INIT {Tint(3)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0), Tint(1), Tint(2), Tint(3)} { C code }</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), Tint(1), Tint(2), Tint(3)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc5 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc6 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc7 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>INIT {Tint(0)}</TD></TR>
+<TR><TD>C__UNSAFE {local(date, 0), Tint(0)} { C code }</TD></TR>
+<TR><TD>RET {Tint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
