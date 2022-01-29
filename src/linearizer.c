@@ -1137,14 +1137,25 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 
 static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
 {
+	Pseudo *container_pseudo = index_pseudo->index_info.container;
+	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+//	if (container_pseudo->type == PSEUDO_INDEXED)
+//		container_pseudo = indexed_load(proc, container_pseudo);
+//	if (key_pseudo->type == PSEUDO_INDEXED)
+//		key_pseudo = indexed_load(proc, key_pseudo);
+
 	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	Instruction *insn = allocate_instruction(proc, op_loadglobal, index_pseudo->index_info.line_number);
-	add_instruction_operand(proc, insn, index_pseudo->index_info.container);
-	add_instruction_operand(proc, insn, index_pseudo->index_info.key);
+
+	add_instruction_operand(proc, insn, container_pseudo);
+	add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
-	free_temp_pseudo(proc, index_pseudo->index_info.container, false);
-	free_temp_pseudo(proc, index_pseudo->index_info.key, false);
+	free_temp_pseudo(proc, container_pseudo, false);
+	free_temp_pseudo(proc, key_pseudo, false);
 	index_pseudo->index_info.used = 1;
 	return target;
 }
@@ -1155,13 +1166,22 @@ static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo)
 	assert(!index_pseudo->index_info.used);
 	if (index_pseudo->index_info.is_global)
 		return indexed_load_from_global(proc, index_pseudo);
-	int op = op_get;
+
 	ravitype_t container_type = index_pseudo->index_info.container_type;
 	ravitype_t key_type = index_pseudo->index_info.key_type;
 	ravitype_t target_type = index_pseudo->index_info.target_type;
 	unsigned line_number = index_pseudo->index_info.line_number;
 	Pseudo *container_pseudo = index_pseudo->index_info.container;
 	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+//	if (container_pseudo->type == PSEUDO_INDEXED)
+//		container_pseudo = indexed_load(proc, container_pseudo);
+//	if (key_pseudo->type == PSEUDO_INDEXED)
+//		key_pseudo = indexed_load(proc, key_pseudo);
+
+	int op = op_get;
 	switch (container_type) {
 	case RAVI_TTABLE:
 		op = op_tget;
@@ -1283,6 +1303,13 @@ static void indexed_store(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo
 	unsigned line_number = index_pseudo->index_info.line_number;
 	Pseudo *container_pseudo = index_pseudo->index_info.container;
 	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+//	if (container_pseudo->type == PSEUDO_INDEXED)
+//		container_pseudo = indexed_load(proc, container_pseudo);
+//	if (key_pseudo->type == PSEUDO_INDEXED)
+//		key_pseudo = indexed_load(proc, key_pseudo);
 
 	Instruction *insn = allocate_instruction(proc, op, line_number);
 	// Add new operand
@@ -1560,6 +1587,8 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 	{
 		line_number = line_number == 0 ? expr->line_number : line_number;
 		Pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
+		if (val_pseudo->type == PSEUDO_INDEXED)
+			val_pseudo = indexed_load(proc, val_pseudo);
 		valinfo[i].vartype = &expr->common_expr.type;
 		// To support the Lua semantics of x,y = y,x as a swap
 		// we need to copy locals to temps
@@ -1667,6 +1696,14 @@ static void linearize_expression_statement(Proc *proc, AstNode *node)
 	FOR_EACH_PTR(node->expression_stmt.var_expr_list, AstNode, var)
 	{
 		Pseudo *var_pseudo = linearize_expression(proc, var);
+
+		if (var_pseudo->type == PSEUDO_INDEXED) {
+			if (var_pseudo->index_info.container->type == PSEUDO_INDEXED)
+				var_pseudo->index_info.container = indexed_load(proc, var_pseudo->index_info.container);
+			if (var_pseudo->index_info.key->type == PSEUDO_INDEXED)
+				var_pseudo->index_info.key = indexed_load(proc, var_pseudo->index_info.key);
+		}
+
 		varinfo[i].vartype = &var->common_expr.type;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
