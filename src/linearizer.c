@@ -1060,6 +1060,21 @@ static Pseudo *create_global_index_pseudo(Proc *proc, Pseudo *container_pseudo, 
 	return index_pseudo;
 }
 
+static Pseudo *create_indexed_pseudo(Proc *proc, ravitype_t container_type,
+				     Pseudo *container_pseudo, ravitype_t key_type,
+				     Pseudo *key_pseudo, ravitype_t target_type, unsigned line_number)
+{
+	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
+	index_pseudo->index_info.line_number = line_number;
+	index_pseudo->index_info.container_type = container_type;
+	index_pseudo->index_info.key_type = key_type;
+	index_pseudo->index_info.target_type = target_type;
+	index_pseudo->index_info.container = container_pseudo;
+	index_pseudo->index_info.key = key_pseudo;
+	index_pseudo->index_info.is_global = 0;
+	return index_pseudo;
+}
+
 static Pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 {
 	LuaSymbol *sym = expr->symbol_expr.var;
@@ -1132,21 +1147,6 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	add_instruction(proc, insn);
 	//target_pseudo->insn = insn;
 	return target_pseudo;
-}
-
-static Pseudo *create_indexed_pseudo(Proc *proc, ravitype_t container_type,
-				  Pseudo *container_pseudo, ravitype_t key_type,
-				  Pseudo *key_pseudo, ravitype_t target_type, unsigned line_number)
-{
-	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
-	index_pseudo->index_info.line_number = line_number;
-	index_pseudo->index_info.container_type = container_type;
-	index_pseudo->index_info.key_type = key_type;
-	index_pseudo->index_info.target_type = target_type;
-	index_pseudo->index_info.container = container_pseudo;
-	index_pseudo->index_info.key = key_pseudo;
-	index_pseudo->index_info.is_global = 0;
-	return index_pseudo;
 }
 
 static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
@@ -1250,35 +1250,6 @@ static void instruct_indexed_store(Proc *proc, ravitype_t table_type, Pseudo *ta
 	add_instruction(proc, insn);
 }
 
-/**
- * we can have situations where
- * we don't know if an expression of global e is a read or write. We assume
- * initially it is a read (i.e. load) operation. But later on as we know
- * more it may be clear that the opcode should be a store. This function converts
- * a load opcode to a store.
- */
-static void convert_loadglobal_to_store(Proc *proc, Instruction *insn, Pseudo *value_pseudo,
-					ravitype_t value_type)
-{
-	assert(insn->opcode == op_loadglobal);
-	remove_instruction(insn->block, insn); // remove the instruction from its original block
-	insn->opcode = op_storeglobal;
-	// Remove the targets
-	Pseudo *get_target = (Pseudo *) raviX_ptrlist_delete_last((PtrList **)&insn->targets);
-	free_temp_pseudo(proc, get_target, false);
-	Pseudo *pseudo;
-	// Move the loadglobal operands to target
-	FOR_EACH_PTR(insn->operands, Pseudo, pseudo) {
-		add_instruction_target(proc, insn, pseudo);
-//		free_temp_pseudo(proc, pseudo, false);
-	}
-	END_FOR_EACH_PTR(pseudo)
-	raviX_ptrlist_remove_all((PtrList **)&insn->operands);
-	// Add new operand
-	add_instruction_operand(proc, insn, value_pseudo);
-	add_instruction(proc, insn);
-}
-
 static void indexed_store_to_global(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo,
 			  ravitype_t value_type)
 {
@@ -1287,62 +1258,6 @@ static void indexed_store_to_global(Proc *proc, Pseudo *index_pseudo, Pseudo *va
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction_target(proc, insn, index_pseudo->index_info.container);
 	add_instruction_target(proc, insn, index_pseudo->index_info.key);
-	add_instruction(proc, insn);
-}
-
-/**
- * In assignment and local statements we can have situations where
- * we don't know if an expression of type e[y] is a read or write. We assume
- * initially it is a read (i.e. load) operation. But later on as we know
- * more it may be clear that the opcode should be a store. This function converts
- * a load opcode to a store.
- */
-static void convert_indexed_load_to_store(Proc *proc, Instruction *insn, Pseudo *value_pseudo,
-					  ravitype_t value_type)
-{
-	enum opcode putop;
-	switch (insn->opcode) {
-	case op_iaget:
-	case op_iaget_ikey:
-		putop = value_type == RAVI_TNUMINT ? op_iaput_ival : op_iaput;
-		break;
-	case op_faget:
-	case op_faget_ikey:
-		putop = value_type == RAVI_TNUMFLT ? op_faput_fval : op_faput;
-		break;
-	case op_tget:
-		putop = op_tput;
-		break;
-	case op_tget_ikey:
-		putop = op_tput_ikey;
-		break;
-	case op_tget_skey:
-		putop = op_tput_skey;
-		break;
-	case op_get:
-		putop = op_put;
-		break;
-	case op_get_ikey:
-		putop = op_put_ikey;
-		break;
-	case op_get_skey:
-		putop = op_put_skey;
-		break;
-	default:
-		return;
-	}
-	remove_instruction(insn->block, insn);
-	insn->opcode = putop;
-	// Remove target
-	Pseudo *get_target = (Pseudo *) raviX_ptrlist_delete_last((PtrList **)&insn->targets);
-	free_temp_pseudo(proc, get_target, false);
-	Pseudo *pseudo;
-	// Move the get operands to put target (table, key)
-	FOR_EACH_PTR(insn->operands, Pseudo, pseudo) { add_instruction_target(proc, insn, pseudo); }
-	END_FOR_EACH_PTR(pseudo)
-	raviX_ptrlist_remove_all((PtrList **)&insn->operands);
-	// Add new operand
-	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction(proc, insn);
 }
 
