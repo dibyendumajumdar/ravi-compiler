@@ -1080,19 +1080,6 @@ static Pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 	LuaSymbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
-		/*
-		Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
-		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
-		Pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
-		Pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
-		Instruction *insn = allocate_instruction(proc, op_loadglobal, expr->line_number);
-		target->insn = insn;
-		add_instruction_operand(proc, insn, operand_env);
-		add_instruction_operand(proc, insn, operand_varname);
-		add_instruction_target(proc, insn, target);
-		add_instruction(proc, insn);
-		return target;
-		 */
 		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		Pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		Pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
@@ -1145,7 +1132,6 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target_pseudo);
 	add_instruction(proc, insn);
-	//target_pseudo->insn = insn;
 	return target_pseudo;
 }
 
@@ -1504,17 +1490,10 @@ static bool is_compatible(const VariableType *var_type, const VariableType *val_
 static void linearize_store_var(Proc *proc, const VariableType *var_type, Pseudo *var_pseudo,
 				const VariableType *val_type, Pseudo *val_pseudo, unsigned line_number)
 {
-	/*
-	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
-		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
-	} else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
-		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
-	 */
 	if (var_pseudo->type == PSEUDO_INDEXED) {
 		indexed_store(proc, var_pseudo, val_pseudo, val_type->type_code);
 	}
 	else {
-		//assert(!var_pseudo->insn);
 		assert(var_type->type_code != RAVI_TVARARGS && var_type->type_code != RAVI_TNIL);
 		if (!is_compatible(var_type, val_type)) {
 			instruct_totype(proc, val_pseudo, var_type, line_number);
