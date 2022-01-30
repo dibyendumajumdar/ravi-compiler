@@ -22,7 +22,7 @@
  ******************************************************************************/
 
 /*
-This file contains the Linearizer. The goal of the Linearizer is
+This file contains the Linearizer. The goal of the Linearizer is to
 generate a linear intermediate representation (IR) from the AST
 suitable for further analysis.
 
@@ -73,21 +73,46 @@ static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo 
 static void linearize_function(LinearizerState *linearizer);
 static Instruction *allocate_instruction(Proc *proc, enum opcode op, unsigned line_number);
 static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_local);
+static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo);
+static void indexed_store(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo,
+			  ravitype_t value_type);
 
 static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 {
 	return (AstNode*) raviX_ptrlist_nth_entry((struct PtrList *) list, i);
 }
 
-enum { MAXBIT = 4 * sizeof(uint64_t) * 8, ESIZE = sizeof(uint64_t) * 8 };
+/*
+ * A simple register assignment system that uses a bit set 256 bits long.
+ * It is not the most efficient as we don't use hard-ware intrinsics to scan for
+ * next available bit.
+ */
 
+#define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
+#define FIELD_E_SIZEOF(t, f) (sizeof(((t*)0)->f[0]))
+
+enum {
+	BITSET_SIZE = FIELD_SIZEOF(PseudoGenerator, bits),    /* total size of bits in #bytes */
+	BITSET_ESIZE = FIELD_E_SIZEOF(PseudoGenerator, bits), /* sizeof bits[0] in #bytes */
+	N_WORDS = BITSET_SIZE / BITSET_ESIZE,		      /* bits array size in #bytes */
+	ESIZE = BITSET_ESIZE * 8,			      /* bits in bits[0] */
+	MAXBIT = N_WORDS * ESIZE			      /* total bits */
+};
+
+static_assert(N_WORDS == 4, "Invalid computation of bitset size"); /* must be kept in sync with PseudoGeneraotor.bits */
+
+/* Identify the top most register allocated; this is useful when we need
+ * to ensure that the next register goes to the top of the stack
+ */
 static int top_reg(PseudoGenerator *generator)
 {
-	for (int i = 3; i >= 0; i--) {
-		if (!generator->bits[i])
+	/* start from the last element of bits */
+	for (int i = N_WORDS-1; i >= 0; i--) {
+		if (!generator->bits[i]) // no bit set
 			continue;
 		uint64_t bit = generator->bits[i];
-		int x = i * sizeof(uint64_t) * 8 - 1;
+		int x = i * ESIZE - 1; /* x is rightmost bit in bits[i] */
+		/* keep getting rid of bits until we have none left */
 		while (bit != 0) {
 			bit >>= 1;
 			x++;
@@ -108,6 +133,9 @@ static int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 	return top == reg;
 }
 
+/**
+ * Free the given register
+ */
 static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 {
 	assert(reg < MAXBIT);
@@ -116,6 +144,11 @@ static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 	generator->bits[n] &= ~(1ull << reg);
 }
 
+/**
+ * Allocate a register, if top is specified then ensure it is top of the
+ * stack else look for a free register. Not the most efficient as we
+ * don't yet use hardware intrinsics for bit scans.
+ */
 static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 {
 	unsigned reg;
@@ -123,11 +156,17 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 		int current_top = top_reg(generator);
 		reg = current_top + 1;
 	} else {
+		/* look for the first free reg */
 		reg = 0;
 		int is_set = 1;
-		for (int i = 0; is_set && i < 4; i++) {
+		for (int i = 0; is_set && i < N_WORDS; i++) {
 			uint64_t bit = generator->bits[i];
-			for (int j = 0; is_set && j < sizeof(uint64_t) * 8; j++) {
+			if (bit == ~0ull) {
+				/* all bits set? skip */
+				reg += ESIZE;
+				continue;
+			} 
+			for (int j = 0; is_set && j < ESIZE; j++) {
 				is_set = (bit & (1ull << j)) != 0;
 				if (is_set)
 					reg++;
@@ -145,7 +184,8 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
- * allocating a new one
+ * allocating a new one, if top is set then ensure that the register is
+ * top of the stack
  */
 static inline unsigned allocate_register(PseudoGenerator *generator, bool top)
 {
@@ -295,6 +335,9 @@ static const Constant *allocate_string_constant(Proc *proc, const StringObject *
 
 static inline void add_instruction_operand(Proc *proc, Instruction *insn, Pseudo *pseudo)
 {
+	if (pseudo->type == PSEUDO_INDEXED) {
+		pseudo = indexed_load(proc, pseudo);
+	}
 	raviX_ptrlist_add((PtrList **)&insn->operands, pseudo, proc->linearizer->compiler_state->allocator);
 }
 
@@ -305,6 +348,7 @@ static inline void replace_instruction_operand(Proc *proc, Instruction *insn, Ps
 
 static inline void add_instruction_target(Proc *proc, Instruction *insn, Pseudo *pseudo)
 {
+	assert(pseudo->type != PSEUDO_INDEXED);
 	raviX_ptrlist_add((PtrList **)&insn->targets, pseudo, proc->linearizer->compiler_state->allocator);
 }
 
@@ -324,17 +368,12 @@ static void free_instruction_operand_pseudos(Proc *proc, Instruction *insn)
 	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
+/* adds instruction to the current basic block */
 static inline void add_instruction(Proc *proc, Instruction *insn)
 {
 	assert(insn->block == NULL || insn->block == proc->current_bb);
 	raviX_ptrlist_add((PtrList **)&proc->current_bb->insns, insn, proc->linearizer->compiler_state->allocator);
 	insn->block = proc->current_bb;
-}
-
-static inline void remove_instruction(BasicBlock *block, Instruction *insn)
-{
-	raviX_ptrlist_remove((PtrList **)&block->insns, insn, 1);
-	insn->block = NULL;
 }
 
 Instruction *raviX_last_instruction(BasicBlock *block)
@@ -473,6 +512,14 @@ static inline Pseudo *convert_range_to_temp(Pseudo *pseudo)
 {
 	assert(pseudo->type == PSEUDO_RANGE);
 	pseudo->type = PSEUDO_TEMP_ANY;
+	return pseudo;
+}
+
+static Pseudo *allocate_indexed_pseudo(Proc *proc)
+{
+	C_MemoryAllocator *allocator = proc->linearizer->compiler_state->allocator;
+	Pseudo *pseudo = (Pseudo *) allocator->calloc(allocator->arena, 1, sizeof(Pseudo));
+	pseudo->type = PSEUDO_INDEXED;
 	return pseudo;
 }
 
@@ -706,6 +753,12 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 		add_instruction_operand(proc, insn, target);
 		free_temp_pseudo(proc, target, false); //CHECK
 		target = allocate_temp_pseudo(proc, subexpr_type, false);
+	}
+	/* unary ops set their operand in the target so we need to check here that the
+	 * operand is not in pending state.
+	 */
+	if (target->type == PSEUDO_INDEXED) {
+		target = indexed_load(proc, target);
 	}
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
@@ -984,11 +1037,7 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 		target = allocate_temp_pseudo(proc, target_type, false);
 		add_instruction_target(proc, not_insn, target);
 		add_instruction(proc, not_insn);
-		//free_temp_pseudo(proc, temp, false);
 	}
-	//free_temp_pseudo(proc, operand1, false);
-	//free_temp_pseudo(proc, operand2, false);
-
 	return target;
 }
 
@@ -1029,22 +1078,53 @@ static Pseudo *linearize_function_expr(Proc *proc, AstNode *expr)
 	return target;
 }
 
+/* Create a deferred pseudo (i.e. reg not allocated yet) for a global var access (i.e. _ENV) */
+static Pseudo *create_global_indexed_pseudo(Proc *proc, Pseudo *container_pseudo, Pseudo *key_pseudo, unsigned line_number)
+{
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+
+	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
+	index_pseudo->index_info.line_number = line_number;
+	index_pseudo->index_info.container_type = RAVI_TANY;
+	index_pseudo->index_info.key_type = RAVI_TSTRING;
+	index_pseudo->index_info.container = container_pseudo;
+	index_pseudo->index_info.key = key_pseudo;
+	index_pseudo->index_info.target_type = RAVI_TANY;
+	index_pseudo->index_info.is_global = 1;
+	return index_pseudo;
+}
+
+/* Create a deferred pseudo (i.e. reg not allocated yet) for a array/table access; we don't know at this
+ * point if it will be a load or store
+ */
+static Pseudo *create_indexed_pseudo(Proc *proc, ravitype_t container_type,
+				     Pseudo *container_pseudo, ravitype_t key_type,
+				     Pseudo *key_pseudo, ravitype_t target_type, unsigned line_number)
+{
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+
+	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
+	index_pseudo->index_info.line_number = line_number;
+	index_pseudo->index_info.container_type = container_type;
+	index_pseudo->index_info.key_type = key_type;
+	index_pseudo->index_info.target_type = target_type;
+	index_pseudo->index_info.container = container_pseudo;
+	index_pseudo->index_info.key = key_pseudo;
+	index_pseudo->index_info.is_global = 0;
+	return index_pseudo;
+}
+
 static Pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 {
 	LuaSymbol *sym = expr->symbol_expr.var;
 	if (sym->symbol_type == SYM_GLOBAL) {
 		assert(sym->variable.env);
-		Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		Pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		Pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
-		Instruction *insn = allocate_instruction(proc, op_loadglobal, expr->line_number);
-		target->insn = insn;
-		add_instruction_operand(proc, insn, operand_env);
-		add_instruction_operand(proc, insn, operand_varname);
-		add_instruction_target(proc, insn, target);
-		add_instruction(proc, insn);
-		return target;
+		return create_global_indexed_pseudo(proc, operand_env, operand_varname, expr->line_number);
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->variable.pseudo;
 	} else if (sym->symbol_type == SYM_UPVALUE) {
@@ -1093,7 +1173,82 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target_pseudo);
 	add_instruction(proc, insn);
-	target_pseudo->insn = insn;
+	return target_pseudo;
+}
+
+static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
+{
+	Pseudo *container_pseudo = index_pseudo->index_info.container;
+	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+
+	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
+	Instruction *insn = allocate_instruction(proc, op_loadglobal, index_pseudo->index_info.line_number);
+
+	add_instruction_operand(proc, insn, container_pseudo);
+	add_instruction_operand(proc, insn, key_pseudo);
+	add_instruction_target(proc, insn, target);
+	add_instruction(proc, insn);
+	free_temp_pseudo(proc, container_pseudo, false);
+	free_temp_pseudo(proc, key_pseudo, false);
+	index_pseudo->index_info.used = 1;
+	return target;
+}
+
+static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo)
+{
+	assert(index_pseudo->type == PSEUDO_INDEXED);
+	assert(!index_pseudo->index_info.used);
+	if (index_pseudo->index_info.is_global)
+		return indexed_load_from_global(proc, index_pseudo);
+
+	ravitype_t container_type = index_pseudo->index_info.container_type;
+	ravitype_t key_type = index_pseudo->index_info.key_type;
+	ravitype_t target_type = index_pseudo->index_info.target_type;
+	unsigned line_number = index_pseudo->index_info.line_number;
+	Pseudo *container_pseudo = index_pseudo->index_info.container;
+	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+
+	int op = op_get;
+	switch (container_type) {
+	case RAVI_TTABLE:
+		op = op_tget;
+		break;
+	case RAVI_TARRAYINT:
+		op = op_iaget;
+		break;
+	case RAVI_TARRAYFLT:
+		op = op_faget;
+		break;
+	default:
+		break;
+	}
+	/* Note we rely upon ordering of enums here */
+	switch (key_type) {
+	case RAVI_TNUMINT:
+		op++;
+		break;
+	case RAVI_TSTRING:
+		assert(container_type != RAVI_TARRAYINT && container_type != RAVI_TARRAYFLT);
+		op += 2;
+		break;
+	default:
+		break;
+	}
+	Pseudo *target_pseudo = allocate_temp_pseudo(proc, target_type, false);
+	Instruction *insn = allocate_instruction(proc, (enum opcode)op, line_number);
+	add_instruction_operand(proc, insn, container_pseudo);
+	add_instruction_operand(proc, insn, key_pseudo);
+	add_instruction_target(proc, insn, target_pseudo);
+	add_instruction(proc, insn);
+	free_temp_pseudo(proc, container_pseudo, false);
+	free_temp_pseudo(proc, key_pseudo, false);
+	index_pseudo->index_info.used = 1;
 	return target_pseudo;
 }
 
@@ -1101,7 +1256,6 @@ static void instruct_indexed_store(Proc *proc, ravitype_t table_type, Pseudo *ta
 				   Pseudo *index_pseudo, ravitype_t index_type, Pseudo *value_pseudo,
 				   ravitype_t value_type, unsigned line_number)
 {
-	// TODO validate the type of assignment
 	// Insert type assertions if needed
 	int op;
 	switch (table_type) {
@@ -1134,88 +1288,60 @@ static void instruct_indexed_store(Proc *proc, ravitype_t table_type, Pseudo *ta
 	add_instruction(proc, insn);
 }
 
-/**
- * we can have situations where
- * we don't know if an expression of global e is a read or write. We assume
- * initially it is a read (i.e. load) operation. But later on as we know
- * more it may be clear that the opcode should be a store. This function converts
- * a load opcode to a store.
- */
-static void convert_loadglobal_to_store(Proc *proc, Instruction *insn, Pseudo *value_pseudo,
-					ravitype_t value_type)
+static void indexed_store_to_global(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo,
+			  ravitype_t value_type)
 {
-	assert(insn->opcode == op_loadglobal);
-	remove_instruction(insn->block, insn); // remove the instruction from its original block
-	insn->opcode = op_storeglobal;
-	// Remove the targets
-	Pseudo *get_target = (Pseudo *) raviX_ptrlist_delete_last((PtrList **)&insn->targets);
-	free_temp_pseudo(proc, get_target, false);
-	Pseudo *pseudo;
-	// Move the loadglobal operands to target
-	FOR_EACH_PTR(insn->operands, Pseudo, pseudo) {
-		add_instruction_target(proc, insn, pseudo);
-//		free_temp_pseudo(proc, pseudo, false);
-	}
-	END_FOR_EACH_PTR(pseudo)
-	raviX_ptrlist_remove_all((PtrList **)&insn->operands);
-	// Add new operand
+	Instruction *insn = allocate_instruction(proc, op_storeglobal, index_pseudo->index_info.line_number);
 	add_instruction_operand(proc, insn, value_pseudo);
+	add_instruction_target(proc, insn, index_pseudo->index_info.container);
+	add_instruction_target(proc, insn, index_pseudo->index_info.key);
 	add_instruction(proc, insn);
 }
 
-/**
- * In assignment and local statements we can have situations where
- * we don't know if an expression of type e[y] is a read or write. We assume
- * initially it is a read (i.e. load) operation. But later on as we know
- * more it may be clear that the opcode should be a store. This function converts
- * a load opcode to a store.
- */
-static void convert_indexed_load_to_store(Proc *proc, Instruction *insn, Pseudo *value_pseudo,
-					  ravitype_t value_type)
+static void indexed_store(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo,
+				    ravitype_t value_type)
 {
-	enum opcode putop;
-	switch (insn->opcode) {
-	case op_iaget:
-	case op_iaget_ikey:
-		putop = value_type == RAVI_TNUMINT ? op_iaput_ival : op_iaput;
-		break;
-	case op_faget:
-	case op_faget_ikey:
-		putop = value_type == RAVI_TNUMFLT ? op_faput_fval : op_faput;
-		break;
-	case op_tget:
-		putop = op_tput;
-		break;
-	case op_tget_ikey:
-		putop = op_tput_ikey;
-		break;
-	case op_tget_skey:
-		putop = op_tput_skey;
-		break;
-	case op_get:
-		putop = op_put;
-		break;
-	case op_get_ikey:
-		putop = op_put_ikey;
-		break;
-	case op_get_skey:
-		putop = op_put_skey;
-		break;
-	default:
+	assert(index_pseudo->type == PSEUDO_INDEXED);
+	if (index_pseudo->index_info.is_global) {
+		indexed_store_to_global(proc, index_pseudo, value_pseudo, value_type);
 		return;
 	}
-	remove_instruction(insn->block, insn);
-	insn->opcode = putop;
-	// Remove target
-	Pseudo *get_target = (Pseudo *) raviX_ptrlist_delete_last((PtrList **)&insn->targets);
-	free_temp_pseudo(proc, get_target, false);
-	Pseudo *pseudo;
-	// Move the get operands to put target (table, key)
-	FOR_EACH_PTR(insn->operands, Pseudo, pseudo) { add_instruction_target(proc, insn, pseudo); }
-	END_FOR_EACH_PTR(pseudo)
-	raviX_ptrlist_remove_all((PtrList **)&insn->operands);
-	// Add new operand
+	int op;
+	ravitype_t table_type = index_pseudo->index_info.container_type;
+	ravitype_t index_type = index_pseudo->index_info.key_type;
+	switch (table_type) {
+	case RAVI_TARRAYINT:
+		op = op_iaput;
+		if (value_type == RAVI_TNUMINT) {
+			op = op_iaput_ival;
+		}
+		break;
+	case RAVI_TARRAYFLT:
+		op = op_faput;
+		if (value_type == RAVI_TNUMFLT) {
+			op = op_faput_fval;
+		}
+		break;
+	default:
+		op = table_type == RAVI_TTABLE ? op_tput : op_put;
+		if (index_type == RAVI_TNUMINT) {
+			op += 1;
+		} else if (index_type == RAVI_TSTRING) {
+			op += 2;
+		}
+		break;
+	}
+	unsigned line_number = index_pseudo->index_info.line_number;
+	Pseudo *container_pseudo = index_pseudo->index_info.container;
+	Pseudo *key_pseudo = index_pseudo->index_info.key;
+
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
+
+	Instruction *insn = allocate_instruction(proc, op, line_number);
 	add_instruction_operand(proc, insn, value_pseudo);
+	add_instruction_target(proc, insn, container_pseudo);
+	add_instruction_target(proc, insn, key_pseudo);
 	add_instruction(proc, insn);
 }
 
@@ -1305,10 +1431,14 @@ static Pseudo *linearize_suffixedexpr(Proc *proc, AstNode *node)
 		Pseudo *next;
 		if (prev_pseudo->type == PSEUDO_RANGE)
 			convert_range_to_temp(prev_pseudo);
+		else if (prev_pseudo->type == PSEUDO_INDEXED)
+			prev_pseudo = indexed_load(proc, prev_pseudo);
 		if (this_node->type == EXPR_Y_INDEX || this_node->type == EXPR_FIELD_SELECTOR) {
 			Pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
-			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
+			if (key_pseudo->type == PSEUDO_INDEXED)
+				key_pseudo = indexed_load(proc, key_pseudo);
+			next = create_indexed_pseudo(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
 						     key_pseudo, this_node->common_expr.type.type_code, node->line_number);
 		} else if (this_node->type == EXPR_FUNCTION_CALL) {
 			next = linearize_function_call_expression(proc, this_node, prev_node, prev_pseudo);
@@ -1358,7 +1488,6 @@ static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 
-	/*TODO process constructor elements */
 	AstNode *ia;
 	int i = 1;
 	FOR_EACH_PTR(expr->table_expr.expr_list, AstNode, ia)
@@ -1413,12 +1542,10 @@ static bool is_compatible(const VariableType *var_type, const VariableType *val_
 static void linearize_store_var(Proc *proc, const VariableType *var_type, Pseudo *var_pseudo,
 				const VariableType *val_type, Pseudo *val_pseudo, unsigned line_number)
 {
-	if (var_pseudo->insn && var_pseudo->insn->opcode >= op_get && var_pseudo->insn->opcode <= op_faget_ikey) {
-		convert_indexed_load_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
-	} else if (var_pseudo->insn && var_pseudo->insn->opcode == op_loadglobal) {
-		convert_loadglobal_to_store(proc, var_pseudo->insn, val_pseudo, val_type->type_code);
-	} else {
-		assert(!var_pseudo->insn);
+	if (var_pseudo->type == PSEUDO_INDEXED) {
+		indexed_store(proc, var_pseudo, val_pseudo, val_type->type_code);
+	}
+	else {
 		assert(var_type->type_code != RAVI_TVARARGS && var_type->type_code != RAVI_TNIL);
 		if (!is_compatible(var_type, val_type)) {
 			instruct_totype(proc, val_pseudo, var_type, line_number);
@@ -1485,6 +1612,8 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 	{
 		line_number = line_number == 0 ? expr->line_number : line_number;
 		Pseudo *val_pseudo = last_val_pseudo = linearize_expression(proc, expr);
+		if (val_pseudo->type == PSEUDO_INDEXED)
+			val_pseudo = indexed_load(proc, val_pseudo);
 		valinfo[i].vartype = &expr->common_expr.type;
 		// To support the Lua semantics of x,y = y,x as a swap
 		// we need to copy locals to temps
@@ -1592,6 +1721,17 @@ static void linearize_expression_statement(Proc *proc, AstNode *node)
 	FOR_EACH_PTR(node->expression_stmt.var_expr_list, AstNode, var)
 	{
 		Pseudo *var_pseudo = linearize_expression(proc, var);
+
+		// See test case https://github.com/dibyendumajumdar/ravi/blob/master/tests/comptests/inputs/34_assign.lua
+		// We need to ensure that any pending index access in the LHS side is resolved
+		// before we evaluate the RHS side
+		if (var_pseudo->type == PSEUDO_INDEXED) {
+			if (var_pseudo->index_info.container->type == PSEUDO_INDEXED)
+				var_pseudo->index_info.container = indexed_load(proc, var_pseudo->index_info.container);
+			if (var_pseudo->index_info.key->type == PSEUDO_INDEXED)
+				var_pseudo->index_info.key = indexed_load(proc, var_pseudo->index_info.key);
+		}
+
 		varinfo[i].vartype = &var->common_expr.type;
 		varinfo[i].pseudo = var_pseudo;
 		i++;
@@ -1698,6 +1838,9 @@ static void linearize_expr_list(Proc *proc, AstNodeList *expr_list, Instruction 
 		Pseudo *pseudo = linearize_expression(proc, expr);
 		if (ne != 0 && pseudo->type == PSEUDO_RANGE) {
 			convert_range_to_temp(pseudo); // Only accept one result unless it is the last expr
+		}
+		else if (pseudo->type == PSEUDO_INDEXED) {
+			pseudo = indexed_load(proc, pseudo);
 		}
 		raviX_ptrlist_add((PtrList **)pseudo_list, pseudo, proc->linearizer->compiler_state->allocator);
 	}
@@ -2447,10 +2590,12 @@ static void linearize_function_statement(Proc *proc, AstNode *node)
 	FOR_EACH_PTR(node->function_stmt.selectors, AstNode, this_node)
 	{
 		Pseudo *next;
+		if (prev_pseudo->type == PSEUDO_INDEXED)
+			prev_pseudo = indexed_load(proc, prev_pseudo);
 		if (this_node->type == EXPR_FIELD_SELECTOR) {
 			Pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
-			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
+			next = create_indexed_pseudo(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
 						     key_pseudo, this_node->common_expr.type.type_code, node->line_number);
 			free_temp_pseudo(proc, key_pseudo, 0);
 		} else {
@@ -2466,11 +2611,13 @@ static void linearize_function_statement(Proc *proc, AstNode *node)
 	// then we could have just handled it above rather than as a special case
 	if (node->function_stmt.method_name) {
 		this_node = node->function_stmt.method_name;
+		if (prev_pseudo->type == PSEUDO_INDEXED)
+			prev_pseudo = indexed_load(proc, prev_pseudo);
 		if (this_node->type == EXPR_FIELD_SELECTOR) {
 			Pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
 			prev_pseudo =
-			    instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
+			    create_indexed_pseudo(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
 						  key_pseudo, this_node->common_expr.type.type_code, node->line_number);
 		} else {
 			handle_error(proc->linearizer->compiler_state,
@@ -2766,6 +2913,11 @@ void raviX_output_pseudo(const Pseudo *pseudo, TextBuffer *mb)
 	}
 	case PSEUDO_RANGE: {
 		raviX_buffer_add_fstring(mb, "T(%d..)", pseudo->regnum);
+		break;
+	}
+	case PSEUDO_INDEXED: {
+		fprintf(stderr, mb->buf);
+		assert(false);
 		break;
 	}
 	}
