@@ -1047,12 +1047,11 @@ static Pseudo *linearize_function_expr(Proc *proc, AstNode *expr)
 	return target;
 }
 
-static Pseudo *create_global_index_pseudo(Proc *proc, Pseudo *container_pseudo, Pseudo *key_pseudo, unsigned line_number)
+/* Create a deferred pseudo (i.e. reg not allocated yet) for a global var access (i.e. _ENV) */
+static Pseudo *create_global_indexed_pseudo(Proc *proc, Pseudo *container_pseudo, Pseudo *key_pseudo, unsigned line_number)
 {
-	if (container_pseudo->type == PSEUDO_INDEXED || key_pseudo->type == PSEUDO_INDEXED) {
-		assert(container_pseudo->type != PSEUDO_INDEXED);
-		assert(key_pseudo->type != PSEUDO_INDEXED);
-	}
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
 
 	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
 	index_pseudo->index_info.line_number = line_number;
@@ -1065,14 +1064,15 @@ static Pseudo *create_global_index_pseudo(Proc *proc, Pseudo *container_pseudo, 
 	return index_pseudo;
 }
 
+/* Create a deferred pseudo (i.e. reg not allocated yet) for a array/table access; we don't know at this
+ * point if it will be a load or store
+ */
 static Pseudo *create_indexed_pseudo(Proc *proc, ravitype_t container_type,
 				     Pseudo *container_pseudo, ravitype_t key_type,
 				     Pseudo *key_pseudo, ravitype_t target_type, unsigned line_number)
 {
-	if (container_pseudo->type == PSEUDO_INDEXED || key_pseudo->type == PSEUDO_INDEXED) {
-		assert(container_pseudo->type != PSEUDO_INDEXED);
-		assert(key_pseudo->type != PSEUDO_INDEXED);
-	}
+	assert(container_pseudo->type != PSEUDO_INDEXED);
+	assert(key_pseudo->type != PSEUDO_INDEXED);
 
 	Pseudo *index_pseudo = allocate_indexed_pseudo(proc);
 	index_pseudo->index_info.line_number = line_number;
@@ -1093,7 +1093,7 @@ static Pseudo *linearize_symbol_expression(Proc *proc, AstNode *expr)
 		const Constant *constant = allocate_string_constant(proc, sym->variable.var_name);
 		Pseudo *operand_varname = allocate_constant_pseudo(proc, constant);
 		Pseudo* operand_env = allocate_symbol_pseudo(proc, sym->variable.env, 0); // no register
-		return create_global_index_pseudo(proc, operand_env, operand_varname, expr->line_number);
+		return create_global_indexed_pseudo(proc, operand_env, operand_varname, expr->line_number);
 	} else if (sym->symbol_type == SYM_LOCAL) {
 		return sym->variable.pseudo;
 	} else if (sym->symbol_type == SYM_UPVALUE) {
@@ -1152,10 +1152,6 @@ static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
 
 	assert(container_pseudo->type != PSEUDO_INDEXED);
 	assert(key_pseudo->type != PSEUDO_INDEXED);
-//	if (container_pseudo->type == PSEUDO_INDEXED)
-//		container_pseudo = indexed_load(proc, container_pseudo);
-//	if (key_pseudo->type == PSEUDO_INDEXED)
-//		key_pseudo = indexed_load(proc, key_pseudo);
 
 	Pseudo *target = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	Instruction *insn = allocate_instruction(proc, op_loadglobal, index_pseudo->index_info.line_number);
@@ -1186,10 +1182,6 @@ static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo)
 
 	assert(container_pseudo->type != PSEUDO_INDEXED);
 	assert(key_pseudo->type != PSEUDO_INDEXED);
-//	if (container_pseudo->type == PSEUDO_INDEXED)
-//		container_pseudo = indexed_load(proc, container_pseudo);
-//	if (key_pseudo->type == PSEUDO_INDEXED)
-//		key_pseudo = indexed_load(proc, key_pseudo);
 
 	int op = op_get;
 	switch (container_type) {
@@ -1233,7 +1225,6 @@ static void instruct_indexed_store(Proc *proc, ravitype_t table_type, Pseudo *ta
 				   Pseudo *index_pseudo, ravitype_t index_type, Pseudo *value_pseudo,
 				   ravitype_t value_type, unsigned line_number)
 {
-	// TODO validate the type of assignment
 	// Insert type assertions if needed
 	int op;
 	switch (table_type) {
@@ -1270,7 +1261,6 @@ static void indexed_store_to_global(Proc *proc, Pseudo *index_pseudo, Pseudo *va
 			  ravitype_t value_type)
 {
 	Instruction *insn = allocate_instruction(proc, op_storeglobal, index_pseudo->index_info.line_number);
-	// Add new operand
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction_target(proc, insn, index_pseudo->index_info.container);
 	add_instruction_target(proc, insn, index_pseudo->index_info.key);
@@ -1316,13 +1306,8 @@ static void indexed_store(Proc *proc, Pseudo *index_pseudo, Pseudo *value_pseudo
 
 	assert(container_pseudo->type != PSEUDO_INDEXED);
 	assert(key_pseudo->type != PSEUDO_INDEXED);
-//	if (container_pseudo->type == PSEUDO_INDEXED)
-//		container_pseudo = indexed_load(proc, container_pseudo);
-//	if (key_pseudo->type == PSEUDO_INDEXED)
-//		key_pseudo = indexed_load(proc, key_pseudo);
 
 	Instruction *insn = allocate_instruction(proc, op, line_number);
-	// Add new operand
 	add_instruction_operand(proc, insn, value_pseudo);
 	add_instruction_target(proc, insn, container_pseudo);
 	add_instruction_target(proc, insn, key_pseudo);
@@ -1420,8 +1405,6 @@ static Pseudo *linearize_suffixedexpr(Proc *proc, AstNode *node)
 		if (this_node->type == EXPR_Y_INDEX || this_node->type == EXPR_FIELD_SELECTOR) {
 			Pseudo *key_pseudo = linearize_expression(proc, this_node->index_expr.expr);
 			ravitype_t key_type = this_node->index_expr.expr->common_expr.type.type_code;
-//			next = instruct_indexed_load(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
-//						     key_pseudo, this_node->common_expr.type.type_code, node->line_number);
 			if (key_pseudo->type == PSEUDO_INDEXED)
 				key_pseudo = indexed_load(proc, key_pseudo);
 			next = create_indexed_pseudo(proc, prev_node->common_expr.type.type_code, prev_pseudo, key_type,
@@ -1709,6 +1692,9 @@ static void linearize_expression_statement(Proc *proc, AstNode *node)
 	{
 		Pseudo *var_pseudo = linearize_expression(proc, var);
 
+		// See test case https://github.com/dibyendumajumdar/ravi/blob/master/tests/comptests/inputs/34_assign.lua
+		// We need to ensure that any pending index access in the LHS side is resolved
+		// before we evaluate the RHS side
 		if (var_pseudo->type == PSEUDO_INDEXED) {
 			if (var_pseudo->index_info.container->type == PSEUDO_INDEXED)
 				var_pseudo->index_info.container = indexed_load(proc, var_pseudo->index_info.container);
