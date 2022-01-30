@@ -203,22 +203,39 @@ static int test_bitset(void)
 	return !status;
 }
 
+/* TODO the test below duplicates code from linearizer */
+
 typedef struct PseudoGenerator {
 	uint64_t bits[4]; /* bitset of registers */
 	unsigned max_reg;
 } PseudoGenerator;
+static inline unsigned raviX_max_reg(PseudoGenerator *generator) { return generator->max_reg; }
+
+#define FIELD_SIZEOF(t, f) (sizeof(((t *)0)->f))
+#define FIELD_E_SIZEOF(t, f) (sizeof(((t *)0)->f[0]))
+
 enum {
-	MAXBIT = 4*sizeof(uint64_t)*8,
-	ESIZE = sizeof(uint64_t)*8
+	BITSET_SIZE = FIELD_SIZEOF(PseudoGenerator, bits),    /* total size of bits in #bytes */
+	BITSET_ESIZE = FIELD_E_SIZEOF(PseudoGenerator, bits), /* sizeof bits[0] in #bytes */
+	N_WORDS = BITSET_SIZE / BITSET_ESIZE,		      /* bits array size in #bytes */
+	ESIZE = BITSET_ESIZE * 8,			      /* bits in bits[0] */
+	MAXBIT = N_WORDS * ESIZE			      /* total bits */
 };
 
-static int top_reg( PseudoGenerator *generator )
+static_assert(N_WORDS == 4, "Invalid computation of bitset size"); /* must be kept in sync with PseudoGeneraotor.bits */
+
+/* Identify the top most register allocated; this is useful when we need
+ * to ensure that the next register goes to the top of the stack
+ */
+static int top_reg(PseudoGenerator *generator)
 {
-	for (int i = 3; i >= 0; i--) {
-		if (!generator->bits[i])
+	/* start from the last element of bits */
+	for (int i = N_WORDS - 1; i >= 0; i--) {
+		if (!generator->bits[i]) // no bit set
 			continue;
 		uint64_t bit = generator->bits[i];
-		int x = i*sizeof(uint64_t)*8-1;
+		int x = i * ESIZE - 1; /* x is rightmost bit in bits[i] */
+		/* keep getting rid of bits until we have none left */
 		while (bit != 0) {
 			bit >>= 1;
 			x++;
@@ -226,11 +243,6 @@ static int top_reg( PseudoGenerator *generator )
 		return x;
 	}
 	return -1;
-}
-
-static unsigned raviX_max_reg(PseudoGenerator *generator)
-{
-	return generator->max_reg;
 }
 
 /**
@@ -244,14 +256,22 @@ static int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 	return top == reg;
 }
 
+/**
+ * Free the given register
+ */
 static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 {
-	assert ( reg < MAXBIT );
+	assert(reg < MAXBIT);
 	unsigned n = reg / ESIZE;
 	reg = reg % ESIZE;
 	generator->bits[n] &= ~(1ull << reg);
 }
 
+/**
+ * Allocate a register, if top is specified then ensure it is top of the
+ * stack else look for a free register. Not the most efficient as we
+ * don't yet use hardware intrinsics for bit scans.
+ */
 static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 {
 	unsigned reg;
@@ -259,11 +279,17 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 		int current_top = top_reg(generator);
 		reg = current_top + 1;
 	} else {
+		/* look for the first free reg */
 		reg = 0;
 		int is_set = 1;
-		for (int i = 0; is_set && i < 4; i++) {
+		for (int i = 0; is_set && i < N_WORDS; i++) {
 			uint64_t bit = generator->bits[i];
-			for (int j = 0; is_set && j < sizeof(uint64_t) * 8; j++) {
+			if (bit == ~0ull) {
+				/* all bits set? skip */ 
+				reg += ESIZE;
+				continue;
+			} 
+			for (int j = 0; is_set && j < ESIZE; j++) {
 				is_set = (bit & (1ull << j)) != 0;
 				if (is_set)
 					reg++;
@@ -278,23 +304,28 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 		generator->max_reg += 1;
 	return reg;
 }
-int main(int argc, const char *argv[])
+
+static int test_pseudo_reg() 
 {
 	PseudoGenerator generator = {0};
+	/* as we keep allocating top reg is updated */
 	for (int i = 0; i < 255; i++) {
 		unsigned max_reg = raviX_max_reg(&generator);
 		if (i != max_reg)
-		assert(max_reg == i);
+			assert(max_reg == i);
 		unsigned reg = pseudo_gen_alloc(&generator, false);
 		if (top_reg(&generator) != reg)
 			assert(pseudo_gen_is_top(&generator, reg));
 	}
 
+	/* freeing some inbetween reg doesn't affect top reg */
 	pseudo_gen_free(&generator, 240);
 	assert(raviX_max_reg(&generator) == 255);
+	/* next alloc picks free reg */
 	unsigned reg = pseudo_gen_alloc(&generator, false);
 	assert(reg == 240);
-	
+
+	/* repeat test for free and alloc, no change to top reg */
 	for (int i = 0; i < 3; i++) {
 		pseudo_gen_free(&generator, 63);
 		pseudo_gen_free(&generator, 64);
@@ -305,6 +336,7 @@ int main(int argc, const char *argv[])
 		assert(reg == 64);
 	}
 
+	/* reset and alloc regs upto 99 */
 	generator = (PseudoGenerator){0};
 	for (int i = 0; i < 100; i++) {
 		unsigned max_reg = raviX_max_reg(&generator);
@@ -314,19 +346,27 @@ int main(int argc, const char *argv[])
 		assert(pseudo_gen_is_top(&generator, reg));
 	}
 
-
 	assert(pseudo_gen_is_top(&generator, 99));
+	/* no free reg so top will be bumped */
 	reg = pseudo_gen_alloc(&generator, true);
 	assert(reg == 100);
 	pseudo_gen_free(&generator, reg);
+	/* 100 free now */
 	reg = pseudo_gen_alloc(&generator, true);
 	assert(reg == 100);
+	/* none free so next is 101 */
 	reg = pseudo_gen_alloc(&generator, true);
 	assert(reg == 101);
+	fprintf(stderr, "PseudoGenerator OK\n");
+	return 0;
+}
 
+int main(int argc, const char *argv[])
+{	
 	int rc = test_stringset();
 	rc += test_memalloc();
 	rc += test_bitset();
+	rc += test_pseudo_reg();
 	if (rc == 0)
 		printf("Ok\n");
 	else

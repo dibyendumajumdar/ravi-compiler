@@ -22,7 +22,7 @@
  ******************************************************************************/
 
 /*
-This file contains the Linearizer. The goal of the Linearizer is
+This file contains the Linearizer. The goal of the Linearizer is to
 generate a linear intermediate representation (IR) from the AST
 suitable for further analysis.
 
@@ -82,15 +82,37 @@ static AstNode* astlist_get(AstNodeList *list, unsigned int i)
 	return (AstNode*) raviX_ptrlist_nth_entry((struct PtrList *) list, i);
 }
 
-enum { MAXBIT = 4 * sizeof(uint64_t) * 8, ESIZE = sizeof(uint64_t) * 8 };
+/*
+ * A simple register assignment system that uses a bit set 256 bits long.
+ * It is not the most efficient as we don't use hard-ware intrinsics to scan for
+ * next available bit.
+ */
 
+#define FIELD_SIZEOF(t, f) (sizeof(((t*)0)->f))
+#define FIELD_E_SIZEOF(t, f) (sizeof(((t*)0)->f[0]))
+
+enum {
+	BITSET_SIZE = FIELD_SIZEOF(PseudoGenerator, bits),    /* total size of bits in #bytes */
+	BITSET_ESIZE = FIELD_E_SIZEOF(PseudoGenerator, bits), /* sizeof bits[0] in #bytes */
+	N_WORDS = BITSET_SIZE / BITSET_ESIZE,		      /* bits array size in #bytes */
+	ESIZE = BITSET_ESIZE * 8,			      /* bits in bits[0] */
+	MAXBIT = N_WORDS * ESIZE			      /* total bits */
+};
+
+static_assert(N_WORDS == 4, "Invalid computation of bitset size"); /* must be kept in sync with PseudoGeneraotor.bits */
+
+/* Identify the top most register allocated; this is useful when we need
+ * to ensure that the next register goes to the top of the stack
+ */
 static int top_reg(PseudoGenerator *generator)
 {
-	for (int i = 3; i >= 0; i--) {
-		if (!generator->bits[i])
+	/* start from the last element of bits */
+	for (int i = N_WORDS-1; i >= 0; i--) {
+		if (!generator->bits[i]) // no bit set
 			continue;
 		uint64_t bit = generator->bits[i];
-		int x = i * sizeof(uint64_t) * 8 - 1;
+		int x = i * ESIZE - 1; /* x is rightmost bit in bits[i] */
+		/* keep getting rid of bits until we have none left */
 		while (bit != 0) {
 			bit >>= 1;
 			x++;
@@ -111,6 +133,9 @@ static int pseudo_gen_is_top(PseudoGenerator *generator, unsigned reg)
 	return top == reg;
 }
 
+/**
+ * Free the given register
+ */
 static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 {
 	assert(reg < MAXBIT);
@@ -119,6 +144,11 @@ static void pseudo_gen_free(PseudoGenerator *generator, unsigned reg)
 	generator->bits[n] &= ~(1ull << reg);
 }
 
+/**
+ * Allocate a register, if top is specified then ensure it is top of the
+ * stack else look for a free register. Not the most efficient as we
+ * don't yet use hardware intrinsics for bit scans.
+ */
 static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 {
 	unsigned reg;
@@ -126,11 +156,17 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 		int current_top = top_reg(generator);
 		reg = current_top + 1;
 	} else {
+		/* look for the first free reg */
 		reg = 0;
 		int is_set = 1;
-		for (int i = 0; is_set && i < 4; i++) {
+		for (int i = 0; is_set && i < N_WORDS; i++) {
 			uint64_t bit = generator->bits[i];
-			for (int j = 0; is_set && j < sizeof(uint64_t) * 8; j++) {
+			if (bit == ~0ull) {
+				/* all bits set? skip */
+				reg += ESIZE;
+				continue;
+			} 
+			for (int j = 0; is_set && j < ESIZE; j++) {
 				is_set = (bit & (1ull << j)) != 0;
 				if (is_set)
 					reg++;
