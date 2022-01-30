@@ -184,7 +184,8 @@ static unsigned pseudo_gen_alloc(PseudoGenerator *generator, bool top)
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
- * allocating a new one
+ * allocating a new one, if top is set then ensure that the register is
+ * top of the stack
  */
 static inline unsigned allocate_register(PseudoGenerator *generator, bool top)
 {
@@ -367,17 +368,12 @@ static void free_instruction_operand_pseudos(Proc *proc, Instruction *insn)
 	END_FOR_EACH_PTR_REVERSE(operand)
 }
 
+/* adds instruction to the current basic block */
 static inline void add_instruction(Proc *proc, Instruction *insn)
 {
 	assert(insn->block == NULL || insn->block == proc->current_bb);
 	raviX_ptrlist_add((PtrList **)&proc->current_bb->insns, insn, proc->linearizer->compiler_state->allocator);
 	insn->block = proc->current_bb;
-}
-
-static inline void remove_instruction(BasicBlock *block, Instruction *insn)
-{
-	raviX_ptrlist_remove((PtrList **)&block->insns, insn, 1);
-	insn->block = NULL;
 }
 
 Instruction *raviX_last_instruction(BasicBlock *block)
@@ -758,6 +754,9 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 		free_temp_pseudo(proc, target, false); //CHECK
 		target = allocate_temp_pseudo(proc, subexpr_type, false);
 	}
+	/* unary ops set their operand in the target so we need to check here that the
+	 * operand is not in pending state.
+	 */
 	if (target->type == PSEUDO_INDEXED) {
 		target = indexed_load(proc, target);
 	}
@@ -1038,11 +1037,7 @@ static Pseudo *linearize_binary_operator(Proc *proc, AstNode *node)
 		target = allocate_temp_pseudo(proc, target_type, false);
 		add_instruction_target(proc, not_insn, target);
 		add_instruction(proc, not_insn);
-		//free_temp_pseudo(proc, temp, false);
 	}
-	//free_temp_pseudo(proc, operand1, false);
-	//free_temp_pseudo(proc, operand2, false);
-
 	return target;
 }
 
@@ -1493,7 +1488,6 @@ static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
 	add_instruction_target(proc, insn, target);
 	add_instruction(proc, insn);
 
-	/*TODO process constructor elements */
 	AstNode *ia;
 	int i = 1;
 	FOR_EACH_PTR(expr->table_expr.expr_list, AstNode, ia)
