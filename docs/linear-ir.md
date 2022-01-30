@@ -31,6 +31,9 @@ uniformly represented in an instruction. Following are the possible `pseudo` typ
 	<dt>PSEUDO_RANGE</dt><dd>Represents a range of registers from a certain starting register on Lua stack relative to 'base'</dd>
 	<dt>PSEUDO_RANGE_SELECT</dt><dd>Picks a specified register from a range, resolves to register on Lua stack, relative to 'base'</dd>
 	<dt>PSEUDO_LUASTACK</dt><dd>Refers to Lua stack position, relative to <code>ci->func</code> rather than <code>base</code>, used by backend for copying results to calling function. Will never be emitted in the IR. This special pseudo type is needed because Lua puts variable args between <code>ci->func</code> and <code>base</code>.</dd>
+	<dt>PSEUDO_INDEXED</dt><dd>Represents an indexed value such as table access or array access where the actual operation to be performed is not yet
+	known, i.e. whether it is get or put operation. Such pseudos should all disappear by the time IR is fully generated, as these are replaced by load and
+	store operations.</dd>
 </dl>
 
 A compiled function is laid out as follows:
