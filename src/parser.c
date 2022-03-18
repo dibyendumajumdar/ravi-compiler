@@ -1540,6 +1540,21 @@ static void limit_function_call_results(ParserState *parser, int num_lhs, AstNod
 	}
 }
 
+/**
+ * Marks locals that have an initializer with literal value
+ */
+static void detect_constant_assignments(LocalStatement *local_statement) {
+	int maxele = min(raviX_ptrlist_size(local_statement->var_list), raviX_ptrlist_size(local_statement->expr_list));
+	for (int i = 0; i < maxele; i++) {
+		LuaSymbol *symbol = (LuaSymbol *) raviX_ptrlist_nth_entry((PtrList *)local_statement->var_list, i);
+		AstNode *expr = (AstNode *) raviX_ptrlist_nth_entry((AstNode *)local_statement->expr_list, i);
+		if (expr->type == EXPR_LITERAL) {
+			assert(symbol->symbol_type == SYM_LOCAL);
+			symbol->variable.literal_initializer = 1;
+		}
+	}
+}
+
 static AstNode *parse_local_statement(ParserState *parser)
 {
 	LexerState *ls = parser->ls;
@@ -1562,7 +1577,9 @@ static AstNode *parse_local_statement(ParserState *parser)
 		/* nexps = 0; */
 		;
 	}
+
 	limit_function_call_results(parser, nvars, node->local_stmt.expr_list);
+	detect_constant_assignments(&node->local_stmt);
 	/* local symbols are only added to scope at the end of the local statement */
 	LuaSymbol *sym = NULL;
 	FOR_EACH_PTR(node->local_stmt.var_list, LuaSymbol, sym) { add_local_symbol_to_current_scope(parser, sym); }

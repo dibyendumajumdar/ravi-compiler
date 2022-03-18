@@ -184,8 +184,10 @@ struct LuaVariableSymbol {
 	const StringObject *var_name; /* name of the variable */
 	Scope *block; /* NULL if global symbol, as globals are never added to a scope */
 	LuaSymbol *env; /* Only applicable for global symbols - this should point to _ENV */
-	unsigned escaped: 1, /* Has one or more up-value references */
-		function_parameter: 1; /* Is a function parameter */
+	unsigned escaped : 1,	     /* Has one or more up-value references */
+	    function_parameter : 1,  /* Is a function parameter */
+	    literal_initializer : 1, /* Was initialized with literal */
+	    modified : 1;	     /*There is an update to the variable post initialization */
 	Pseudo *pseudo;	   /* backend data for the symbol */
 };
 struct LuaLabelSymbol {
