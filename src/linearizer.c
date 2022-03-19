@@ -69,7 +69,7 @@ static void start_scope(LinearizerState *linearizer, Proc *proc, Scope *scope);
 static void end_scope(LinearizerState *linearizer, Proc *proc, unsigned line_number);
 static void instruct_br(Proc *proc, Pseudo *pseudo, unsigned line_number);
 static bool is_block_terminated(BasicBlock *block);
-static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo *src, unsigned line_number);
+static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo *src, unsigned line_number, bool is_initializer);
 static void linearize_function(LinearizerState *linearizer);
 static Instruction *allocate_instruction(Proc *proc, enum opcode op, unsigned line_number);
 static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_local);
@@ -774,7 +774,7 @@ static Pseudo *linearize_unary_operator(Proc *proc, AstNode *node)
 	return target;
 }
 
-static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo *src, unsigned line_number)
+static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo *src, unsigned line_number, bool is_intializer)
 {
 	Instruction *mov = allocate_instruction(proc, op, line_number);
 	add_instruction_operand(proc, mov, src);
@@ -847,7 +847,7 @@ static Pseudo *linearize_bool(Proc *proc, AstNode *node, bool is_and)
 
 	Pseudo *result = allocate_temp_pseudo(proc, RAVI_TANY, false);
 	Pseudo *operand1 = linearize_expression(proc, e1);
-	instruct_move(proc, op_mov, result, operand1, node->line_number);
+	instruct_move(proc, op_mov, result, operand1, node->line_number, false);
 	free_temp_pseudo(proc, operand1, false);
 	if (is_and)
 		instruct_cbr(proc, result, first_block, end_block, node->line_number); // If first value is true then evaluate the second
@@ -856,7 +856,7 @@ static Pseudo *linearize_bool(Proc *proc, AstNode *node, bool is_and)
 
 	start_block(proc, first_block, node->line_number);
 	Pseudo *operand2 = linearize_expression(proc, e2);
-	instruct_move(proc, op_mov, result, operand2, node->line_number);
+	instruct_move(proc, op_mov, result, operand2, node->line_number, false);
 	free_temp_pseudo(proc, operand2, false);
 	instruct_br(proc, allocate_block_pseudo(proc, end_block), node->line_number);
 
@@ -1393,7 +1393,7 @@ static Pseudo *linearize_function_call_expression(Proc *proc, AstNode *expr,
 	if (callsite_pseudo->type != PSEUDO_TEMP_ANY ||
 	    callsite_pseudo->type == PSEUDO_TEMP_ANY && !pseudo_gen_is_top(&proc->temp_pseudos, callsite_pseudo->regnum)) {
 		Pseudo *temp = allocate_temp_pseudo(proc, RAVI_TANY, true);
-		instruct_move(proc, op_mov, temp, callsite_pseudo, expr->line_number);
+		instruct_move(proc, op_mov, temp, callsite_pseudo, expr->line_number, false);
 		replace_instruction_operand(proc, insn, callsite_pseudo, temp);
 		callsite_pseudo = temp;
 	}
@@ -1503,7 +1503,7 @@ static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
  * The Ravi parser doesn't allow this; it requires explicit table
  * constructor. So this is an enhancement.
  */
-static Pseudo *linearize_table_constructor_inplace(Proc *proc, Pseudo *target, ravitype_t type_code, unsigned line_number)
+static Pseudo *linearize_table_constructor_inplace(Proc *proc, Pseudo *target, ravitype_t type_code, unsigned line_number, bool is_initializer)
 {
 	enum opcode op = op_newtable;
 	if (type_code == RAVI_TARRAYINT)
@@ -1540,7 +1540,7 @@ static bool is_compatible(const VariableType *var_type, const VariableType *val_
 }
 
 static void linearize_store_var(Proc *proc, const VariableType *var_type, Pseudo *var_pseudo,
-				const VariableType *val_type, Pseudo *val_pseudo, unsigned line_number)
+				const VariableType *val_type, Pseudo *val_pseudo, unsigned line_number, bool is_initializer)
 {
 	if (var_pseudo->type == PSEUDO_INDEXED) {
 		indexed_store(proc, var_pseudo, val_pseudo, val_type->type_code);
@@ -1557,7 +1557,7 @@ static void linearize_store_var(Proc *proc, const VariableType *var_type, Pseudo
 		} else if (var_type->type_code == RAVI_TNUMFLT) {
 			op = val_type->type_code == RAVI_TNUMFLT ? op_movf : op_movif;
 		}
-		instruct_move(proc, op, var_pseudo, val_pseudo, line_number);
+		instruct_move(proc, op, var_pseudo, val_pseudo, line_number, is_initializer);
 	}
 }
 
@@ -1579,14 +1579,14 @@ static ravitype_t get_type(LuaSymbol *symbol) {
 static Pseudo *copy_to_temp_if_necessary(Proc *proc, Pseudo *original, unsigned line_number) {
 	if (original->type == PSEUDO_SYMBOL) {
 		Pseudo *copy = allocate_temp_pseudo(proc, get_type(original->symbol), false);
-		instruct_move(proc, op_mov, copy, original, line_number);
+		instruct_move(proc, op_mov, copy, original, line_number, false);
 		// TODO we may need to set type more specifically
 		return copy;
 	}
 	return original;
 }
 
-static void linearize_init(Proc *proc, Pseudo *pseudo, unsigned line_number)
+static void linearize_init(Proc *proc, Pseudo *pseudo, unsigned line_number, bool is_initializer)
 {
 	Instruction *insn = allocate_instruction(proc, op_init, line_number);
 	add_instruction_target(proc, insn, pseudo);
@@ -1598,7 +1598,7 @@ struct node_info {
 	Pseudo *pseudo;
 };
 
-static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node_info *varinfo, int nv)
+static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node_info *varinfo, int nv, bool is_initializer)
 {
 	AstNode *expr;
 
@@ -1639,15 +1639,15 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 				int pick = i - ne + 1;
 				linearize_store_var(proc, varinfo[i].vartype, varinfo[i].pseudo,
 						    valinfo[ne-1].vartype,
-				    raviX_allocate_range_select_pseudo(proc, last_val_pseudo, pick), line_number);
+				    raviX_allocate_range_select_pseudo(proc, last_val_pseudo, pick), line_number, is_initializer);
 			} else {
 				if (varinfo[i].vartype->type_code == RAVI_TTABLE ||
 				    varinfo[i].vartype->type_code == RAVI_TARRAYFLT ||
 				    varinfo[i].vartype->type_code == RAVI_TARRAYINT) {
-					linearize_table_constructor_inplace(proc, varinfo[i].pseudo, varinfo[i].vartype->type_code, line_number);
+					linearize_table_constructor_inplace(proc, varinfo[i].pseudo, varinfo[i].vartype->type_code, line_number, is_initializer);
 				}
 				else {
-					linearize_init(proc, varinfo[i].pseudo, line_number);
+					linearize_init(proc, varinfo[i].pseudo, line_number, is_initializer);
 				}
 			}
 		}
@@ -1660,7 +1660,7 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 				valinfo[i].pseudo = raviX_allocate_range_select_pseudo(proc, valinfo[i].pseudo, 0);
 			}
 			linearize_store_var(proc, varinfo[i].vartype, varinfo[i].pseudo,
-					    valinfo[i].vartype, valinfo[i].pseudo, line_number);
+					    valinfo[i].vartype, valinfo[i].pseudo, line_number, is_initializer);
 			free_temp_pseudo(proc, valinfo[i].pseudo, false);
 			if (range_pseudo) {
 				free_temp_pseudo(proc, range_pseudo, false);
@@ -1738,7 +1738,7 @@ static void linearize_expression_statement(Proc *proc, AstNode *node)
 	}
 	END_FOR_EACH_PTR(var)
 
-	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv);
+	linearize_assignment(proc, node->expression_stmt.expr_list, varinfo, nv, false);
 }
 
 static void linearize_local_statement(Proc *proc, AstNode *stmt)
@@ -1759,7 +1759,7 @@ static void linearize_local_statement(Proc *proc, AstNode *stmt)
 	}
 	END_FOR_EACH_PTR(var)
 
-	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv);
+	linearize_assignment(proc, stmt->local_stmt.expr_list, varinfo, nv, true);
 }
 
 static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
@@ -2311,14 +2311,14 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 		convert_range_to_temp(t); // Only accept one result
 	}
 	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number, false);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
 	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number, false);
 
 	if (step_expr == NULL)
 		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
@@ -2329,7 +2329,7 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 		}
 	}
 	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, step_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, step_pseudo, t, node->line_number, false);
 
 	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo, node->line_number);
@@ -2352,7 +2352,7 @@ static void linearize_for_num_statement_positivestep(Proc *proc, AstNode *node)
 	instruct_cbr(proc, stop_pseudo, Lend, Lbody, node->line_number);
 
 	start_block(proc, Lbody, node->line_number);
-	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo, node->line_number);
+	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo, node->line_number, false);
 
 	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
@@ -2430,14 +2430,14 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 		convert_range_to_temp(t); // Only accept one result
 	}
 	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number, false);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
 	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number, false);
 
 	if (step_expr == NULL)
 		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
@@ -2448,7 +2448,7 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 		}
 	}
 	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
-	instruct_move(proc, op_mov, step_pseudo, t, node->line_number);
+	instruct_move(proc, op_mov, step_pseudo, t, node->line_number, false);
 
 	Pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
@@ -2480,7 +2480,7 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 	instruct_cbr(proc, stop_pseudo, Lend, Lbody, node->line_number);
 
 	start_block(proc, Lbody, node->line_number);
-	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo, node->line_number);
+	instruct_move(proc, op_mov, var_sym->variable.pseudo, index_var_pseudo, node->line_number, false);
 
 	start_scope(proc->linearizer, proc, node->for_stmt.for_body);
 	linearize_statement_list(proc, node->for_stmt.for_statement_list);
@@ -2628,7 +2628,7 @@ static void linearize_function_statement(Proc *proc, AstNode *node)
 	Pseudo *function_pseudo = linearize_function_expr(proc, node->function_stmt.function_expr);
 	/* Following will potentially convert load to store */
 	linearize_store_var(proc, &prev_node->common_expr.type, prev_pseudo,
-			    &node->function_stmt.function_expr->common_expr.type, function_pseudo, node->line_number);
+			    &node->function_stmt.function_expr->common_expr.type, function_pseudo, node->line_number, false);
 	free_temp_pseudo(proc, prev_pseudo, false);
 	free_temp_pseudo(proc, function_pseudo, false);
 }
