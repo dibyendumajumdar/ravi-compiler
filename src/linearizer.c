@@ -2942,6 +2942,67 @@ void raviX_output_pseudo(const Pseudo *pseudo, TextBuffer *mb)
 	}
 }
 
+// Simple optimization pass that replaces use of upvalues that point to literals
+// it doesn't try to remove the upvalues from the proc definition yet
+
+static inline bool is_replaceable_upvalue(Pseudo *pseudo) {
+	return pseudo->type == PSEUDO_SYMBOL
+	       && pseudo->symbol->symbol_type == SYM_UPVALUE
+	       && pseudo->symbol->upvalue.target_variable->variable.literal_initializer
+	       && !pseudo->symbol->upvalue.target_variable->variable.modified;
+}
+
+static inline bool is_replaceable_type(AstNode *litexpr) {
+	return litexpr->common_expr.type.type_code == RAVI_TNUMINT ||
+	       litexpr->common_expr.type.type_code == RAVI_TNUMFLT ||
+	       litexpr->common_expr.type.type_code == RAVI_TSTRING;
+}
+
+static void do_replace_literal_upvalues_in_instruction(Proc *proc, Instruction *insn) {
+	PseudoList *list = insn->operands;
+	Pseudo *pseudo;
+	FOR_EACH_PTR(list, Pseudo, pseudo)
+	{
+		if (is_replaceable_upvalue(pseudo)) {
+			AstNode *litexpr = pseudo->symbol->upvalue.target_variable->variable.literal_initializer;
+			assert(litexpr);
+			if (is_replaceable_type(litexpr)) {
+				Pseudo *replacement = allocate_constant_pseudo(proc, allocate_constant(proc, litexpr));
+				REPLACE_CURRENT_PTR(Pseudo, pseudo, replacement);
+			}
+		}
+	}
+	END_FOR_EACH_PTR(pseudo)
+}
+
+static void do_replace_literal_upvalues_in_block(Proc *proc, BasicBlock *bb) {
+	InstructionList *list = bb->insns;
+	Instruction *insn;
+	FOR_EACH_PTR(list, Instruction, insn) {
+	    do_replace_literal_upvalues_in_instruction(proc, insn);
+	}
+	END_FOR_EACH_PTR(insn)
+}
+
+static void do_replace_literal_upvalues(Proc *proc)
+{
+	BasicBlock *bb;
+	for (int i = 0; i < (int)proc->node_count; i++) {
+		bb = proc->nodes[i];
+		do_replace_literal_upvalues_in_block(proc, bb);
+	}
+}
+
+static void replace_literal_upvalues(Proc *proc)
+{
+	do_replace_literal_upvalues(proc);
+	Proc *child_proc;
+	FOR_EACH_PTR(proc->procs, Proc, child_proc) { replace_literal_upvalues(child_proc); }
+	END_FOR_EACH_PTR(childproc)
+}
+
+////////////// end of optimization of upvalues
+
 static const char *op_codenames[] = {
     "NOOP",	  "RET",    "ADD",  "ADDff",  "ADDfi",	    "ADDii",	 "SUB",	      "SUBff",	   "SUBfi",
     "SUBif",	  "SUBii",  "MUL",  "MULff",  "MULfi",	    "MULii",	 "DIV",	      "DIVff",	   "DIVfi",
@@ -3059,6 +3120,7 @@ int raviX_ast_linearize(LinearizerState *linearizer)
 	int rc = setjmp(linearizer->compiler_state->env);
 	if (rc == 0) {
 		linearize_function(linearizer);
+		replace_literal_upvalues(proc);
 	}
 	return rc;
 }
