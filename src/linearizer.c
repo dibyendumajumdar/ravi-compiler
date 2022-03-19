@@ -3124,7 +3124,6 @@ int raviX_ast_linearize(LinearizerState *linearizer)
 	int rc = setjmp(linearizer->compiler_state->env);
 	if (rc == 0) {
 		linearize_function(linearizer);
-		replace_literal_upvalues(proc);
 	}
 	return rc;
 }
