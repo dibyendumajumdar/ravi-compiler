@@ -587,6 +587,20 @@ static inline void set_current_proc(LinearizerState *linearizer, Proc *proc)
 	linearizer->current_proc = proc;
 }
 
+static void set_local_modified_flag(Pseudo *target) {
+	if (target->type != PSEUDO_SYMBOL)
+		return;
+	LuaSymbol *symbol = target->symbol;
+	if (symbol->symbol_type == SYM_UPVALUE)
+		symbol = symbol->upvalue.target_variable;
+	if (symbol->symbol_type != SYM_LOCAL)
+		return;
+	if (!symbol->variable.literal_initializer)
+		return;
+	assert(symbol->variable.literal_initializer->type == EXPR_LITERAL);
+	symbol->variable.modified = 1;
+}
+
 static void instruct_totype(Proc *proc, Pseudo *target, const VariableType *vtype, unsigned line_number)
 {
 	enum opcode targetop = op_nop;
@@ -780,6 +794,8 @@ static Pseudo *instruct_move(Proc *proc, enum opcode op, Pseudo *target, Pseudo 
 	add_instruction_operand(proc, mov, src);
 	add_instruction_target(proc, mov, target);
 	add_instruction(proc, mov);
+	if (!is_intializer)
+		set_local_modified_flag(target);
 	return target;
 }
 
@@ -1173,6 +1189,7 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target_pseudo);
 	add_instruction(proc, insn);
+	set_local_modified_flag(target_pseudo);
 	return target_pseudo;
 }
 
@@ -1194,6 +1211,7 @@ static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
 	free_temp_pseudo(proc, container_pseudo, false);
 	free_temp_pseudo(proc, key_pseudo, false);
 	index_pseudo->index_info.used = 1;
+	set_local_modified_flag(target);
 	return target;
 }
 
@@ -1249,6 +1267,7 @@ static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo)
 	free_temp_pseudo(proc, container_pseudo, false);
 	free_temp_pseudo(proc, key_pseudo, false);
 	index_pseudo->index_info.used = 1;
+	set_local_modified_flag(target_pseudo);
 	return target_pseudo;
 }
 
