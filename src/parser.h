@@ -186,9 +186,9 @@ struct LuaVariableSymbol {
 	LuaSymbol *env; /* Only applicable for global symbols - this should point to _ENV */
 	unsigned escaped : 1,	     /* Has one or more up-value references */
 	    function_parameter : 1,  /* Is a function parameter */
-	    literal_initializer : 1, /* Was initialized with literal */
 	    modified : 1;	     /*There is an update to the variable post initialization */
 	Pseudo *pseudo;	   /* backend data for the symbol */
+	AstNode *literal_initializer; /* Was initialized with literal */
 };
 struct LuaLabelSymbol {
 	const StringObject *label_name;

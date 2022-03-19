@@ -187,6 +187,8 @@ LuaSymbol *raviX_new_local_symbol(CompilerState *compiler_state, Scope *scope, c
 	symbol->variable.var_name = name;
 	symbol->variable.pseudo = NULL;
 	symbol->variable.escaped = 0;
+	symbol->variable.modified = 0;
+	symbol->variable.literal_initializer = NULL;
 	return symbol;
 }
 
@@ -1554,7 +1556,7 @@ static void detect_constant_assignments(LocalStatement *local_statement) {
 		AstNode *expr = (AstNode *) raviX_ptrlist_nth_entry((PtrList *)local_statement->expr_list, i);
 		if (expr->type == EXPR_LITERAL) {
 			assert(symbol->symbol_type == SYM_LOCAL);
-			symbol->variable.literal_initializer = 1;
+			symbol->variable.literal_initializer = expr;
 		}
 	}
 }
