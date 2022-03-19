@@ -1540,11 +1540,15 @@ static void limit_function_call_results(ParserState *parser, int num_lhs, AstNod
 	}
 }
 
+static inline int min_int(int a, int b) {
+	return a <= b ? a: b;
+}
+
 /**
  * Marks locals that have an initializer with literal value
  */
 static void detect_constant_assignments(LocalStatement *local_statement) {
-	int maxele = min(raviX_ptrlist_size((const PtrList *)local_statement->var_list), raviX_ptrlist_size((const PtrList *)local_statement->expr_list));
+	int maxele = min_int(raviX_ptrlist_size((const PtrList *)local_statement->var_list), raviX_ptrlist_size((const PtrList *)local_statement->expr_list));
 	for (int i = 0; i < maxele; i++) {
 		LuaSymbol *symbol = (LuaSymbol *) raviX_ptrlist_nth_entry((PtrList *)local_statement->var_list, i);
 		AstNode *expr = (AstNode *) raviX_ptrlist_nth_entry((PtrList *)local_statement->expr_list, i);
