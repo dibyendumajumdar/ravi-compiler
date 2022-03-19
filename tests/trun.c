@@ -179,6 +179,12 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 			raviX_output_cfg(linearizer->main_proc, stdout);
 		}
 	}
+	if (args->opt_upvalue) {
+		raviX_optimize_upvalues(linearizer);
+		if (args->irdump) {
+			raviX_output_linearizer(linearizer, stdout);
+		}
+	}
 	if (args->gen_C) {
 		fprintf(stdout, "\n#endif\n");
 		raviX_generate_C_tofile(linearizer, args->mainfunc, stdout);

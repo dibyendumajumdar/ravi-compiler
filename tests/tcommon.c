@@ -40,6 +40,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	args->simplify_ast = 0;
 	args->remove_unreachable_blocks = 0;
 	args->gen_C = 0;
+	args->opt_upvalue = 0;
 	args->mainfunc = "setup";
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--notypecheck") == 0) {
@@ -60,6 +61,8 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			args->remove_unreachable_blocks = 1;
 		} else if (strcmp(argv[i], "--gen-C") == 0) {
 			args->gen_C = 1;
+		} else if (strcmp(argv[i], "--opt-upvalues") == 0) {
+			args->opt_upvalue = 1;
 		} else if (strcmp(argv[i], "-main") == 0) {
 			if (i < argc - 1) {
 				i++;

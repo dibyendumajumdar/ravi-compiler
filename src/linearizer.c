@@ -3001,6 +3001,10 @@ static void replace_literal_upvalues(Proc *proc)
 	END_FOR_EACH_PTR(childproc)
 }
 
+void raviX_optimize_upvalues(LinearizerState *linearizer) {
+	replace_literal_upvalues(linearizer->main_proc);
+}
+
 ////////////// end of optimization of upvalues
 
 static const char *op_codenames[] = {
