@@ -598,7 +598,8 @@ static void set_local_modified_flag(Pseudo *target) {
 	if (!symbol->variable.literal_initializer)
 		return;
 	assert(symbol->variable.literal_initializer->type == EXPR_LITERAL);
-	symbol->variable.modified = 1;
+	assert(symbol->variable.modified);
+	//symbol->variable.modified = 1;
 }
 
 static void instruct_totype(Proc *proc, Pseudo *target, const VariableType *vtype, unsigned line_number)

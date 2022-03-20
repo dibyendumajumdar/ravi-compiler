@@ -1627,6 +1627,38 @@ static AstNode *parse_function_statement(ParserState *parser, int line)
 	return function_stmt;
 }
 
+static LuaSymbol *is_symbol_expression(AstNode *node) {
+	if (node->type == EXPR_SUFFIXED &&
+	    node->suffixed_expr.suffix_list == NULL &&
+	    node->suffixed_expr.primary_expr->type == EXPR_SYMBOL)
+		return node->suffixed_expr.primary_expr->symbol_expr.var;
+	if (node->type == EXPR_SYMBOL)
+		return node->symbol_expr.var;
+	return NULL;
+}
+
+static void set_local_modified_flag(LuaSymbol *symbol) {
+	if (symbol->symbol_type == SYM_UPVALUE)
+		symbol = symbol->upvalue.target_variable;
+	if (symbol->symbol_type != SYM_LOCAL)
+		return;
+	symbol->variable.modified = 1;
+}
+
+static void detect_local_updates(ExpressionStatement *expr_statement)
+{
+	int maxele = min_int(raviX_ptrlist_size((const PtrList *)expr_statement->var_expr_list),
+			     raviX_ptrlist_size((const PtrList *)expr_statement->expr_list));
+	for (int i = 0; i < maxele; i++) {
+		AstNode *var = (AstNode *)raviX_ptrlist_nth_entry((PtrList *)expr_statement->var_expr_list, i);
+		AstNode *expr = (AstNode *)raviX_ptrlist_nth_entry((PtrList *)expr_statement->expr_list, i);
+		LuaSymbol *symbol = is_symbol_expression(var);
+		if (symbol) {
+			set_local_modified_flag(symbol);
+		}
+	}
+}
+
 /* parse function call with no returns or assignment statement */
 static AstNode *parse_expression_statement(ParserState *parser)
 {
@@ -1650,6 +1682,7 @@ static AstNode *parse_expression_statement(ParserState *parser)
 		    parser, raviX_ptrlist_size((const PtrList *)stmt->expression_stmt.var_expr_list), current_list);
 	}
 	stmt->expression_stmt.expr_list = current_list;
+	detect_local_updates(&stmt->expression_stmt);
 	// TODO Check that if not assignment then it is a function call
 	return stmt;
 }
