@@ -1655,11 +1655,9 @@ static void set_local_modified_flag(LuaSymbol *symbol) {
 
 static void detect_local_updates(ExpressionStatement *expr_statement)
 {
-	int maxele = min_int(raviX_ptrlist_size((const PtrList *)expr_statement->var_expr_list),
-			     raviX_ptrlist_size((const PtrList *)expr_statement->expr_list));
+	int maxele = raviX_ptrlist_size((const PtrList *)expr_statement->var_expr_list);
 	for (int i = 0; i < maxele; i++) {
 		AstNode *var = (AstNode *)raviX_ptrlist_nth_entry((PtrList *)expr_statement->var_expr_list, i);
-		AstNode *expr = (AstNode *)raviX_ptrlist_nth_entry((PtrList *)expr_statement->expr_list, i);
 		LuaSymbol *symbol = is_symbol_expression(var);
 		if (symbol) {
 			set_local_modified_flag(symbol);
