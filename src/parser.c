@@ -1387,6 +1387,7 @@ static void parse_fornum_statement(ParserState *parser, AstNode *stmt,
 	LexerState *ls = parser->ls;
 	/* fornum -> NAME = exp1,exp1[,exp1] forbody */
 	LuaSymbol *local = new_local_symbol(parser, varname, RAVI_TANY, NULL);
+	local->variable.modified = 1;
 	raviX_add_symbol(parser->compiler_state, &stmt->for_stmt.symbols, local);
 	add_local_symbol_to_current_scope(parser, local);
 	checknext(ls, '=');
@@ -1409,10 +1410,12 @@ static void parse_for_list(ParserState *parser, AstNode *stmt, const StringObjec
 	int nvars = 4; /* gen, state, control, plus at least one declared var */
 	/* create declared variables */
 	LuaSymbol *local = new_local_symbol(parser, indexname, RAVI_TANY, NULL);
+	local->variable.modified = 1;
 	raviX_add_symbol(parser->compiler_state, &stmt->for_stmt.symbols, local);
 	add_local_symbol_to_current_scope(parser, local);
 	while (testnext(ls, ',')) {
 		local = new_local_symbol(parser, check_name_and_next(ls), RAVI_TANY, NULL);
+		local->variable.modified = 1;
 		raviX_add_symbol(parser->compiler_state, &stmt->for_stmt.symbols, local);
 		add_local_symbol_to_current_scope(parser, local);
 		nvars++;
