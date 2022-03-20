@@ -13,7 +13,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any  
   --[expressions]
     1
    f --global symbol any 
@@ -67,7 +67,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any  
   --[expressions]
     1
    f --global symbol any 
@@ -290,12 +290,12 @@ function()
     --[local symbols] a, y, a, z
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol any   const
       --[expressions]
         1
       local
       --[symbols]
-        y --local symbol closure 
+        y --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a
@@ -312,12 +312,12 @@ function()
         end
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol any   const
       --[expressions]
         5
       local
       --[symbols]
-        z --local symbol closure 
+        z --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a
@@ -335,13 +335,13 @@ function()
       return
         --[suffixed expr start] closure
          --[primary start] closure
-           y --local symbol closure 
+           y --local symbol closure   const
          --[primary end]
         --[suffixed expr end]
        ,
         --[suffixed expr start] closure
          --[primary start] closure
-           z --local symbol closure 
+           z --local symbol closure   const
          --[primary end]
         --[suffixed expr end]
     end
@@ -353,12 +353,12 @@ function()
     --[local symbols] a, y, a, z
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol integer   const
       --[expressions]
         1
       local
       --[symbols]
-        y --local symbol closure 
+        y --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a
@@ -368,19 +368,19 @@ function()
               return
                 --[suffixed expr start] any
                  --[primary start] any
-                   a --upvalue any 
+                   a --upvalue integer 
                  --[primary end]
                 --[suffixed expr end]
             end
         end
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol integer   const
       --[expressions]
         5
       local
       --[symbols]
-        z --local symbol closure 
+        z --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a
@@ -390,7 +390,7 @@ function()
               return
                 --[suffixed expr start] any
                  --[primary start] any
-                   a --upvalue any 
+                   a --upvalue integer 
                  --[primary end]
                 --[suffixed expr end]
             end
@@ -398,13 +398,13 @@ function()
       return
         --[suffixed expr start] closure
          --[primary start] closure
-           y --local symbol closure 
+           y --local symbol closure   const
          --[primary end]
         --[suffixed expr end]
        ,
         --[suffixed expr start] closure
          --[primary start] closure
-           z --local symbol closure 
+           z --local symbol closure   const
          --[primary end]
         --[suffixed expr end]
     end
@@ -416,10 +416,10 @@ L0 (entry)
 L1 (exit)
 define Proc%2
 L0 (entry)
-	MOV {1 Kint(0)} {local(a, 0)}
+	MOVi {1 Kint(0)} {local(a, 0)}
 	CLOSURE {Proc%3} {T(0)}
 	MOV {T(0)} {local(y, 1)}
-	MOV {5 Kint(1)} {local(a, 2)}
+	MOVi {5 Kint(1)} {local(a, 2)}
 	CLOSURE {Proc%5} {T(0)}
 	MOV {T(0)} {local(z, 3)}
 	RET {local(y, 1), local(z, 3)} {L1}
@@ -452,10 +452,10 @@ L0 -> L1
 digraph Proc2 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1 Kint(0)} {local(a, 0)}</TD></TR>
+<TR><TD>MOVi {1 Kint(0)} {local(a, 0)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(y, 1)}</TD></TR>
-<TR><TD>MOV {5 Kint(1)} {local(a, 2)}</TD></TR>
+<TR><TD>MOVi {5 Kint(1)} {local(a, 2)}</TD></TR>
 <TR><TD>CLOSURE {Proc%5} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(z, 3)}</TD></TR>
 <TR><TD>RET {local(y, 1), local(z, 3)} {L1}</TD></TR>
@@ -553,10 +553,10 @@ L0 -> L1
 digraph Proc2 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1 Kint(0)} {local(a, 0)}</TD></TR>
+<TR><TD>MOVi {1 Kint(0)} {local(a, 0)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(y, 1)}</TD></TR>
-<TR><TD>MOV {5 Kint(1)} {local(a, 2)}</TD></TR>
+<TR><TD>MOVi {5 Kint(1)} {local(a, 2)}</TD></TR>
 <TR><TD>CLOSURE {Proc%5} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(z, 3)}</TD></TR>
 <TR><TD>RET {local(y, 1), local(z, 3)} {L1}</TD></TR>
@@ -666,12 +666,12 @@ function()
 --[local symbols] x, l3:, l3_1:
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any  
   do
   --[local symbols] y, l2:, l1:
     local
     --[symbols]
-      y --local symbol any 
+      y --local symbol any   const
     --[expressions]
       12
     goto l1
@@ -680,7 +680,7 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
@@ -688,7 +688,7 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           x --local symbol any 
+           x --local symbol any  
          --[primary end]
         --[suffixed expr end]
        +
@@ -702,14 +702,14 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
      --[expression list start]
        --[suffixed expr start] any
         --[primary start] any
-          y --local symbol any 
+          y --local symbol any   const
         --[primary end]
        --[suffixed expr end]
      --[expression list end]
@@ -730,7 +730,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               x --local symbol any 
+               x --local symbol any  
              --[primary end]
             --[suffixed expr end]
            ==
@@ -748,12 +748,12 @@ function()
 --[local symbols] x, l3:, l3_1:
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any  
   do
   --[local symbols] y, l2:, l1:
     local
     --[symbols]
-      y --local symbol any 
+      y --local symbol integer   const
     --[expressions]
       12
     goto l1
@@ -762,7 +762,7 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
@@ -770,7 +770,7 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           x --local symbol any 
+           x --local symbol any  
          --[primary end]
         --[suffixed expr end]
        +
@@ -784,14 +784,14 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
      --[expression list start]
-       --[suffixed expr start] any
-        --[primary start] any
-          y --local symbol any 
+       --[suffixed expr start] integer
+        --[primary start] integer
+          y --local symbol integer   const
         --[primary end]
        --[suffixed expr end]
      --[expression list end]
@@ -812,7 +812,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               x --local symbol any 
+               x --local symbol any  
              --[primary end]
             --[suffixed expr end]
            ==
@@ -828,12 +828,11 @@ end
 define Proc%1
 L0 (entry)
 	INIT {local(x, 0)}
-	MOV {12 Kint(0)} {local(y, 1)}
+	MOVi {12 Kint(0)} {Tint(0)}
 	BR {L2}
 L1 (exit)
 L2
-	MOV {local(y, 1)} {T(0)}
-	MOV {T(0)} {local(x, 0)}
+	MOV {Tint(0)} {local(x, 0)}
 	BR {L3}
 L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
@@ -853,14 +852,13 @@ digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>INIT {local(x, 0)}</TD></TR>
-<TR><TD>MOV {12 Kint(0)} {local(y, 1)}</TD></TR>
+<TR><TD>MOVi {12 Kint(0)} {Tint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>MOV {local(y, 1)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {Tint(0)} {local(x, 0)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
@@ -904,14 +902,14 @@ function()
 --[local symbols] msgs
   local
   --[symbols]
-    msgs --local symbol any 
+    msgs --local symbol any   const
   --[expressions]
     { --[table constructor start] table
     } --[table constructor end]
    Message --global symbol any 
    =
     function(
-      m --local symbol any 
+      m --local symbol any   const
     )
     --upvalues  _ENV*, msgs
     --[local symbols] m
@@ -936,7 +934,7 @@ function()
                (
                  --[suffixed expr start] any
                   --[primary start] any
-                    m --local symbol any 
+                    m --local symbol any   const
                   --[primary end]
                  --[suffixed expr end]
                )
@@ -985,7 +983,7 @@ function()
                (
                  --[suffixed expr start] any
                   --[primary start] any
-                    m --local symbol any 
+                    m --local symbol any   const
                   --[primary end]
                  --[suffixed expr end]
                 ,
@@ -1009,14 +1007,14 @@ function()
 --[local symbols] msgs
   local
   --[symbols]
-    msgs --local symbol any 
+    msgs --local symbol any   const
   --[expressions]
     { --[table constructor start] table
     } --[table constructor end]
    Message --global symbol any 
    =
     function(
-      m --local symbol any 
+      m --local symbol any   const
     )
     --upvalues  _ENV*, msgs
     --[local symbols] m
@@ -1041,7 +1039,7 @@ function()
                (
                  --[suffixed expr start] any
                   --[primary start] any
-                    m --local symbol any 
+                    m --local symbol any   const
                   --[primary end]
                  --[suffixed expr end]
                )
@@ -1090,7 +1088,7 @@ function()
                (
                  --[suffixed expr start] any
                   --[primary start] any
-                    m --local symbol any 
+                    m --local symbol any   const
                   --[primary end]
                  --[suffixed expr end]
                 ,
@@ -1238,15 +1236,15 @@ function()
 --[local symbols] b, z
   local
   --[symbols]
-    b --local symbol any 
+    b --local symbol any  
   local
   --[symbols]
-    z --local symbol closure 
+    z --local symbol closure   const
   --[expressions]
     function(
-      p1 --local symbol any 
+      p1 --local symbol any   const
      ,
-      p2 --local symbol any 
+      p2 --local symbol any   const
     )
     --upvalues  b
     --[local symbols] p1, p2, a, x, c, y, t
@@ -1254,22 +1252,22 @@ function()
       --[local symbols] x, y
         local
         --[symbols]
-          x --local symbol any 
+          x --local symbol any   const
          ,
-          y --local symbol any 
+          y --local symbol any   const
       end
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol any  
        ,
-        x --local symbol any 
+        x --local symbol any   const
        ,
-        c --local symbol any 
+        c --local symbol any   const
        ,
-        y --local symbol any 
+        y --local symbol any   const
       local
       --[symbols]
-        t --local symbol closure 
+        t --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a, y, x, b
@@ -1339,15 +1337,15 @@ function()
 --[local symbols] b, z
   local
   --[symbols]
-    b --local symbol any 
+    b --local symbol any  
   local
   --[symbols]
-    z --local symbol closure 
+    z --local symbol closure   const
   --[expressions]
     function(
-      p1 --local symbol any 
+      p1 --local symbol any   const
      ,
-      p2 --local symbol any 
+      p2 --local symbol any   const
     )
     --upvalues  b
     --[local symbols] p1, p2, a, x, c, y, t
@@ -1355,22 +1353,22 @@ function()
       --[local symbols] x, y
         local
         --[symbols]
-          x --local symbol any 
+          x --local symbol any   const
          ,
-          y --local symbol any 
+          y --local symbol any   const
       end
       local
       --[symbols]
-        a --local symbol any 
+        a --local symbol any  
        ,
-        x --local symbol any 
+        x --local symbol any   const
        ,
-        c --local symbol any 
+        c --local symbol any   const
        ,
-        y --local symbol any 
+        y --local symbol any   const
       local
       --[symbols]
-        t --local symbol closure 
+        t --local symbol closure   const
       --[expressions]
         function()
         --upvalues  a, y, x, b
@@ -1636,7 +1634,7 @@ function()
 --[local symbols] _ENV
   local
   --[symbols]
-    _ENV --local symbol any 
+    _ENV --local symbol any   const
   --[expressions]
     { --[table constructor start] table
     } --[table constructor end]
@@ -1662,7 +1660,7 @@ function()
 --[local symbols] _ENV
   local
   --[symbols]
-    _ENV --local symbol any 
+    _ENV --local symbol any   const
   --[expressions]
     { --[table constructor start] table
     } --[table constructor end]

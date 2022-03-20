@@ -235,7 +235,7 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any  
     )
     --[local symbols] a, L2:, L1:
       ::L2::
@@ -247,7 +247,7 @@ function()
           --[binary expr start] any
            --[suffixed expr start] any
             --[primary start] any
-              a --local symbol any 
+              a --local symbol any  
             --[primary end]
            --[suffixed expr end]
           <
@@ -263,7 +263,7 @@ function()
        --[var list start]
          --[suffixed expr start] any
           --[primary start] any
-            a --local symbol any 
+            a --local symbol any  
           --[primary end]
          --[suffixed expr end]
        = --[var list end]
@@ -271,7 +271,7 @@ function()
          --[binary expr start] any
           --[suffixed expr start] any
            --[primary start] any
-             a --local symbol any 
+             a --local symbol any  
            --[primary end]
           --[suffixed expr end]
          +
@@ -287,7 +287,7 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any  
     )
     --[local symbols] a, L2:, L1:
       ::L2::
@@ -299,7 +299,7 @@ function()
           --[binary expr start] any
            --[suffixed expr start] any
             --[primary start] any
-              a --local symbol any 
+              a --local symbol any  
             --[primary end]
            --[suffixed expr end]
           <
@@ -315,7 +315,7 @@ function()
        --[var list start]
          --[suffixed expr start] any
           --[primary start] any
-            a --local symbol any 
+            a --local symbol any  
           --[primary end]
          --[suffixed expr end]
        = --[var list end]
@@ -323,7 +323,7 @@ function()
          --[binary expr start] any
           --[suffixed expr start] any
            --[primary start] any
-             a --local symbol any 
+             a --local symbol any  
            --[primary end]
           --[suffixed expr end]
          +
@@ -458,7 +458,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol any 
+    i --local symbol any  
   =
     1
    ,
@@ -475,7 +475,7 @@ function()
             (
               --[suffixed expr start] any
                --[primary start] any
-                 i --local symbol any 
+                 i --local symbol any  
                --[primary end]
               --[suffixed expr end]
             )
@@ -490,7 +490,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol integer 
+    i --local symbol integer  
   =
     1
    ,
@@ -507,7 +507,7 @@ function()
             (
               --[suffixed expr start] integer
                --[primary start] integer
-                 i --local symbol integer 
+                 i --local symbol integer  
                --[primary end]
               --[suffixed expr end]
             )
@@ -582,7 +582,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol any 
+    i --local symbol any  
   =
     10
    ,
@@ -604,7 +604,7 @@ function()
             (
               --[suffixed expr start] any
                --[primary start] any
-                 i --local symbol any 
+                 i --local symbol any  
                --[primary end]
               --[suffixed expr end]
             )
@@ -619,7 +619,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol integer 
+    i --local symbol integer  
   =
     10
    ,
@@ -641,7 +641,7 @@ function()
             (
               --[suffixed expr start] integer
                --[primary start] integer
-                 i --local symbol integer 
+                 i --local symbol integer  
                --[primary end]
               --[suffixed expr end]
             )
@@ -1017,7 +1017,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol any 
+    i --local symbol any  
   =
     1
    ,
@@ -1027,7 +1027,7 @@ function()
       --[binary expr start] any
        --[suffixed expr start] any
         --[primary start] any
-          i --local symbol any 
+          i --local symbol any  
         --[primary end]
        --[suffixed expr end]
       ==
@@ -1043,7 +1043,7 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] i
-    i --local symbol integer 
+    i --local symbol integer  
   =
     1
    ,
@@ -1053,7 +1053,7 @@ function()
       --[binary expr start] boolean
        --[suffixed expr start] integer
         --[primary start] integer
-          i --local symbol integer 
+          i --local symbol integer  
         --[primary end]
        --[suffixed expr end]
       ==
@@ -1156,14 +1156,14 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any  
     )
     --[local symbols] a
       while
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any  
          --[primary end]
         --[suffixed expr end]
        <
@@ -1174,7 +1174,7 @@ function()
          --[var list start]
            --[suffixed expr start] any
             --[primary start] any
-              a --local symbol any 
+              a --local symbol any  
             --[primary end]
            --[suffixed expr end]
          = --[var list end]
@@ -1182,7 +1182,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               a --local symbol any 
+               a --local symbol any  
              --[primary end]
             --[suffixed expr end]
            +
@@ -1197,14 +1197,14 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any  
     )
     --[local symbols] a
       while
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any  
          --[primary end]
         --[suffixed expr end]
        <
@@ -1215,7 +1215,7 @@ function()
          --[var list start]
            --[suffixed expr start] any
             --[primary start] any
-              a --local symbol any 
+              a --local symbol any  
             --[primary end]
            --[suffixed expr end]
          = --[var list end]
@@ -1223,7 +1223,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               a --local symbol any 
+               a --local symbol any  
              --[primary end]
             --[suffixed expr end]
            +
@@ -1327,28 +1327,28 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any   const
      ,
-      b --local symbol any 
+      b --local symbol any   const
      ,
-      c --local symbol any 
+      c --local symbol any   const
      ,
-      d --local symbol any 
+      d --local symbol any   const
      ,
-      e --local symbol any 
+      e --local symbol any   const
     )
     --[local symbols] a, b, c, d, e, l1:, l2:, l3:, l4:
       if
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           b --local symbol any 
+           b --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1358,13 +1358,13 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           c --local symbol any 
+           c --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1374,13 +1374,13 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           d --local symbol any 
+           d --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1391,13 +1391,13 @@ function()
          --[binary expr start] any
           --[suffixed expr start] any
            --[primary start] any
-             a --local symbol any 
+             a --local symbol any   const
            --[primary end]
           --[suffixed expr end]
          ==
           --[suffixed expr start] any
            --[primary start] any
-             e --local symbol any 
+             e --local symbol any   const
            --[primary end]
           --[suffixed expr end]
          --[binary expr end]
@@ -1417,28 +1417,28 @@ function()
 --upvalues  _ENV*
   return
     function(
-      a --local symbol any 
+      a --local symbol any   const
      ,
-      b --local symbol any 
+      b --local symbol any   const
      ,
-      c --local symbol any 
+      c --local symbol any   const
      ,
-      d --local symbol any 
+      d --local symbol any   const
      ,
-      e --local symbol any 
+      e --local symbol any   const
     )
     --[local symbols] a, b, c, d, e, l1:, l2:, l3:, l4:
       if
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           b --local symbol any 
+           b --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1448,13 +1448,13 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           c --local symbol any 
+           c --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1464,13 +1464,13 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           a --local symbol any 
+           a --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        ==
         --[suffixed expr start] any
          --[primary start] any
-           d --local symbol any 
+           d --local symbol any   const
          --[primary end]
         --[suffixed expr end]
        --[binary expr end]
@@ -1481,13 +1481,13 @@ function()
          --[binary expr start] any
           --[suffixed expr start] any
            --[primary start] any
-             a --local symbol any 
+             a --local symbol any   const
            --[primary end]
           --[suffixed expr end]
          ==
           --[suffixed expr start] any
            --[primary start] any
-             e --local symbol any 
+             e --local symbol any   const
            --[primary end]
           --[suffixed expr end]
          --[binary expr end]
@@ -1812,10 +1812,10 @@ function()
     --[local symbols] sum
       local
       --[symbols]
-        sum --local symbol any 
+        sum --local symbol any  
       for
       --[local symbols] j
-        j --local symbol any 
+        j --local symbol any  
       =
         1
        ,
@@ -1825,7 +1825,7 @@ function()
           --[var list start]
             --[suffixed expr start] any
              --[primary start] any
-               sum --local symbol any 
+               sum --local symbol any  
              --[primary end]
             --[suffixed expr end]
           = --[var list end]
@@ -1835,7 +1835,7 @@ function()
          --[expression statement end]
          for
          --[local symbols] k
-           k --local symbol any 
+           k --local symbol any  
          =
            1
           ,
@@ -1845,7 +1845,7 @@ function()
              --[var list start]
                --[suffixed expr start] any
                 --[primary start] any
-                  sum --local symbol any 
+                  sum --local symbol any  
                 --[primary end]
                --[suffixed expr end]
              = --[var list end]
@@ -1853,7 +1853,7 @@ function()
                --[binary expr start] any
                 --[suffixed expr start] any
                  --[primary start] any
-                   sum --local symbol any 
+                   sum --local symbol any  
                  --[primary end]
                 --[suffixed expr end]
                +
@@ -1865,13 +1865,13 @@ function()
                    --[binary expr start] any
                     --[suffixed expr start] any
                      --[primary start] any
-                       k --local symbol any 
+                       k --local symbol any  
                      --[primary end]
                     --[suffixed expr end]
                    *
                     --[suffixed expr start] any
                      --[primary start] any
-                       k --local symbol any 
+                       k --local symbol any  
                      --[primary end]
                     --[suffixed expr end]
                    --[binary expr end]
@@ -1886,7 +1886,7 @@ function()
       return
         --[suffixed expr start] any
          --[primary start] any
-           sum --local symbol any 
+           sum --local symbol any  
          --[primary end]
         --[suffixed expr end]
     end
@@ -1898,10 +1898,10 @@ function()
     --[local symbols] sum
       local
       --[symbols]
-        sum --local symbol any 
+        sum --local symbol any  
       for
       --[local symbols] j
-        j --local symbol integer 
+        j --local symbol integer  
       =
         1
        ,
@@ -1911,7 +1911,7 @@ function()
           --[var list start]
             --[suffixed expr start] any
              --[primary start] any
-               sum --local symbol any 
+               sum --local symbol any  
              --[primary end]
             --[suffixed expr end]
           = --[var list end]
@@ -1921,7 +1921,7 @@ function()
          --[expression statement end]
          for
          --[local symbols] k
-           k --local symbol integer 
+           k --local symbol integer  
          =
            1
           ,
@@ -1931,7 +1931,7 @@ function()
              --[var list start]
                --[suffixed expr start] any
                 --[primary start] any
-                  sum --local symbol any 
+                  sum --local symbol any  
                 --[primary end]
                --[suffixed expr end]
              = --[var list end]
@@ -1939,7 +1939,7 @@ function()
                --[binary expr start] any
                 --[suffixed expr start] any
                  --[primary start] any
-                   sum --local symbol any 
+                   sum --local symbol any  
                  --[primary end]
                 --[suffixed expr end]
                +
@@ -1951,13 +1951,13 @@ function()
                    --[binary expr start] integer
                     --[suffixed expr start] integer
                      --[primary start] integer
-                       k --local symbol integer 
+                       k --local symbol integer  
                      --[primary end]
                     --[suffixed expr end]
                    *
                     --[suffixed expr start] integer
                      --[primary start] integer
-                       k --local symbol integer 
+                       k --local symbol integer  
                      --[primary end]
                     --[suffixed expr end]
                    --[binary expr end]
@@ -1972,7 +1972,7 @@ function()
       return
         --[suffixed expr start] any
          --[primary start] any
-           sum --local symbol any 
+           sum --local symbol any  
          --[primary end]
         --[suffixed expr end]
     end
@@ -2182,12 +2182,12 @@ function()
 --[local symbols] x, l3:, l3_1:
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any  
   do
   --[local symbols] y, l2:, l1:
     local
     --[symbols]
-      y --local symbol any 
+      y --local symbol any   const
     --[expressions]
       12
     goto l1
@@ -2196,7 +2196,7 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
@@ -2204,7 +2204,7 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           x --local symbol any 
+           x --local symbol any  
          --[primary end]
         --[suffixed expr end]
        +
@@ -2218,14 +2218,14 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
      --[expression list start]
        --[suffixed expr start] any
         --[primary start] any
-          y --local symbol any 
+          y --local symbol any   const
         --[primary end]
        --[suffixed expr end]
      --[expression list end]
@@ -2246,7 +2246,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               x --local symbol any 
+               x --local symbol any  
              --[primary end]
             --[suffixed expr end]
            ==
@@ -2264,12 +2264,12 @@ function()
 --[local symbols] x, l3:, l3_1:
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any  
   do
   --[local symbols] y, l2:, l1:
     local
     --[symbols]
-      y --local symbol any 
+      y --local symbol integer   const
     --[expressions]
       12
     goto l1
@@ -2278,7 +2278,7 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
@@ -2286,7 +2286,7 @@ function()
        --[binary expr start] any
         --[suffixed expr start] any
          --[primary start] any
-           x --local symbol any 
+           x --local symbol any  
          --[primary end]
         --[suffixed expr end]
        +
@@ -2300,14 +2300,14 @@ function()
      --[var list start]
        --[suffixed expr start] any
         --[primary start] any
-          x --local symbol any 
+          x --local symbol any  
         --[primary end]
        --[suffixed expr end]
      = --[var list end]
      --[expression list start]
-       --[suffixed expr start] any
-        --[primary start] any
-          y --local symbol any 
+       --[suffixed expr start] integer
+        --[primary start] integer
+          y --local symbol integer   const
         --[primary end]
        --[suffixed expr end]
      --[expression list end]
@@ -2328,7 +2328,7 @@ function()
            --[binary expr start] any
             --[suffixed expr start] any
              --[primary start] any
-               x --local symbol any 
+               x --local symbol any  
              --[primary end]
             --[suffixed expr end]
            ==
@@ -2344,12 +2344,11 @@ end
 define Proc%1
 L0 (entry)
 	INIT {local(x, 0)}
-	MOV {12 Kint(0)} {local(y, 1)}
+	MOVi {12 Kint(0)} {Tint(0)}
 	BR {L2}
 L1 (exit)
 L2
-	MOV {local(y, 1)} {T(0)}
-	MOV {T(0)} {local(x, 0)}
+	MOV {Tint(0)} {local(x, 0)}
 	BR {L3}
 L3
 	ADD {local(x, 0), 1 Kint(1)} {T(0)}
@@ -2369,14 +2368,13 @@ digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>INIT {local(x, 0)}</TD></TR>
-<TR><TD>MOV {12 Kint(0)} {local(y, 1)}</TD></TR>
+<TR><TD>MOVi {12 Kint(0)} {Tint(0)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>MOV {local(y, 1)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(x, 0)}</TD></TR>
+<TR><TD>MOV {Tint(0)} {local(x, 0)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3

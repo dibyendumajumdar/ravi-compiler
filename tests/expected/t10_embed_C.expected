@@ -25,16 +25,16 @@ function()
    demo --global symbol any 
    =
     function(
-      u --local symbol userdata Userdata
+      u --local symbol userdata Userdata 
     )
     --[local symbols] u, u1
       C (
-        u --local symbol userdata Userdata
+        u --local symbol userdata Userdata 
         ) '        MyStruct *s = (MyStruct *) u.ptr;
     '
       local
       --[symbols]
-        u1 --local symbol any 
+        u1 --local symbol any   const
       --[expressions]
         C__new( --userdata
         )
@@ -51,16 +51,16 @@ function()
    demo --global symbol any 
    =
     function(
-      u --local symbol userdata Userdata
+      u --local symbol userdata Userdata 
     )
     --[local symbols] u, u1
       C (
-        u --local symbol userdata Userdata
+        u --local symbol userdata Userdata 
         ) '        MyStruct *s = (MyStruct *) u.ptr;
     '
       local
       --[symbols]
-        u1 --local symbol any 
+        u1 --local symbol any   const
       --[expressions]
         C__new( --userdata
         )
@@ -124,23 +124,23 @@ function()
 --[local symbols] i, j, k
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer  
   --[expressions]
     1
   local
   --[symbols]
-    j --local symbol integer 
+    j --local symbol integer  
   --[expressions]
     2
   local
   --[symbols]
-    k --local symbol integer 
+    k --local symbol integer  
   C (
-    i --local symbol integer 
+    i --local symbol integer  
    ,
-    j --local symbol integer 
+    j --local symbol integer  
    ,
-    k --local symbol integer 
+    k --local symbol integer  
     ) '     k = i+j; // Okay as primitive types
 '
 end
@@ -149,23 +149,23 @@ function()
 --[local symbols] i, j, k
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer  
   --[expressions]
     1
   local
   --[symbols]
-    j --local symbol integer 
+    j --local symbol integer  
   --[expressions]
     2
   local
   --[symbols]
-    k --local symbol integer 
+    k --local symbol integer  
   C (
-    i --local symbol integer 
+    i --local symbol integer  
    ,
-    j --local symbol integer 
+    j --local symbol integer  
    ,
-    k --local symbol integer 
+    k --local symbol integer  
     ) '     k = i+j; // Okay as primitive types
 '
 end
@@ -217,24 +217,24 @@ function()
 '
   local
   --[symbols]
-    u --local symbol any 
+    u --local symbol any  
   --[expressions]
     C__new( --userdata
     )
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer  
   --[expressions]
     42
   local
   --[symbols]
-    j --local symbol integer 
+    j --local symbol integer  
   C (
-    i --local symbol integer 
+    i --local symbol integer  
    ,
-    j --local symbol integer 
+    j --local symbol integer  
    ,
-    u --local symbol any 
+    u --local symbol any  
     ) '    MyStruct *s = (MyStruct *) u.ptr;
     s->i = i;
     j = s->i;
@@ -242,7 +242,7 @@ function()
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       j --local symbol integer 
+       j --local symbol integer  
      --[primary end]
     --[suffixed expr end]
 end
@@ -256,24 +256,24 @@ function()
 '
   local
   --[symbols]
-    u --local symbol any 
+    u --local symbol any  
   --[expressions]
     C__new( --userdata
     )
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer  
   --[expressions]
     42
   local
   --[symbols]
-    j --local symbol integer 
+    j --local symbol integer  
   C (
-    i --local symbol integer 
+    i --local symbol integer  
    ,
-    j --local symbol integer 
+    j --local symbol integer  
    ,
-    u --local symbol any 
+    u --local symbol any  
     ) '    MyStruct *s = (MyStruct *) u.ptr;
     s->i = i;
     j = s->i;
@@ -281,7 +281,7 @@ function()
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       j --local symbol integer 
+       j --local symbol integer  
      --[primary end]
     --[suffixed expr end]
 end
@@ -437,27 +437,27 @@ function()
      --[field selector end]
    =
     function(
-      d --local symbol integer 
+      d --local symbol integer  
      ,
-      m --local symbol integer 
+      m --local symbol integer  
      ,
-      y --local symbol integer 
+      y --local symbol integer  
     )
     --[local symbols] d, m, y, date
       local
       --[symbols]
-        date --local symbol any 
+        date --local symbol any  
       --[expressions]
         C__new( --userdata
         )
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        d --local symbol integer 
+        d --local symbol integer  
        ,
-        m --local symbol integer 
+        m --local symbol integer  
        ,
-        y --local symbol integer 
+        y --local symbol integer  
         ) '        Date *dateptr = (Date *) date.ptr;
         dateptr->d = (unsigned char)d;
         dateptr->m = (unsigned char)m;
@@ -472,7 +472,7 @@ function()
       return
         --[suffixed expr start] any
          --[primary start] any
-           date --local symbol any 
+           date --local symbol any  
          --[primary end]
         --[suffixed expr end]
     end
@@ -484,32 +484,32 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --upvalues  _ENV*
     --[local symbols] date, d, m, y, j
       local
       --[symbols]
-        d --local symbol integer 
+        d --local symbol integer  
       local
       --[symbols]
-        m --local symbol integer 
+        m --local symbol integer  
       local
       --[symbols]
-        y --local symbol integer 
+        y --local symbol integer  
       local
       --[symbols]
-        j --local symbol integer 
+        j --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        d --local symbol integer 
+        d --local symbol integer  
        ,
-        m --local symbol integer 
+        m --local symbol integer  
        ,
-        y --local symbol integer 
+        y --local symbol integer  
        ,
-        j --local symbol integer 
+        j --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             d = dateptr->d;
             m = dateptr->m;
@@ -527,25 +527,25 @@ function()
              (
                --[suffixed expr start] integer
                 --[primary start] integer
-                  d --local symbol integer 
+                  d --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  m --local symbol integer 
+                  m --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  y --local symbol integer 
+                  y --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  j --local symbol integer 
+                  j --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
              )
@@ -563,23 +563,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->d;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -591,23 +591,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->m;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -619,23 +619,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->y;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -647,29 +647,29 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->serial;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
   local
   --[symbols]
-    d --local symbol any 
+    d --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -706,7 +706,7 @@ function()
          (
            --[suffixed expr start] any
             --[primary start] any
-              d --local symbol any 
+              d --local symbol any   const
             --[primary end]
            --[suffixed expr end]
          )
@@ -740,7 +740,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -779,7 +779,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -818,7 +818,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -857,7 +857,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -904,27 +904,27 @@ function()
      --[field selector end]
    =
     function(
-      d --local symbol integer 
+      d --local symbol integer  
      ,
-      m --local symbol integer 
+      m --local symbol integer  
      ,
-      y --local symbol integer 
+      y --local symbol integer  
     )
     --[local symbols] d, m, y, date
       local
       --[symbols]
-        date --local symbol any 
+        date --local symbol any  
       --[expressions]
         C__new( --userdata
         )
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        d --local symbol integer 
+        d --local symbol integer  
        ,
-        m --local symbol integer 
+        m --local symbol integer  
        ,
-        y --local symbol integer 
+        y --local symbol integer  
         ) '        Date *dateptr = (Date *) date.ptr;
         dateptr->d = (unsigned char)d;
         dateptr->m = (unsigned char)m;
@@ -939,7 +939,7 @@ function()
       return
         --[suffixed expr start] any
          --[primary start] any
-           date --local symbol any 
+           date --local symbol any  
          --[primary end]
         --[suffixed expr end]
     end
@@ -951,32 +951,32 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --upvalues  _ENV*
     --[local symbols] date, d, m, y, j
       local
       --[symbols]
-        d --local symbol integer 
+        d --local symbol integer  
       local
       --[symbols]
-        m --local symbol integer 
+        m --local symbol integer  
       local
       --[symbols]
-        y --local symbol integer 
+        y --local symbol integer  
       local
       --[symbols]
-        j --local symbol integer 
+        j --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        d --local symbol integer 
+        d --local symbol integer  
        ,
-        m --local symbol integer 
+        m --local symbol integer  
        ,
-        y --local symbol integer 
+        y --local symbol integer  
        ,
-        j --local symbol integer 
+        j --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             d = dateptr->d;
             m = dateptr->m;
@@ -994,25 +994,25 @@ function()
              (
                --[suffixed expr start] integer
                 --[primary start] integer
-                  d --local symbol integer 
+                  d --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  m --local symbol integer 
+                  m --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  y --local symbol integer 
+                  y --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] integer
                 --[primary start] integer
-                  j --local symbol integer 
+                  j --local symbol integer  
                 --[primary end]
                --[suffixed expr end]
              )
@@ -1030,23 +1030,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->d;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -1058,23 +1058,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->m;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -1086,23 +1086,23 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->y;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
@@ -1114,29 +1114,29 @@ function()
      --[field selector end]
    =
     function(
-      date --local symbol any 
+      date --local symbol any  
     )
     --[local symbols] date, v
       local
       --[symbols]
-        v --local symbol integer 
+        v --local symbol integer  
       C (
-        date --local symbol any 
+        date --local symbol any  
        ,
-        v --local symbol integer 
+        v --local symbol integer  
         ) '            Date *dateptr = (Date *) date.ptr;
             v = dateptr->serial;
     '
       return
         --[suffixed expr start] integer
          --[primary start] integer
-           v --local symbol integer 
+           v --local symbol integer  
          --[primary end]
         --[suffixed expr end]
     end
   local
   --[symbols]
-    d --local symbol any 
+    d --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -1173,7 +1173,7 @@ function()
          (
            --[suffixed expr start] any
             --[primary start] any
-              d --local symbol any 
+              d --local symbol any   const
             --[primary end]
            --[suffixed expr end]
          )
@@ -1207,7 +1207,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -1246,7 +1246,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -1285,7 +1285,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )
@@ -1324,7 +1324,7 @@ function()
                 (
                   --[suffixed expr start] any
                    --[primary start] any
-                     d --local symbol any 
+                     d --local symbol any   const
                    --[primary end]
                   --[suffixed expr end]
                 )

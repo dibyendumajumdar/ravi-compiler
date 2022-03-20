@@ -5,7 +5,7 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol any 
+    i --local symbol any   const
   --[expressions]
     0
 end
@@ -14,19 +14,19 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol any 
+    i --local symbol integer   const
   --[expressions]
     0
 end
 define Proc%1
 L0 (entry)
-	MOV {0 Kint(0)} {local(i, 0)}
+	MOVi {0 Kint(0)} {Tint(0)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {0 Kint(0)} {local(i, 0)}</TD></TR>
+<TR><TD>MOVi {0 Kint(0)} {Tint(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -38,9 +38,9 @@ function()
 --[local symbols] i, j
   local
   --[symbols]
-    i --local symbol any 
+    i --local symbol any   const
    ,
-    j --local symbol any 
+    j --local symbol any   const
   --[expressions]
     1
    ,
@@ -51,9 +51,9 @@ function()
 --[local symbols] i, j
   local
   --[symbols]
-    i --local symbol any 
+    i --local symbol integer   const
    ,
-    j --local symbol any 
+    j --local symbol integer   const
   --[expressions]
     1
    ,
@@ -61,15 +61,15 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {1 Kint(0)} {local(i, 0)}
-	MOV {2 Kint(1)} {local(j, 1)}
+	MOVi {1 Kint(0)} {Tint(0)}
+	MOVi {2 Kint(1)} {Tint(1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1 Kint(0)} {local(i, 0)}</TD></TR>
-<TR><TD>MOV {2 Kint(1)} {local(j, 1)}</TD></TR>
+<TR><TD>MOVi {1 Kint(0)} {Tint(0)}</TD></TR>
+<TR><TD>MOVi {2 Kint(1)} {Tint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -81,7 +81,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -94,7 +94,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -124,7 +124,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -137,7 +137,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -167,9 +167,9 @@ function()
 --[local symbols] a, b
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
    ,
-    b --local symbol any 
+    b --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -188,9 +188,9 @@ function()
 --[local symbols] a, b
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
    ,
-    b --local symbol any 
+    b --local symbol any   const
   --[expressions]
     --[suffixed expr start] any
      --[primary start] any
@@ -230,12 +230,12 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol integer 
+    a --local symbol integer   const
   return
     --[binary expr start] any
      --[suffixed expr start] integer
       --[primary start] integer
-        a --local symbol integer 
+        a --local symbol integer   const
       --[primary end]
      --[suffixed expr end]
     +
@@ -247,12 +247,12 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol integer 
+    a --local symbol integer   const
   return
     --[binary expr start] integer
      --[suffixed expr start] integer
       --[primary start] integer
-        a --local symbol integer 
+        a --local symbol integer   const
       --[primary end]
      --[suffixed expr end]
     +
@@ -281,7 +281,7 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer   const
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -293,7 +293,7 @@ function()
          --[binary expr start] any
           --[suffixed expr start] integer
            --[primary start] integer
-             i --local symbol integer 
+             i --local symbol integer   const
            --[primary end]
           --[suffixed expr end]
          /
@@ -309,7 +309,7 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer   const
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -321,7 +321,7 @@ function()
          --[binary expr start] number
           --[suffixed expr start] integer
            --[primary start] integer
-             i --local symbol integer 
+             i --local symbol integer   const
            --[primary end]
           --[suffixed expr end]
          /
@@ -358,11 +358,11 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   return
     --[suffixed expr start] any
      --[primary start] integer[]
-       t --local symbol integer[] 
+       t --local symbol integer[]   const
      --[primary end]
      --[suffix list start]
        --[Y index start] any
@@ -378,11 +378,11 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   return
     --[suffixed expr start] integer
      --[primary start] integer[]
-       t --local symbol integer[] 
+       t --local symbol integer[]   const
      --[primary end]
      --[suffix list start]
        --[Y index start] integer
@@ -415,23 +415,23 @@ function()
 --[local symbols] t, len
   local
   --[symbols]
-    t --local symbol table 
+    t --local symbol table   const
   local
   --[symbols]
-    len --local symbol integer 
+    len --local symbol integer   const
   --[expressions]
     --[unary expr start] any
     #
      --[suffixed expr start] table
       --[primary start] table
-        t --local symbol table 
+        t --local symbol table   const
       --[primary end]
      --[suffixed expr end]
     --[unary expr end]
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       len --local symbol integer 
+       len --local symbol integer   const
      --[primary end]
     --[suffixed expr end]
 end
@@ -440,23 +440,23 @@ function()
 --[local symbols] t, len
   local
   --[symbols]
-    t --local symbol table 
+    t --local symbol table   const
   local
   --[symbols]
-    len --local symbol integer 
+    len --local symbol integer   const
   --[expressions]
     --[unary expr start] any
     #
      --[suffixed expr start] table
       --[primary start] table
-        t --local symbol table 
+        t --local symbol table   const
       --[primary end]
      --[suffixed expr end]
     --[unary expr end]
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       len --local symbol integer 
+       len --local symbol integer   const
      --[primary end]
     --[suffixed expr end]
 end
@@ -550,7 +550,7 @@ function()
   --[expression statement end]
   local
   --[symbols]
-    _g --local symbol any 
+    _g --local symbol any   const
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -583,7 +583,7 @@ function()
       --[binary expr start] any
        --[suffixed expr start] any
         --[primary start] any
-          _g --local symbol any 
+          _g --local symbol any   const
         --[primary end]
        --[suffixed expr end]
       and
@@ -661,7 +661,7 @@ function()
   --[expression statement end]
   local
   --[symbols]
-    _g --local symbol any 
+    _g --local symbol any   const
   --[expression statement start]
    --[var list start]
      --[suffixed expr start] any
@@ -694,7 +694,7 @@ function()
       --[binary expr start] any
        --[suffixed expr start] any
         --[primary start] any
-          _g --local symbol any 
+          _g --local symbol any   const
         --[primary end]
        --[suffixed expr end]
       and

@@ -5,7 +5,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[binary expr start] any
      --[suffixed expr start] any
@@ -26,7 +26,7 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[binary expr start] any
      --[suffixed expr start] any
@@ -68,7 +68,7 @@ function()
 --[local symbols] hello
   local
   --[symbols]
-    hello --local symbol any 
+    hello --local symbol any   const
   --[expressions]
     --[binary expr start] any
      'hello '
@@ -81,7 +81,7 @@ function()
 --[local symbols] hello
   local
   --[symbols]
-    hello --local symbol any 
+    hello --local symbol any   const
   --[expressions]
     --[binary expr start] any
      'hello '
@@ -111,7 +111,7 @@ function()
 --[local symbols] y
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
      'ab'
@@ -140,7 +140,7 @@ function()
 --[local symbols] y
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
      'ab'
@@ -191,17 +191,17 @@ function()
 --[local symbols] x, y
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any   const
   --[expressions]
     1.0000000000000000
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
      --[suffixed expr start] any
       --[primary start] any
-        x --local symbol any 
+        x --local symbol any   const
       --[primary end]
      --[suffixed expr end]
     ..
@@ -210,7 +210,7 @@ function()
      ..
       --[suffixed expr start] any
        --[primary start] any
-         x --local symbol any 
+         x --local symbol any   const
        --[primary end]
       --[suffixed expr end]
      --[binary expr end]
@@ -221,26 +221,26 @@ function()
 --[local symbols] x, y
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol number   const
   --[expressions]
     1.0000000000000000
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
-     --[suffixed expr start] any
-      --[primary start] any
-        x --local symbol any 
+     --[suffixed expr start] number
+      --[primary start] number
+        x --local symbol number   const
       --[primary end]
      --[suffixed expr end]
     ..
      --[binary expr start] any
       ' test '
      ..
-      --[suffixed expr start] any
-       --[primary start] any
-         x --local symbol any 
+      --[suffixed expr start] number
+       --[primary start] number
+         x --local symbol number   const
        --[primary end]
       --[suffixed expr end]
      --[binary expr end]
@@ -248,19 +248,19 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {1E0 Kflt(0)} {local(x, 0)}
-	CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}
-	CONCAT {local(x, 0), T(0)} {T(0)}
-	MOV {T(0)} {local(y, 1)}
+	MOVf {1E0 Kflt(0)} {Tflt(0)}
+	CONCAT {' test ' Ks(0), Tflt(0)} {T(0)}
+	CONCAT {Tflt(0), T(0)} {T(0)}
+	MOV {T(0)} {local(y, 0)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1E0 Kflt(0)} {local(x, 0)}</TD></TR>
-<TR><TD>CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {local(x, 0), T(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(y, 1)}</TD></TR>
+<TR><TD>MOVf {1E0 Kflt(0)} {Tflt(0)}</TD></TR>
+<TR><TD>CONCAT {' test ' Ks(0), Tflt(0)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {Tflt(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(y, 0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -274,17 +274,17 @@ function()
 --[local symbols] x, y, z, a
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol any   const
   --[expressions]
     1.0000000000000000
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
      --[suffixed expr start] any
       --[primary start] any
-        x --local symbol any 
+        x --local symbol any   const
       --[primary end]
      --[suffixed expr end]
     ..
@@ -293,25 +293,25 @@ function()
      ..
       --[suffixed expr start] any
        --[primary start] any
-         x --local symbol any 
+         x --local symbol any   const
        --[primary end]
       --[suffixed expr end]
      --[binary expr end]
     --[binary expr end]
   local
   --[symbols]
-    z --local symbol any 
+    z --local symbol any   const
   --[expressions]
     2.0000000000000000
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[binary expr start] any
      --[binary expr start] any
       --[suffixed expr start] any
        --[primary start] any
-         x --local symbol any 
+         x --local symbol any   const
        --[primary end]
       --[suffixed expr end]
      +
@@ -324,7 +324,7 @@ function()
       --[binary expr start] any
        --[suffixed expr start] any
         --[primary start] any
-          y --local symbol any 
+          y --local symbol any   const
         --[primary end]
        --[suffixed expr end]
       ..
@@ -334,7 +334,7 @@ function()
         --[binary expr start] any
          --[suffixed expr start] any
           --[primary start] any
-            z --local symbol any 
+            z --local symbol any   const
           --[primary end]
          --[suffixed expr end]
         +
@@ -350,44 +350,44 @@ function()
 --[local symbols] x, y, z, a
   local
   --[symbols]
-    x --local symbol any 
+    x --local symbol number   const
   --[expressions]
     1.0000000000000000
   local
   --[symbols]
-    y --local symbol any 
+    y --local symbol any   const
   --[expressions]
     --[binary expr start] any
-     --[suffixed expr start] any
-      --[primary start] any
-        x --local symbol any 
+     --[suffixed expr start] number
+      --[primary start] number
+        x --local symbol number   const
       --[primary end]
      --[suffixed expr end]
     ..
      --[binary expr start] any
       ' test '
      ..
-      --[suffixed expr start] any
-       --[primary start] any
-         x --local symbol any 
+      --[suffixed expr start] number
+       --[primary start] number
+         x --local symbol number   const
        --[primary end]
       --[suffixed expr end]
      --[binary expr end]
     --[binary expr end]
   local
   --[symbols]
-    z --local symbol any 
+    z --local symbol number   const
   --[expressions]
     2.0000000000000000
   local
   --[symbols]
-    a --local symbol any 
+    a --local symbol any   const
   --[expressions]
     --[binary expr start] any
-     --[binary expr start] any
-      --[suffixed expr start] any
-       --[primary start] any
-         x --local symbol any 
+     --[binary expr start] number
+      --[suffixed expr start] number
+       --[primary start] number
+         x --local symbol number   const
        --[primary end]
       --[suffixed expr end]
      +
@@ -400,17 +400,17 @@ function()
       --[binary expr start] any
        --[suffixed expr start] any
         --[primary start] any
-          y --local symbol any 
+          y --local symbol any   const
         --[primary end]
        --[suffixed expr end]
       ..
        --[binary expr start] any
         ' '
        ..
-        --[binary expr start] any
-         --[suffixed expr start] any
-          --[primary start] any
-            z --local symbol any 
+        --[binary expr start] number
+         --[suffixed expr start] number
+          --[primary start] number
+            z --local symbol number   const
           --[primary end]
          --[suffixed expr end]
         +
@@ -423,35 +423,35 @@ function()
 end
 define Proc%1
 L0 (entry)
-	MOV {1E0 Kflt(0)} {local(x, 0)}
-	CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}
-	CONCAT {local(x, 0), T(0)} {T(0)}
-	MOV {T(0)} {local(y, 1)}
-	MOV {2E0 Kflt(1)} {local(z, 2)}
-	ADD {local(x, 0), 1 Kint(0)} {T(0)}
-	ADD {local(z, 2), 2 Kint(1)} {T(1)}
-	CONCAT {' ' Ks(1), T(1)} {T(1)}
-	CONCAT {local(y, 1), T(1)} {T(1)}
-	CONCAT {' ' Ks(1), T(1)} {T(1)}
-	CONCAT {T(0), T(1)} {T(0)}
-	MOV {T(0)} {local(a, 3)}
+	MOVf {1E0 Kflt(0)} {Tflt(0)}
+	CONCAT {' test ' Ks(0), Tflt(0)} {T(0)}
+	CONCAT {Tflt(0), T(0)} {T(0)}
+	MOV {T(0)} {local(y, 0)}
+	MOVf {2E0 Kflt(1)} {Tflt(1)}
+	ADDfi {Tflt(0), 1 Kint(0)} {Tflt(2)}
+	ADDfi {Tflt(1), 2 Kint(1)} {Tflt(3)}
+	CONCAT {' ' Ks(1), Tflt(3)} {T(0)}
+	CONCAT {local(y, 0), T(0)} {T(0)}
+	CONCAT {' ' Ks(1), T(0)} {T(0)}
+	CONCAT {Tflt(2), T(0)} {T(0)}
+	MOV {T(0)} {local(a, 1)}
 	RET {L1}
 L1 (exit)
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>MOV {1E0 Kflt(0)} {local(x, 0)}</TD></TR>
-<TR><TD>CONCAT {' test ' Ks(0), local(x, 0)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {local(x, 0), T(0)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(y, 1)}</TD></TR>
-<TR><TD>MOV {2E0 Kflt(1)} {local(z, 2)}</TD></TR>
-<TR><TD>ADD {local(x, 0), 1 Kint(0)} {T(0)}</TD></TR>
-<TR><TD>ADD {local(z, 2), 2 Kint(1)} {T(1)}</TD></TR>
-<TR><TD>CONCAT {' ' Ks(1), T(1)} {T(1)}</TD></TR>
-<TR><TD>CONCAT {local(y, 1), T(1)} {T(1)}</TD></TR>
-<TR><TD>CONCAT {' ' Ks(1), T(1)} {T(1)}</TD></TR>
-<TR><TD>CONCAT {T(0), T(1)} {T(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {local(a, 3)}</TD></TR>
+<TR><TD>MOVf {1E0 Kflt(0)} {Tflt(0)}</TD></TR>
+<TR><TD>CONCAT {' test ' Ks(0), Tflt(0)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {Tflt(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(y, 0)}</TD></TR>
+<TR><TD>MOVf {2E0 Kflt(1)} {Tflt(1)}</TD></TR>
+<TR><TD>ADDfi {Tflt(0), 1 Kint(0)} {Tflt(2)}</TD></TR>
+<TR><TD>ADDfi {Tflt(1), 2 Kint(1)} {Tflt(3)}</TD></TR>
+<TR><TD>CONCAT {' ' Ks(1), Tflt(3)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {local(y, 0), T(0)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {' ' Ks(1), T(0)} {T(0)}</TD></TR>
+<TR><TD>CONCAT {Tflt(2), T(0)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(a, 1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

@@ -6,9 +6,9 @@ function()
 --upvalues  _ENV*
   for
   --[local symbols] k, v
-    k --local symbol any 
+    k --local symbol any  
    ,
-    v --local symbol any 
+    v --local symbol any  
   in
     --[suffixed expr start] any
      --[primary start] any
@@ -38,13 +38,13 @@ function()
             (
               --[suffixed expr start] any
                --[primary start] any
-                 k --local symbol any 
+                 k --local symbol any  
                --[primary end]
               --[suffixed expr end]
              ,
               --[suffixed expr start] any
                --[primary start] any
-                 v --local symbol any 
+                 v --local symbol any  
                --[primary end]
               --[suffixed expr end]
             )
@@ -61,11 +61,11 @@ function()
   --[local symbols] (for_f), (for_s), (for_var)
     local
     --[symbols]
-      (for_f) --local symbol any 
+      (for_f) --local symbol any  
      ,
-      (for_s) --local symbol any 
+      (for_s) --local symbol any  
      ,
-      (for_var) --local symbol any 
+      (for_var) --local symbol any  
     --[expressions]
       --[suffixed expr start] any
        --[primary start] any
@@ -89,27 +89,27 @@ function()
     do
       local
       --[symbols]
-        k --local symbol any 
+        k --local symbol any  
        ,
-        v --local symbol any 
+        v --local symbol any  
       --[expressions]
         --[suffixed expr start] any
          --[primary start] any
-           (for_f) --local symbol any 
+           (for_f) --local symbol any  
          --[primary end]
          --[suffix list start]
            --[function call start] any
             (
-               (for_s) --local symbol any 
+               (for_s) --local symbol any  
              ,
-               (for_var) --local symbol any 
+               (for_var) --local symbol any  
             )
            --[function call end]
          --[suffix list end]
         --[suffixed expr end]
       if
        --[binary expr start] any
-         k --local symbol any 
+         k --local symbol any  
        ==
         nil
        --[binary expr end]
@@ -118,10 +118,10 @@ function()
       end
       --[expression statement start]
        --[var list start]
-          (for_var) --local symbol any 
+          (for_var) --local symbol any  
        = --[var list end]
        --[expression list start]
-          k --local symbol any 
+          k --local symbol any  
        --[expression list end]
       --[expression statement end]
       --[expression statement start]
@@ -135,13 +135,13 @@ function()
              (
                --[suffixed expr start] any
                 --[primary start] any
-                  k --local symbol any 
+                  k --local symbol any  
                 --[primary end]
                --[suffixed expr end]
               ,
                --[suffixed expr start] any
                 --[primary start] any
-                  v --local symbol any 
+                  v --local symbol any  
                 --[primary end]
                --[suffixed expr end]
              )

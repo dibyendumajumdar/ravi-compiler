@@ -5,9 +5,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol integer[] 
+      bar --local symbol integer[]   const
      ,
-      zee --local symbol number[] 
+      zee --local symbol number[]   const
     )
     --[local symbols] bar, zee
     end
@@ -17,9 +17,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol integer[] 
+      bar --local symbol integer[]   const
      ,
-      zee --local symbol number[] 
+      zee --local symbol number[]   const
     )
     --[local symbols] bar, zee
     end
@@ -70,9 +70,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol number 
+      bar --local symbol number   const
      ,
-      zee --local symbol string 
+      zee --local symbol string   const
     )
     --[local symbols] bar, zee
     end
@@ -82,9 +82,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol number 
+      bar --local symbol number   const
      ,
-      zee --local symbol string 
+      zee --local symbol string   const
     )
     --[local symbols] bar, zee
     end
@@ -135,9 +135,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol closure 
+      bar --local symbol closure   const
      ,
-      zee --local symbol userdata My.User.Type
+      zee --local symbol userdata My.User.Type  const
     )
     --[local symbols] bar, zee
     end
@@ -147,9 +147,9 @@ function()
    foo --global symbol any 
    =
     function(
-      bar --local symbol closure 
+      bar --local symbol closure   const
      ,
-      zee --local symbol userdata My.User.Type
+      zee --local symbol userdata My.User.Type  const
     )
     --[local symbols] bar, zee
     end
@@ -596,12 +596,12 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol integer 
+    a --local symbol integer   const
   return
     --[binary expr start] any
      --[suffixed expr start] integer
       --[primary start] integer
-        a --local symbol integer 
+        a --local symbol integer   const
       --[primary end]
      --[suffixed expr end]
     +
@@ -613,12 +613,12 @@ function()
 --[local symbols] a
   local
   --[symbols]
-    a --local symbol integer 
+    a --local symbol integer   const
   return
     --[binary expr start] integer
      --[suffixed expr start] integer
       --[primary start] integer
-        a --local symbol integer 
+        a --local symbol integer   const
       --[primary end]
      --[suffixed expr end]
     +
@@ -647,7 +647,7 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer   const
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -659,7 +659,7 @@ function()
          --[binary expr start] any
           --[suffixed expr start] integer
            --[primary start] integer
-             i --local symbol integer 
+             i --local symbol integer   const
            --[primary end]
           --[suffixed expr end]
          /
@@ -675,7 +675,7 @@ function()
 --[local symbols] i
   local
   --[symbols]
-    i --local symbol integer 
+    i --local symbol integer   const
   return
     --[suffixed expr start] any
      --[primary start] any
@@ -687,7 +687,7 @@ function()
          --[binary expr start] number
           --[suffixed expr start] integer
            --[primary start] integer
-             i --local symbol integer 
+             i --local symbol integer   const
            --[primary end]
           --[suffixed expr end]
          /
@@ -724,11 +724,11 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   return
     --[suffixed expr start] any
      --[primary start] integer[]
-       t --local symbol integer[] 
+       t --local symbol integer[]   const
      --[primary end]
      --[suffix list start]
        --[Y index start] any
@@ -744,11 +744,11 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   return
     --[suffixed expr start] integer
      --[primary start] integer[]
-       t --local symbol integer[] 
+       t --local symbol integer[]   const
      --[primary end]
      --[suffix list start]
        --[Y index start] integer
@@ -781,14 +781,14 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   if
    --[suffixed expr start] any
     --[primary start] any
      --[binary expr start] any
       --[suffixed expr start] any
        --[primary start] integer[]
-         t --local symbol integer[] 
+         t --local symbol integer[]   const
        --[primary end]
        --[suffix list start]
          --[Y index start] any
@@ -815,14 +815,14 @@ function()
 --[local symbols] t
   local
   --[symbols]
-    t --local symbol integer[] 
+    t --local symbol integer[]   const
   if
    --[suffixed expr start] boolean
     --[primary start] boolean
      --[binary expr start] boolean
       --[suffixed expr start] integer
        --[primary start] integer[]
-         t --local symbol integer[] 
+         t --local symbol integer[]   const
        --[primary end]
        --[suffix list start]
          --[Y index start] integer
@@ -890,23 +890,23 @@ function()
 --[local symbols] t, len
   local
   --[symbols]
-    t --local symbol table 
+    t --local symbol table   const
   local
   --[symbols]
-    len --local symbol integer 
+    len --local symbol integer   const
   --[expressions]
     --[unary expr start] any
     #
      --[suffixed expr start] table
       --[primary start] table
-        t --local symbol table 
+        t --local symbol table   const
       --[primary end]
      --[suffixed expr end]
     --[unary expr end]
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       len --local symbol integer 
+       len --local symbol integer   const
      --[primary end]
     --[suffixed expr end]
 end
@@ -915,23 +915,23 @@ function()
 --[local symbols] t, len
   local
   --[symbols]
-    t --local symbol table 
+    t --local symbol table   const
   local
   --[symbols]
-    len --local symbol integer 
+    len --local symbol integer   const
   --[expressions]
     --[unary expr start] any
     #
      --[suffixed expr start] table
       --[primary start] table
-        t --local symbol table 
+        t --local symbol table   const
       --[primary end]
      --[suffixed expr end]
     --[unary expr end]
   return
     --[suffixed expr start] integer
      --[primary start] integer
-       len --local symbol integer 
+       len --local symbol integer   const
      --[primary end]
     --[suffixed expr end]
 end
@@ -960,16 +960,16 @@ function()
 --upvalues  _ENV*
   return
     function(
-      t --local symbol table 
+      t --local symbol table   const
      ,
-      i --local symbol integer 
+      i --local symbol integer  
     )
     --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
           --[primary start] integer
-            i --local symbol integer 
+            i --local symbol integer  
           --[primary end]
          --[suffixed expr end]
        = --[var list end]
@@ -978,7 +978,7 @@ function()
          #
           --[suffixed expr start] table
            --[primary start] table
-             t --local symbol table 
+             t --local symbol table   const
            --[primary end]
           --[suffixed expr end]
          --[unary expr end]
@@ -990,16 +990,16 @@ function()
 --upvalues  _ENV*
   return
     function(
-      t --local symbol table 
+      t --local symbol table   const
      ,
-      i --local symbol integer 
+      i --local symbol integer  
     )
     --[local symbols] t, i
       --[expression statement start]
        --[var list start]
          --[suffixed expr start] integer
           --[primary start] integer
-            i --local symbol integer 
+            i --local symbol integer  
           --[primary end]
          --[suffixed expr end]
        = --[var list end]
@@ -1008,7 +1008,7 @@ function()
          #
           --[suffixed expr start] table
            --[primary start] table
-             t --local symbol table 
+             t --local symbol table   const
            --[primary end]
           --[suffixed expr end]
          --[unary expr end]
@@ -1085,9 +1085,9 @@ function()
    matmul --global symbol any 
    =
     function(
-      a --local symbol table 
+      a --local symbol table   const
      ,
-      b --local symbol table 
+      b --local symbol table   const
     )
     --upvalues  _ENV*
     --[local symbols] a, b, m, n, p, x, c
@@ -1109,7 +1109,7 @@ function()
                    #
                     --[suffixed expr start] any
                      --[primary start] table
-                       a --local symbol table 
+                       a --local symbol table   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] any
@@ -1128,7 +1128,7 @@ function()
                 #
                  --[suffixed expr start] table
                   --[primary start] table
-                    b --local symbol table 
+                    b --local symbol table   const
                   --[primary end]
                  --[suffixed expr end]
                 --[unary expr end]
@@ -1141,19 +1141,19 @@ function()
       --[expression statement end]
       local
       --[symbols]
-        m --local symbol integer 
+        m --local symbol integer   const
        ,
-        n --local symbol integer 
+        n --local symbol integer   const
        ,
-        p --local symbol integer 
+        p --local symbol integer   const
        ,
-        x --local symbol table 
+        x --local symbol table   const
       --[expressions]
         --[unary expr start] any
         #
          --[suffixed expr start] table
           --[primary start] table
-            a --local symbol table 
+            a --local symbol table   const
           --[primary end]
          --[suffixed expr end]
         --[unary expr end]
@@ -1162,7 +1162,7 @@ function()
         #
          --[suffixed expr start] any
           --[primary start] table
-            a --local symbol table 
+            a --local symbol table   const
           --[primary end]
           --[suffix list start]
             --[Y index start] any
@@ -1178,7 +1178,7 @@ function()
         #
          --[suffixed expr start] any
           --[primary start] table
-            b --local symbol table 
+            b --local symbol table   const
           --[primary end]
           --[suffix list start]
             --[Y index start] any
@@ -1194,7 +1194,7 @@ function()
         } --[table constructor end]
       local
       --[symbols]
-        c --local symbol table 
+        c --local symbol table   const
       --[expressions]
         --[suffixed expr start] any
          --[primary start] any
@@ -1209,7 +1209,7 @@ function()
             (
               --[suffixed expr start] table
                --[primary start] table
-                 b --local symbol table 
+                 b --local symbol table   const
                --[primary end]
               --[suffixed expr end]
             )
@@ -1218,20 +1218,20 @@ function()
         --[suffixed expr end]
       for
       --[local symbols] i
-        i --local symbol any 
+        i --local symbol any  
       =
         1
        ,
         --[suffixed expr start] integer
          --[primary start] integer
-           m --local symbol integer 
+           m --local symbol integer   const
          --[primary end]
         --[suffixed expr end]
       do
       --[local symbols] xi
          local
          --[symbols]
-           xi --local symbol number[] 
+           xi --local symbol number[]   const
          --[expressions]
            --[suffixed expr start] any
             --[primary start] any
@@ -1246,7 +1246,7 @@ function()
                (
                  --[suffixed expr start] integer
                   --[primary start] integer
-                    p --local symbol integer 
+                    p --local symbol integer   const
                   --[primary end]
                  --[suffixed expr end]
                 ,
@@ -1259,14 +1259,14 @@ function()
           --[var list start]
             --[suffixed expr start] any
              --[primary start] table
-               x --local symbol table 
+               x --local symbol table   const
              --[primary end]
              --[suffix list start]
                --[Y index start] any
                 [
                  --[suffixed expr start] any
                   --[primary start] any
-                    i --local symbol any 
+                    i --local symbol any  
                   --[primary end]
                  --[suffixed expr end]
                 ]
@@ -1277,31 +1277,31 @@ function()
           --[expression list start]
             --[suffixed expr start] number[]
              --[primary start] number[]
-               xi --local symbol number[] 
+               xi --local symbol number[]   const
              --[primary end]
             --[suffixed expr end]
           --[expression list end]
          --[expression statement end]
          for
          --[local symbols] j
-           j --local symbol any 
+           j --local symbol any  
          =
            1
           ,
            --[suffixed expr start] integer
             --[primary start] integer
-              p --local symbol integer 
+              p --local symbol integer   const
             --[primary end]
            --[suffixed expr end]
          do
          --[local symbols] sum, ai, cj
             local
             --[symbols]
-              sum --local symbol number 
+              sum --local symbol number  
              ,
-              ai --local symbol number[] 
+              ai --local symbol number[]   const
              ,
-              cj --local symbol number[] 
+              cj --local symbol number[]   const
             --[expressions]
               0.0000000000000000
              ,
@@ -1311,14 +1311,14 @@ function()
                 --[primary start] any
                  --[suffixed expr start] any
                   --[primary start] table
-                    a --local symbol table 
+                    a --local symbol table   const
                   --[primary end]
                   --[suffix list start]
                     --[Y index start] any
                      [
                       --[suffixed expr start] any
                        --[primary start] any
-                         i --local symbol any 
+                         i --local symbol any  
                        --[primary end]
                       --[suffixed expr end]
                      ]
@@ -1335,14 +1335,14 @@ function()
                 --[primary start] any
                  --[suffixed expr start] any
                   --[primary start] table
-                    c --local symbol table 
+                    c --local symbol table   const
                   --[primary end]
                   --[suffix list start]
                     --[Y index start] any
                      [
                       --[suffixed expr start] any
                        --[primary start] any
-                         j --local symbol any 
+                         j --local symbol any  
                        --[primary end]
                       --[suffixed expr end]
                      ]
@@ -1354,13 +1354,13 @@ function()
               --[unary expr end]
             for
             --[local symbols] k
-              k --local symbol any 
+              k --local symbol any  
             =
               1
              ,
               --[suffixed expr start] integer
                --[primary start] integer
-                 n --local symbol integer 
+                 n --local symbol integer   const
                --[primary end]
               --[suffixed expr end]
             do
@@ -1368,7 +1368,7 @@ function()
                 --[var list start]
                   --[suffixed expr start] number
                    --[primary start] number
-                     sum --local symbol number 
+                     sum --local symbol number  
                    --[primary end]
                   --[suffixed expr end]
                 = --[var list end]
@@ -1376,21 +1376,21 @@ function()
                   --[binary expr start] any
                    --[suffixed expr start] number
                     --[primary start] number
-                      sum --local symbol number 
+                      sum --local symbol number  
                     --[primary end]
                    --[suffixed expr end]
                   +
                    --[binary expr start] any
                     --[suffixed expr start] any
                      --[primary start] number[]
-                       ai --local symbol number[] 
+                       ai --local symbol number[]   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] any
                         [
                          --[suffixed expr start] any
                           --[primary start] any
-                            k --local symbol any 
+                            k --local symbol any  
                           --[primary end]
                          --[suffixed expr end]
                         ]
@@ -1400,14 +1400,14 @@ function()
                    *
                     --[suffixed expr start] any
                      --[primary start] number[]
-                       cj --local symbol number[] 
+                       cj --local symbol number[]   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] any
                         [
                          --[suffixed expr start] any
                           --[primary start] any
-                            k --local symbol any 
+                            k --local symbol any  
                           --[primary end]
                          --[suffixed expr end]
                         ]
@@ -1423,14 +1423,14 @@ function()
              --[var list start]
                --[suffixed expr start] any
                 --[primary start] number[]
-                  xi --local symbol number[] 
+                  xi --local symbol number[]   const
                 --[primary end]
                 --[suffix list start]
                   --[Y index start] any
                    [
                     --[suffixed expr start] any
                      --[primary start] any
-                       j --local symbol any 
+                       j --local symbol any  
                      --[primary end]
                     --[suffixed expr end]
                    ]
@@ -1441,7 +1441,7 @@ function()
              --[expression list start]
                --[suffixed expr start] number
                 --[primary start] number
-                  sum --local symbol number 
+                  sum --local symbol number  
                 --[primary end]
                --[suffixed expr end]
              --[expression list end]
@@ -1451,7 +1451,7 @@ function()
       return
         --[suffixed expr start] table
          --[primary start] table
-           x --local symbol table 
+           x --local symbol table   const
          --[primary end]
         --[suffixed expr end]
     end
@@ -1467,9 +1467,9 @@ function()
    matmul --global symbol any 
    =
     function(
-      a --local symbol table 
+      a --local symbol table   const
      ,
-      b --local symbol table 
+      b --local symbol table   const
     )
     --upvalues  _ENV*
     --[local symbols] a, b, m, n, p, x, c
@@ -1491,7 +1491,7 @@ function()
                    #
                     --[suffixed expr start] any
                      --[primary start] table
-                       a --local symbol table 
+                       a --local symbol table   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] any
@@ -1510,7 +1510,7 @@ function()
                 #
                  --[suffixed expr start] table
                   --[primary start] table
-                    b --local symbol table 
+                    b --local symbol table   const
                   --[primary end]
                  --[suffixed expr end]
                 --[unary expr end]
@@ -1523,19 +1523,19 @@ function()
       --[expression statement end]
       local
       --[symbols]
-        m --local symbol integer 
+        m --local symbol integer   const
        ,
-        n --local symbol integer 
+        n --local symbol integer   const
        ,
-        p --local symbol integer 
+        p --local symbol integer   const
        ,
-        x --local symbol table 
+        x --local symbol table   const
       --[expressions]
         --[unary expr start] any
         #
          --[suffixed expr start] table
           --[primary start] table
-            a --local symbol table 
+            a --local symbol table   const
           --[primary end]
          --[suffixed expr end]
         --[unary expr end]
@@ -1544,7 +1544,7 @@ function()
         #
          --[suffixed expr start] any
           --[primary start] table
-            a --local symbol table 
+            a --local symbol table   const
           --[primary end]
           --[suffix list start]
             --[Y index start] any
@@ -1560,7 +1560,7 @@ function()
         #
          --[suffixed expr start] any
           --[primary start] table
-            b --local symbol table 
+            b --local symbol table   const
           --[primary end]
           --[suffix list start]
             --[Y index start] any
@@ -1576,7 +1576,7 @@ function()
         } --[table constructor end]
       local
       --[symbols]
-        c --local symbol table 
+        c --local symbol table   const
       --[expressions]
         --[suffixed expr start] any
          --[primary start] any
@@ -1591,7 +1591,7 @@ function()
             (
               --[suffixed expr start] table
                --[primary start] table
-                 b --local symbol table 
+                 b --local symbol table   const
                --[primary end]
               --[suffixed expr end]
             )
@@ -1600,20 +1600,20 @@ function()
         --[suffixed expr end]
       for
       --[local symbols] i
-        i --local symbol integer 
+        i --local symbol integer  
       =
         1
        ,
         --[suffixed expr start] integer
          --[primary start] integer
-           m --local symbol integer 
+           m --local symbol integer   const
          --[primary end]
         --[suffixed expr end]
       do
       --[local symbols] xi
          local
          --[symbols]
-           xi --local symbol number[] 
+           xi --local symbol number[]   const
          --[expressions]
            --[suffixed expr start] any
             --[primary start] any
@@ -1628,7 +1628,7 @@ function()
                (
                  --[suffixed expr start] integer
                   --[primary start] integer
-                    p --local symbol integer 
+                    p --local symbol integer   const
                   --[primary end]
                  --[suffixed expr end]
                 ,
@@ -1641,14 +1641,14 @@ function()
           --[var list start]
             --[suffixed expr start] any
              --[primary start] table
-               x --local symbol table 
+               x --local symbol table   const
              --[primary end]
              --[suffix list start]
                --[Y index start] any
                 [
                  --[suffixed expr start] integer
                   --[primary start] integer
-                    i --local symbol integer 
+                    i --local symbol integer  
                   --[primary end]
                  --[suffixed expr end]
                 ]
@@ -1659,31 +1659,31 @@ function()
           --[expression list start]
             --[suffixed expr start] number[]
              --[primary start] number[]
-               xi --local symbol number[] 
+               xi --local symbol number[]   const
              --[primary end]
             --[suffixed expr end]
           --[expression list end]
          --[expression statement end]
          for
          --[local symbols] j
-           j --local symbol integer 
+           j --local symbol integer  
          =
            1
           ,
            --[suffixed expr start] integer
             --[primary start] integer
-              p --local symbol integer 
+              p --local symbol integer   const
             --[primary end]
            --[suffixed expr end]
          do
          --[local symbols] sum, ai, cj
             local
             --[symbols]
-              sum --local symbol number 
+              sum --local symbol number  
              ,
-              ai --local symbol number[] 
+              ai --local symbol number[]   const
              ,
-              cj --local symbol number[] 
+              cj --local symbol number[]   const
             --[expressions]
               0.0000000000000000
              ,
@@ -1693,14 +1693,14 @@ function()
                 --[primary start] any
                  --[suffixed expr start] any
                   --[primary start] table
-                    a --local symbol table 
+                    a --local symbol table   const
                   --[primary end]
                   --[suffix list start]
                     --[Y index start] any
                      [
                       --[suffixed expr start] integer
                        --[primary start] integer
-                         i --local symbol integer 
+                         i --local symbol integer  
                        --[primary end]
                       --[suffixed expr end]
                      ]
@@ -1717,14 +1717,14 @@ function()
                 --[primary start] any
                  --[suffixed expr start] any
                   --[primary start] table
-                    c --local symbol table 
+                    c --local symbol table   const
                   --[primary end]
                   --[suffix list start]
                     --[Y index start] any
                      [
                       --[suffixed expr start] integer
                        --[primary start] integer
-                         j --local symbol integer 
+                         j --local symbol integer  
                        --[primary end]
                       --[suffixed expr end]
                      ]
@@ -1736,13 +1736,13 @@ function()
               --[unary expr end]
             for
             --[local symbols] k
-              k --local symbol integer 
+              k --local symbol integer  
             =
               1
              ,
               --[suffixed expr start] integer
                --[primary start] integer
-                 n --local symbol integer 
+                 n --local symbol integer   const
                --[primary end]
               --[suffixed expr end]
             do
@@ -1750,7 +1750,7 @@ function()
                 --[var list start]
                   --[suffixed expr start] number
                    --[primary start] number
-                     sum --local symbol number 
+                     sum --local symbol number  
                    --[primary end]
                   --[suffixed expr end]
                 = --[var list end]
@@ -1758,21 +1758,21 @@ function()
                   --[binary expr start] number
                    --[suffixed expr start] number
                     --[primary start] number
-                      sum --local symbol number 
+                      sum --local symbol number  
                     --[primary end]
                    --[suffixed expr end]
                   +
                    --[binary expr start] number
                     --[suffixed expr start] number
                      --[primary start] number[]
-                       ai --local symbol number[] 
+                       ai --local symbol number[]   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] number
                         [
                          --[suffixed expr start] integer
                           --[primary start] integer
-                            k --local symbol integer 
+                            k --local symbol integer  
                           --[primary end]
                          --[suffixed expr end]
                         ]
@@ -1782,14 +1782,14 @@ function()
                    *
                     --[suffixed expr start] number
                      --[primary start] number[]
-                       cj --local symbol number[] 
+                       cj --local symbol number[]   const
                      --[primary end]
                      --[suffix list start]
                        --[Y index start] number
                         [
                          --[suffixed expr start] integer
                           --[primary start] integer
-                            k --local symbol integer 
+                            k --local symbol integer  
                           --[primary end]
                          --[suffixed expr end]
                         ]
@@ -1805,14 +1805,14 @@ function()
              --[var list start]
                --[suffixed expr start] number
                 --[primary start] number[]
-                  xi --local symbol number[] 
+                  xi --local symbol number[]   const
                 --[primary end]
                 --[suffix list start]
                   --[Y index start] number
                    [
                     --[suffixed expr start] integer
                      --[primary start] integer
-                       j --local symbol integer 
+                       j --local symbol integer  
                      --[primary end]
                     --[suffixed expr end]
                    ]
@@ -1823,7 +1823,7 @@ function()
              --[expression list start]
                --[suffixed expr start] number
                 --[primary start] number
-                  sum --local symbol number 
+                  sum --local symbol number  
                 --[primary end]
                --[suffixed expr end]
              --[expression list end]
@@ -1833,7 +1833,7 @@ function()
       return
         --[suffixed expr start] table
          --[primary start] table
-           x --local symbol table 
+           x --local symbol table   const
          --[primary end]
         --[suffixed expr end]
     end
