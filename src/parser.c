@@ -1253,8 +1253,10 @@ static AstNode *parse_embedded_C(ParserState *parser, bool is_decl) {
 			const StringObject *varname = ls->t.seminfo.ts;
 			bool is_local = 0;
 			LuaSymbol *symbol = search_for_variable(parser, varname, &is_local);
-			if (symbol && is_local)
+			if (symbol && is_local) {
 				raviX_add_symbol(parser->compiler_state, &node->embedded_C_stmt.symbols, symbol);
+				symbol->variable.modified = 1; // assume local will be modified
+			}
 			else {
 				raviX_syntaxerror(ls, "Argument to C__unsafe() must be a local variable");
 			}
@@ -1262,8 +1264,11 @@ static AstNode *parse_embedded_C(ParserState *parser, bool is_decl) {
 			while (testnext(ls, ',')) {
 				varname = check_name_and_next(ls);
 				symbol = search_for_variable(parser, varname, &is_local);
-				if (symbol && is_local)
-					raviX_add_symbol(parser->compiler_state, &node->embedded_C_stmt.symbols, symbol);
+				if (symbol && is_local) {
+					raviX_add_symbol(parser->compiler_state, &node->embedded_C_stmt.symbols,
+							 symbol);
+					symbol->variable.modified = 1; // assume local will be modified
+				}
 				else {
 					raviX_syntaxerror(ls, "Argument to C__unsafe() must be a local variable");
 				}
