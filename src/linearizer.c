@@ -386,8 +386,14 @@ static Instruction *allocate_instruction(Proc *proc, enum opcode op, unsigned li
 static void free_instruction_operand_pseudos(Proc *proc, Instruction *insn)
 {
 	Pseudo *operand;
-	FOR_EACH_PTR_REVERSE(insn->operands, Pseudo, operand) { free_temp_pseudo(proc, operand, false); }
-	END_FOR_EACH_PTR_REVERSE(operand)
+	Pseudo *last = NULL;
+	FOR_EACH_PTR_REVERSE(insn->operands, Pseudo, operand) {
+		free_temp_pseudo(proc, operand, false);
+		last = operand;
+	} END_FOR_EACH_PTR_REVERSE(operand)
+	if (last != NULL && last->type == PSEUDO_RANGE_SELECT) {
+		free_temp_pseudo(proc, last->range_pseudo, false);
+	}
 }
 
 /* adds instruction to the current basic block */
