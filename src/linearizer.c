@@ -1767,6 +1767,9 @@ static void linearize_assignment(Proc *proc, AstNodeList *expr_list, struct node
 	for (int i = nv-1; i >= 0; i--) {
 		free_temp_pseudo(proc, varinfo[i].pseudo, false);
 	}
+	if (last_val_pseudo != NULL && last_val_pseudo->type == PSEUDO_RANGE) {
+		free_temp_pseudo(proc, last_val_pseudo, false);
+	}
 	return;
 }
 
