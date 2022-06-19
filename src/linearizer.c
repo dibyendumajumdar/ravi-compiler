@@ -1231,7 +1231,7 @@ static Pseudo *instruct_indexed_load(Proc *proc, ravitype_t container_type,
 	Pseudo *tofree2 = add_instruction_operand(proc, insn, key_pseudo);
 	add_instruction_target(proc, insn, target_pseudo);
 	add_instruction(proc, insn);
-	if (tofree2)
+	if (tofree1)
 		free_temp_pseudo(proc, tofree1, false);
 	if (tofree2)
 		free_temp_pseudo(proc, tofree2, false);
@@ -1256,7 +1256,7 @@ static Pseudo *indexed_load_from_global(Proc *proc, Pseudo *index_pseudo)
 	free_temp_pseudo(proc, container_pseudo, false);
 	free_temp_pseudo(proc, key_pseudo, false);
 	index_pseudo->index_info.used = 1;
-	if (tofree2)
+	if (tofree1)
 		free_temp_pseudo(proc, tofree1, false);
 	if (tofree2)
 		free_temp_pseudo(proc, tofree2, false);
@@ -1315,7 +1315,7 @@ static Pseudo *indexed_load(Proc *proc, Pseudo *index_pseudo)
 	free_temp_pseudo(proc, container_pseudo, false);
 	free_temp_pseudo(proc, key_pseudo, false);
 	index_pseudo->index_info.used = 1;
-	if (tofree2)
+	if (tofree1)
 		free_temp_pseudo(proc, tofree1, false);
 	if (tofree2)
 		free_temp_pseudo(proc, tofree2, false);
@@ -1485,7 +1485,7 @@ static Pseudo *linearize_function_call_expression(Proc *proc, AstNode *expr,
 
 	free_instruction_operand_pseudos(proc, insn);
 	if (tofree1)
-		free_temp_pseudo(proc, tofree2, false);
+		free_temp_pseudo(proc, tofree1, false);
 	if (tofree2)
 		free_temp_pseudo(proc, tofree2, false);
 	for (int i = 0; i < argi; i++) {
