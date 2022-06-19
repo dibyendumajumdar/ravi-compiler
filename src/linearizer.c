@@ -1491,7 +1491,7 @@ static Pseudo *linearize_function_call_expression(Proc *proc, AstNode *expr,
 	for (int i = 0; i < argi; i++) {
 		Pseudo *tofree = tofreelist[i];
 		if (tofree)
-			free_temp_pseudo(proc, tofree2, false);
+			free_temp_pseudo(proc, tofree, false);
 	}
 	return return_pseudo;
 }
