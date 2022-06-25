@@ -345,8 +345,8 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	LT {local(a, 0), 10 Kint(0)} {T(0)}
-	NOT {T(0)} {T(0)}
+	LT {local(a, 0), 10 Kint(0)} {T(1)}
+	NOT {T(1)} {T(0)}
 	CBR {T(0)} {L3, L4}
 L3
 	BR {L5}
@@ -375,8 +375,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
-<TR><TD>NOT {T(0)} {T(0)}</TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(1)}</TD></TR>
+<TR><TD>NOT {T(1)} {T(0)}</TD></TR>
 <TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
@@ -417,8 +417,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(0)}</TD></TR>
-<TR><TD>NOT {T(0)} {T(0)}</TD></TR>
+<TR><TD>LT {local(a, 0), 10 Kint(0)} {T(1)}</TD></TR>
+<TR><TD>NOT {T(1)} {T(0)}</TD></TR>
 <TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
@@ -2357,8 +2357,7 @@ L3
 L4
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
 	EQ {local(x, 0), 13 Kint(2)} {T(1)}
-	MOV {T(0)} {T(2)}
-	CALL {T(2), T(1)} {T(2..), 1 Kint(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L5
 	BR {L2}
@@ -2389,8 +2388,7 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>EQ {local(x, 0), 13 Kint(2)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), T(1)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L4 -> L1

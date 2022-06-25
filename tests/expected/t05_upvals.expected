@@ -841,8 +841,7 @@ L3
 L4
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
 	EQ {local(x, 0), 13 Kint(2)} {T(1)}
-	MOV {T(0)} {T(2)}
-	CALL {T(2), T(1)} {T(2..), 1 Kint(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L5
 	BR {L2}
@@ -873,8 +872,7 @@ L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>EQ {local(x, 0), 13 Kint(2)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), T(1)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L4 -> L1
@@ -1121,19 +1119,19 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(0)}
-	NOT {T(0)} {T(1)}
-	CBR {T(1)} {L3, L4}
+	LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(1)}
+	NOT {T(1)} {T(0)}
+	CBR {T(0)} {L3, L4}
 L3
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(2)}
-	CALL {T(2), local(m, 0)} {T(2..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}
+	CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}
 	LEN {Upval(1, Proc%1, msgs)} {T(2)}
-	ADD {T(2), 1 Kint(0)} {T(2)}
-	LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(3)}
-	GETsk {T(3), 'sub' Ks(3)} {T(4)}
+	ADD {T(2), 1 Kint(0)} {T(1)}
+	LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}
+	GETsk {T(2), 'sub' Ks(3)} {T(2)}
 	UNMi {3 Kint(1)} {Tint(0)}
-	CALL {T(4), local(m, 0), 3 Kint(1), Tint(0)} {T(4..), 1 Kint(0)}
-	PUT {T(4[4..])} {Upval(1, Proc%1, msgs), T(2)}
+	CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}
+	PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}
 	BR {L4}
 L4
 	RET {L1}
@@ -1156,23 +1154,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>NOT {T(0)} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L3, L4}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>NOT {T(1)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(m, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}</TD></TR>
 <TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(2)}</TD></TR>
-<TR><TD>ADD {T(2), 1 Kint(0)} {T(2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(3)}</TD></TR>
-<TR><TD>GETsk {T(3), 'sub' Ks(3)} {T(4)}</TD></TR>
+<TR><TD>ADD {T(2), 1 Kint(0)} {T(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'sub' Ks(3)} {T(2)}</TD></TR>
 <TR><TD>UNMi {3 Kint(1)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(4), local(m, 0), 3 Kint(1), Tint(0)} {T(4..), 1 Kint(0)}</TD></TR>
-<TR><TD>PUT {T(4[4..])} {Upval(1, Proc%1, msgs), T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4
@@ -1190,23 +1188,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>NOT {T(0)} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L3, L4}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), '_nomsg' Ks(0)} {T(1)}</TD></TR>
+<TR><TD>NOT {T(1)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(m, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}</TD></TR>
 <TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(2)}</TD></TR>
-<TR><TD>ADD {T(2), 1 Kint(0)} {T(2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(3)}</TD></TR>
-<TR><TD>GETsk {T(3), 'sub' Ks(3)} {T(4)}</TD></TR>
+<TR><TD>ADD {T(2), 1 Kint(0)} {T(1)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'sub' Ks(3)} {T(2)}</TD></TR>
 <TR><TD>UNMi {3 Kint(1)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(4), local(m, 0), 3 Kint(1), Tint(0)} {T(4..), 1 Kint(0)}</TD></TR>
-<TR><TD>PUT {T(4[4..])} {Upval(1, Proc%1, msgs), T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4
@@ -1457,9 +1455,9 @@ L1 (exit)
 define Proc%3
 L0 (entry)
 	MOV {1 Kint(0)} {Upval(0, Proc%2, a)}
-	ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(0)}
-	CLOSURE {Proc%4} {T(1)}
-	ADD {T(0), T(1)} {T(0)}
+	ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(1)}
+	CLOSURE {Proc%4} {T(2)}
+	ADD {T(1), T(2)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 define Proc%4
@@ -1497,9 +1495,9 @@ digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Upval(0, Proc%2, a)}</TD></TR>
-<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(0)}</TD></TR>
-<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
-<TR><TD>ADD {T(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(2)}</TD></TR>
+<TR><TD>ADD {T(1), T(2)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1526,9 +1524,9 @@ digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Upval(0, Proc%2, a)}</TD></TR>
-<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(0)}</TD></TR>
-<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
-<TR><TD>ADD {T(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(2)}</TD></TR>
+<TR><TD>ADD {T(1), T(2)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1571,9 +1569,9 @@ digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Upval(0, Proc%2, a)}</TD></TR>
-<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(0)}</TD></TR>
-<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
-<TR><TD>ADD {T(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(2)}</TD></TR>
+<TR><TD>ADD {T(1), T(2)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1600,9 +1598,9 @@ digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {1 Kint(0)} {Upval(0, Proc%2, a)}</TD></TR>
-<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(0)}</TD></TR>
-<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
-<TR><TD>ADD {T(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(1, Proc%2, y), Upval(2, Proc%2, x)} {T(1)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(2)}</TD></TR>
+<TR><TD>ADD {T(1), T(2)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

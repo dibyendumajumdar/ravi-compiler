@@ -256,8 +256,8 @@ L0 (entry)
 L1 (exit)
 define Proc%4
 L0 (entry)
-	ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}
-	ADD {T(0), local(z, 0)} {T(0)}
+	ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}
+	ADD {T(1), local(z, 0)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 digraph Proc1 {
@@ -285,8 +285,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -294,8 +294,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -311,8 +311,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -320,8 +320,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -345,8 +345,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -354,8 +354,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -371,8 +371,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -380,8 +380,8 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), local(z, 0)} {T(0)}</TD></TR>
+<TR><TD>ADD {Upval(0, Proc%2, x), Upval(1, Proc%3, y)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), local(z, 0)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1261,10 +1261,10 @@ L0 (entry)
 L1 (exit)
 define Proc%4
 L0 (entry)
-	LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}
-	ADD {local(c, 0), T(1)} {T(0)}
-	ADD {T(0), Upval(1, Proc%3, b)} {T(0)}
-	ADD {T(0), Upval(2, Proc%2, a)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}
+	ADD {local(c, 0), T(3)} {T(2)}
+	ADD {T(2), Upval(1, Proc%3, b)} {T(1)}
+	ADD {T(1), Upval(2, Proc%2, a)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 digraph Proc1 {
@@ -1296,10 +1296,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1307,10 +1307,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1328,10 +1328,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1339,10 +1339,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1370,10 +1370,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1381,10 +1381,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1402,10 +1402,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -1413,10 +1413,10 @@ L0 -> L1
 digraph Proc4 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>ADD {local(c, 0), T(1)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(1, Proc%3, b)} {T(0)}</TD></TR>
-<TR><TD>ADD {T(0), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'g' Ks(0)} {T(3)}</TD></TR>
+<TR><TD>ADD {local(c, 0), T(3)} {T(2)}</TD></TR>
+<TR><TD>ADD {T(2), Upval(1, Proc%3, b)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), Upval(2, Proc%2, a)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

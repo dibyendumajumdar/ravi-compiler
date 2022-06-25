@@ -147,8 +147,8 @@ define Proc%2
 L0 (entry)
 	TOINT {local(m, 0)}
 	TOINT {local(n, 1)}
-	EQii {local(m, 0), local(n, 1)} {Tbool(0)}
 	MOV {Upval(0, Proc%1, assert)} {T(0)}
+	EQii {local(m, 0), local(n, 1)} {Tbool(0)}
 	CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), 'testing' Ks(1)} {T(0..), 1 Kint(0)}
@@ -168,8 +168,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOINT {local(m, 0)}</TD></TR>
 <TR><TD>TOINT {local(n, 1)}</TD></TR>
-<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
 <TR><TD>MOV {Upval(0, Proc%1, assert)} {T(0)}</TD></TR>
+<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
 <TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0), 'testing' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
@@ -182,8 +182,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOINT {local(m, 0)}</TD></TR>
 <TR><TD>TOINT {local(n, 1)}</TD></TR>
-<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
 <TR><TD>MOV {Upval(0, Proc%1, assert)} {T(0)}</TD></TR>
+<TR><TD>EQii {local(m, 0), local(n, 1)} {Tbool(0)}</TD></TR>
 <TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>CALL {T(0), 'testing' Ks(1)} {T(0..), 1 Kint(0)}</TD></TR>
@@ -982,8 +982,8 @@ end
 define Proc%1
 L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'math' Ks(0)} {T(0)}
-	GETsk {T(0), 'abs' Ks(1)} {T(1)}
-	MOV {T(1)} {local(abs, 0)}
+	GETsk {T(0), 'abs' Ks(1)} {T(0)}
+	MOV {T(0)} {local(abs, 0)}
 	CLOSURE {Proc%2} {T(0)}
 	MOV {T(0)} {local(compute_pi, 1)}
 	NEWTABLE {T(0)}
@@ -1003,9 +1003,9 @@ L0 (entry)
 	BR {L2}
 L1 (exit)
 L2
-	LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(0)}
 	MOV {Upval(0, Proc%1, abs)} {T(1)}
-	CALL {T(1), T(0)} {T(1..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(2)}
+	CALL {T(1), T(2)} {T(1..), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}
 	LT {T(1), T(1..)} {T(0)}
 	CBR {T(0)} {L3, L4}
@@ -1072,11 +1072,11 @@ define Proc%10
 L0 (entry)
 	TOFARRAY {local(values, 0)}
 	LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}
-	GETsk {T(0), 'numarray' Ks(1)} {T(1)}
+	GETsk {T(0), 'numarray' Ks(1)} {T(0)}
 	LENi {local(values, 0)} {Tint(0)}
-	CALL {T(1), Tint(0), 0 Kint(0)} {T(1..), 1 Kint(1)}
-	TOFARRAY {T(1[1..])}
-	MOV {T(1[1..])} {local(arr, 1)}
+	CALL {T(0), Tint(0), 0 Kint(0)} {T(0..), 1 Kint(1)}
+	TOFARRAY {T(0[0..])}
+	MOV {T(0[0..])} {local(arr, 1)}
 	MOV {1 Kint(1)} {Tint(1)}
 	LENi {local(values, 0)} {Tint(2)}
 	MOV {Tint(2)} {Tint(3)}
@@ -1101,8 +1101,8 @@ digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'math' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'abs' Ks(1)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(1)} {local(abs, 0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'abs' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(abs, 0)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
 <TR><TD>MOV {T(0)} {local(compute_pi, 1)}</TD></TR>
 <TR><TD>NEWTABLE {T(0)}</TD></TR>
@@ -1126,9 +1126,9 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {Upval(0, Proc%1, abs)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), T(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(1), T(2)} {T(1..), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}</TD></TR>
 <TR><TD>LT {T(1), T(1..)} {T(0)}</TD></TR>
 <TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
@@ -1257,11 +1257,11 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(0)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0), 0 Kint(0)} {T(1..), 1 Kint(1)}</TD></TR>
-<TR><TD>TOFARRAY {T(1[1..])}</TD></TR>
-<TR><TD>MOV {T(1[1..])} {local(arr, 1)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), 0 Kint(0)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
@@ -1302,11 +1302,11 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(0)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0), 0 Kint(0)} {T(1..), 1 Kint(1)}</TD></TR>
-<TR><TD>TOFARRAY {T(1[1..])}</TD></TR>
-<TR><TD>MOV {T(1[1..])} {local(arr, 1)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), 0 Kint(0)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
@@ -1351,9 +1351,9 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>MOV {Upval(0, Proc%1, abs)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), T(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'c' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(1), T(2)} {T(1..), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'TOL' Ks(1)} {T(1)}</TD></TR>
 <TR><TD>LT {T(1), T(1..)} {T(0)}</TD></TR>
 <TR><TD>CBR {T(0)} {L3, L4}</TD></TR>
@@ -1482,11 +1482,11 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(0)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0), 0 Kint(0)} {T(1..), 1 Kint(1)}</TD></TR>
-<TR><TD>TOFARRAY {T(1[1..])}</TD></TR>
-<TR><TD>MOV {T(1[1..])} {local(arr, 1)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), 0 Kint(0)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
@@ -1527,11 +1527,11 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>TOFARRAY {local(values, 0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(0), 'numarray' Ks(1)} {T(0)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tint(0), 0 Kint(0)} {T(1..), 1 Kint(1)}</TD></TR>
-<TR><TD>TOFARRAY {T(1[1..])}</TD></TR>
-<TR><TD>MOV {T(1[1..])} {local(arr, 1)}</TD></TR>
+<TR><TD>CALL {T(0), Tint(0), 0 Kint(0)} {T(0..), 1 Kint(1)}</TD></TR>
+<TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
 <TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
 <TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
@@ -1812,8 +1812,8 @@ L0 (entry)
 	TOINT {T(1[0..])}
 	MOVi {T(1[0..])} {Tint(1)}
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
-	ADDii {Tint(0), Tint(1)} {Tint(2)}
-	EQii {Tint(2), 11 Kint(1)} {Tbool(2)}
+	ADDii {Tint(0), Tint(1)} {Tint(3)}
+	EQii {Tint(3), 11 Kint(1)} {Tbool(2)}
 	CALL {T(0), Tbool(2)} {T(0..), 1 Kint(2)}
 	RET {L1}
 L1 (exit)
@@ -1845,8 +1845,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOINT {T(1[0..])}</TD></TR>
 <TR><TD>MOVi {T(1[0..])} {Tint(1)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(2)}</TD></TR>
-<TR><TD>EQii {Tint(2), 11 Kint(1)} {Tbool(2)}</TD></TR>
+<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(3)}</TD></TR>
+<TR><TD>EQii {Tint(3), 11 Kint(1)} {Tbool(2)}</TD></TR>
 <TR><TD>CALL {T(0), Tbool(2)} {T(0..), 1 Kint(2)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
@@ -1882,8 +1882,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOINT {T(1[0..])}</TD></TR>
 <TR><TD>MOVi {T(1[0..])} {Tint(1)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
-<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(2)}</TD></TR>
-<TR><TD>EQii {Tint(2), 11 Kint(1)} {Tbool(2)}</TD></TR>
+<TR><TD>ADDii {Tint(0), Tint(1)} {Tint(3)}</TD></TR>
+<TR><TD>EQii {Tint(3), 11 Kint(1)} {Tbool(2)}</TD></TR>
 <TR><TD>CALL {T(0), Tbool(2)} {T(0..), 1 Kint(2)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
@@ -2253,14 +2253,13 @@ L0 (entry)
 	PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
 	GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(1)}
-	MOV {T(0)} {T(2)}
-	CALL {T(2), T(1), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}
-	LEN {Upval(0, Proc%1, y)} {T(2)}
-	TOINT {T(2)}
-	MOV {T(2)} {Tint(0)}
-	EQii {Tint(0), 1 Kint(0)} {Tbool(0)}
-	CALL {T(1), Tbool(0)} {T(1..), 1 Kint(0)}
+	CALL {T(0), T(1), 9.967E1 Kflt(0)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
+	LEN {Upval(0, Proc%1, y)} {T(1)}
+	TOINT {T(1)}
+	MOV {T(1)} {Tint(1)}
+	EQii {Tint(1), 1 Kint(0)} {Tbool(0)}
+	CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 define Proc%3
@@ -2292,14 +2291,13 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), T(1), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>LEN {Upval(0, Proc%1, y)} {T(2)}</TD></TR>
-<TR><TD>TOINT {T(2)}</TD></TR>
-<TR><TD>MOV {T(2)} {Tint(0)}</TD></TR>
-<TR><TD>EQii {Tint(0), 1 Kint(0)} {Tbool(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tbool(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(0), T(1), 9.967E1 Kflt(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>LEN {Upval(0, Proc%1, y)} {T(1)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {Tint(1)}</TD></TR>
+<TR><TD>EQii {Tint(1), 1 Kint(0)} {Tbool(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2333,14 +2331,13 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>PUTik {9.967E1 Kflt(0)} {Upval(0, Proc%1, y), 1 Kint(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>GETik {Upval(0, Proc%1, y), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), T(1), 9.967E1 Kflt(0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>LEN {Upval(0, Proc%1, y)} {T(2)}</TD></TR>
-<TR><TD>TOINT {T(2)}</TD></TR>
-<TR><TD>MOV {T(2)} {Tint(0)}</TD></TR>
-<TR><TD>EQii {Tint(0), 1 Kint(0)} {Tbool(0)}</TD></TR>
-<TR><TD>CALL {T(1), Tbool(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>CALL {T(0), T(1), 9.967E1 Kflt(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>LEN {Upval(0, Proc%1, y)} {T(1)}</TD></TR>
+<TR><TD>TOINT {T(1)}</TD></TR>
+<TR><TD>MOV {T(1)} {Tint(1)}</TD></TR>
+<TR><TD>EQii {Tint(1), 1 Kint(0)} {Tbool(0)}</TD></TR>
+<TR><TD>CALL {T(0), Tbool(0)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2818,8 +2815,7 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'pcall' Ks(1)} {T(1)}
 	CALL {T(1), local(test_numarray_meta, 0)} {T(1..), -1 Kint(0)}
-	MOV {T(0)} {T(2)}
-	CALL {T(2), T(1..)} {T(2..), 1 Kint(1)}
+	CALL {T(0), T(1..)} {T(0..), 1 Kint(1)}
 	RET {L1}
 L1 (exit)
 define Proc%2
@@ -2834,30 +2830,27 @@ L0 (entry)
 	TPUTsk {'matrix' Ks(2)} {T(1), '__name' Ks(1)}
 	CLOSURE {Proc%3} {T(2)}
 	TPUTsk {T(2)} {T(1), '__tostring' Ks(3)}
-	MOV {T(0)} {T(2)}
-	CALL {T(2), local(farray, 0), T(1)} {T(2..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(1)}
+	CALL {T(0), local(farray, 0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(2)}
 	CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}
-	EQ {T(2..), 'matrix' Ks(2)} {T(2)}
-	MOV {T(1)} {T(3)}
-	CALL {T(3), T(2)} {T(3..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}
-	LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(3)}
-	CALL {T(3), local(farray, 0)} {T(3..), 1 Kint(0)}
-	EQ {T(3..), '{1.1,2.2,3.3}' Ks(7)} {T(3)}
-	MOV {T(2)} {T(4)}
-	CALL {T(4), T(3)} {T(4..), 1 Kint(0)}
+	EQ {T(2..), 'matrix' Ks(2)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(2)}
+	CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}
+	EQ {T(2..), '{1.1,2.2,3.3}' Ks(7)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
 	CLOSE {local(farray, 0)}
 	RET {L1}
 L1 (exit)
 define Proc%3
 L0 (entry)
-	LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}
-	GETsk {T(0), 'concat' Ks(2)} {T(1)}
-	CALL {T(1), Upval(1, Proc%2, farray), ',' Ks(3)} {T(1..), 1 Kint(0)}
-	CONCAT {T(1..), '}' Ks(4)} {T(0)}
-	CONCAT {'{' Ks(0), T(0)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(2)}
+	GETsk {T(2), 'concat' Ks(2)} {T(2)}
+	CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}
+	CONCAT {T(2..), '}' Ks(4)} {T(1)}
+	CONCAT {'{' Ks(0), T(1)} {T(0)}
 	RET {T(0)} {L1}
 L1 (exit)
 digraph Proc1 {
@@ -2868,8 +2861,7 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'pcall' Ks(1)} {T(1)}</TD></TR>
 <TR><TD>CALL {T(1), local(test_numarray_meta, 0)} {T(1..), -1 Kint(0)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), T(1..)} {T(2..), 1 Kint(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1..)} {T(0..), 1 Kint(1)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2886,20 +2878,17 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TPUTsk {'matrix' Ks(2)} {T(1), '__name' Ks(1)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(2)}</TD></TR>
 <TR><TD>TPUTsk {T(2)} {T(1), '__tostring' Ks(3)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(farray, 0), T(1)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), local(farray, 0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(2)}</TD></TR>
 <TR><TD>CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {T(2..), 'matrix' Ks(2)} {T(2)}</TD></TR>
-<TR><TD>MOV {T(1)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(3), T(2)} {T(3..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(3), local(farray, 0)} {T(3..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {T(3..), '{1.1,2.2,3.3}' Ks(7)} {T(3)}</TD></TR>
-<TR><TD>MOV {T(2)} {T(4)}</TD></TR>
-<TR><TD>CALL {T(4), T(3)} {T(4..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(2..), 'matrix' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(2..), '{1.1,2.2,3.3}' Ks(7)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>CLOSE {local(farray, 0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
@@ -2907,11 +2896,11 @@ L0 -> L1
 digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Upval(1, Proc%2, farray), ',' Ks(3)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>CONCAT {T(1..), '}' Ks(4)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {'{' Ks(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'concat' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(1)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2919,11 +2908,11 @@ L0 -> L1
 digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Upval(1, Proc%2, farray), ',' Ks(3)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>CONCAT {T(1..), '}' Ks(4)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {'{' Ks(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'concat' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(1)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2942,20 +2931,17 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TPUTsk {'matrix' Ks(2)} {T(1), '__name' Ks(1)}</TD></TR>
 <TR><TD>CLOSURE {Proc%3} {T(2)}</TD></TR>
 <TR><TD>TPUTsk {T(2)} {T(1), '__tostring' Ks(3)}</TD></TR>
-<TR><TD>MOV {T(0)} {T(2)}</TD></TR>
-<TR><TD>CALL {T(2), local(farray, 0), T(1)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), local(farray, 0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'ravitype' Ks(5)} {T(2)}</TD></TR>
 <TR><TD>CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {T(2..), 'matrix' Ks(2)} {T(2)}</TD></TR>
-<TR><TD>MOV {T(1)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(3), T(2)} {T(3..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(3)}</TD></TR>
-<TR><TD>CALL {T(3), local(farray, 0)} {T(3..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {T(3..), '{1.1,2.2,3.3}' Ks(7)} {T(3)}</TD></TR>
-<TR><TD>MOV {T(2)} {T(4)}</TD></TR>
-<TR><TD>CALL {T(4), T(3)} {T(4..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(2..), 'matrix' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(4)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'tostring' Ks(6)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(farray, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {T(2..), '{1.1,2.2,3.3}' Ks(7)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>CLOSE {local(farray, 0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
@@ -2963,11 +2949,11 @@ L0 -> L1
 digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Upval(1, Proc%2, farray), ',' Ks(3)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>CONCAT {T(1..), '}' Ks(4)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {'{' Ks(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'concat' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(1)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
@@ -2975,11 +2961,11 @@ L0 -> L1
 digraph Proc3 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(0)}</TD></TR>
-<TR><TD>GETsk {T(0), 'concat' Ks(2)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), Upval(1, Proc%2, farray), ',' Ks(3)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>CONCAT {T(1..), '}' Ks(4)} {T(0)}</TD></TR>
-<TR><TD>CONCAT {'{' Ks(0), T(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'table' Ks(1)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'concat' Ks(2)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), Upval(1, Proc%2, farray), ',' Ks(3)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>CONCAT {T(2..), '}' Ks(4)} {T(1)}</TD></TR>
+<TR><TD>CONCAT {'{' Ks(0), T(1)} {T(0)}</TD></TR>
 <TR><TD>RET {T(0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
