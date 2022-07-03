@@ -1598,10 +1598,11 @@ static Pseudo *linearize_suffixedexpr(Proc *proc, AstNode *node)
 }
 
 static int linearize_indexed_assign(Proc *proc, Pseudo *table, ravitype_t table_type,
-				    AstNode *expr, int next)
+				    AstNode *expr, int next, bool is_last)
 {
 	Pseudo *index_pseudo;
 	ravitype_t index_type;
+	bool array = false;
 	if (expr->table_elem_assign_expr.key_expr) {
 		index_pseudo = linearize_expression(proc, expr->table_elem_assign_expr.key_expr);
 		index_type = expr->table_elem_assign_expr.key_expr->index_expr.expr->common_expr.type.type_code;
@@ -1610,9 +1611,10 @@ static int linearize_indexed_assign(Proc *proc, Pseudo *table, ravitype_t table_
 		const Constant *constant = allocate_integer_constant(proc, next++);
 		index_pseudo = allocate_constant_pseudo(proc, constant);
 		index_type = RAVI_TNUMINT;
+		array = true;
 	}
 	Pseudo *value_pseudo = linearize_expression(proc, expr->table_elem_assign_expr.value_expr);
-	if (value_pseudo->type == PSEUDO_RANGE) {
+	if (value_pseudo->type == PSEUDO_RANGE && (!array || !is_last)) {
 		// FIXME issue 81 we need to allow range in the last element
 		// But codegen can't handle that at the moment
 		convert_range_to_temp(value_pseudo);
@@ -1639,9 +1641,12 @@ static Pseudo *linearize_table_constructor(Proc *proc, AstNode *expr)
 
 	AstNode *ia;
 	int i = 1;
+	int num_expressions = raviX_ptrlist_size((const PtrList *) expr->table_expr.expr_list);
+	int j = 1;
 	FOR_EACH_PTR(expr->table_expr.expr_list, AstNode, ia)
 	{
-		i = linearize_indexed_assign(proc, target, expr->table_expr.type.type_code, ia, i);
+		i = linearize_indexed_assign(proc, target, expr->table_expr.type.type_code, ia, i, j==num_expressions);
+		j++;
 	}
 	END_FOR_EACH_PTR(ia)
 
@@ -1976,11 +1981,11 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 		break;
 	}
 	assert(result);
+	check_pseudo_is_top(proc, result);
 	if (result->type == PSEUDO_RANGE && expr->common_expr.truncate_results) {
 		// Need to truncate the results to 1
 		return raviX_allocate_range_select_pseudo(proc, result, 0);
 	}
-	check_pseudo_is_top(proc, result);
 	return result;
 }
 
