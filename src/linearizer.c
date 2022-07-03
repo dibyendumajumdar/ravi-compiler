@@ -202,20 +202,38 @@ static void pseudo_gen_check(PseudoGenerator *generator, AstNode *node, const ch
 	}
 }
 
-static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo) {
+typedef struct SavedRegs {
+	unsigned flt_top;
+	unsigned int_top;
+	unsigned temp_top;
+} SavedRegs;
+
+static SavedRegs save_regs(Proc *proc) {
+	SavedRegs regs;
+	regs.flt_top = top_reg(&proc->temp_flt_pseudos);
+	regs.int_top = top_reg(&proc->temp_int_pseudos);
+	regs.temp_top = top_reg(&proc->temp_pseudos);
+	return regs;
+} 
+
+static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo, const SavedRegs* saved_regs) {
 	PseudoGenerator *gen;
+	unsigned saved_top;
 	assert(!pseudo->freed);
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
 		gen = &proc->temp_flt_pseudos;
+		saved_top = saved_regs->flt_top;
 		break;
 	case PSEUDO_TEMP_INT:
 	case PSEUDO_TEMP_BOOL:
 		gen = &proc->temp_int_pseudos;
+		saved_top = saved_regs->int_top;
 		break;
 	case PSEUDO_RANGE:
 	case PSEUDO_TEMP_ANY:
 		gen = &proc->temp_pseudos;
+		saved_top = saved_regs->temp_top;
 		break;
 	default:
 		// Not a temp, so no need to do anything
@@ -228,7 +246,13 @@ static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo) {
 		return;
 	if (top != pseudo->regnum) {
 		fprintf(stderr, "Top expected %u, found %u\n", top, pseudo->regnum);
+		assert(false);
 	}
+	if (top != saved_top+1) {
+		fprintf(stderr, "Top %u, previous top %u\n", top, saved_top+1);
+		assert(false);
+	}
+
 }
 
 
@@ -1944,6 +1968,7 @@ static Pseudo *linearize_builtin_expression(Proc *proc, AstNode *expr)
 static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 {
 	Pseudo *result = NULL;
+	SavedRegs saved_regs = save_regs(proc);
 	switch (expr->type) {
 	case EXPR_LITERAL: {
 		result = linearize_literal(proc, expr);
@@ -1981,7 +2006,7 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 		break;
 	}
 	assert(result);
-	check_pseudo_is_top(proc, result);
+	//check_pseudo_is_top(proc, result, &saved_regs);
 	if (result->type == PSEUDO_RANGE && expr->common_expr.truncate_results) {
 		// Need to truncate the results to 1
 		return raviX_allocate_range_select_pseudo(proc, result, 0);
