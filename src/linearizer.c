@@ -2060,7 +2060,10 @@ static void linearize_test_cond(Proc *proc, AstNode *node, BasicBlock *true_bloc
 {
 	Pseudo *condition_pseudo = linearize_expression(proc, node->test_then_block.condition);
 	instruct_cbr(proc, condition_pseudo, true_block, false_block, node->line_number);
-	free_temp_pseudo(proc, condition_pseudo, false);
+	if (condition_pseudo->type == PSEUDO_RANGE_SELECT)
+		free_temp_pseudo(proc, condition_pseudo->range_pseudo, false);
+	else
+		free_temp_pseudo(proc, condition_pseudo, false);
 }
 
 /* linearize the 'else if' block */
