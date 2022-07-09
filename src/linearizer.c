@@ -203,9 +203,9 @@ static void pseudo_gen_check(PseudoGenerator *generator, AstNode *node, const ch
 }
 
 typedef struct SavedRegs {
-	unsigned flt_top;
-	unsigned int_top;
-	unsigned temp_top;
+	int flt_top;
+	int int_top;
+	int temp_top;
 } SavedRegs;
 
 static SavedRegs save_regs(Proc *proc) {
@@ -216,24 +216,20 @@ static SavedRegs save_regs(Proc *proc) {
 	return regs;
 } 
 
-static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo, const SavedRegs* saved_regs) {
+static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo) {
 	PseudoGenerator *gen;
-	unsigned saved_top;
 	assert(!pseudo->freed);
 	switch (pseudo->type) {
 	case PSEUDO_TEMP_FLT:
 		gen = &proc->temp_flt_pseudos;
-		saved_top = saved_regs->flt_top;
 		break;
 	case PSEUDO_TEMP_INT:
 	case PSEUDO_TEMP_BOOL:
 		gen = &proc->temp_int_pseudos;
-		saved_top = saved_regs->int_top;
 		break;
 	case PSEUDO_RANGE:
 	case PSEUDO_TEMP_ANY:
 		gen = &proc->temp_pseudos;
-		saved_top = saved_regs->temp_top;
 		break;
 	default:
 		// Not a temp, so no need to do anything
@@ -248,13 +244,13 @@ static void check_pseudo_is_top(Proc *proc, Pseudo *pseudo, const SavedRegs* sav
 		fprintf(stderr, "Top expected %u, found %u\n", top, pseudo->regnum);
 		assert(false);
 	}
-	if (top != saved_top+1) {
-		fprintf(stderr, "Top %u, previous top %u\n", top, saved_top+1);
-		assert(false);
-	}
-
 }
 
+static void check_regs_restored(Proc *proc, SavedRegs *saved_regs) {
+	assert(saved_regs->flt_top == top_reg(&proc->temp_flt_pseudos));
+	assert(saved_regs->int_top == top_reg(&proc->temp_int_pseudos));
+	assert(saved_regs->temp_top == top_reg(&proc->temp_pseudos));
+}
 
 /**
  * Allocates a register by reusing a free'd register if possible otherwise
@@ -623,6 +619,9 @@ static void free_temp_pseudo(Proc *proc, Pseudo *pseudo, bool free_local)
 	case PSEUDO_TEMP_ANY:
 		gen = &proc->temp_pseudos;
 		break;
+	case PSEUDO_INDEXED:
+		free_temp_pseudo(proc, pseudo->index_info.key, false);
+		free_temp_pseudo(proc, pseudo->index_info.container, false);
 	default:
 		// Not a temp, so no need to do anything
 		return;
@@ -2006,7 +2005,7 @@ static Pseudo *linearize_expression(Proc *proc, AstNode *expr)
 		break;
 	}
 	assert(result);
-	//check_pseudo_is_top(proc, result, &saved_regs);
+	check_pseudo_is_top(proc, result);
 	if (result->type == PSEUDO_RANGE && expr->common_expr.truncate_results) {
 		// Need to truncate the results to 1
 		return raviX_allocate_range_select_pseudo(proc, result, 0);
@@ -2061,6 +2060,7 @@ static void linearize_test_cond(Proc *proc, AstNode *node, BasicBlock *true_bloc
 {
 	Pseudo *condition_pseudo = linearize_expression(proc, node->test_then_block.condition);
 	instruct_cbr(proc, condition_pseudo, true_block, false_block, node->line_number);
+	free_temp_pseudo(proc, condition_pseudo, false);
 }
 
 /* linearize the 'else if' block */
@@ -2822,6 +2822,7 @@ static void linearize_function_statement(Proc *proc, AstNode *node)
 
 static void linearize_statement(Proc *proc, AstNode *node)
 {
+	SavedRegs saved_regs = save_regs(proc);
 	switch (node->type) {
 	case AST_NONE: {
 		break;
@@ -2879,9 +2880,7 @@ static void linearize_statement(Proc *proc, AstNode *node)
 		handle_error(proc->linearizer->compiler_state, "unknown statement type");
 		break;
 	}
-//	pseudo_gen_check(&proc->temp_pseudos, node, "temp_pseudos");
-//	pseudo_gen_check(&proc->temp_flt_pseudos, node, "temp_flt_pseudos");
-//	pseudo_gen_check(&proc->temp_int_pseudos, node, "temp_int_pseudos");
+	check_regs_restored(proc, &saved_regs);
 }
 
 /**
