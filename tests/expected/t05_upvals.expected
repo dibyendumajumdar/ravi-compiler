@@ -1123,15 +1123,15 @@ L2
 	NOT {T(1)} {T(0)}
 	CBR {T(0)} {L3, L4}
 L3
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}
-	CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}
-	LEN {Upval(1, Proc%1, msgs)} {T(2)}
-	ADD {T(2), 1 Kint(0)} {T(1)}
-	LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}
-	GETsk {T(2), 'sub' Ks(3)} {T(2)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}
+	CALL {T(0), local(m, 0)} {T(0..), 1 Kint(0)}
+	LEN {Upval(1, Proc%1, msgs)} {T(1)}
+	ADD {T(1), 1 Kint(0)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(1)}
+	GETsk {T(1), 'sub' Ks(3)} {T(1)}
 	UNMi {3 Kint(1)} {Tint(0)}
-	CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}
-	PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}
+	CALL {T(1), local(m, 0), 3 Kint(1), Tint(0)} {T(1..), 1 Kint(0)}
+	PUT {T(1[1..])} {Upval(1, Proc%1, msgs), T(0)}
 	BR {L4}
 L4
 	RET {L1}
@@ -1162,15 +1162,15 @@ L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(2)}</TD></TR>
-<TR><TD>ADD {T(2), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}</TD></TR>
-<TR><TD>GETsk {T(2), 'sub' Ks(3)} {T(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(m, 0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(1), 'sub' Ks(3)} {T(1)}</TD></TR>
 <TR><TD>UNMi {3 Kint(1)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local(m, 0), 3 Kint(1), Tint(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>PUT {T(1[1..])} {Upval(1, Proc%1, msgs), T(0)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4
@@ -1196,15 +1196,15 @@ L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), local(m, 0)} {T(1..), 1 Kint(0)}</TD></TR>
-<TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(2)}</TD></TR>
-<TR><TD>ADD {T(2), 1 Kint(0)} {T(1)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(2)}</TD></TR>
-<TR><TD>GETsk {T(2), 'sub' Ks(3)} {T(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(m, 0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LEN {Upval(1, Proc%1, msgs)} {T(1)}</TD></TR>
+<TR><TD>ADD {T(1), 1 Kint(0)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'string' Ks(2)} {T(1)}</TD></TR>
+<TR><TD>GETsk {T(1), 'sub' Ks(3)} {T(1)}</TD></TR>
 <TR><TD>UNMi {3 Kint(1)} {Tint(0)}</TD></TR>
-<TR><TD>CALL {T(2), local(m, 0), 3 Kint(1), Tint(0)} {T(2..), 1 Kint(0)}</TD></TR>
-<TR><TD>PUT {T(2[2..])} {Upval(1, Proc%1, msgs), T(1)}</TD></TR>
+<TR><TD>CALL {T(1), local(m, 0), 3 Kint(1), Tint(0)} {T(1..), 1 Kint(0)}</TD></TR>
+<TR><TD>PUT {T(1[1..])} {Upval(1, Proc%1, msgs), T(0)}</TD></TR>
 <TR><TD>BR {L4}</TD></TR>
 </TABLE>>];
 L3 -> L4

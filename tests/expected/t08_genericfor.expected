@@ -179,10 +179,10 @@ L5
 L6
 	BR {L4}
 L7
-	MOV {local(k, 3)} {T(1)}
-	MOV {T(1)} {local((for_var), 2)}
-	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(1)}
-	CALL {T(1), local(k, 3), local(v, 4)} {T(1..), 1 Kint(2)}
+	MOV {local(k, 3)} {T(0)}
+	MOV {T(0)} {local((for_var), 2)}
+	LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}
+	CALL {T(0), local(k, 3), local(v, 4)} {T(0..), 1 Kint(2)}
 	BR {L2}
 L8
 	BR {L7}
@@ -232,10 +232,10 @@ L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L6 -> L4
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>MOV {local(k, 3)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(1)} {local((for_var), 2)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1), local(k, 3), local(v, 4)} {T(1..), 1 Kint(2)}</TD></TR>
+<TR><TD>MOV {local(k, 3)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local((for_var), 2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'print' Ks(2)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(k, 3), local(v, 4)} {T(0..), 1 Kint(2)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L7 -> L2
