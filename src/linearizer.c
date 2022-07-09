@@ -2612,19 +2612,25 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 		handle_error(proc->linearizer->compiler_state, "A least index and limit must be supplied");
 	}
 
+	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
+	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
+	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
+	Pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
+	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
+
 	Pseudo *t = linearize_expression(proc, index_var_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *index_var_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, index_var_pseudo, t, node->line_number);
+	free_temp_pseudo(proc, t, false);
 
 	t = linearize_expression(proc, limit_expr);
 	if (t->type == PSEUDO_RANGE) {
 		convert_range_to_temp(t); // Only accept one result
 	}
-	Pseudo *limit_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, limit_pseudo, t, node->line_number);
+	free_temp_pseudo(proc, t, false);
 
 	if (step_expr == NULL)
 		t = allocate_constant_pseudo(proc, allocate_integer_constant(proc, 1));
@@ -2634,14 +2640,12 @@ static void linearize_for_num_statement(Proc *proc, AstNode *node)
 			convert_range_to_temp(t); // Only accept one result
 		}
 	}
-	Pseudo *step_pseudo = allocate_temp_pseudo(proc, RAVI_TNUMINT, false);
 	instruct_move(proc, op_mov, step_pseudo, t, node->line_number);
+	free_temp_pseudo(proc, t, false);
 
-	Pseudo *step_positive = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_ltii, allocate_constant_pseudo(proc, allocate_integer_constant(proc, 0)),
 				  step_pseudo, step_positive, node->line_number);
 
-	Pseudo *stop_pseudo = allocate_temp_pseudo(proc, RAVI_TBOOLEAN, false);
 	create_binary_instruction(proc, op_subii, index_var_pseudo, step_pseudo, index_var_pseudo, node->line_number);
 
 	BasicBlock *L1 = create_block(proc);
