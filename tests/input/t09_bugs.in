@@ -109,3 +109,9 @@ function getMyPlayer()
     end
     return player
 end
+#
+local b: number
+local j: integer
+local i: integer
+local a:number[]
+a[i]=a[i]+b*a[j]
