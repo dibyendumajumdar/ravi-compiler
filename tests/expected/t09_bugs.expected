@@ -3068,6 +3068,7 @@ function z()
     print(t)
     return t
 end
+
 function()
 --upvalues  _ENV*
    z --global symbol any 
@@ -3188,5 +3189,325 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>RET {local(t, 0)} {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1
+}
+}
+function test()
+    local myPlayer = getMyPlayer()
+    if ( myPlayer:Alive() ) then
+        return true
+    end
+    return false
+end
+function getMyPlayer()
+    local player = {}
+    function player:Alive()
+        return 1
+    end
+    return player
+end
+function()
+--upvalues  _ENV*
+   test --global symbol any 
+   =
+    function()
+    --upvalues  _ENV*
+    --[local symbols] myPlayer
+      local
+      --[symbols]
+        myPlayer --local symbol any   const
+      --[expressions]
+        --[suffixed expr start] any
+         --[primary start] any
+           getMyPlayer --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      if
+       --[suffixed expr start] any
+        --[primary start] any
+         --[suffixed expr start] any
+          --[primary start] any
+            myPlayer --local symbol any   const
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             : Alive (
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+        --[primary end]
+       --[suffixed expr end]
+      then
+        return
+          true
+      end
+      return
+        false
+    end
+   getMyPlayer --global symbol any 
+   =
+    function()
+    --[local symbols] player
+      local
+      --[symbols]
+        player --local symbol any   const
+      --[expressions]
+        { --[table constructor start] table
+        } --[table constructor end]
+       player --local symbol any   const
+       --[method name]
+        --[field selector start] any
+         .
+          'Alive'
+        --[field selector end]
+       =
+        function(
+          self --local symbol any   const
+        )
+        --[local symbols] self
+          return
+            1
+        end
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           player --local symbol any   const
+         --[primary end]
+        --[suffixed expr end]
+    end
+end
+function()
+--upvalues  _ENV*
+   test --global symbol any 
+   =
+    function()
+    --upvalues  _ENV*
+    --[local symbols] myPlayer
+      local
+      --[symbols]
+        myPlayer --local symbol any   const
+      --[expressions]
+        --[suffixed expr start] any
+         --[primary start] any
+           getMyPlayer --global symbol any 
+         --[primary end]
+         --[suffix list start]
+           --[function call start] any
+            (
+            )
+           --[function call end]
+         --[suffix list end]
+        --[suffixed expr end]
+      if
+       --[suffixed expr start] any
+        --[primary start] any
+         --[suffixed expr start] any
+          --[primary start] any
+            myPlayer --local symbol any   const
+          --[primary end]
+          --[suffix list start]
+            --[function call start] any
+             : Alive (
+             )
+            --[function call end]
+          --[suffix list end]
+         --[suffixed expr end]
+        --[primary end]
+       --[suffixed expr end]
+      then
+        return
+          true
+      end
+      return
+        false
+    end
+   getMyPlayer --global symbol any 
+   =
+    function()
+    --[local symbols] player
+      local
+      --[symbols]
+        player --local symbol any   const
+      --[expressions]
+        { --[table constructor start] table
+        } --[table constructor end]
+       player --local symbol any   const
+       --[method name]
+        --[field selector start] any
+         .
+          'Alive'
+        --[field selector end]
+       =
+        function(
+          self --local symbol any   const
+        )
+        --[local symbols] self
+          return
+            1
+        end
+      return
+        --[suffixed expr start] any
+         --[primary start] any
+           player --local symbol any   const
+         --[primary end]
+        --[suffixed expr end]
+    end
+end
+define Proc%1
+L0 (entry)
+	CLOSURE {Proc%2} {T(0)}
+	STOREGLOBAL {T(0)} {Upval(_ENV), 'test' Ks(0)}
+	CLOSURE {Proc%3} {T(0)}
+	STOREGLOBAL {T(0)} {Upval(_ENV), 'getMyPlayer' Ks(1)}
+	RET {L1}
+L1 (exit)
+define Proc%2
+L0 (entry)
+	LOADGLOBAL {Upval(_ENV), 'getMyPlayer' Ks(0)} {T(0)}
+	CALL {T(0)} {T(0..), 1 Kint(0)}
+	MOV {T(0[0..])} {local(myPlayer, 0)}
+	BR {L2}
+L1 (exit)
+L2
+	GETsk {local(myPlayer, 0), 'Alive' Ks(1)} {T(0)}
+	CALL {T(0), local(myPlayer, 0)} {T(0..), 1 Kint(0)}
+	CBR {T(0[0..])} {L3, L4}
+L3
+	RET {true} {L1}
+L4
+	RET {false} {L1}
+define Proc%3
+L0 (entry)
+	NEWTABLE {T(0)}
+	MOV {T(0)} {local(player, 0)}
+	CLOSURE {Proc%4} {T(0)}
+	PUTsk {T(0)} {local(player, 0), 'Alive' Ks(0)}
+	RET {local(player, 0)} {L1}
+L1 (exit)
+define Proc%4
+L0 (entry)
+	RET {1 Kint(0)} {L1}
+L1 (exit)
+digraph Proc1 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>CLOSURE {Proc%2} {T(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(0)} {Upval(_ENV), 'test' Ks(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(0)}</TD></TR>
+<TR><TD>STOREGLOBAL {T(0)} {Upval(_ENV), 'getMyPlayer' Ks(1)}</TD></TR>
+<TR><TD>RET {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'getMyPlayer' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(myPlayer, 0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>GETsk {local(myPlayer, 0), 'Alive' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(myPlayer, 0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>CBR {T(0[0..])} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>RET {true} {L1}</TD></TR>
+</TABLE>>];
+L3 -> L1
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {false} {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWTABLE {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(player, 0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(0)}</TD></TR>
+<TR><TD>PUTsk {T(0)} {local(player, 0), 'Alive' Ks(0)}</TD></TR>
+<TR><TD>RET {local(player, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1 Kint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1 Kint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+}
+digraph Proc2 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'getMyPlayer' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(myPlayer, 0)}</TD></TR>
+<TR><TD>BR {L2}</TD></TR>
+</TABLE>>];
+L0 -> L2
+L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L2</B></TD></TR>
+<TR><TD>GETsk {local(myPlayer, 0), 'Alive' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(myPlayer, 0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>CBR {T(0[0..])} {L3, L4}</TD></TR>
+</TABLE>>];
+L2 -> L3
+L2 -> L4
+L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L3</B></TD></TR>
+<TR><TD>RET {true} {L1}</TD></TR>
+</TABLE>>];
+L3 -> L1
+L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L4</B></TD></TR>
+<TR><TD>RET {false} {L1}</TD></TR>
+</TABLE>>];
+L4 -> L1
+}
+digraph Proc3 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>NEWTABLE {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(player, 0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(0)}</TD></TR>
+<TR><TD>PUTsk {T(0)} {local(player, 0), 'Alive' Ks(0)}</TD></TR>
+<TR><TD>RET {local(player, 0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1 Kint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
+digraph Proc4 {
+L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
+<TR><TD><B>L0</B></TD></TR>
+<TR><TD>RET {1 Kint(0)} {L1}</TD></TR>
+</TABLE>>];
+L0 -> L1
+}
 }
 }
