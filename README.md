@@ -26,11 +26,19 @@ The compiler library consists of distinct modules:
 
 ## Status
 
+### Limitations
+
+* No support for var args
+* The last argument to a table constructor is truncated to 1 value 
+
+### Change Log
+
+* 10-July-2022 Many bug fixes to do with how the virtual registers are allocated
 * 12-Oct-2021 Initial proof of concept for [new embedded C syntax](https://github.com/dibyendumajumdar/ravi-compiler/wiki/Embedding-C)
 * 22-Jun-2021 Increased coverage of Lua syntax to cover string concatenations and generic for loops.
+* 17-Jan-2021 The code is now C++ compliant so we can compile everything in C++ or C.
 * 28-Nov-2020 We can generate code for a large subset of Ravi language and run the compiled code from Ravi.
 * 01-Dec-2020 The generated code is now also suitable for AOT compilation but requires special loading facility in Ravi.
-* 17-Jan-2021 The code is now C++ compliant so we can compile everything in C++ or C.
 
 ## LICENSE
 
