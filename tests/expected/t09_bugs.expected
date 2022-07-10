@@ -1078,18 +1078,18 @@ L0 (entry)
 	TOFARRAY {T(0[0..])}
 	MOV {T(0[0..])} {local(arr, 1)}
 	MOV {1 Kint(1)} {Tint(1)}
-	LENi {local(values, 0)} {Tint(2)}
-	MOV {Tint(2)} {Tint(3)}
-	MOV {1 Kint(1)} {Tint(4)}
-	SUBii {Tint(1), Tint(4)} {Tint(1)}
+	LENi {local(values, 0)} {Tint(5)}
+	MOV {Tint(5)} {Tint(2)}
+	MOV {1 Kint(1)} {Tint(3)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
-	ADDii {Tint(1), Tint(4)} {Tint(1)}
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L3}
 L3
-	LIii {Tint(3), Tint(1)} {Tbool(5)}
-	CBR {Tbool(5)} {L5, L4}
+	LIii {Tint(2), Tint(1)} {Tbool(4)}
+	CBR {Tbool(4)} {L5, L4}
 L4
 	MOV {Tint(1)} {Tint(0)}
 	FAGETik {local(values, 0), Tint(0)} {Tflt(0)}
@@ -1263,23 +1263,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
 <TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
-<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
-<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
-<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(5)}</TD></TR>
+<TR><TD>MOV {Tint(5)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
 </TABLE>>];
 L3 -> L5
 L3 -> L4
@@ -1308,23 +1308,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
 <TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
-<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
-<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
-<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(5)}</TD></TR>
+<TR><TD>MOV {Tint(5)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
 </TABLE>>];
 L3 -> L5
 L3 -> L4
@@ -1488,23 +1488,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
 <TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
-<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
-<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
-<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(5)}</TD></TR>
+<TR><TD>MOV {Tint(5)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
 </TABLE>>];
 L3 -> L5
 L3 -> L4
@@ -1533,23 +1533,23 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>TOFARRAY {T(0[0..])}</TD></TR>
 <TR><TD>MOV {T(0[0..])} {local(arr, 1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(1)}</TD></TR>
-<TR><TD>LENi {local(values, 0)} {Tint(2)}</TD></TR>
-<TR><TD>MOV {Tint(2)} {Tint(3)}</TD></TR>
-<TR><TD>MOV {1 Kint(1)} {Tint(4)}</TD></TR>
-<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>LENi {local(values, 0)} {Tint(5)}</TD></TR>
+<TR><TD>MOV {Tint(5)} {Tint(2)}</TD></TR>
+<TR><TD>MOV {1 Kint(1)} {Tint(3)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L3}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(3), Tint(1)} {Tbool(5)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L5, L4}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(4)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L5, L4}</TD></TR>
 </TABLE>>];
 L3 -> L5
 L3 -> L4

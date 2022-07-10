@@ -1346,52 +1346,52 @@ L0 (entry)
 	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
 	CLOSURE {Proc%2} {T(1)}
 	PUTsk {T(1)} {T(0), 'make_date' Ks(1)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(1)}
-	CLOSURE {Proc%3} {T(2)}
-	PUTsk {T(2)} {T(1), 'print_date' Ks(2)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%3} {T(1)}
+	PUTsk {T(1)} {T(0), 'print_date' Ks(2)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%4} {T(1)}
+	PUTsk {T(1)} {T(0), 'get_day' Ks(3)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%5} {T(1)}
+	PUTsk {T(1)} {T(0), 'get_month' Ks(4)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%6} {T(1)}
+	PUTsk {T(1)} {T(0), 'get_year' Ks(5)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	CLOSURE {Proc%7} {T(1)}
+	PUTsk {T(1)} {T(0), 'get_serial' Ks(6)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	GETsk {T(0), 'make_date' Ks(1)} {T(0)}
+	CALL {T(0), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(0..), 1 Kint(0)}
+	MOV {T(0[0..])} {local(d, 0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}
+	GETsk {T(0), 'print_date' Ks(2)} {T(0)}
+	CALL {T(0), local(d, 0)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}
 	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}
-	CLOSURE {Proc%4} {T(3)}
-	PUTsk {T(3)} {T(2), 'get_day' Ks(3)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(3)}
-	CLOSURE {Proc%5} {T(4)}
-	PUTsk {T(4)} {T(3), 'get_month' Ks(4)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(4)}
-	CLOSURE {Proc%6} {T(5)}
-	PUTsk {T(5)} {T(4), 'get_year' Ks(5)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(5)}
-	CLOSURE {Proc%7} {T(6)}
-	PUTsk {T(6)} {T(5), 'get_serial' Ks(6)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}
-	GETsk {T(6), 'make_date' Ks(1)} {T(6)}
-	CALL {T(6), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(6..), 1 Kint(0)}
-	MOV {T(6[6..])} {local(d, 0)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}
-	GETsk {T(6), 'print_date' Ks(2)} {T(6)}
-	CALL {T(6), local(d, 0)} {T(6..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}
-	GETsk {T(8), 'get_year' Ks(5)} {T(8)}
-	CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}
-	EQ {1900 Kint(1), T(8..)} {T(7)}
-	CALL {T(6), T(7)} {T(6..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}
-	GETsk {T(8), 'get_month' Ks(4)} {T(8)}
-	CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}
-	EQ {1 Kint(0), T(8..)} {T(7)}
-	CALL {T(6), T(7)} {T(6..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}
-	GETsk {T(8), 'get_day' Ks(3)} {T(8)}
-	CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}
-	EQ {1 Kint(0), T(8..)} {T(7)}
-	CALL {T(6), T(7)} {T(6..), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}
-	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}
-	GETsk {T(8), 'get_serial' Ks(6)} {T(8)}
-	CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}
-	EQ {2 Kint(2), T(8..)} {T(7)}
-	CALL {T(6), T(7)} {T(6..), 1 Kint(0)}
+	GETsk {T(2), 'get_year' Ks(5)} {T(2)}
+	CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}
+	EQ {1900 Kint(1), T(2..)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}
+	GETsk {T(2), 'get_month' Ks(4)} {T(2)}
+	CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}
+	EQ {1 Kint(0), T(2..)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}
+	GETsk {T(2), 'get_day' Ks(3)} {T(2)}
+	CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}
+	EQ {1 Kint(0), T(2..)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}
+	LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}
+	GETsk {T(2), 'get_serial' Ks(6)} {T(2)}
+	CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}
+	EQ {2 Kint(2), T(2..)} {T(1)}
+	CALL {T(0), T(1)} {T(0..), 1 Kint(0)}
 	RET {L1}
 L1 (exit)
 define Proc%2
@@ -1447,52 +1447,52 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
 <TR><TD>CLOSURE {Proc%2} {T(1)}</TD></TR>
 <TR><TD>PUTsk {T(1)} {T(0), 'make_date' Ks(1)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(1)}</TD></TR>
-<TR><TD>CLOSURE {Proc%3} {T(2)}</TD></TR>
-<TR><TD>PUTsk {T(2)} {T(1), 'print_date' Ks(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%3} {T(1)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'print_date' Ks(2)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%4} {T(1)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'get_day' Ks(3)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%5} {T(1)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'get_month' Ks(4)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%6} {T(1)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'get_year' Ks(5)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>CLOSURE {Proc%7} {T(1)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'get_serial' Ks(6)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'make_date' Ks(1)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>MOV {T(0[0..])} {local(d, 0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(0)}</TD></TR>
+<TR><TD>GETsk {T(0), 'print_date' Ks(2)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0), local(d, 0)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}</TD></TR>
 <TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}</TD></TR>
-<TR><TD>CLOSURE {Proc%4} {T(3)}</TD></TR>
-<TR><TD>PUTsk {T(3)} {T(2), 'get_day' Ks(3)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(3)}</TD></TR>
-<TR><TD>CLOSURE {Proc%5} {T(4)}</TD></TR>
-<TR><TD>PUTsk {T(4)} {T(3), 'get_month' Ks(4)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(4)}</TD></TR>
-<TR><TD>CLOSURE {Proc%6} {T(5)}</TD></TR>
-<TR><TD>PUTsk {T(5)} {T(4), 'get_year' Ks(5)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(5)}</TD></TR>
-<TR><TD>CLOSURE {Proc%7} {T(6)}</TD></TR>
-<TR><TD>PUTsk {T(6)} {T(5), 'get_serial' Ks(6)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}</TD></TR>
-<TR><TD>GETsk {T(6), 'make_date' Ks(1)} {T(6)}</TD></TR>
-<TR><TD>CALL {T(6), 1 Kint(0), 1 Kint(0), 1900 Kint(1)} {T(6..), 1 Kint(0)}</TD></TR>
-<TR><TD>MOV {T(6[6..])} {local(d, 0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(6)}</TD></TR>
-<TR><TD>GETsk {T(6), 'print_date' Ks(2)} {T(6)}</TD></TR>
-<TR><TD>CALL {T(6), local(d, 0)} {T(6..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}</TD></TR>
-<TR><TD>GETsk {T(8), 'get_year' Ks(5)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {1900 Kint(1), T(8..)} {T(7)}</TD></TR>
-<TR><TD>CALL {T(6), T(7)} {T(6..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}</TD></TR>
-<TR><TD>GETsk {T(8), 'get_month' Ks(4)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {1 Kint(0), T(8..)} {T(7)}</TD></TR>
-<TR><TD>CALL {T(6), T(7)} {T(6..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}</TD></TR>
-<TR><TD>GETsk {T(8), 'get_day' Ks(3)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {1 Kint(0), T(8..)} {T(7)}</TD></TR>
-<TR><TD>CALL {T(6), T(7)} {T(6..), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(6)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(8)}</TD></TR>
-<TR><TD>GETsk {T(8), 'get_serial' Ks(6)} {T(8)}</TD></TR>
-<TR><TD>CALL {T(8), local(d, 0)} {T(8..), 1 Kint(0)}</TD></TR>
-<TR><TD>EQ {2 Kint(2), T(8..)} {T(7)}</TD></TR>
-<TR><TD>CALL {T(6), T(7)} {T(6..), 1 Kint(0)}</TD></TR>
+<TR><TD>GETsk {T(2), 'get_year' Ks(5)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1900 Kint(1), T(2..)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'get_month' Ks(4)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1 Kint(0), T(2..)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'get_day' Ks(3)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {1 Kint(0), T(2..)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'assert' Ks(7)} {T(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'DateFunctions' Ks(0)} {T(2)}</TD></TR>
+<TR><TD>GETsk {T(2), 'get_serial' Ks(6)} {T(2)}</TD></TR>
+<TR><TD>CALL {T(2), local(d, 0)} {T(2..), 1 Kint(0)}</TD></TR>
+<TR><TD>EQ {2 Kint(2), T(2..)} {T(1)}</TD></TR>
+<TR><TD>CALL {T(0), T(1)} {T(0..), 1 Kint(0)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L0 -> L1

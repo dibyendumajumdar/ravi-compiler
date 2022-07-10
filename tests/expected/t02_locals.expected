@@ -729,24 +729,24 @@ L4
 L5
 	PUTik {T(1)} {T(0), 2 Kint(1)}
 	INIT {local(_g, 0)}
-	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(1)}
-	CALL {T(1)} {T(1), 1 Kint(0)}
-	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}
-	GET {T(1), T(2)} {T(1)}
-	MOV {local(_g, 0)} {T(3)}
-	CBR {T(3)} {L8, L9}
+	LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(0)}
+	CALL {T(0)} {T(0), 1 Kint(0)}
+	LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(1)}
+	GET {T(0), T(1)} {T(0)}
+	MOV {local(_g, 0)} {T(2)}
+	CBR {T(2)} {L8, L9}
 L6
-	MOV {'majumdar' Ks(8)} {T(2)}
+	MOV {'majumdar' Ks(8)} {T(1)}
 	BR {L7}
 L7
-	PUTsk {T(2)} {T(1), 'name' Ks(6)}
+	PUTsk {T(1)} {T(0), 'name' Ks(6)}
 	RET {L1}
 L8
-	MOV {'Dibyendu' Ks(7)} {T(3)}
+	MOV {'Dibyendu' Ks(7)} {T(2)}
 	BR {L9}
 L9
-	MOV {T(3)} {T(2)}
-	CBR {T(2)} {L7, L6}
+	MOV {T(2)} {T(1)}
+	CBR {T(1)} {L7, L6}
 digraph Proc1 {
 L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
@@ -784,37 +784,37 @@ L5 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L5</B></TD></TR>
 <TR><TD>PUTik {T(1)} {T(0), 2 Kint(1)}</TD></TR>
 <TR><TD>INIT {local(_g, 0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(1)}</TD></TR>
-<TR><TD>CALL {T(1)} {T(1), 1 Kint(0)}</TD></TR>
-<TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(2)}</TD></TR>
-<TR><TD>GET {T(1), T(2)} {T(1)}</TD></TR>
-<TR><TD>MOV {local(_g, 0)} {T(3)}</TD></TR>
-<TR><TD>CBR {T(3)} {L8, L9}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'r' Ks(4)} {T(0)}</TD></TR>
+<TR><TD>CALL {T(0)} {T(0), 1 Kint(0)}</TD></TR>
+<TR><TD>LOADGLOBAL {Upval(_ENV), 'a' Ks(5)} {T(1)}</TD></TR>
+<TR><TD>GET {T(0), T(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {local(_g, 0)} {T(2)}</TD></TR>
+<TR><TD>CBR {T(2)} {L8, L9}</TD></TR>
 </TABLE>>];
 L5 -> L8
 L5 -> L9
 L6 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L6</B></TD></TR>
-<TR><TD>MOV {'majumdar' Ks(8)} {T(2)}</TD></TR>
+<TR><TD>MOV {'majumdar' Ks(8)} {T(1)}</TD></TR>
 <TR><TD>BR {L7}</TD></TR>
 </TABLE>>];
 L6 -> L7
 L7 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L7</B></TD></TR>
-<TR><TD>PUTsk {T(2)} {T(1), 'name' Ks(6)}</TD></TR>
+<TR><TD>PUTsk {T(1)} {T(0), 'name' Ks(6)}</TD></TR>
 <TR><TD>RET {L1}</TD></TR>
 </TABLE>>];
 L7 -> L1
 L8 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L8</B></TD></TR>
-<TR><TD>MOV {'Dibyendu' Ks(7)} {T(3)}</TD></TR>
+<TR><TD>MOV {'Dibyendu' Ks(7)} {T(2)}</TD></TR>
 <TR><TD>BR {L9}</TD></TR>
 </TABLE>>];
 L8 -> L9
 L9 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L9</B></TD></TR>
-<TR><TD>MOV {T(3)} {T(2)}</TD></TR>
-<TR><TD>CBR {T(2)} {L7, L6}</TD></TR>
+<TR><TD>MOV {T(2)} {T(1)}</TD></TR>
+<TR><TD>CBR {T(1)} {L7, L6}</TD></TR>
 </TABLE>>];
 L9 -> L7
 L9 -> L6

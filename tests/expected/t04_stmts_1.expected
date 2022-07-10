@@ -351,8 +351,8 @@ L2
 L3
 	BR {L5}
 L4
-	ADD {local(a, 0), 1 Kint(1)} {T(1)}
-	MOV {T(1)} {local(a, 0)}
+	ADD {local(a, 0), 1 Kint(1)} {T(0)}
+	MOV {T(0)} {local(a, 0)}
 	BR {L0}
 L5
 	RET {L1}
@@ -388,8 +388,8 @@ L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L3 -> L5
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(1)} {local(a, 0)}</TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(a, 0)}</TD></TR>
 <TR><TD>BR {L0}</TD></TR>
 </TABLE>>];
 L4 -> L0
@@ -430,8 +430,8 @@ L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L3 -> L5
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(1)}</TD></TR>
-<TR><TD>MOV {T(1)} {local(a, 0)}</TD></TR>
+<TR><TD>ADD {local(a, 0), 1 Kint(1)} {T(0)}</TD></TR>
+<TR><TD>MOV {T(0)} {local(a, 0)}</TD></TR>
 <TR><TD>BR {L0}</TD></TR>
 </TABLE>>];
 L4 -> L0
@@ -656,21 +656,21 @@ define Proc%1
 L0 (entry)
 	MOV {10 Kint(0)} {Tint(1)}
 	MOV {1 Kint(1)} {Tint(2)}
-	UNMi {1 Kint(1)} {Tint(3)}
-	MOV {Tint(3)} {Tint(4)}
-	LIii {0 Kint(2), Tint(4)} {Tbool(5)}
-	SUBii {Tint(1), Tint(4)} {Tint(1)}
+	UNMi {1 Kint(1)} {Tint(6)}
+	MOV {Tint(6)} {Tint(3)}
+	LIii {0 Kint(2), Tint(3)} {Tbool(4)}
+	SUBii {Tint(1), Tint(3)} {Tint(1)}
 	BR {L2}
 L1 (exit)
 L2
-	ADDii {Tint(1), Tint(4)} {Tint(1)}
-	CBR {Tbool(5)} {L3, L4}
+	ADDii {Tint(1), Tint(3)} {Tint(1)}
+	CBR {Tbool(4)} {L3, L4}
 L3
-	LIii {Tint(2), Tint(1)} {Tbool(6)}
-	CBR {Tbool(6)} {L6, L5}
+	LIii {Tint(2), Tint(1)} {Tbool(5)}
+	CBR {Tbool(5)} {L6, L5}
 L4
-	LIii {Tint(1), Tint(2)} {Tbool(6)}
-	CBR {Tbool(6)} {L6, L5}
+	LIii {Tint(1), Tint(2)} {Tbool(5)}
+	CBR {Tbool(5)} {L6, L5}
 L5
 	MOV {Tint(1)} {Tint(0)}
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
@@ -683,31 +683,31 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L0</B></TD></TR>
 <TR><TD>MOV {10 Kint(0)} {Tint(1)}</TD></TR>
 <TR><TD>MOV {1 Kint(1)} {Tint(2)}</TD></TR>
-<TR><TD>UNMi {1 Kint(1)} {Tint(3)}</TD></TR>
-<TR><TD>MOV {Tint(3)} {Tint(4)}</TD></TR>
-<TR><TD>LIii {0 Kint(2), Tint(4)} {Tbool(5)}</TD></TR>
-<TR><TD>SUBii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
+<TR><TD>UNMi {1 Kint(1)} {Tint(6)}</TD></TR>
+<TR><TD>MOV {Tint(6)} {Tint(3)}</TD></TR>
+<TR><TD>LIii {0 Kint(2), Tint(3)} {Tbool(4)}</TD></TR>
+<TR><TD>SUBii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
 <TR><TD>BR {L2}</TD></TR>
 </TABLE>>];
 L0 -> L2
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>ADDii {Tint(1), Tint(4)} {Tint(1)}</TD></TR>
-<TR><TD>CBR {Tbool(5)} {L3, L4}</TD></TR>
+<TR><TD>ADDii {Tint(1), Tint(3)} {Tint(1)}</TD></TR>
+<TR><TD>CBR {Tbool(4)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L2 -> L4
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(6)}</TD></TR>
-<TR><TD>CBR {Tbool(6)} {L6, L5}</TD></TR>
+<TR><TD>LIii {Tint(2), Tint(1)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L6, L5}</TD></TR>
 </TABLE>>];
 L3 -> L6
 L3 -> L5
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>LIii {Tint(1), Tint(2)} {Tbool(6)}</TD></TR>
-<TR><TD>CBR {Tbool(6)} {L6, L5}</TD></TR>
+<TR><TD>LIii {Tint(1), Tint(2)} {Tbool(5)}</TD></TR>
+<TR><TD>CBR {Tbool(5)} {L6, L5}</TD></TR>
 </TABLE>>];
 L4 -> L6
 L4 -> L5
@@ -1516,11 +1516,11 @@ L2
 	EQ {local(a, 0), local(b, 1)} {T(0)}
 	CBR {T(0)} {L5, L3}
 L3
-	EQ {local(a, 0), local(c, 2)} {T(1)}
-	CBR {T(1)} {L6, L4}
+	EQ {local(a, 0), local(c, 2)} {T(0)}
+	CBR {T(0)} {L6, L4}
 L4
-	EQ {local(a, 0), local(d, 3)} {T(2)}
-	CBR {T(2)} {L7, L8}
+	EQ {local(a, 0), local(d, 3)} {T(0)}
+	CBR {T(0)} {L7, L8}
 L5
 	BR {L10}
 L6
@@ -1542,8 +1542,8 @@ L13
 L14
 	BR {L9}
 L15
-	EQ {local(a, 0), local(e, 4)} {T(3)}
-	CBR {T(3)} {L16, L17}
+	EQ {local(a, 0), local(e, 4)} {T(0)}
+	CBR {T(0)} {L16, L17}
 L16
 	BR {L19}
 L17
@@ -1578,15 +1578,15 @@ L2 -> L5
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(c, 2)} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L6, L4}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(c, 2)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L6, L4}</TD></TR>
 </TABLE>>];
 L3 -> L6
 L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(d, 3)} {T(2)}</TD></TR>
-<TR><TD>CBR {T(2)} {L7, L8}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(d, 3)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L7, L8}</TD></TR>
 </TABLE>>];
 L4 -> L7
 L4 -> L8
@@ -1642,8 +1642,8 @@ L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L14 -> L9
 L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L15</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
-<TR><TD>CBR {T(3)} {L16, L17}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(e, 4)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L16, L17}</TD></TR>
 </TABLE>>];
 L15 -> L16
 L15 -> L17
@@ -1693,15 +1693,15 @@ L2 -> L5
 L2 -> L3
 L3 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L3</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(c, 2)} {T(1)}</TD></TR>
-<TR><TD>CBR {T(1)} {L6, L4}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(c, 2)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L6, L4}</TD></TR>
 </TABLE>>];
 L3 -> L6
 L3 -> L4
 L4 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L4</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(d, 3)} {T(2)}</TD></TR>
-<TR><TD>CBR {T(2)} {L7, L8}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(d, 3)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L7, L8}</TD></TR>
 </TABLE>>];
 L4 -> L7
 L4 -> L8
@@ -1757,8 +1757,8 @@ L14 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L14 -> L9
 L15 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L15</B></TD></TR>
-<TR><TD>EQ {local(a, 0), local(e, 4)} {T(3)}</TD></TR>
-<TR><TD>CBR {T(3)} {L16, L17}</TD></TR>
+<TR><TD>EQ {local(a, 0), local(e, 4)} {T(0)}</TD></TR>
+<TR><TD>CBR {T(0)} {L16, L17}</TD></TR>
 </TABLE>>];
 L15 -> L16
 L15 -> L17
