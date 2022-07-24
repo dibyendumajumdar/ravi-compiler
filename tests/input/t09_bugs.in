@@ -115,3 +115,5 @@ local j: integer
 local i: integer
 local a:number[]
 a[i]=a[i]+b*a[j]
+#
+unlpack((ret2(f())))
