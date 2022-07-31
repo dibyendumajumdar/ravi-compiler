@@ -2,3 +2,19 @@ for k,v in pairs(t) do
     print(k,v)
 end
 #
+local values = {}
+for k,v in pairs({ name='Dibyendu', surname='Majumdar' }) do
+    local key = k
+    local value = v
+    values[key] = value
+end
+#
+local values = {}
+for k, v in pairs({name='Dibyendu'}) do
+    for k, v in pairs({surname='Majumdar'}) do
+        assert(k == 'surname')
+        assert(v == 'Majumdar')
+    end
+    assert(k == 'name')
+    assert(v == 'Dibyendu')
+end
