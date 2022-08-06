@@ -18,3 +18,12 @@ for k, v in pairs({name='Dibyendu'}) do
     assert(k == 'name')
     assert(v == 'Dibyendu')
 end
+#
+local function allcases (n: integer)
+    for i = 1, n - 1 do
+        for _, v1 in ipairs(allcases(i)) do
+            for _, v2 in ipairs(allcases(n - i)) do
+            end
+        end
+    end
+end
