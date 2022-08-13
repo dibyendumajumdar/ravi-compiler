@@ -34,7 +34,7 @@ Generic for loops are transformed to while loops in ast_lower.c
 */
 
 #include "fnv_hash.h"
-#include <parser.h>
+#include "parser.h"
 
 /* forward declarations */
 static AstNode *parse_expression(ParserState *);

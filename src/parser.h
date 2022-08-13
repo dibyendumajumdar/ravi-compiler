@@ -30,7 +30,7 @@
  * The data structures defined here are private.
  */
 
-#include "ravi_compiler.h"
+#include <ravi_compiler.h>
 
 #include "allocate.h"
 #include "membuf.h"
