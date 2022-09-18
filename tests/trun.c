@@ -131,7 +131,7 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		goto L_exit;
 	}
 	if (args->astdump) {
-		raviX_output_ast(compiler_state, stdout);
+		raviX_dump_ast(compiler_state, stdout);
 	}
 	rc = raviX_ast_lower(compiler_state);
 	if (rc != 0) {
@@ -144,7 +144,7 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		goto L_exit;
 	}
 	if (args->astdump) {
-		raviX_output_ast(compiler_state, stdout);
+		raviX_dump_ast(compiler_state, stdout);
 	}
 	if (args->simplify_ast) {
 		rc = raviX_ast_simplify(compiler_state);
@@ -153,7 +153,7 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 			goto L_exit;
 		}
 		if (args->astdump) {
-			raviX_output_ast(compiler_state, stdout);
+			raviX_dump_ast(compiler_state, stdout);
 		}
 	}
 	LinearizerState *linearizer = raviX_init_linearizer(compiler_state);

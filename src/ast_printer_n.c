@@ -101,7 +101,22 @@ static void dump_ast_node_list(TextBuffer *buf, AstNodeList *list, int level, co
 			printf_buf(buf, "%p%s\n", level, delimiter);
 		raviX_dump_ast_node(buf, node, level + 1);
 	}
-	END_FOR_EACH_PTR(node);
+	END_FOR_EACH_PTR(node)
+}
+
+static void dump_ast_node_list_as_ids(TextBuffer *buf, AstNodeList *list, const char *delimiter)
+{
+	AstNode *node;
+	bool is_first = true;
+	FOR_EACH_PTR(list, AstNode, node)
+	{
+		if (is_first)
+			is_first = false;
+		else if (delimiter)
+			printf_buf(buf, "%s", delimiter);
+		printf_buf(buf, "%P", node);
+	}
+	END_FOR_EACH_PTR(node)
 }
 
 static void dump_statement_list(TextBuffer *buf, AstNodeList *statement_list, int level)
@@ -234,13 +249,12 @@ static void dump_symbol_name_list(TextBuffer *buf, LuaSymbolList *list, int leve
 	END_FOR_EACH_PTR(node);
 }
 
-
 static void dump_scope(TextBuffer *buf, Scope *scope, int level)
 {
 	printf_buf(buf, "%pScope {\n", level);
-	printf_buf(buf, "%pid = %P,\n", level + 1, scope);
-	printf_buf(buf, "%pfunction = %P,\n", level + 1, scope->function);
-	printf_buf(buf, "%pparent = %P,\n", level + 1, scope->parent);
+	printf_buf(buf, "%pscope_id = %P,\n", level + 1, scope);
+	printf_buf(buf, "%pfunction_id = %P,\n", level + 1, scope->function);
+	printf_buf(buf, "%pparent_scope_id = %P,\n", level + 1, scope->parent);
 	printf_buf(buf, "%psymbols = {\n", level + 1);
 	dump_symbol_list(buf, scope->symbol_list, level + 2, ",");
 	printf_buf(buf, "%p},\n", level + 1);
@@ -253,8 +267,8 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 	switch (node->type) {
 	case EXPR_FUNCTION: {
 		printf_buf(buf, "%pExprFunction {\n", level);
-		printf_buf(buf, "%pid = %P,\n", level + 1, node);
-		printf_buf(buf, "%pparent_function = %P,\n", level + 1, node->function_expr.parent_function);
+		printf_buf(buf, "%pfunction_id = %P,\n", level + 1, node);
+		printf_buf(buf, "%pparent_function_id = %P,\n", level + 1, node->function_expr.parent_function);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(node->function_expr.type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(node->function_expr.type.type_name));
@@ -277,11 +291,11 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->function_expr.function_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
-		//		if (node->function_expr.child_functions) {
-		//			printf_buf(buf, "%pchild_functions = {\n", level+1);
-		//			dump_ast_node_list(buf, node->function_expr.child_functions, level+1, ",");
-		//			printf_buf(buf, "%p}\n", level+1);
-		//		}
+		if (node->function_expr.child_functions) {
+			printf_buf(buf, "%pchild_functions = { ", level+1);
+			dump_ast_node_list_as_ids(buf, node->function_expr.child_functions, ",");
+			printf_buf(buf, " }\n");
+		}
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -405,7 +419,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 			printf_buf(buf, "%p},\n", level + 2);
 			printf_buf(buf, "%p},\n", level + 1);
 		}
-		printf_buf(buf, "%}\n", level);
+		printf_buf(buf, "%p}\n", level);
 		break;
 	}
 	case STMT_WHILE: {
@@ -608,7 +622,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(node->table_expr.type.type_name));
 		printf_buf(buf, "%pexpr_list = {\n", level + 1);
 		dump_ast_node_list(buf, node->table_expr.expr_list, level + 1, ",");
-		printf_buf(buf, "%}\n", level + 1);
+		printf_buf(buf, "%p}\n", level + 1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
