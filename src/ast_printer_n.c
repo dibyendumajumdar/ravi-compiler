@@ -131,7 +131,7 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 	switch (sym->symbol_type) {
 	case SYM_ENV: {
 		printf_buf(buf, "%pSymEnv {\n", level);
-		printf_buf(buf, "%pid = %P,\n", level + 1, sym);
+		printf_buf(buf, "%psymbol_id = %P,\n", level + 1, sym);
 		printf_buf(buf, "%pname = '%t',\n", level + 1, sym->variable.var_name);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(sym->variable.value_type.type_code));
@@ -141,7 +141,7 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 	}
 	case SYM_GLOBAL: {
 		printf_buf(buf, "%pSymGlobal {\n", level);
-		printf_buf(buf, "%pid = %P,\n", level + 1, sym);
+		printf_buf(buf, "%psymbol_id = %P,\n", level + 1, sym);
 		printf_buf(buf, "%pname = '%t',\n", level + 1, sym->variable.var_name);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(sym->variable.value_type.type_code));
@@ -151,7 +151,7 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 	}
 	case SYM_LOCAL: {
 		printf_buf(buf, "%pSymLocal {\n", level);
-		printf_buf(buf, "%pid = %P,\n", level + 1, sym);
+		printf_buf(buf, "%psymbol_id = %P,\n", level + 1, sym);
 		printf_buf(buf, "%pname = '%t',\n", level + 1, sym->variable.var_name);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(sym->variable.value_type.type_code));
@@ -160,13 +160,13 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 		printf_buf(buf, "%pfunction_argument = %b,\n", level + 1,
 			   (lua_Integer)sym->variable.function_parameter);
 		printf_buf(buf, "%pescaped = %b,\n", level + 1, (lua_Integer)sym->variable.escaped);
-		printf_buf(buf, "%pscope = %P,\n", level + 1, (lua_Integer)sym->variable.block);
+		printf_buf(buf, "%pscope_id = %P,\n", level + 1, (lua_Integer)sym->variable.block);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
 	case SYM_UPVALUE: {
 		printf_buf(buf, "%pSymUpvalue {\n", level);
-		printf_buf(buf, "%ptarget_id = %P,\n", level + 1, sym->upvalue.target_variable);
+		printf_buf(buf, "%ptarget_symbol_id = %P,\n", level + 1, sym->upvalue.target_variable);
 		printf_buf(buf, "%ptarget_variable_name = %t,\n", level + 1,
 			   sym->upvalue.target_variable->variable.var_name);
 		printf_buf(buf, "%ptarget_type_code = %s,\n", level + 1,
@@ -185,29 +185,29 @@ static void dump_symbol_name(TextBuffer *buf, LuaSymbol *sym)
 {
 	switch (sym->symbol_type) {
 	case SYM_LOCAL: {
-		printf_buf(buf, "SymLocalRef{ name='%t', id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymLocalRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_ENV: {
-		printf_buf(buf, "SymEnvRef{ name='%t', id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymEnvRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_GLOBAL: {
-		printf_buf(buf, "SymGlobalRef{ name='%t', id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymGlobalRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_UPVALUE: {
 		if (sym->upvalue.target_variable->symbol_type == SYM_ENV) {
-			printf_buf(buf, "SymUpvalRef{ name='%t', id = %P, env = true }",
+			printf_buf(buf, "SymUpvalRef{ name='%t', symbol_id = %P, env = true }",
 				   sym->upvalue.target_variable->variable.var_name, sym->upvalue.target_variable);
 		} else {
-			printf_buf(buf, "SymUpvalRef{ name='%t', id = %P }",
+			printf_buf(buf, "SymUpvalRef{ name='%t', symbol_id = %P }",
 				   sym->upvalue.target_variable->variable.var_name, sym->upvalue.target_variable);
 		}
 		break;
 	}
 	case SYM_LABEL: {
-		printf_buf(buf, "SymLabelRef{ name='%t', id = %P }", sym->label.label_name, sym);
+		printf_buf(buf, "SymLabelRef{ name='%t', symbol_id = %P }", sym->label.label_name, sym);
 		break;
 	}
 	default:
@@ -359,7 +359,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtGoto {\n", level);
 		printf_buf(buf, "%pis_break = %b,\n", level + 1, (lua_Integer)node->goto_stmt.is_break);
 		printf_buf(buf, "%plabel_name = '%t',\n", level + 1, node->goto_stmt.name);
-		printf_buf(buf, "%pgoto_scope = %P\n", level + 1, node->goto_stmt.goto_scope);
+		printf_buf(buf, "%pgoto_scope_id = %P\n", level + 1, node->goto_stmt.goto_scope);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
