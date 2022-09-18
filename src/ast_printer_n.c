@@ -583,7 +583,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_FIELD_SELECTOR: {
-		printf_buf(buf, "%pExprSelector {", level);
+		printf_buf(buf, "%pExprSelector {\n", level);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1, raviX_get_type_name(node->index_expr.type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(node->index_expr.type.type_name));
 		printf_buf(buf, "%pselector = \n", level + 1);
@@ -592,7 +592,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_Y_INDEX: {
-		printf_buf(buf, "%pExprIndex {", level);
+		printf_buf(buf, "%pExprIndex {\n", level);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1, raviX_get_type_name(node->index_expr.type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(node->index_expr.type.type_name));
 		printf_buf(buf, "%pindex = \n", level + 1);
@@ -602,20 +602,20 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_TABLE_ELEMENT_ASSIGN: {
-		printf_buf(buf, "%pExprTableAssign {", level);
-		//		printf_buf(buf, "%p%c %T\n", level, "[indexed assign start]",
-		//&node->table_elem_assign_expr.type); 		if (node->table_elem_assign_expr.key_expr) { 			printf_buf(buf,
-		//"%p%c\n", level, "[index start]"); 			raviX_print_ast_node(buf, node->table_elem_assign_expr.key_expr,
-		//level + 1); 			printf_buf(buf, "%p%c\n", level, "[index end]");
-		//		}
-		//		printf_buf(buf, "%p%c\n", level, "[value start]");
-		//		raviX_print_ast_node(buf, node->table_elem_assign_expr.value_expr, level + 1);
-		//		printf_buf(buf, "%p%c\n", level, "[value end]");
+		printf_buf(buf, "%pExprTableAssign {\n", level);
+		if (node->table_elem_assign_expr.key_expr) {
+			printf_buf(buf, "%pkey = {\n", level + 1);
+			raviX_dump_ast_node(buf, node->table_elem_assign_expr.key_expr, level + 2);
+			printf_buf(buf, "%p},\n", level + 1);
+		}
+		printf_buf(buf, "%pvalue = {\n", level+1);
+		raviX_dump_ast_node(buf, node->table_elem_assign_expr.value_expr, level + 2);
+		printf_buf(buf, "%p}\n", level + 1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
 	case EXPR_TABLE_LITERAL: {
-		printf_buf(buf, "%pExprTableLit {", level);
+		printf_buf(buf, "%pExprTableLit {\n", level);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1, raviX_get_type_name(node->table_expr.type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(node->table_expr.type.type_name));
 		printf_buf(buf, "%pexpr_list = {\n", level + 1);
@@ -625,7 +625,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case EXPR_CONCAT: {
-		printf_buf(buf, "%pExprConcat {", level);
+		printf_buf(buf, "%pExprConcat {\n", level);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(node->string_concatenation_expr.type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1,
