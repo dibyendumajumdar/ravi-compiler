@@ -326,25 +326,23 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		break;
 	}
 	case STMT_FUNCTION: {
-		//		struct FunctionStatement {
-		//			AstNode *name;		 /* base symbol to be looked up - symbol_expression */
-		//			AstNodeList *selectors; /* Optional list of index_expression(s) */
-		//			AstNode *method_name;	 /* Optional - index_expression */
-		//			AstNode *function_expr;	 /* Function's AST - function_expression */
-		//		};
 		printf_buf(buf, "%pStmtFunction {\n", level);
-
-		//		raviX_print_ast_node(buf, node->function_stmt.name, level);
-		//		if (node->function_stmt.selectors) {
-		//			printf_buf(buf, "%p%c\n", level + 1, "[selectors]");
-		//			//print_ast_node_list(buf, node->function_stmt.selectors, level + 2, NULL);
-		//		}
-		//		if (node->function_stmt.method_name) {
-		//			printf_buf(buf, "%p%c\n", level + 1, "[method name]");
-		//			raviX_print_ast_node(buf, node->function_stmt.method_name, level + 2);
-		//		}
-		//		printf_buf(buf, "%p=\n", level + 1);
-		//		raviX_print_ast_node(buf, node->function_stmt.function_expr, level + 2);
+		printf_buf(buf, "%pname = {\n", level+1);
+		raviX_dump_ast_node(buf, node->function_stmt.name, level+2);
+		printf_buf(buf, "%p},\n", level+1);
+		if (node->function_stmt.selectors) {
+			printf_buf(buf, "%pselectors = {\n", level+1);
+			dump_ast_node_list(buf, node->function_stmt.selectors, level + 2, ",");
+			printf_buf(buf, "%p},\n", level+1);
+		}
+		if (node->function_stmt.method_name) {
+			printf_buf(buf, "%pmethod_name = {\n", level+1);
+			raviX_dump_ast_node(buf, node->function_stmt.name, level+2);
+			printf_buf(buf, "%p},\n", level+1);
+		}
+		printf_buf(buf, "%pfunction_expr =\n", level + 1);
+		raviX_dump_ast_node(buf, node->function_stmt.function_expr, level + 2);
+		printf_buf(buf, "%p}\n", level+1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
