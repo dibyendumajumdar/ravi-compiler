@@ -99,7 +99,11 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 
 const char *read_file(const char *filename)
 {
+#ifdef _WIN32
+	FILE *fp = fopen(filename, "rb");
+#else
 	FILE *fp = fopen(filename, "r");
+#endif
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to open file %s\n", filename);
 		return NULL;

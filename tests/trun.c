@@ -188,7 +188,6 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 	if (args->gen_C) {
 		fprintf(stdout, "\n#endif\n");
 		raviX_generate_C_tofile(linearizer, args->mainfunc, stdout);
-		fflush(stdout);
 	}
 
 L_linend:
@@ -196,6 +195,7 @@ L_linend:
 
 L_exit:
 	raviX_destroy_compiler(compiler_state);
+	fflush(stdout);
 
 	return rc;
 }
