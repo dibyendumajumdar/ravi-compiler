@@ -187,29 +187,29 @@ static void dump_symbol_name(TextBuffer *buf, LuaSymbol *sym)
 {
 	switch (sym->symbol_type) {
 	case SYM_LOCAL: {
-		printf_buf(buf, "SymLocalRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymLocalRef { name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_ENV: {
-		printf_buf(buf, "SymEnvRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymEnvRef { name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_GLOBAL: {
-		printf_buf(buf, "SymGlobalRef{ name='%t', symbol_id = %P }", sym->variable.var_name, sym);
+		printf_buf(buf, "SymGlobalRef { name='%t', symbol_id = %P }", sym->variable.var_name, sym);
 		break;
 	}
 	case SYM_UPVALUE: {
 		if (sym->upvalue.target_variable->symbol_type == SYM_ENV) {
-			printf_buf(buf, "SymUpvalRef{ name='%t', symbol_id = %P, env = true }",
+			printf_buf(buf, "SymUpvalRef { name='%t', symbol_id = %P, env = true }",
 				   sym->upvalue.target_variable->variable.var_name, sym->upvalue.target_variable);
 		} else {
-			printf_buf(buf, "SymUpvalRef{ name='%t', symbol_id = %P }",
+			printf_buf(buf, "SymUpvalRef { name='%t', symbol_id = %P }",
 				   sym->upvalue.target_variable->variable.var_name, sym->upvalue.target_variable);
 		}
 		break;
 	}
 	case SYM_LABEL: {
-		printf_buf(buf, "SymLabelRef{ name='%t', symbol_id = %P }", sym->label.label_name, sym);
+		printf_buf(buf, "SymLabelRef { name='%t', symbol_id = %P }", sym->label.label_name, sym);
 		break;
 	}
 	default:
@@ -287,9 +287,9 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 			dump_symbol_list(buf, node->function_expr.upvalues, level + 2, ",");
 			printf_buf(buf, "%p},\n", level + 1);
 		}
-		printf_buf(buf, "%pmain_block = {\n", level + 1);
+		printf_buf(buf, "%pmain_block = \n", level + 1);
 		dump_scope(buf, node->function_expr.main_block, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->function_expr.function_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
@@ -329,22 +329,22 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 	}
 	case STMT_FUNCTION: {
 		printf_buf(buf, "%pStmtFunction {\n", level);
-		printf_buf(buf, "%pname = {\n", level+1);
+		printf_buf(buf, "%pname = \n", level+1);
 		raviX_dump_ast_node(buf, node->function_stmt.name, level+2);
-		printf_buf(buf, "%p},\n", level+1);
+		printf_buf(buf, "%p,\n", level+1);
 		if (node->function_stmt.selectors) {
 			printf_buf(buf, "%pselectors = {\n", level+1);
 			dump_ast_node_list(buf, node->function_stmt.selectors, level + 2, ",");
 			printf_buf(buf, "%p},\n", level+1);
 		}
 		if (node->function_stmt.method_name) {
-			printf_buf(buf, "%pmethod_name = {\n", level+1);
-			raviX_dump_ast_node(buf, node->function_stmt.name, level+2);
-			printf_buf(buf, "%p},\n", level+1);
+			printf_buf(buf, "%pmethod_name = \n", level+1);
+			raviX_dump_ast_node(buf, node->function_stmt.method_name, level+2);
+			printf_buf(buf, "%p,\n", level+1);
 		}
 		printf_buf(buf, "%pfunction_expr =\n", level + 1);
 		raviX_dump_ast_node(buf, node->function_stmt.function_expr, level + 2);
-		printf_buf(buf, "%p}\n", level+1);
+		printf_buf(buf, "%p\n", level+1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -367,7 +367,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtDo {\n", level);
 		printf_buf(buf, "%pscope = \n", level + 1);
 		dump_scope(buf, node->do_stmt.scope, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->do_stmt.do_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
@@ -426,10 +426,10 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtWhile {\n", level);
 		printf_buf(buf, "%ploop_scope = \n", level + 1);
 		dump_scope(buf, node->while_or_repeat_stmt.loop_scope, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pcondition = \n", level + 1);
 		raviX_dump_ast_node(buf, node->while_or_repeat_stmt.condition, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->while_or_repeat_stmt.loop_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
@@ -440,13 +440,13 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtRepeat {\n", level);
 		printf_buf(buf, "%ploop_scope = \n", level + 1);
 		dump_scope(buf, node->while_or_repeat_stmt.loop_scope, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->while_or_repeat_stmt.loop_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
 		printf_buf(buf, "%pcondition = \n", level + 1);
 		raviX_dump_ast_node(buf, node->while_or_repeat_stmt.condition, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -454,13 +454,13 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtForIn {\n", level);
 		printf_buf(buf, "%pfor_scope = \n", level + 1);
 		dump_scope(buf, node->for_stmt.for_scope, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
-		printf_buf(buf, "%psymbols = \n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
+		printf_buf(buf, "%psymbols = {\n", level + 1);
 		dump_symbol_name_list(buf, node->for_stmt.symbols, level + 2, ",");
 		printf_buf(buf, "%p},\n", level + 1);
 		printf_buf(buf, "%pbody_scope = \n", level + 1);
 		dump_scope(buf, node->for_stmt.for_body, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->for_stmt.for_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
@@ -471,13 +471,13 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pStmtForNum {\n", level);
 		printf_buf(buf, "%pfor_scope = \n", level + 1);
 		dump_scope(buf, node->for_stmt.for_scope, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
-		printf_buf(buf, "%psymbols = \n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
+		printf_buf(buf, "%psymbols = {\n", level + 1);
 		dump_symbol_name_list(buf, node->for_stmt.symbols, level + 2, ",");
 		printf_buf(buf, "%p},\n", level + 1);
 		printf_buf(buf, "%pbody_scope = \n", level + 1);
 		dump_scope(buf, node->for_stmt.for_body, level + 2);
-		printf_buf(buf, "%p},\n", level + 1);
+		printf_buf(buf, "%p,\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
 		dump_statement_list(buf, node->for_stmt.for_statement_list, level + 1);
 		printf_buf(buf, "%p},\n", level + 1);
@@ -517,7 +517,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 			printf_buf(buf, "%pmethod_name = '%t',\n", level + 1, node->function_call_expr.method_name);
 		}
 		if (node->function_call_expr.arg_list) {
-			printf_buf(buf, "%parg_list = \n", level + 1);
+			printf_buf(buf, "%parg_list = {\n", level + 1);
 			dump_ast_node_list(buf, node->function_call_expr.arg_list, level + 2, ",");
 			printf_buf(buf, "%p},\n", level + 1);
 		}
@@ -600,19 +600,17 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 		printf_buf(buf, "%pindex = \n", level + 1);
 		raviX_dump_ast_node(buf, node->index_expr.expr, level + 2);
 		printf_buf(buf, "%p}\n", level);
-		printf_buf(buf, "%p}\n", level);
 		break;
 	}
 	case EXPR_TABLE_ELEMENT_ASSIGN: {
 		printf_buf(buf, "%pExprTableAssign {\n", level);
 		if (node->table_elem_assign_expr.key_expr) {
-			printf_buf(buf, "%pkey = {\n", level + 1);
+			printf_buf(buf, "%pkey = \n", level + 1);
 			raviX_dump_ast_node(buf, node->table_elem_assign_expr.key_expr, level + 2);
-			printf_buf(buf, "%p},\n", level + 1);
+			printf_buf(buf, "%p,\n", level + 1);
 		}
-		printf_buf(buf, "%pvalue = {\n", level+1);
+		printf_buf(buf, "%pvalue = \n", level+1);
 		raviX_dump_ast_node(buf, node->table_elem_assign_expr.value_expr, level + 2);
-		printf_buf(buf, "%p}\n", level + 1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -634,7 +632,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 			   get_as_str(node->string_concatenation_expr.type.type_name));
 		printf_buf(buf, "%pexpr_list = {\n", level + 1);
 		dump_ast_node_list(buf, node->string_concatenation_expr.expr_list, level + 1, ",");
-		printf_buf(buf, "%}\n", level + 1);
+		printf_buf(buf, "%p}\n", level + 1);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
