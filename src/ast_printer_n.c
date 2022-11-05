@@ -70,7 +70,7 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 		} else if (cp[0] == '%' && cp[1] == 'f') { /* float */
 			double d;
 			d = va_arg(ap, double);
-			raviX_buffer_add_fstring(buf, "%.16f", d);
+			raviX_buffer_add_double(buf, d);
 			cp++;
 		} else if (cp[0] == '%' && cp[1] == 'b') { /* boolean */
 			lua_Integer i;
@@ -80,7 +80,7 @@ static void printf_buf(TextBuffer *buf, const char *format, ...)
 		} else if (cp[0] == '%' && cp[1] == 'P') { /* pointer */
 			void *p;
 			p = va_arg(ap, void *);
-			raviX_buffer_add_fstring(buf, "%p", p);
+			raviX_buffer_add_fstring(buf, "%lld", (intptr_t)p);
 			cp++;
 		} else {
 			raviX_buffer_add_char(buf, *cp);
@@ -145,7 +145,7 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 		printf_buf(buf, "%pname = '%t',\n", level + 1, sym->variable.var_name);
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(sym->variable.value_type.type_code));
-		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(sym->variable.value_type.type_name));
+		printf_buf(buf, "%ptype_name = '%s'\n", level + 1, get_as_str(sym->variable.value_type.type_name));
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -156,11 +156,11 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 		printf_buf(buf, "%ptype_code = %s,\n", level + 1,
 			   raviX_get_type_name(sym->variable.value_type.type_code));
 		printf_buf(buf, "%ptype_name = '%s',\n", level + 1, get_as_str(sym->variable.value_type.type_name));
-		printf_buf(buf, "%pmodified = %b,\n", level + 1, (lua_Integer)sym->variable.modified);
-		printf_buf(buf, "%pfunction_argument = %b,\n", level + 1,
+		printf_buf(buf, "%pis_modified = %b,\n", level + 1, (lua_Integer)sym->variable.modified);
+		printf_buf(buf, "%pis_function_argument = %b,\n", level + 1,
 			   (lua_Integer)sym->variable.function_parameter);
-		printf_buf(buf, "%pescaped = %b,\n", level + 1, (lua_Integer)sym->variable.escaped);
-		printf_buf(buf, "%pscope_id = %P,\n", level + 1, (lua_Integer)sym->variable.block);
+		printf_buf(buf, "%pis_escaped = %b,\n", level + 1, (lua_Integer)sym->variable.escaped);
+		printf_buf(buf, "%pscope_id = %P\n", level + 1, (lua_Integer)sym->variable.block);
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -173,6 +173,8 @@ static void dump_symbol(TextBuffer *buf, LuaSymbol *sym, int level)
 			   raviX_get_type_name(sym->upvalue.target_variable->variable.value_type.type_code));
 		printf_buf(buf, "%ptarget_type_name = '%s',\n", level + 1,
 			   get_as_str(sym->upvalue.target_variable->variable.value_type.type_name));
+		printf_buf(buf, "%pupvalue_index = %i\n", level + 1,
+			   (lua_Integer)(sym->upvalue.upvalue_index));
 		printf_buf(buf, "%p}\n", level);
 		break;
 	}
@@ -285,7 +287,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 			dump_symbol_list(buf, node->function_expr.upvalues, level + 2, ",");
 			printf_buf(buf, "%p},\n", level + 1);
 		}
-		printf_buf(buf, "%pmain_block = \n", level + 1);
+		printf_buf(buf, "%pmain_block = {\n", level + 1);
 		dump_scope(buf, node->function_expr.main_block, level + 2);
 		printf_buf(buf, "%p},\n", level + 1);
 		printf_buf(buf, "%pstatements = {\n", level + 1);
@@ -406,7 +408,7 @@ void raviX_dump_ast_node(TextBuffer *buf, AstNode *node, int level)
 				is_first = false;
 			}
 		}
-		END_FOR_EACH_PTR(node);
+		END_FOR_EACH_PTR(node)
 		if (node->if_stmt.else_block) {
 			printf_buf(buf, "%pElse {\n", level + 1);
 			printf_buf(buf, "%pscope = \n", level + 2);
