@@ -881,7 +881,8 @@ L0 (entry)
 	BR {L3}
 L1 (exit)
 L2
-	CBR {true} {L3, L4}
+	NOT {true} {Tbool(0)}
+	CBR {Tbool(0)} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
@@ -897,7 +898,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L3
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>CBR {true} {L3, L4}</TD></TR>
+<TR><TD>NOT {true} {Tbool(0)}</TD></TR>
+<TR><TD>CBR {Tbool(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L2 -> L4
@@ -972,7 +974,8 @@ L0 (entry)
 	BR {L3}
 L1 (exit)
 L2
-	CBR {true} {L3, L4}
+	NOT {true} {Tbool(0)}
+	CBR {Tbool(0)} {L3, L4}
 L3
 	LOADGLOBAL {Upval(_ENV), 'print' Ks(0)} {T(0)}
 	CALL {T(0), 'forever' Ks(1)} {T(0..), 1 Kint(0)}
@@ -989,7 +992,8 @@ L0 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 L0 -> L3
 L2 [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0">
 <TR><TD><B>L2</B></TD></TR>
-<TR><TD>CBR {true} {L3, L4}</TD></TR>
+<TR><TD>NOT {true} {Tbool(0)}</TD></TR>
+<TR><TD>CBR {Tbool(0)} {L3, L4}</TD></TR>
 </TABLE>>];
 L2 -> L3
 L2 -> L4
