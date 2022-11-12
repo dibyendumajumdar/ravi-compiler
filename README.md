@@ -29,10 +29,10 @@ The compiler library consists of distinct modules:
 ### Limitations
 
 * No support for var args
-* The last argument to a table constructor is truncated to 1 value 
 
 ### Change Log
 
+* 12-nov-2022 More bug fixes, e.g. repeat statement was incorrectly compiled
 * 10-July-2022 Many bug fixes to do with how the virtual registers are allocated
 * 12-Oct-2021 Initial proof of concept for [new embedded C syntax](https://github.com/dibyendumajumdar/ravi-compiler/wiki/Embedding-C)
 * 22-Jun-2021 Increased coverage of Lua syntax to cover string concatenations and generic for loops.
@@ -96,7 +96,7 @@ trun --gen-C "print 'hello world'"
 
 ## Testing
 
-At the moment we have a couple of simple test driver programs: `tparse` and `trun`. These drivers take a string or file input which must be a valid Lua/Ravi chunk of code, and output the AST, the result of type checking, linear IR output if supported, and the CFG as a `dot` file. Example of the output can be found in the `tests/expected` folder.
+At the moment we have a simple test driver programs: `trun`. The driver takes a string or file input which must be a valid Lua/Ravi chunk of code, and outputs the AST, the result of type checking, linear IR output if supported, and the CFG as a `dot` file. Example of the output can be found in the `tests/expected` folder.
 
 Suppose `trun` was built in `build` folder then you can run the tests as follows:
 

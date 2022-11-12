@@ -14,10 +14,10 @@ At the moment we run `tparse` or `trun` on inputs and compare the output as save
 The `trun` utility has the following interface.
 
 ```
-trun [string | -f filename] [--notypecheck] [--nolinearize] [--noastdump] [--noirdump] [--nocodump] [--nocfgdump] [--simplify-ast] [--gen-C]
+trun [string | -f filename] [--notypecheck] [--nolinearize] [--noastdump] [--noirdump] [--nocodump] [--nocfgdump] [--simplify-ast] [--opt-upvalues] [--table-ast] [--remove-unreachable-blocks] [--gen-C] [-main main_function_name]
 ```
 
-The options have following meanings:
+The options have the following meanings:
 
 * `-f filename` - input file. The input should consist of chunks of code separated by a line containing just `#`. See `t00_exprs.in` in the input folder.
 * `--notypecheck` - omits the type checking step
@@ -27,11 +27,15 @@ The options have following meanings:
 * `--nocodump` - stops output of the input code chunk
 * `--nocfgdump` - stops output of the CFG
 * `--simplify-ast` - performs simplifications on the AST such as constant folding
+* `--remove-unreachable-blocks` - performs a step to remove unreachable blocks
+* `--opt-upvalues` - experimental feature to replace upvalues with constants when upvalue refers to a constant
+* `--table-ast` - dumps ast in a Ravi code format using functions and tables
 * `--gen-C` - generates C code that is suitable for JIT or AOT compilation for Ravi
+* `-main <arg>` - allows naming of the main function in generated C code
 
 The CFG output is generated in the format supported by the `dot` command in `graphviz`. 
 
-Currently all output will be produced to `stdout`.
+Currently, all output will be produced to `stdout`.
 
 Example. 
 
