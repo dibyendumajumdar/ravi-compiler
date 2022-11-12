@@ -99,6 +99,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 
 const char *read_file(const char *filename)
 {
+	/* We need to use binary read on windows to get file size correctly */
 #ifdef _WIN32
 	FILE *fp = fopen(filename, "rb");
 #else
