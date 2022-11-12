@@ -37,6 +37,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 	args->irdump = 1;
 	args->cfgdump = 1;
 	args->codump = 1;
+	args->table_ast = 0;
 	args->simplify_ast = 0;
 	args->remove_unreachable_blocks = 0;
 	args->gen_C = 0;
@@ -63,6 +64,8 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 			args->gen_C = 1;
 		} else if (strcmp(argv[i], "--opt-upvalues") == 0) {
 			args->opt_upvalue = 1;
+		} else if (strcmp(argv[i], "--table-ast") == 0) {
+			args->table_ast = 1;
 		} else if (strcmp(argv[i], "-main") == 0) {
 			if (i < argc - 1) {
 				i++;
@@ -99,7 +102,7 @@ void parse_arguments(struct arguments *args, int argc, const char *argv[])
 
 const char *read_file(const char *filename)
 {
-	/* We need to use binary read on windows to get file size correctly */
+	/* We need to use binary read on Windows to get file size correctly */
 #ifdef _WIN32
 	FILE *fp = fopen(filename, "rb");
 #else

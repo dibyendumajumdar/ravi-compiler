@@ -113,6 +113,15 @@ static void destroy_chunks(struct chunk_data *chunks)
 	destroy_allocator(&chunks->allocator);
 }
 
+static void output_ast(CompilerState *compiler_state, const struct arguments *args) {
+	if (args->astdump) {
+		if (args->table_ast)
+			raviX_dump_ast(compiler_state, stdout);
+		else
+			raviX_output_ast(compiler_state, stdout);
+	}
+}
+
 static int do_code(C_MemoryAllocator *allocator, const char *code, const struct arguments *args)
 {
 	int rc = 0;
@@ -130,9 +139,7 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
-	if (args->astdump) {
-		raviX_output_ast(compiler_state, stdout);
-	}
+	output_ast(compiler_state, args);
 	rc = raviX_ast_lower(compiler_state);
 	if (rc != 0) {
 		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
@@ -143,18 +150,14 @@ static int do_code(C_MemoryAllocator *allocator, const char *code, const struct 
 		fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 		goto L_exit;
 	}
-	if (args->astdump) {
-		raviX_output_ast(compiler_state, stdout);
-	}
+	output_ast(compiler_state, args);
 	if (args->simplify_ast) {
 		rc = raviX_ast_simplify(compiler_state);
 		if (rc != 0) {
 			fprintf(stderr, "%s\n", raviX_get_last_error(compiler_state));
 			goto L_exit;
 		}
-		if (args->astdump) {
-			raviX_output_ast(compiler_state, stdout);
-		}
+		output_ast(compiler_state, args);
 	}
 	LinearizerState *linearizer = raviX_init_linearizer(compiler_state);
 	rc = raviX_ast_linearize(linearizer);
